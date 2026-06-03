@@ -1,4 +1,4 @@
-import '@arco-design/web-react/dist/css/arco.css';
+import '@arco-themes/react-arco-pro/css/arco.css';
 import './app/styles/global.css';
 
 import React from 'react';

@@ -1,6 +1,7 @@
 import { type PropsWithChildren, useMemo } from 'react';
 
 import { ConfigProvider } from '@arco-design/web-react';
+import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import {
   CurrentUserProvider,
   CurrentUserStore,
@@ -23,7 +24,17 @@ export function AppProviders({ children }: PropsWithChildren) {
   }, []);
 
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      componentConfig={{
+        Card: {
+          bordered: false
+        },
+        Table: {
+          border: false
+        }
+      }}
+      locale={zhCN}
+    >
       <CurrentUserProvider store={currentUserStore}>{children}</CurrentUserProvider>
     </ConfigProvider>
   );

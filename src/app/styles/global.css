@@ -1,7 +1,7 @@
 :root {
-  --dt-page-bg: #f6f8fb;
-  --dt-surface-bg: #ffffff;
-  --dt-border-muted: #e5e8ef;
+  --dt-page-bg: var(--color-fill-2);
+  --dt-surface-bg: var(--color-bg-2);
+  --dt-border-muted: var(--color-border-2);
   --dt-text-primary: #1d2129;
   --dt-text-secondary: #4e5969;
   --dt-accent: #165dff;
@@ -31,31 +31,75 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.app-shell {
+.admin-pro-shell {
   min-height: 100vh;
 }
 
-.app-sider {
+.admin-pro-sider {
+  background: var(--color-menu-light-bg);
   border-right: 1px solid var(--dt-border-muted);
+  box-shadow: 1px 0 4px rgb(0 21 41 / 4%);
 }
 
-.app-header {
+.admin-pro-logo {
+  align-items: center;
+  border-bottom: 1px solid var(--dt-border-muted);
+  display: flex;
+  gap: var(--dt-space-3);
+  height: 56px;
+  padding: 0 var(--dt-space-4);
+}
+
+.admin-pro-logo-mark {
+  align-items: center;
+  background: var(--dt-accent);
+  border-radius: var(--dt-radius-2);
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.admin-pro-menu-link {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  gap: var(--dt-space-3);
+  text-decoration: none;
+  width: 100%;
+}
+
+.admin-pro-header {
   align-items: center;
   background: var(--dt-surface-bg);
   border-bottom: 1px solid var(--dt-border-muted);
   display: flex;
   height: 56px;
+  justify-content: space-between;
   padding: 0 var(--dt-space-6);
 }
 
-.app-content {
+.admin-pro-content {
   padding: var(--dt-space-6);
+}
+
+.admin-pro-icon-button {
+  color: var(--dt-text-secondary);
 }
 
 .dashboard-panel {
   display: grid;
   gap: var(--dt-space-4);
   grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard-kpi-grid {
+  display: grid;
+  gap: var(--dt-space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .dashboard-card-header {
@@ -92,4 +136,74 @@ body {
 
 .status-dot.is-error {
   background: var(--dt-danger);
+}
+
+.login-page {
+  align-items: stretch;
+  background:
+    radial-gradient(circle at 16% 18%, rgb(22 93 255 / 14%), transparent 28%),
+    linear-gradient(135deg, var(--color-fill-2) 0%, var(--color-bg-1) 52%, var(--color-fill-3) 100%);
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) 420px;
+  min-height: 100vh;
+  padding: 72px 96px;
+}
+
+.login-visual {
+  align-content: center;
+  display: grid;
+  justify-items: start;
+}
+
+.login-brand-mark {
+  align-items: center;
+  background: var(--dt-accent);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgb(22 93 255 / 24%);
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 20px;
+  font-weight: 700;
+  height: 48px;
+  justify-content: center;
+  margin-bottom: var(--dt-space-4);
+  width: 48px;
+}
+
+.login-brand-subtitle {
+  color: var(--dt-text-secondary);
+  font-size: 18px;
+  margin-top: var(--dt-space-3);
+}
+
+.login-card {
+  align-self: center;
+  border: 1px solid var(--dt-border-muted);
+  border-radius: var(--dt-radius-2);
+  box-shadow: 0 16px 40px rgb(29 33 41 / 10%);
+  width: 100%;
+}
+
+.login-card-subtitle {
+  display: inline-block;
+  margin-bottom: var(--dt-space-6);
+}
+
+.login-form {
+  margin-top: var(--dt-space-4);
+}
+
+.login-form-alert {
+  margin-bottom: var(--dt-space-4);
+}
+
+.login-form-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--dt-space-4);
+}
+
+.login-form-actions {
+  width: 100%;
 }

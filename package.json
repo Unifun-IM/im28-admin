@@ -14,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@arco-themes/react-arco-pro": "^0.0.7",
     "@arco-design/web-react": "^2.66.1",
     "@vitejs/plugin-react": "^4.3.4",
     "axios": "^1.7.7",
