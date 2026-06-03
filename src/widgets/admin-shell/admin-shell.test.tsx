@@ -8,7 +8,9 @@ describe('AdminShell', () => {
     render(
       <MemoryRouter>
         <AdminShell
+          currentUserName="Admin User"
           menuItems={[{ key: 'dashboard', label: 'Dashboard', path: '/dashboard' }]}
+          onLogout={() => undefined}
           selectedMenuKey="dashboard"
           title="im-admin"
         >
@@ -17,10 +19,19 @@ describe('AdminShell', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('banner')).toHaveTextContent('im-admin');
+    const header = screen.getByRole('banner');
+    expect(header).toHaveTextContent('im-admin');
+    expect(header).toHaveTextContent('Admin User');
+    expect(header).toHaveTextContent('退出登录');
     expect(screen.getByRole('navigation', { name: 'Admin navigation' })).toHaveTextContent(
       'Dashboard'
     );
-    expect(screen.getByRole('main')).toHaveTextContent('Dashboard content');
+    expect(screen.getByRole('navigation', { name: 'Admin navigation' })).toHaveTextContent(
+      '收起菜单'
+    );
+    const main = screen.getByRole('main');
+    expect(main).toHaveTextContent('Home');
+    expect(main).toHaveTextContent('Dashboard');
+    expect(main).toHaveTextContent('Dashboard content');
   });
 });

@@ -1,8 +1,9 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 
-import { DashboardPage } from '@pages/dashboard';
 import { LoginPage } from '@pages/login';
-import { AdminShell, type AdminMenuItem } from '@widgets/admin-shell';
+import type { AdminMenuItem } from '@widgets/admin-shell';
+
+import { DashboardRoute } from './DashboardRoute';
 
 export function appRoutes(menuItems: AdminMenuItem[] = []): RouteObject[] {
   return [
@@ -17,11 +18,7 @@ export function appRoutes(menuItems: AdminMenuItem[] = []): RouteObject[] {
     },
     {
       path: '/dashboard',
-      element: (
-        <AdminShell menuItems={menuItems} selectedMenuKey="dashboard" title="im-admin">
-          <DashboardPage />
-        </AdminShell>
-      ),
+      element: <DashboardRoute menuItems={menuItems} />,
       handle: { menuKey: 'dashboard', title: 'Dashboard' }
     }
   ];
