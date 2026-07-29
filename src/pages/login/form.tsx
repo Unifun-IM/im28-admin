@@ -4,14 +4,17 @@ import {
   Checkbox,
   Link,
   Button,
-  Space,
+  Space
 } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
 import { IconLock, IconUser } from '@arco-design/web-react/icon';
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
-import useStorage from '@shared/lib/useStorage';
+
+import { setAccessToken } from '@shared/api/request';
+import { postApiUserLogin } from '@shared/api/user';
 import useLocale from '@shared/lib/useLocale';
+import useStorage from '@shared/lib/useStorage';
+
 import locale from './locale';
 import styles from './style/index.module.less';
 
@@ -19,55 +22,53 @@ export default function LoginForm() {
   const formRef = useRef<FormInstance>();
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loginParams, setLoginParams, removeLoginParams] =
-    useStorage('loginParams');
+  const [loginParams, setLoginParams, removeLoginParams] = useStorage('loginParams');
 
   const t = useLocale(locale);
-
   const [rememberPassword, setRememberPassword] = useState(!!loginParams);
 
-  function afterLoginSuccess(params) {
-    // 记住密码
+  function afterLoginSuccess(params: API.LoginRequest, accessToken?: string) {
     if (rememberPassword) {
       setLoginParams(JSON.stringify(params));
     } else {
       removeLoginParams();
     }
-    // 记录登录状态
     localStorage.setItem('userStatus', 'login');
-    // 跳转首页
+    setAccessToken(accessToken || 'mock-admin-token');
     window.location.href = '/';
   }
 
-  function login(params) {
+  async function login(params: API.LoginRequest) {
     setErrorMessage('');
     setLoading(true);
-    axios
-      .post('/api/user/login', params)
-      .then((res) => {
-        const { status, msg } = res.data;
-        if (status === 'ok') {
-          afterLoginSuccess(params);
-        } else {
-          setErrorMessage(msg || t['login.form.login.errMsg']);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      const res = await postApiUserLogin(params);
+      if (res.status === 'ok') {
+        afterLoginSuccess(params, res.access_token);
+      } else {
+        setErrorMessage(res.msg || t['login.form.login.errMsg']);
+      }
+    } catch (error) {
+      const message =
+        error && typeof error === 'object' && 'message' in error
+          ? String((error as { message: string }).message)
+          : t['login.form.login.errMsg'];
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function onSubmitClick() {
-    formRef.current.validate().then((values) => {
-      login(values);
+    formRef.current?.validate().then((values) => {
+      login(values as API.LoginRequest);
     });
   }
 
-  // 读取 localStorage，设置初始值
   useEffect(() => {
-    const rememberPassword = !!loginParams;
-    setRememberPassword(rememberPassword);
-    if (formRef.current && rememberPassword) {
+    const remembered = !!loginParams;
+    setRememberPassword(remembered);
+    if (formRef.current && remembered) {
       const parseParams = JSON.parse(loginParams);
       formRef.current.setFieldsValue(parseParams);
     }
@@ -76,9 +77,7 @@ export default function LoginForm() {
   return (
     <div className={styles['login-form-wrapper']}>
       <div className={styles['login-form-title']}>{t['login.form.title']}</div>
-      <div className={styles['login-form-sub-title']}>
-        {t['login.form.title']}
-      </div>
+      <div className={styles['login-form-sub-title']}>{t['login.form.title']}</div>
       <div className={styles['login-form-error-msg']}>{errorMessage}</div>
       <Form
         className={styles['login-form']}
@@ -116,11 +115,7 @@ export default function LoginForm() {
           <Button type="primary" long onClick={onSubmitClick} loading={loading}>
             {t['login.form.login']}
           </Button>
-          <Button
-            type="text"
-            long
-            className={styles['login-form-register-btn']}
-          >
+          <Button type="text" long className={styles['login-form-register-btn']}>
             {t['login.form.register']}
           </Button>
         </Space>

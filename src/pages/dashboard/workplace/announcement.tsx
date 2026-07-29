@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link, Card, Skeleton, Tag, Typography } from '@arco-design/web-react';
+import { getApiWorkplaceAnnouncement } from '@shared/api/workplace';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
 import styles from './style/announcement.module.less';
@@ -13,10 +13,9 @@ function Announcement() {
 
   const fetchData = () => {
     setLoading(true);
-    axios
-      .get('/api/workplace/announcement')
-      .then((res) => {
-        setData(res.data);
+    getApiWorkplaceAnnouncement()
+      .then((list) => {
+        setData(list || []);
       })
       .finally(() => {
         setLoading(false);

@@ -2,9 +2,13 @@ import { type PropsWithChildren, useEffect, useMemo } from 'react';
 import { ConfigProvider } from '@arco-design/web-react';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
-import axios from 'axios';
 
-import { globalStore, type UserInfo } from '@entities/global-state';
+import { globalStore } from '@entities/global-state';
+import {
+  setAccessToken,
+  setUnauthorizedHandler
+} from '@shared/api/request';
+import { getApiUserUserInfo } from '@shared/api/user';
 import { GlobalContext } from '@shared/lib/global-context';
 import changeTheme from '@shared/lib/changeTheme';
 import checkLogin from '@shared/lib/checkLogin';
@@ -38,14 +42,31 @@ export function AppProviders({ children }: PropsWithChildren) {
   );
 
   useEffect(() => {
+    setUnauthorizedHandler(() => {
+      localStorage.removeItem('userStatus');
+      setAccessToken(null);
+      if (window.location.pathname.replace(/\//g, '') !== 'login') {
+        window.location.pathname = '/login';
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (checkLogin()) {
       globalStore.updateUserInfo({ userLoading: true });
-      axios.get('/api/user/userInfo').then((res) => {
-        globalStore.updateUserInfo({
-          userInfo: res.data as UserInfo,
-          userLoading: false
+      getApiUserUserInfo()
+        .then((userInfo) => {
+          globalStore.updateUserInfo({
+            userInfo: {
+              permissions: {},
+              ...userInfo
+            },
+            userLoading: false
+          });
+        })
+        .catch(() => {
+          globalStore.updateUserInfo({ userLoading: false });
         });
-      });
     } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
       window.location.pathname = '/login';
     }

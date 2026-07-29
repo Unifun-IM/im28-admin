@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Spin, Typography } from '@arco-design/web-react';
 import { DonutChart } from 'bizcharts';
-import axios from 'axios';
+import { getApiWorkplaceContentPercentage } from '@shared/api/workplace';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
 
@@ -12,10 +12,9 @@ function PopularContent() {
 
   const fetchData = () => {
     setLoading(true);
-    axios
-      .get('/api/workplace/content-percentage')
-      .then((res) => {
-        setData(res.data);
+    getApiWorkplaceContentPercentage()
+      .then((list) => {
+        setData(list || []);
       })
       .finally(() => {
         setLoading(false);

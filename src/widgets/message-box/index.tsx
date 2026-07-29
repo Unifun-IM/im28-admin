@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import groupBy from 'lodash/groupBy';
 import {
   Trigger,
@@ -15,6 +14,7 @@ import {
   IconFile,
   IconDesktop,
 } from '@arco-design/web-react/icon';
+import { getApiMessageList, postApiMessageRead } from '@shared/api/message';
 import useLocale from '@shared/lib/useLocale';
 import MessageList, { MessageListType } from './list';
 import styles from './style/index.module.less';
@@ -29,10 +29,9 @@ function DropContent() {
 
   function fetchSourceData(showLoading = true) {
     showLoading && setLoading(true);
-    axios
-      .get('/api/message/list')
-      .then((res) => {
-        setSourceData(res.data);
+    getApiMessageList()
+      .then((data) => {
+        setSourceData((data || []) as MessageListType);
       })
       .finally(() => {
         showLoading && setLoading(false);
@@ -41,13 +40,9 @@ function DropContent() {
 
   function readMessage(data: MessageListType) {
     const ids = data.map((item) => item.id);
-    axios
-      .post('/api/message/read', {
-        ids,
-      })
-      .then(() => {
-        fetchSourceData();
-      });
+    postApiMessageRead({ ids }).then(() => {
+      fetchSourceData();
+    });
   }
 
   useEffect(() => {

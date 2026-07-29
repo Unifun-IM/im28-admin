@@ -10,18 +10,20 @@ IM 管理后台。基于 **Arco Design Pro（Vite 精简版）** 能力，按 **
 - Arco Design + `@arco-themes/react-arco-pro`
 - React Router v6
 - MobX / mobx-react-lite
+- `@umijs/openapi` 生成接口
 - Less Modules、MockJS、i18n（内置 zh-CN / en-US）
 
 ## 快速开始
 
 ```bash
 npm install
+# OPENAPI_YAML_URL=https://... npm run openapi   # 有远程文档后再生成
 npm run dev
 npm run build
 npm test
 ```
 
-默认账号（Mock）：见登录页提示，密码与用户名任意非空即可（以 mock `/api/user/login` 规则为准）。
+默认账号（Mock）：`admin` / `admin`。
 
 ## 目录结构（FSD）
 
@@ -32,7 +34,7 @@ src/
   widgets/       # 布局与复合 UI：admin-shell、navbar、settings、message-box…
   features/      # 用户交互特性（可扩展）
   entities/      # 业务实体；global-state 为 MobX 全局状态（替代 Pro 的 Redux）
-  shared/        # 与业务无关：api、lib、locale、mock、config、assets、ui
+  shared/        # api(request + openapi 生成)、lib、locale、mock、config、assets
 ```
 
 ## 相对官方精简版 Pro 的映射
@@ -46,12 +48,32 @@ src/
 | `routes.ts` / `settings.json` / `locale` / `mock` | `shared/config` / `shared/locale` / `shared/mock` |
 | `pages/login|workplace|example|403` | 同路径，位于 `pages/` |
 
-精简版页面范围（对齐 simple）：
+精简版页面范围（对齐 simple）：登录 / 工作台 / 示例页 / 403。
 
-- 登录 `login`
-- 工作台 `dashboard/workplace`
-- 示例页 `example`
-- 无权限 `exception/403`
+## 接口引入方式
+
+接口由 **OpenAPI 脚本生成**，页面按模块具名导入：
+
+```ts
+import { postApiUserLogin } from '@shared/api/user'
+import { getApiWorkplaceOverviewContent } from '@shared/api/workplace'
+import { setAccessToken } from '@shared/api/request'
+
+const res = await postApiUserLogin({ userName, password })
+```
+
+| 路径 | 职责 |
+| --- | --- |
+| `OPENAPI_YAML_URL` | 远程 OpenAPI YAML 地址 |
+| `npm run openapi` | 拉取远程 YAML→JSON + 生成 `src/shared/api/*` |
+| `shared/api/request.ts` | 手写 axios 单例（生成代码依赖它，勿删） |
+| `src/shared/api/*.ts` / `typings.d.ts` | **生成物**，不要手改 |
+
+```bash
+OPENAPI_YAML_URL=https://example.com/openapi.yaml npm run openapi
+```
+
+环境变量见 `.env.example`（`VITE_API_BASE_URL`）。
 
 ## 内置能力
 
@@ -72,3 +94,5 @@ src/
 | `npm run lint` | ESLint |
 | `npm run typecheck` | 仅类型检查 |
 | `npm test` | Vitest |
+| `npm run openapi` | 从远程 OpenAPI 生成 `src/shared/api` |
+| `npm run openapi:convert` | 仅拉取远程 YAML → `openapi.json` |

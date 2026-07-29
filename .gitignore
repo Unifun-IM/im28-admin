@@ -42,6 +42,9 @@ pnpm-debug.log*
 # Vite
 .vite/
 
+# OpenAPI generated intermediate
+openapi.json
+
 # Misc
 *.pem
 .vercel

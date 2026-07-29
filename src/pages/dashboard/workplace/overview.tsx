@@ -10,7 +10,7 @@ import {
 import { useSelector } from '@shared/lib/redux-compat';
 import { IconCaretUp } from '@arco-design/web-react/icon';
 import OverviewAreaLine from '@widgets/chart/overview-area-line';
-import axios from 'axios';
+import { getApiWorkplaceOverviewContent } from '@shared/api/workplace';
 import locale from './locale';
 import useLocale from '@shared/lib/useLocale';
 import styles from './style/overview.module.less';
@@ -65,10 +65,9 @@ function Overview() {
 
   const fetchData = () => {
     setLoading(true);
-    axios
-      .get('/api/workplace/overview-content')
-      .then((res) => {
-        setData(res.data);
+    getApiWorkplaceOverviewContent()
+      .then((data) => {
+        setData(data || {});
       })
       .finally(() => {
         setLoading(false);

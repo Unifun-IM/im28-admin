@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, Card, Radio, Table, Typography } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp } from '@arco-design/web-react/icon';
-import axios from 'axios';
+import { getApiWorkplacePopularContents } from '@shared/api/workplace';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
 import styles from './style/popular-contents.module.less';
@@ -16,13 +16,14 @@ function PopularContent() {
 
   const fetchData = useCallback(() => {
     setLoading(true);
-    axios
-      .get(
-        `/api/workplace/popular-contents?page=${page}&pageSize=5&category=${type}`
-      )
-      .then((res) => {
-        setData(res.data.list);
-        setTotal(res.data.total);
+    getApiWorkplacePopularContents({
+      page,
+      pageSize: 5,
+      category: String(type)
+    })
+      .then((payload) => {
+        setData(payload.list || []);
+        setTotal(payload.total || 0);
       })
       .finally(() => {
         setLoading(false);

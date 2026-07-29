@@ -1,3 +1,12 @@
-/** Axios-backed HTTP client factory. */
-export { createHttpClient } from './http-client';
-export type { CreateHttpClientOptions, HttpClient } from './http-client';
+// @ts-ignore
+/* eslint-disable */
+// API 更新时间：
+// API 唯一标识：
+import * as user from "./user";
+import * as workplace from "./workplace";
+import * as message from "./message";
+export default {
+  user,
+  workplace,
+  message,
+};

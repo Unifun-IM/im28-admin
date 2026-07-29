@@ -36,6 +36,7 @@ import styles from './style/index.module.less';
 import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
 import { generatePermission } from '@shared/config/routes';
+import { setAccessToken } from '@shared/api/request';
 
 function Navbar({ show }: { show: boolean }) {
   const t = useLocale();
@@ -49,6 +50,7 @@ function Navbar({ show }: { show: boolean }) {
 
   function logout() {
     setUserStatus('logout');
+    setAccessToken(null);
     window.location.href = '/login';
   }
 

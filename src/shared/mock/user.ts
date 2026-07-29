@@ -50,6 +50,7 @@ if (!isSSR) {
         if (userName === 'admin' && password === 'admin') {
           return {
             status: 'ok',
+            access_token: 'mock-admin-token',
           };
         }
         return {
