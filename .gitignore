@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Local editor and OS files
+.DS_Store
+*.log
+
+.idea
+build/
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+*.keystore
+!debug.keystore
+.kotlin/
+CLAUDE.md
+packages/im-sdk/dist
+.claude
+.trae
