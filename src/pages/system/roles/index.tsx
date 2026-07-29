@@ -88,6 +88,7 @@ export default function RolesPage() {
         toolbar={
           <>
             <Button
+              className="use-biz-table-secondary-btn"
               onClick={() => {
                 Modal.confirm({
                   title: '二次确认',

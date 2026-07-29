@@ -47,15 +47,32 @@ if (!isSSR) {
             msg: '密码不能为空',
           };
         }
+        // 已绑定 GA
         if (userName === 'admin' && password === 'admin') {
           return {
             status: 'ok',
             access_token: 'mock-admin-token',
+            ga_bound: true,
+          };
+        }
+        // 未绑定 GA → 绑定弹窗
+        if (userName === 'newadmin' && password === 'admin') {
+          return {
+            status: 'ok',
+            access_token: 'mock-new-admin-token',
+            ga_bound: false,
+          };
+        }
+        // 锁定提示
+        if (userName === 'locked') {
+          return {
+            status: 'error',
+            msg: '账号密码错误达到 5 次，请15分钟后重试',
           };
         }
         return {
           status: 'error',
-          msg: '账号或者密码错误',
+          msg: '账号或密码错误请重试',
         };
       });
     },

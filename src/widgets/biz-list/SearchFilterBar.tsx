@@ -4,39 +4,40 @@ import {
   Card,
   ConfigProvider,
   Form,
-  Grid,
   Space,
   type FormInstance
 } from '@arco-design/web-react';
 import { IconDown, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 
-const { Row, Col } = Grid;
-
-/** 对齐 Arco Pro 列表筛选：单列 span=8（一行约 3 项），宽字段 span=12 */
-const FIELD_COL_SPAN = {
-  1: 8,
-  2: 12
-} as const;
-
+/**
+ * 对齐 Figma 602:35072：
+ * - 窄字段 224 / 宽字段 456（=224×2+8）/ 通栏 full
+ * - 容器 flex-wrap + gap 8
+ */
 export type FilterFieldProps = {
   children: React.ReactNode;
-  /** 1 → Col span=8；2 → span=12（时间区间等） */
-  span?: 1 | 2;
+  /**
+   * 1 | narrow → 224px；
+   * 2 → 456px（时间区间等）；
+   * full → 通栏
+   */
+  span?: 1 | 2 | 'narrow' | 'full';
   className?: string;
 };
 
-/** 筛选项：Arco Grid.Col + Form.Item（Pro 列表页标准） */
+/** 筛选项：固定宽字段，由外层 flex-wrap 排布 */
 export function FilterField({ children, span = 1, className }: FilterFieldProps) {
+  const dataSpan =
+    span === 'full' ? 'full' : span === 2 ? '2' : '1';
   return (
-    <Col
+    <div
       className={cs('use-biz-filter-field', className)}
-      span={FIELD_COL_SPAN[span]}
       data-filter-field="true"
-      data-span={span}
+      data-span={dataSpan}
     >
       {children}
-    </Col>
+    </div>
   );
 }
 
@@ -79,6 +80,8 @@ export type SearchFilterBarProps = {
   form?: FormInstance;
   onSearch?: () => void;
   onReset?: () => void;
+  /** 重置左侧的额外操作（如「批量搜索」「取消批量搜索」） */
+  extraActions?: React.ReactNode;
   collapsible?: boolean;
   collapsedCount?: number;
   defaultCollapsed?: boolean;
@@ -90,20 +93,20 @@ export type SearchFilterBarProps = {
 };
 
 /**
- * 搜索筛选 — Arco Design Pro 标准：
- * Card + Form(layout=vertical) + Grid.Row/Col + Space
- * 视觉 token（填充控件、标签字号等）用 use-biz-filter-bar 补齐
+ * 搜索筛选 — Figma 602:35071 / 602:35072
+ * Card + Form(vertical) + flex-wrap gap-8；视觉 token 用 use-biz-filter-bar
  */
 export default function SearchFilterBar({
   children,
   form,
   onSearch,
   onReset,
+  extraActions,
   collapsible = true,
   collapsedCount = 4,
   defaultCollapsed = true,
   searchText = '查询',
-  resetText = '清除全部',
+  resetText = '重置',
   expandText = '展开筛选',
   collapseText = '收起筛选',
   className
@@ -126,7 +129,7 @@ export default function SearchFilterBar({
         }}
       >
         <Form form={form} layout="vertical" requiredSymbol={false} size="default">
-          <Row className="use-biz-filter-fields" gutter={[16, 12]} align="end">
+          <div className="use-biz-filter-fields">
             {visibleChildren.map((child, index) => {
               const key = child.key ?? index;
               if (isFilterFieldElement(child)) {
@@ -134,7 +137,7 @@ export default function SearchFilterBar({
               }
               return <FilterField key={key}>{child}</FilterField>;
             })}
-            <Col className="use-biz-filter-actions" flex="auto">
+            <div className="use-biz-filter-actions">
               <Space size={8}>
                 {showToggle && (
                   <Button
@@ -146,6 +149,7 @@ export default function SearchFilterBar({
                     {collapsed ? expandText : collapseText}
                   </Button>
                 )}
+                {extraActions}
                 <Button
                   type="text"
                   className="use-biz-filter-action-text"
@@ -161,8 +165,8 @@ export default function SearchFilterBar({
                   {searchText}
                 </Button>
               </Space>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </Form>
       </ConfigProvider>
     </Card>

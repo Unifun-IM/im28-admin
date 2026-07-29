@@ -28,17 +28,26 @@ export type BizListPageProps<T = Record<string, unknown>> = {
   summary?: SummaryItem[];
   /** 表格卡片标题，如「角色列表」 */
   title?: React.ReactNode;
-  /** 右侧操作按钮区（不含刷新/列设置） */
+  /** 右侧操作按钮区（不含刷新/列设置）；浅色批量条出现时会隐藏 */
   toolbar?: React.ReactNode;
+  /** 始终展示的右侧操作（如「添加白名单」），不受批量选中隐藏 */
+  toolbarAlways?: React.ReactNode;
   onRefresh?: () => void;
   showColumnSetting?: boolean;
   onColumnSetting?: () => void;
+  /** 透传 SearchFilterBar */
+  filterExtraActions?: React.ReactNode;
+  filterResetText?: string;
+  filterCollapsible?: boolean;
+  filterDefaultCollapsed?: boolean;
   /** 批量操作：有选中行时浮出 */
   batchActions?: {
     onArchive?: (keys: (string | number)[]) => void;
     onEdit?: (keys: (string | number)[]) => void;
     onDelete?: (keys: (string | number)[]) => void;
     extra?: React.ReactNode;
+    /** dark 居中浮条；light 跟工具栏右侧 */
+    theme?: 'dark' | 'light';
   };
   tableProps: TableProps<T>;
   className?: string;
@@ -53,9 +62,14 @@ export default function BizListPage<T extends Record<string, unknown>>({
   summary,
   title,
   toolbar,
+  toolbarAlways,
   onRefresh,
   showColumnSetting,
   onColumnSetting,
+  filterExtraActions,
+  filterResetText,
+  filterCollapsible,
+  filterDefaultCollapsed,
   batchActions,
   tableProps,
   className
@@ -112,10 +126,21 @@ export default function BizListPage<T extends Record<string, unknown>>({
     };
   }, [hasFixedRight, tableProps.scroll]);
 
+  const batchTheme = batchActions?.theme || 'dark';
+  const batchInToolbar = batchTheme === 'light';
+
   return (
     <div className={cs('flex flex-col gap-4', className)}>
       {filter && (
-        <SearchFilterBar form={form} onSearch={onSearch} onReset={onReset}>
+        <SearchFilterBar
+          form={form}
+          onSearch={onSearch}
+          onReset={onReset}
+          extraActions={filterExtraActions}
+          resetText={filterResetText}
+          collapsible={filterCollapsible}
+          defaultCollapsed={filterDefaultCollapsed}
+        >
           {filter}
         </SearchFilterBar>
       )}
@@ -126,13 +151,14 @@ export default function BizListPage<T extends Record<string, unknown>>({
       >
         {(title ||
           toolbar ||
+          toolbarAlways ||
           onRefresh ||
           enableColumnSetting ||
           hasRowSelection) && (
-          <div className="relative box-border flex h-14 items-center justify-between gap-4 px-3 max-md:h-auto max-md:flex-wrap max-md:p-3">
+          <div className="use-biz-table-toolbar relative max-md:h-auto max-md:flex-wrap">
             <div className="flex min-w-0 items-center gap-3">
               {title != null && title !== '' && (
-                <div className="text-sm font-medium leading-[21px] text-arco-text-1">
+                <div className="use-biz-table-toolbar-title">
                   {title}
                 </div>
               )}
@@ -153,8 +179,8 @@ export default function BizListPage<T extends Record<string, unknown>>({
                   {onRefresh && (
                     <Tooltip content="刷新">
                       <Button
-                        type="text"
-                        className="!h-8 !w-8 !rounded !p-0 !text-arco-text-2 hover:!bg-arco-fill-2 hover:!text-arco-text-1"
+                        type="secondary"
+                        className="use-biz-table-icon-btn"
                         icon={<IconRefresh />}
                         onClick={onRefresh}
                       />
@@ -163,8 +189,8 @@ export default function BizListPage<T extends Record<string, unknown>>({
                   {enableColumnSetting && (
                     <Tooltip content="列设置">
                       <Button
-                        type="text"
-                        className="!h-8 !w-8 !rounded !p-0 !text-arco-text-2 hover:!bg-arco-fill-2 hover:!text-arco-text-1"
+                        type="secondary"
+                        className="use-biz-table-icon-btn"
                         icon={<IconSettings />}
                         onClick={onColumnSetting}
                       />
@@ -172,13 +198,41 @@ export default function BizListPage<T extends Record<string, unknown>>({
                   )}
                 </div>
               )}
-              {toolbar && <Space size={8}>{toolbar}</Space>}
+              {batchInToolbar && batchActions && (
+                <TableBatchBar
+                  count={selectedCount}
+                  showSelectedOnly={showSelectedOnly}
+                  onShowSelectedOnlyChange={setShowSelectedOnly}
+                  theme="light"
+                  onArchive={
+                    batchActions.onArchive
+                      ? () => batchActions.onArchive?.(selectedRowKeys)
+                      : undefined
+                  }
+                  onEdit={
+                    batchActions.onEdit
+                      ? () => batchActions.onEdit?.(selectedRowKeys)
+                      : undefined
+                  }
+                  onDelete={
+                    batchActions.onDelete
+                      ? () => batchActions.onDelete?.(selectedRowKeys)
+                      : undefined
+                  }
+                  extra={batchActions.extra}
+                />
+              )}
+              {toolbar && !(batchInToolbar && selectedCount > 0) && (
+                <Space size={8}>{toolbar}</Space>
+              )}
+              {toolbarAlways && <Space size={8}>{toolbarAlways}</Space>}
             </div>
-            {batchActions && (
+            {batchActions && !batchInToolbar && (
               <TableBatchBar
                 count={selectedCount}
                 showSelectedOnly={showSelectedOnly}
                 onShowSelectedOnlyChange={setShowSelectedOnly}
+                theme={batchTheme}
                 className="pointer-events-auto absolute left-1/2 top-3 z-20 -translate-x-1/2 max-md:static max-md:translate-x-0 max-md:self-center"
                 onArchive={
                   batchActions.onArchive
@@ -205,6 +259,7 @@ export default function BizListPage<T extends Record<string, unknown>>({
             rowKey="id"
             border={false}
             {...tableProps}
+            stripe={tableProps.stripe ?? true}
             className={cs('use-biz-table', tableProps.className)}
             columns={columns}
             data={displayData}

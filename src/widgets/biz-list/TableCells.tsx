@@ -1,6 +1,7 @@
 import React from 'react';
-import { Avatar, Dropdown, Menu, Tooltip } from '@arco-design/web-react';
+import { Avatar, Dropdown, Menu, Message, Tooltip } from '@arco-design/web-react';
 import {
+  IconCopy,
   IconDelete,
   IconEdit,
   IconEye,
@@ -8,12 +9,20 @@ import {
   IconSettings
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import copy from 'copy-to-clipboard';
 
 export type AvatarNameCellProps = {
   name: React.ReactNode;
   sub?: React.ReactNode;
   avatar?: string;
   size?: number;
+  /** 不展示头像（邀请人列等） */
+  hideAvatar?: boolean;
+  /** 副文案可复制内容；有值时展示复制图标 */
+  copyText?: string;
+  /** 主文案 class，如蓝链 */
+  nameClassName?: string;
+  onNameClick?: () => void;
 };
 
 /** 头像 + 主文案 + 副文案 */
@@ -21,20 +30,66 @@ export function AvatarNameCell({
   name,
   sub,
   avatar,
-  size = 24
+  size = 24,
+  hideAvatar,
+  copyText,
+  nameClassName,
+  onNameClick
 }: AvatarNameCellProps) {
   return (
-    <div className="flex min-w-0 items-center gap-2">
-      <Avatar size={size} className="shrink-0">
-        {avatar ? <img alt="" src={avatar} /> : String(name || '?').slice(0, 1)}
-      </Avatar>
+    <div className="flex min-w-0 items-center gap-[8px]">
+      {!hideAvatar && (
+        <Avatar size={size} className="shrink-0">
+          {avatar ? <img alt="" src={avatar} /> : String(name || '?').slice(0, 1)}
+        </Avatar>
+      )}
       <div className="min-w-0">
-        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-sm leading-5 text-arco-text-1">
+        <div
+          className={cs(
+            'overflow-hidden text-ellipsis whitespace-nowrap text-[12px] leading-[12px] text-arco-text-1',
+            onNameClick && 'cursor-pointer',
+            nameClassName
+          )}
+          onClick={
+            onNameClick
+              ? (e) => {
+                  e.stopPropagation();
+                  onNameClick();
+                }
+              : undefined
+          }
+          onKeyDown={
+            onNameClick
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onNameClick();
+                  }
+                }
+              : undefined
+          }
+          role={onNameClick ? 'button' : undefined}
+          tabIndex={onNameClick ? 0 : undefined}
+        >
           {name}
         </div>
         {sub != null && sub !== '' && (
-          <div className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-4 text-arco-text-3">
-            {sub}
+          <div className="mt-[4px] flex items-center gap-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[10px] leading-[10px] text-arco-text-3">
+            <span className="min-w-0 truncate">{sub}</span>
+            {copyText != null && copyText !== '' && (
+              <button
+                type="button"
+                className="inline-flex size-[10px] shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-4 hover:text-arco-text-2"
+                aria-label="复制"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copy(copyText);
+                  Message.success('已复制');
+                }}
+              >
+                <IconCopy className="text-[10px]" />
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -50,12 +105,12 @@ export type DoubleLineCellProps = {
 /** 双行文本单元格 */
 export function DoubleLineCell({ primary, secondary }: DoubleLineCellProps) {
   return (
-    <div className="flex min-w-0 flex-col justify-center leading-[1.2]">
-      <div className="overflow-hidden text-ellipsis whitespace-nowrap text-sm leading-5 text-arco-text-1">
+    <div className="flex min-w-0 flex-col justify-center gap-[4px]">
+      <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[10px] leading-[10px] text-arco-text-1">
         {primary}
       </div>
       {secondary != null && secondary !== '' && (
-        <div className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-4 text-arco-text-3">
+        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[10px] leading-[10px] text-arco-text-3">
           {secondary}
         </div>
       )}
@@ -81,11 +136,11 @@ export function StatusBadge({ status, text, className }: StatusBadgeProps) {
   return (
     <span
       className={cs(
-        'inline-flex items-center gap-1.5 text-sm leading-5 text-arco-text-1',
+        'use-status-badge inline-flex items-center gap-[8px] text-[12px] leading-[20px] text-arco-text-1',
         className
       )}
     >
-      <i className={cs('h-1.5 w-1.5 shrink-0 rounded-full', STATUS_DOT[status])} />
+      <i className={cs('size-[6px] shrink-0 rounded-full', STATUS_DOT[status])} />
       {text}
     </span>
   );
@@ -106,11 +161,16 @@ export type ActionLinksProps = {
   items: ActionLinkItem[];
   /** 直接展示的图标上限（含「更多」占位），默认 3 */
   maxVisible?: number;
+  /** icon：图标操作列；text：文字链接（用户查询 Figma） */
+  variant?: 'icon' | 'text';
   className?: string;
 };
 
 const ICON_BTN =
-  'inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-arco-text-2 hover:bg-arco-fill-2 hover:text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-xs';
+  'inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-arco-text-2 hover:bg-arco-fill-2 hover:text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-xs';
+
+const TEXT_BTN =
+  'inline-flex cursor-pointer items-center border-0 bg-transparent p-0 text-[12px] leading-[12px] text-[rgb(var(--primary-6))] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40';
 
 function resolveActionIcon(item: ActionLinkItem): React.ReactNode {
   if (item.icon) return item.icon;
@@ -126,15 +186,37 @@ function resolveActionIcon(item: ActionLinkItem): React.ReactNode {
 }
 
 /**
- * 表格操作列（Figma 602:34917）
- * - 最多用 icon 展示 3 个功能，Hover Tooltip 说明
- * - 超出部分收进「…」下拉列表
+ * 表格操作列（Figma 602:34917 / 用户查询文字链）
+ * - icon：最多展示 3 个，超出进「…」
+ * - text：并排文字链接
  */
 export function ActionLinks({
   items,
   maxVisible = 3,
+  variant = 'icon',
   className
 }: ActionLinksProps) {
+  if (variant === 'text') {
+    return (
+      <div className={cs('inline-flex items-center gap-[8px]', className)}>
+        {items.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={cs(TEXT_BTN, item.danger && '!text-[rgb(var(--danger-6))]')}
+            disabled={item.disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              item.onClick?.();
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   const safeMax = Math.max(1, maxVisible);
   const needMore = items.length > safeMax;
   const visibleItems = needMore ? items.slice(0, safeMax - 1) : items;

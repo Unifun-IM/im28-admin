@@ -49,6 +49,10 @@ export function normalizeBizColumns<T>(
           ? userRender(colValue, record, index)
           : (colValue as React.ReactNode);
         if (content == null || content === false) return content;
+        // 仅纯文本走省略 + Tooltip；自定义节点（状态点/标签等）原样渲染
+        if (typeof content !== 'string' && typeof content !== 'number') {
+          return content;
+        }
         return <EllipsisCell>{content}</EllipsisCell>;
       }
     };

@@ -49,9 +49,34 @@ export async function getInviteCodes(params: PageParams) {
   });
 }
 
+export type UserHierarchyNode = {
+  key: string;
+  userId: string;
+  nickname: string;
+  avatar?: string;
+  inviteCode: string;
+  /** 直属下级数量 */
+  childCount: number;
+  /** parent=上级；target=查询目标；child=下级 */
+  role?: 'parent' | 'target' | 'child';
+  children?: UserHierarchyNode[];
+};
+
+export async function getUserHierarchy(userId: string) {
+  return request.get<{ tree: UserHierarchyNode | null }>(
+    '/api/biz/user/hierarchy',
+    { params: { userId } }
+  );
+}
+
 export async function postBlacklistAction(body: {
   ids: string[];
   action: 'add' | 'remove';
+  /** 批量加入：限时 / 永久 */
+  durationType?: 'temporary' | 'permanent';
+  reason?: string;
+  reasonDetail?: string;
+  remark?: string;
 }) {
   return request.post('/api/biz/user/blacklist/action', body);
 }
@@ -60,6 +85,10 @@ export async function postWhitelistAction(body: {
   ids: string[];
   action: 'add' | 'remove';
   keyword?: string;
+  whitelistType?: string;
+  reason?: string;
+  reasonDetail?: string;
+  remark?: string;
 }) {
   return request.post('/api/biz/user/whitelist/action', body);
 }

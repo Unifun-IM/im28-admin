@@ -1,6 +1,7 @@
 import Mock from 'mockjs';
 import qs from 'query-string';
 import setupMock from '@shared/lib/setupMock';
+import { USER_ACTION_PAIRS } from '@shared/config/user-action-types';
 
 function parseQuery(url: string) {
   const q = url.split('?')[1] || '';
@@ -36,6 +37,7 @@ setupMock({
           status: '@pick(["正常","黑名单","注销"])',
           online: '@pick(["在线","离线"])',
           inviteCode: /[A-Z0-9]{5}/,
+          inviterName: '@cname',
           registerTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
           lastActiveTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
@@ -61,6 +63,7 @@ setupMock({
         inviterId: /1[0-9]{7}/,
         registerTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
         lastLoginTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+        lastActiveTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
         friendCount: '@integer(0,200)',
         groupCount: '@integer(0,40)',
         devices: [
@@ -82,13 +85,36 @@ setupMock({
           }
         ],
         logs: {
-          'list|5': [
+          list: [
             {
-              id: '@id',
-              action: '@pick(["登录账号","修改昵称","绑定手机号","加入群聊"])',
-              client: '@pick(["iOS","Android","Web"])',
-              time: '@datetime("yyyy-MM-dd HH:mm:ss")',
-              ip: '@ip'
+              id: '1',
+              time: '2026-05-25 10:15:32',
+              action: '聊天',
+              detail: '操作人 @alice · 钱包签名'
+            },
+            {
+              id: '2',
+              time: '2026-05-25 10:15:32',
+              action: '修改昵称',
+              detail: '平台 TG 账号 @tg***01'
+            },
+            {
+              id: '3',
+              time: '2026-05-25 10:15:32',
+              action: '发红包',
+              detail: '100 USDT · 收款 USDT · 代理 10%'
+            },
+            {
+              id: '4',
+              time: '2026-05-25 10:15:32',
+              action: '聊天',
+              detail: '审核人 @operator01'
+            },
+            {
+              id: '5',
+              time: '2026-05-25 10:15:32',
+              action: '登录',
+              detail: '商品 ID SP100028'
             }
           ]
         }
@@ -97,18 +123,33 @@ setupMock({
 
     Mock.mock(new RegExp('/api/biz/user/logs'), (options: { url: string }) => {
       const q = parseQuery(options.url);
-      return pageList(56, Number(q.page), Number(q.pageSize), () =>
-        Mock.mock({
+      return pageList(56, Number(q.page), Number(q.pageSize), () => {
+        const actionPair =
+          USER_ACTION_PAIRS[
+            Mock.Random.integer(0, USER_ACTION_PAIRS.length - 1)
+          ];
+        const client = Mock.mock(
+          '@pick(["iOS","Android","Web","PC"])'
+        ) as string;
+        return Mock.mock({
           id: '@id',
+          logId: /1[0-9]{12}/,
           userId: /1[0-9]{7}/,
           nickname: '@cname',
-          action: '@pick(["登录账号","登录失败","修改资料","好友关系","群聊","消息操作"])',
-          client: '@pick(["iOS","Android","Web","PC"])',
-          time: '@datetime("yyyy-MM-dd HH:mm:ss")',
+          avatar: '',
+          action: actionPair[0],
+          actionCategory: actionPair[1],
+          actionStatus: '@pick(["成功","成功","成功","失败"])',
+          version: `${client === 'Android' ? '安卓' : client === 'iOS' ? 'IOS' : client === 'Web' ? 'WEB' : 'PC'} v1.0`,
+          clientOs: '@pick(["Android 15","iOS 18.1","Windows 11","macOS 15","Chrome 131"])',
+          clientDevice:
+            '@pick(["Xiaomi 14 Pro","iPhone 16","MacBook Pro","Pixel 9","--"])',
           ip: '@ip',
-          detail: '@csentence(8,20)'
-        })
-      );
+          region: '@pick(["日本·东京","中国·上海","中国·北京","美国·加州","新加坡"])',
+          remark: '@pick(["--","用户主动操作","系统自动记录"])',
+          operateTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
+        });
+      });
     });
 
     Mock.mock(new RegExp('/api/biz/user/blacklist/action'), () => ({ ok: true }));
@@ -116,28 +157,41 @@ setupMock({
 
     Mock.mock(new RegExp('/api/biz/user/blacklist(\\?|$)'), (options: { url: string }) => {
       const q = parseQuery(options.url);
-      return pageList(24, Number(q.page), Number(q.pageSize), () =>
+      return pageList(300, Number(q.page), Number(q.pageSize), () =>
         Mock.mock({
           id: '@id',
           userId: /1[0-9]{7}/,
           nickname: '@cname',
-          reason: '@csentence(6,16)',
-          operator: '@cname',
-          time: '@datetime("yyyy-MM-dd HH:mm:ss")'
+          avatar: '',
+          phone: /1[3-9]\d{9}/,
+          email: '@email',
+          account: '@word(6,12)',
+          operator: '@pick(["Admin-sp","admin","运营小王"])',
+          operateTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+          operateType:
+            '@pick(["批量添加用户","骚扰用户","用户举报核实","xxx"])',
+          reason:
+            '@pick(["用户举报核实","频繁骚扰其他用户","传播恶意文件或链接","--"])',
+          remark: '@pick(["--","已核实","待复核"])'
         })
       );
     });
 
     Mock.mock(new RegExp('/api/biz/user/whitelist(\\?|$)'), (options: { url: string }) => {
       const q = parseQuery(options.url);
-      return pageList(18, Number(q.page), Number(q.pageSize), () =>
+      return pageList(300, Number(q.page), Number(q.pageSize), () =>
         Mock.mock({
           id: '@id',
           userId: /1[0-9]{7}/,
           nickname: '@cname',
-          remark: '@csentence(4,12)',
-          operator: '@cname',
-          time: '@datetime("yyyy-MM-dd HH:mm:ss")'
+          avatar: '',
+          phone: /1[3-9]\d{9}/,
+          email: '@email',
+          account: '@word(6,12)',
+          operator: '@pick(["Admin-sp","admin","运营小王"])',
+          operateTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+          reason: '@pick(["测试账号","内部员工","VIP用户","合作方","--"])',
+          remark: '@pick(["--","已核实","长期豁免"])'
         })
       );
     });
@@ -156,6 +210,63 @@ setupMock({
           status: '@pick(["有效","过期","已用尽"])'
         })
       );
+    });
+
+    Mock.mock(new RegExp('/api/biz/user/hierarchy'), (options: { url: string }) => {
+      const q = parseQuery(options.url);
+      const targetId = String(q.userId || '11223345');
+      if (!targetId.trim()) {
+        return { tree: null };
+      }
+      const mkChild = (
+        nickname: string,
+        userId: string,
+        inviteCode: string,
+        children?: Record<string, unknown>[]
+      ) => ({
+        key: userId,
+        userId,
+        nickname,
+        avatar: '',
+        inviteCode,
+        childCount: children?.length || 0,
+        role: 'child',
+        children
+      });
+      return {
+        tree: {
+          key: 'parent-99001122',
+          userId: '99001122',
+          nickname: '躺平小王子',
+          avatar: '',
+          inviteCode: 'A1B2C',
+          childCount: 12,
+          role: 'parent',
+          children: [
+            {
+              key: targetId,
+              userId: targetId,
+              nickname: 'SoulKeeper_',
+              avatar: '',
+              inviteCode: 'X9Y8Z',
+              childCount: 5,
+              role: 'target',
+              children: [
+                mkChild('小明', '10000001', 'M1001', [
+                  mkChild('小花', '10000011', 'H1011'),
+                  mkChild('小草', '10000012', 'C1012')
+                ]),
+                mkChild('小红', '10000002', 'R1002', [
+                  mkChild('小叶', '10000021', 'Y1021')
+                ]),
+                mkChild('小刚', '10000003', 'G1003'),
+                mkChild('小丽', '10000004', 'L1004'),
+                mkChild('小强', '10000005', 'Q1005')
+              ]
+            }
+          ]
+        }
+      };
     });
 
     Mock.mock(new RegExp('/api/biz/system/accounts'), (options: { url: string }) => {

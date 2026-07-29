@@ -20,6 +20,8 @@ declare namespace API {
     status?: "ok" | "error";
     msg?: string;
     access_token?: string;
+    /** 是否已绑定 GA；未绑定走绑定弹窗 */
+    ga_bound?: boolean;
   };
 
   type MessageItem = {
