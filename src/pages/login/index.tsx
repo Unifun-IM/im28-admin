@@ -1,27 +1,37 @@
-import { PasswordLoginForm } from '@features/password-login';
-import { Card, Typography } from '@shared/ui';
+import React, { useEffect } from 'react';
+import Footer from '@widgets/footer';
+import Logo from '@shared/assets/logo.svg?react';
+import LoginForm from './form';
+import LoginBanner from './banner';
+import styles from './style/index.module.less';
 
-export function LoginPage() {
+function Login() {
+  useEffect(() => {
+    document.body.setAttribute('arco-theme', 'light');
+  }, []);
+
   return (
-    <main className="login-page">
-      <section className="login-visual" aria-label="Arco Design Pro">
-        <div className="login-brand-mark">IM</div>
-        <Typography.Title heading={2} style={{ margin: 0 }}>
-          im-admin
-        </Typography.Title>
-        <Typography.Text className="login-brand-subtitle">
-          Arco Design Pro
-        </Typography.Text>
-      </section>
-      <Card className="login-card">
-        <Typography.Title heading={3} style={{ marginTop: 0 }}>
-          登录
-        </Typography.Title>
-        <Typography.Text className="login-card-subtitle" type="secondary">
-          管理后台工作台入口
-        </Typography.Text>
-        <PasswordLoginForm />
-      </Card>
-    </main>
+    <div className={styles.container}>
+      <div className={styles.logo}>
+        <Logo />
+        <div className={styles['logo-text']}>Arco Design Pro</div>
+      </div>
+      <div className={styles.banner}>
+        <div className={styles['banner-inner']}>
+          <LoginBanner />
+        </div>
+      </div>
+      <div className={styles.content}>
+        <div className={styles['content-inner']}>
+          <LoginForm />
+        </div>
+        <div className={styles.footer}>
+          <Footer />
+        </div>
+      </div>
+    </div>
   );
 }
+Login.displayName = 'LoginPage';
+
+export default Login;

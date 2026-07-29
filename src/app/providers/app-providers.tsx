@@ -1,41 +1,70 @@
-import { type PropsWithChildren, useMemo } from 'react';
-
+import { type PropsWithChildren, useEffect, useMemo } from 'react';
 import { ConfigProvider } from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
-import {
-  CurrentUserProvider,
-  CurrentUserStore,
-  fetchCurrentUser
-} from '@entities/current-user';
-import { createHttpClient } from '@shared/api';
+import axios from 'axios';
 
-function getAccessToken() {
-  return window.localStorage.getItem('im-admin.access-token');
+import { globalStore, type UserInfo } from '@entities/global-state';
+import { GlobalContext } from '@shared/lib/global-context';
+import changeTheme from '@shared/lib/changeTheme';
+import checkLogin from '@shared/lib/checkLogin';
+import useStorage from '@shared/lib/useStorage';
+
+import '@shared/mock';
+
+function getArcoLocale(lang: string) {
+  switch (lang) {
+    case 'zh-CN':
+      return zhCN;
+    case 'en-US':
+      return enUS;
+    default:
+      return zhCN;
+  }
 }
 
 export function AppProviders({ children }: PropsWithChildren) {
-  const currentUserStore = useMemo(() => {
-    const httpClient = createHttpClient({
-      baseURL: import.meta.env.VITE_ADMIN_API_BASE_URL ?? '/api/admin',
-      getAccessToken
-    });
+  const [lang, setLang] = useStorage('arco-lang', 'zh-CN');
+  const [theme, setTheme] = useStorage('arco-theme', 'light');
 
-    return new CurrentUserStore(() => fetchCurrentUser(httpClient));
+  const contextValue = useMemo(
+    () => ({
+      lang,
+      setLang,
+      theme,
+      setTheme
+    }),
+    [lang, setLang, theme, setTheme]
+  );
+
+  useEffect(() => {
+    if (checkLogin()) {
+      globalStore.updateUserInfo({ userLoading: true });
+      axios.get('/api/user/userInfo').then((res) => {
+        globalStore.updateUserInfo({
+          userInfo: res.data as UserInfo,
+          userLoading: false
+        });
+      });
+    } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
+      window.location.pathname = '/login';
+    }
   }, []);
+
+  useEffect(() => {
+    changeTheme(theme);
+  }, [theme]);
 
   return (
     <ConfigProvider
       componentConfig={{
-        Card: {
-          bordered: false
-        },
-        Table: {
-          border: false
-        }
+        Card: { bordered: false },
+        List: { bordered: false },
+        Table: { border: false }
       }}
-      locale={zhCN}
+      locale={getArcoLocale(lang || 'zh-CN')}
     >
-      <CurrentUserProvider store={currentUserStore}>{children}</CurrentUserProvider>
+      <GlobalContext.Provider value={contextValue}>{children}</GlobalContext.Provider>
     </ConfigProvider>
   );
 }

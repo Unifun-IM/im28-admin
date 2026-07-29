@@ -1,5 +1,5 @@
 import '@arco-themes/react-arco-pro/css/arco.css';
-import './app/styles/global.css';
+import '@app/styles/global.less';
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

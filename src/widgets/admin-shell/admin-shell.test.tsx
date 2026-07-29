@@ -1,37 +1,27 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { AdminShell } from './index';
+import { GlobalContext } from '@shared/lib/global-context';
+import { PageLayout } from './PageLayout';
 
-describe('AdminShell', () => {
-  it('renders an Arco Pro style admin frame around page content', () => {
-    render(
-      <MemoryRouter>
-        <AdminShell
-          currentUserName="Admin User"
-          menuItems={[{ key: 'dashboard', label: 'Dashboard', path: '/dashboard' }]}
-          onLogout={() => undefined}
-          selectedMenuKey="dashboard"
-          title="im-admin"
+describe('PageLayout', () => {
+  it('renders the Arco Pro simple admin shell chrome', () => {
+    const { container } = render(
+      <MemoryRouter initialEntries={['/dashboard/workplace']}>
+        <GlobalContext.Provider
+          value={{
+            lang: 'zh-CN',
+            setLang: () => undefined,
+            theme: 'light',
+            setTheme: () => undefined
+          }}
         >
-          <div>Dashboard content</div>
-        </AdminShell>
+          <PageLayout />
+        </GlobalContext.Provider>
       </MemoryRouter>
     );
 
-    const header = screen.getByRole('banner');
-    expect(header).toHaveTextContent('im-admin');
-    expect(header).toHaveTextContent('Admin User');
-    expect(header).toHaveTextContent('退出登录');
-    expect(screen.getByRole('navigation', { name: 'Admin navigation' })).toHaveTextContent(
-      'Dashboard'
-    );
-    expect(screen.getByRole('navigation', { name: 'Admin navigation' })).toHaveTextContent(
-      '收起菜单'
-    );
-    const main = screen.getByRole('main');
-    expect(main).toHaveTextContent('Home');
-    expect(main).toHaveTextContent('Dashboard');
-    expect(main).toHaveTextContent('Dashboard content');
+    expect(container.querySelector('.arco-layout')).toBeTruthy();
+    expect(container.querySelector('.arco-layout-sider, .arco-menu')).toBeTruthy();
   });
 });
