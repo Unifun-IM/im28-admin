@@ -71,7 +71,7 @@ function flattenFilterChildren(children: React.ReactNode): React.ReactElement[] 
 }
 
 export const bizFilterSelectProps = {
-  dropdownMenuClassName: 'use-biz-filter-dropdown'
+  // 面板样式由 dropdownRender 包裹的 .use-biz-filter-dropdown 驱动
 } as const;
 
 export type SearchFilterBarProps = {

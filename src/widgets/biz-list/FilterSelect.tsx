@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Checkbox,
+  Input,
   Select,
-  Space,
   type SelectProps
 } from '@arco-design/web-react';
+import { IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 
 import { bizFilterSelectProps } from './SearchFilterBar';
@@ -21,8 +22,18 @@ function getOptionValues(
     .filter((v) => v !== undefined && v !== null);
 }
 
+function getOptionLabel(opt: NonNullable<SelectProps['options']>[number]): string {
+  if (opt == null || typeof opt !== 'object') return String(opt ?? '');
+  return String(
+    (opt as { label?: React.ReactNode }).label ??
+      (opt as { value?: string | number }).value ??
+      ''
+  );
+}
+
 /**
- * 筛选区 Select — 基于 Arco Select；多选补全选 / 清除（Figma 602:35116）
+ * 筛选区 Select — 基于 Arco Select；多选下拉对齐 Figma 602:35141
+ *（内嵌搜索 / 全选 / checkbox 选项 / 清除）
  */
 export default function FilterSelect(props: SelectProps) {
   const {
@@ -35,11 +46,18 @@ export default function FilterSelect(props: SelectProps) {
     showSearch,
     allowClear,
     className,
+    onVisibleChange,
     ...rest
   } = props;
 
   const isMultiple = mode === 'multiple' || mode === 'tags';
-  const allValues = useMemo(() => getOptionValues(options), [options]);
+  const [keyword, setKeyword] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!isMultiple || !keyword.trim() || !options?.length) return options;
+    const q = keyword.trim().toLowerCase();
+    return options.filter((opt) => getOptionLabel(opt).toLowerCase().includes(q));
+  }, [isMultiple, keyword, options]);
 
   const selectedValues = useMemo(() => {
     const raw = value ?? defaultValue;
@@ -47,16 +65,29 @@ export default function FilterSelect(props: SelectProps) {
     return (Array.isArray(raw) ? raw : [raw]) as (string | number)[];
   }, [value, defaultValue]);
 
+  const visibleValues = useMemo(
+    () => getOptionValues(filteredOptions),
+    [filteredOptions]
+  );
+
   const allSelected =
     isMultiple &&
-    allValues.length > 0 &&
-    allValues.every((v) => selectedValues.includes(v));
+    visibleValues.length > 0 &&
+    visibleValues.every((v) => selectedValues.includes(v));
   const someSelected =
-    isMultiple && selectedValues.length > 0 && !allSelected;
+    isMultiple &&
+    visibleValues.some((v) => selectedValues.includes(v)) &&
+    !allSelected;
 
   const handleSelectAll = () => {
     if (!isMultiple) return;
-    onChange?.((allSelected ? [] : allValues) as never, {} as never);
+    if (allSelected) {
+      const next = selectedValues.filter((v) => !visibleValues.includes(v));
+      onChange?.(next as never, {} as never);
+      return;
+    }
+    const merged = Array.from(new Set([...selectedValues, ...visibleValues]));
+    onChange?.(merged as never, {} as never);
   };
 
   const handleClear = () => {
@@ -64,19 +95,35 @@ export default function FilterSelect(props: SelectProps) {
     onChange?.((isMultiple ? [] : undefined) as never, {} as never);
   };
 
+  const handleVisibleChange = (visible: boolean) => {
+    if (!visible) setKeyword('');
+    onVisibleChange?.(visible);
+  };
+
   const renderDropdown: SelectProps['dropdownRender'] = (menu) => {
     const body = (
-      <>
-        {isMultiple && allValues.length > 0 && (
+      <div className="use-biz-filter-dropdown">
+        {isMultiple && (
+          <Input
+            className="use-biz-filter-dropdown-search"
+            allowClear
+            size="small"
+            value={keyword}
+            placeholder="搜索"
+            prefix={<IconSearch />}
+            onChange={setKeyword}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
+        {isMultiple && visibleValues.length > 0 && (
           <div
             className="use-biz-filter-select-all"
             onMouseDown={(e) => e.preventDefault()}
             onClick={handleSelectAll}
           >
-            <Space size={4}>
-              <Checkbox checked={allSelected} indeterminate={someSelected} />
-              <span>全选</span>
-            </Space>
+            <Checkbox checked={allSelected} indeterminate={someSelected} />
+            <span>全选</span>
           </div>
         )}
         {menu}
@@ -92,7 +139,7 @@ export default function FilterSelect(props: SelectProps) {
             清除
           </div>
         )}
-      </>
+      </div>
     );
     return dropdownRender ? dropdownRender(body) : body;
   };
@@ -102,12 +149,14 @@ export default function FilterSelect(props: SelectProps) {
       {...bizFilterSelectProps}
       {...rest}
       mode={mode}
-      options={options}
+      options={isMultiple ? filteredOptions : options}
       value={value}
       defaultValue={defaultValue}
       onChange={onChange}
       allowClear={allowClear}
-      showSearch={showSearch ?? isMultiple}
+      /* 多选搜索放在下拉内，与稿面一致 */
+      showSearch={isMultiple ? false : (showSearch ?? false)}
+      onVisibleChange={handleVisibleChange}
       dropdownRender={renderDropdown}
       className={className}
     />

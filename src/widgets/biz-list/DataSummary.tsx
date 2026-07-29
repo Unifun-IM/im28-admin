@@ -46,7 +46,10 @@ function resolveTone(
   return 'default';
 }
 
-/** Figma 数据汇总区域（node 688:24611）— 布局由 Tailwind 承担 */
+/**
+ * 数据汇总 — Figma 688:24685
+ * 行高 32 / 字号 12·行高 20；标签 text-3 + 14 问号；数值 text-1 / success / danger
+ */
 export default function DataSummary({
   items,
   columns,
@@ -76,13 +79,13 @@ export default function DataSummary({
       <button
         type="button"
         className={cs(
-          'use-biz-summary box-border flex h-9 w-full cursor-pointer items-center justify-center gap-1 px-3 py-2 text-xs text-arco-text-1 hover:bg-arco-fill-1',
+          'use-biz-summary box-border flex h-[32px] w-full cursor-pointer items-center justify-center gap-[4px] px-[12px] text-[12px] leading-[20px] text-arco-text-1',
           className
         )}
         onClick={() => setCollapsed(false)}
       >
         <span>{title}</span>
-        <IconDown className="text-xs" />
+        <IconDown className="text-[12px]" />
       </button>
     );
   }
@@ -94,18 +97,18 @@ export default function DataSummary({
         className
       )}
     >
-      <div className="box-border flex h-8 items-center justify-between gap-2.5 border-b border-arco-border-2 px-3">
-        <span className="min-w-0 flex-1 text-xs font-normal text-arco-text-1">
+      <div className="box-border flex h-[32px] items-center justify-between gap-[10px] border-b border-arco-border-2 px-[12px]">
+        <span className="min-w-0 flex-1 text-[12px] font-normal leading-[20px] text-arco-text-1">
           {title}
         </span>
         {collapsible && (
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-xs text-arco-text-2 hover:text-arco-text-1"
+            className="inline-flex cursor-pointer items-center gap-[4px] border-0 bg-transparent p-0 text-[12px] leading-[20px] text-arco-text-2 hover:text-arco-text-1"
             onClick={() => setCollapsed(true)}
           >
             收起
-            <IconUp className="text-xs" />
+            <IconUp className="text-[12px]" />
           </button>
         )}
       </div>
@@ -118,33 +121,33 @@ export default function DataSummary({
           const isLastCol = (index + 1) % cols === 0;
           const isLastRow = index >= cells.length - cols;
           const cellBorder = cs(
-            'box-border flex h-8 min-w-0 items-center justify-between gap-2 border-arco-border-2 px-3',
+            'box-border flex h-[32px] min-w-0 items-center justify-between gap-[8px] border-solid border-arco-border-2 px-[12px]',
             !isLastCol && 'border-r',
             !isLastRow && 'border-b'
           );
 
           if (empty) {
-            return <div key={`empty-${index}`} className={cellBorder} />;
+            return <div key={`empty-${index}`} className={cellBorder} aria-hidden />;
           }
 
           const tone = resolveTone(item.value, item.tone);
           return (
             <div key={`${item.label}-${index}`} className={cellBorder}>
-              <div className="flex min-w-0 flex-1 items-center gap-1">
-                <span className="truncate text-xs text-arco-text-3">
+              <div className="flex min-w-0 flex-1 items-center gap-[4px]">
+                <span className="truncate text-[12px] leading-[20px] text-arco-text-3">
                   {item.label}
                 </span>
                 {item.tip != null && item.tip !== '' && (
                   <Tooltip content={item.tip}>
-                    <IconQuestionCircle className="shrink-0 cursor-help text-sm text-arco-text-4" />
+                    <IconQuestionCircle className="shrink-0 cursor-help text-[14px] text-arco-text-4" />
                   </Tooltip>
                 )}
               </div>
               <span
                 className={cs(
-                  'shrink-0 text-xs tabular-nums',
-                  tone === 'success' && 'text-arco-success',
-                  tone === 'danger' && 'text-arco-danger',
+                  'shrink-0 text-[12px] leading-[20px] tabular-nums',
+                  tone === 'success' && 'text-[rgb(var(--success-6))]',
+                  tone === 'danger' && 'text-[rgb(var(--danger-6))]',
                   tone === 'default' && 'text-arco-text-1'
                 )}
               >
