@@ -13,7 +13,6 @@ import OverviewAreaLine from '@widgets/chart/overview-area-line';
 import { getApiWorkplaceOverviewContent } from '@shared/api/workplace';
 import locale from './locale';
 import useLocale from '@shared/lib/useLocale';
-import styles from './style/overview.module.less';
 import IconCalendar from './assets/calendar.svg?react';
 import IconComments from './assets/comments.svg?react';
 import IconContent from './assets/content.svg?react';
@@ -32,14 +31,18 @@ type StatisticItemType = {
 function StatisticItem(props: StatisticItemType) {
   const { icon, title, count, loading, unit } = props;
   return (
-    <div className={styles.item}>
-      <div className={styles.icon}>{icon}</div>
+    <div className="flex items-center pl-5 text-arco-text-1">
+      <div className="mr-3 flex h-[54px] w-[54px] items-center justify-center rounded-full bg-arco-fill-2">
+        {icon}
+      </div>
       <div>
         <Skeleton loading={loading} text={{ rows: 2, width: 60 }} animation>
-          <div className={styles.title}>{title}</div>
-          <div className={styles.count}>
+          <div className="text-xs text-arco-text-1">{title}</div>
+          <div className="text-[22px] font-semibold text-arco-text-1">
             {count}
-            <span className={styles.unit}>{unit}</span>
+            <span className="ml-2 text-xs font-normal text-arco-text-2">
+              {unit}
+            </span>
           </div>
         </Skeleton>
       </div>
@@ -95,7 +98,7 @@ function Overview() {
             unit={t['workplace.pecs']}
           />
         </Col>
-        <Divider type="vertical" className={styles.divider} />
+        <Divider type="vertical" className="h-[60px]" />
         <Col flex={1}>
           <StatisticItem
             icon={<IconContent />}
@@ -105,7 +108,7 @@ function Overview() {
             unit={t['workplace.pecs']}
           />
         </Col>
-        <Divider type="vertical" className={styles.divider} />
+        <Divider type="vertical" className="h-[60px]" />
         <Col flex={1}>
           <StatisticItem
             icon={<IconComments />}
@@ -115,7 +118,7 @@ function Overview() {
             unit={t['workplace.pecs']}
           />
         </Col>
-        <Divider type="vertical" className={styles.divider} />
+        <Divider type="vertical" className="h-[60px]" />
         <Col flex={1}>
           <StatisticItem
             icon={<IconIncrease />}
@@ -134,13 +137,13 @@ function Overview() {
       </Row>
       <Divider />
       <div>
-        <div className={styles.ctw}>
+        <div className="mb-4 flex justify-between">
           <Typography.Paragraph
-            className={styles['chart-title']}
+            className="text-base font-medium"
             style={{ marginBottom: 0 }}
           >
             {t['workplace.contentData']}
-            <span className={styles['chart-sub-title']}>
+            <span className="ml-1 text-xs font-normal text-arco-text-3">
               ({t['workplace.1year']})
             </span>
           </Typography.Paragraph>

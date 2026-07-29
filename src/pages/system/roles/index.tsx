@@ -40,7 +40,7 @@ export default function RolesPage() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
   const [visible, setVisible] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
 
@@ -140,15 +140,30 @@ export default function RolesPage() {
             },
             {
               title: '操作',
-              width: 100,
+              width: 108,
               render: () => (
                 <ActionLinks
                   items={[
-                    { key: 'edit', label: '编辑', onClick: () => setVisible(true) },
                     {
-                      key: 'more',
-                      label: '更多',
-                      onClick: () => Message.info('更多操作（mock）')
+                      key: 'edit',
+                      label: '编辑',
+                      onClick: () => setVisible(true)
+                    },
+                    {
+                      key: 'delete',
+                      label: '删除',
+                      danger: true,
+                      onClick: () => Message.info('删除（mock）')
+                    },
+                    {
+                      key: 'perms',
+                      label: '权限配置',
+                      onClick: () => Message.info('权限配置（mock）')
+                    },
+                    {
+                      key: 'copy',
+                      label: '复制角色',
+                      onClick: () => Message.info('复制角色（mock）')
                     }
                   ]}
                 />

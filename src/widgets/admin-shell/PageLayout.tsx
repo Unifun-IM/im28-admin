@@ -2,10 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Spin } from '@arco-design/web-react';
 import {
-  IconApps,
+  IconDoubleRight,
   IconGift,
   IconMenuFold,
-  IconMenuUnfold,
   IconSettings,
   IconStorage,
   IconUserGroup,
@@ -24,7 +23,8 @@ import lazyload from '@shared/lib/lazyload';
 import { useGlobalSelector } from '@shared/lib/global-store-hooks';
 import useLocale from '@shared/lib/useLocale';
 import Footer from '@widgets/footer';
-import Navbar from '@widgets/navbar';
+import Navbar, { type NavbarBreadcrumbItem } from '@widgets/navbar';
+import PageTabs from '@widgets/page-tabs';
 
 import styles from './style/layout.module.less';
 
@@ -35,6 +35,8 @@ const Content = Layout.Content;
 
 const Exception403 = lazyload(() => import('@pages/exception/403'));
 
+/** Figma 862:20168：常规 240 / 最小 56；贴边全高，无外边距 */
+const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 56;
 
 function getIconFromKey(key: string) {
@@ -42,7 +44,7 @@ function getIconFromKey(key: string) {
     case 'user':
       return <IconUserGroup className={styles.icon} />;
     case 'system':
-      return <IconApps className={styles.icon} />;
+      return <IconSettings className={styles.icon} />;
     case 'system-params':
       return <IconSettings className={styles.icon} />;
     case 'finance':
@@ -101,22 +103,43 @@ export function PageLayout() {
   const paths = (currentComponent || defaultRoute).split('/');
   const defaultOpenKeys = paths.slice(0, paths.length - 1);
 
-  const [breadcrumb, setBreadCrumb] = useState<React.ReactNode[]>([]);
+  const [breadcrumb, setBreadCrumb] = useState<NavbarBreadcrumbItem[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(defaultSelectedKeys);
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
 
-  const routeMap = useRef<Map<string, React.ReactNode[]>>(new Map());
+  const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
   const menuMap = useRef<Map<string, { menuItem?: boolean; subMenu?: boolean }>>(
     new Map()
   );
 
-  const navbarHeight = 64;
-  const menuWidth = collapsed ? COLLAPSED_WIDTH : settings.menuWidth;
+  const navbarHeight = 44;
+  const pageTabsHeight = 32;
+  const headerGap = 10;
   const showNavbar = settings.navbar && urlParams.navbar !== false;
   const showMenu = settings.menu && urlParams.menu !== false;
   const showFooter = settings.footer && urlParams.footer !== false;
+  const expandedWidth = settings.menuWidth || EXPANDED_WIDTH;
+  const menuWidth = collapsed ? COLLAPSED_WIDTH : expandedWidth;
+  /** 侧栏占位：常规 240 / 最小 56（贴边，无外边距） */
+  const siderOccupied = showMenu ? menuWidth : 0;
+  const headerHeight = showNavbar
+    ? navbarHeight + headerGap + pageTabsHeight
+    : 0;
   const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
+
+  const pageTabTitle = useMemo(() => {
+    if (!breadcrumb.length) {
+      const flat = flattenRoutes.find(
+        (r) => pathname === `/${r.key}` || pathname.startsWith(`/${r.key}/`)
+      );
+      if (flat) return locale[flat.name] || flat.name;
+      return pathname;
+    }
+    const last = breadcrumb[breadcrumb.length - 1];
+    const name = typeof last === 'string' ? last : last.name;
+    return locale[name] || name;
+  }, [breadcrumb, flattenRoutes, locale, pathname]);
 
   function onClickMenuItem(key: string) {
     const currentRoute = flattenRoutes.find((r) => r.key === key);
@@ -136,12 +159,12 @@ export function PageLayout() {
     setCollapsed((value) => !value);
   }
 
-  const paddingLeft = showMenu ? { paddingLeft: menuWidth } : {};
-  const paddingTop = showNavbar ? { paddingTop: navbarHeight } : {};
+  const paddingLeft = showMenu ? { paddingLeft: siderOccupied } : {};
+  const paddingTop = headerHeight ? { paddingTop: headerHeight } : {};
   const paddingStyle = { ...paddingLeft, ...paddingTop };
   const navbarStyle = {
-    left: showMenu ? menuWidth : 0,
-    width: showMenu ? `calc(100% - ${menuWidth}px)` : '100%'
+    left: siderOccupied,
+    width: siderOccupied ? `calc(100% - ${siderOccupied}px)` : '100%'
   };
 
   function renderRoutes(localeMap: Record<string, string>) {
@@ -149,7 +172,7 @@ export function PageLayout() {
     return function travel(
       _routes: IRoute[],
       _level: number,
-      parentNode: React.ReactNode[] = []
+      parentNode: NavbarBreadcrumbItem[] = []
     ) {
       return _routes.map((route) => {
         const { breadcrumb: showBreadcrumb = true, ignore } = route;
@@ -160,10 +183,14 @@ export function PageLayout() {
             <span>{localeMap[route.name] || route.name}</span>
           </>
         );
+        const crumb: NavbarBreadcrumbItem = {
+          name: route.name,
+          icon: iconDom || undefined
+        };
 
         routeMap.current.set(
           `/${route.key}`,
-          showBreadcrumb ? [...parentNode, route.name] : []
+          showBreadcrumb ? [...parentNode, crumb] : []
         );
 
         const visibleChildren = (route.children || []).filter((child) => {
@@ -171,7 +198,7 @@ export function PageLayout() {
           if (childIgnore || route.ignore) {
             routeMap.current.set(
               `/${child.key}`,
-              childBreadcrumb ? [...parentNode, route.name, child.name] : []
+              childBreadcrumb ? [...parentNode, crumb, { name: child.name }] : []
             );
           }
           return !childIgnore;
@@ -182,9 +209,11 @@ export function PageLayout() {
         }
         if (visibleChildren.length) {
           menuMap.current.set(route.key, { subMenu: true });
+          const nextParent =
+            showBreadcrumb === false ? parentNode : [...parentNode, crumb];
           return (
             <SubMenu key={route.key} title={titleDom}>
-              {travel(visibleChildren, _level + 1, [...parentNode, route.name])}
+              {travel(visibleChildren, _level + 1, nextParent)}
             </SubMenu>
           );
         }
@@ -205,7 +234,7 @@ export function PageLayout() {
       if (menuType?.menuItem) {
         newSelectedKeys.push(menuKey);
       }
-      if (menuType?.subMenu && !openKeys.includes(menuKey)) {
+      if (menuType?.subMenu && !newOpenKeys.includes(menuKey)) {
         newOpenKeys.push(menuKey);
       }
       pathKeys.pop();
@@ -223,6 +252,33 @@ export function PageLayout() {
         newSelectedKeys.push('session/user');
       }
     }
+
+    // 打开选中项的祖先 SubMenu（如 user/manage）
+    const collectAncestors = (
+      list: IRoute[],
+      target: string,
+      trail: string[] = []
+    ): string[] | null => {
+      for (const route of list) {
+        if (route.key === target) return trail;
+        if (route.children?.length) {
+          const found = collectAncestors(route.children, target, [
+            ...trail,
+            route.key
+          ]);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const selected = newSelectedKeys[0];
+    if (selected) {
+      const ancestors = collectAncestors(routes, selected);
+      ancestors?.forEach((key) => {
+        if (!newOpenKeys.includes(key)) newOpenKeys.push(key);
+      });
+    }
+
     setSelectedKeys(newSelectedKeys);
     setOpenKeys(newOpenKeys);
   }
@@ -257,6 +313,7 @@ export function PageLayout() {
         style={navbarStyle}
       >
         <Navbar show={showNavbar} breadcrumb={breadcrumb} />
+        {showNavbar ? <PageTabs title={pageTabTitle} /> : null}
       </div>
       {userLoading ? (
         <Spin className={styles.spin} />
@@ -294,11 +351,15 @@ export function PageLayout() {
                 </Menu>
               </div>
               <div className={styles['collapse-btn']} onClick={toggleCollapse}>
-                {collapsed ? <IconMenuUnfold /> : <IconMenuFold />}
+                {collapsed ? <IconDoubleRight /> : <IconMenuFold />}
               </div>
             </Sider>
           )}
-          <Layout className={styles['layout-content']} style={paddingStyle}>
+          <Layout
+            className={styles['layout-content']}
+            style={paddingStyle}
+            data-layout-content
+          >
             <div className={styles['layout-content-wrapper']}>
               <Content>
                 <Routes>

@@ -1,31 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import groupBy from 'lodash/groupBy';
-import {
-  Trigger,
-  Tabs,
-  Avatar,
-  Spin,
-  Button,
-  Switch
-} from '@arco-design/web-react';
-import {
-  IconMessage,
-  IconCustomerService,
-  IconFile,
-  IconDesktop
-} from '@arco-design/web-react/icon';
+import { Trigger, Spin, Button, Switch } from '@arco-design/web-react';
 import { getApiMessageList, postApiMessageRead } from '@shared/api/message';
 import useLocale from '@shared/lib/useLocale';
+import cs from 'classnames';
 import MessageList, { MessageListType } from './list';
-import styles from './style/index.module.less';
+
+type TabKey = 'all' | 'unread' | 'message' | 'notice';
 
 function DropContent() {
   const t = useLocale();
   const [loading, setLoading] = useState(false);
-  const [onlyUnread, setOnlyUnread] = useState(false);
-  const [groupData, setGroupData] = useState<{
-    [key: string]: MessageListType;
-  }>({});
+  const [alertSound, setAlertSound] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [sourceData, setSourceData] = useState<MessageListType>([]);
 
   function fetchSourceData(showLoading = true) {
@@ -50,99 +37,94 @@ function DropContent() {
     fetchSourceData();
   }, []);
 
-  useEffect(() => {
-    const next = groupBy(sourceData, 'type');
-    setGroupData(next);
-  }, [sourceData]);
+  const groupData = useMemo(() => groupBy(sourceData, 'type'), [sourceData]);
+  const unreadAll = useMemo(
+    () => sourceData.filter((row) => !row.status),
+    [sourceData]
+  );
 
-  const tabList = [
+  const listData = useMemo(() => {
+    if (activeTab === 'all') return sourceData;
+    if (activeTab === 'unread') return unreadAll;
+    return groupData[activeTab] || [];
+  }, [activeTab, sourceData, unreadAll, groupData]);
+
+  const tabs: { key: TabKey; label: React.ReactNode }[] = [
+    { key: 'all', label: t['message.tab.all'] },
     {
-      key: 'message',
-      title: t['message.tab.title.message'],
-      titleIcon: <IconMessage />
+      key: 'unread',
+      label: `${t['message.tab.unread']}${
+        unreadAll.length ? `(${unreadAll.length})` : ''
+      }`
     },
-    {
-      key: 'notice',
-      title: t['message.tab.title.notice'],
-      titleIcon: <IconCustomerService />
-    },
-    {
-      key: 'todo',
-      title: t['message.tab.title.todo'],
-      titleIcon: <IconFile />,
-      avatar: (
-        <Avatar style={{ backgroundColor: '#0FC6C2' }}>
-          <IconDesktop />
-        </Avatar>
-      )
-    }
+    { key: 'message', label: t['message.tab.category1'] },
+    { key: 'notice', label: t['message.tab.category2'] }
   ];
 
   return (
-    <div className={styles['message-box']}>
-      <div className={styles['message-header']}>
-        <span className={styles['message-header-title']}>
+    <div className="flex max-h-[520px] w-96 flex-col overflow-hidden rounded-xl bg-arco-bg-popup shadow-popover">
+      <div className="box-border flex h-12 items-center justify-between gap-2 border-b border-arco-border-2 bg-arco-bg-popup p-2">
+        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-arco-text-1">
           {t['message.box.title']}
         </span>
-        <div className={styles['message-header-extra']}>
+        <div className="flex shrink-0 items-center gap-2 text-xs leading-5 text-arco-text-1">
           <span>{t['message.onlyUnread']}</span>
-          <Switch size="small" checked={onlyUnread} onChange={setOnlyUnread} />
+          <Switch size="small" checked={alertSound} onChange={setAlertSound} />
         </div>
       </div>
-      <Spin loading={loading} style={{ display: 'block' }}>
-        <Tabs
-          overflow="dropdown"
-          type="rounded"
-          defaultActiveTab="message"
-          destroyOnHide
-        >
-          {tabList.map((item) => {
-            const { key, title } = item;
-            const data = groupData[key] || [];
-            const unReadData = data.filter((row) => !row.status);
-            const listData = onlyUnread ? unReadData : data;
-            return (
-              <Tabs.TabPane
-                key={key}
-                title={
-                  <span>
-                    {title}
-                    {unReadData.length ? `(${unReadData.length})` : ''}
-                  </span>
-                }
-              >
-                <MessageList
-                  data={listData}
-                  unReadData={unReadData}
-                  onItemClick={(row) => {
-                    readMessage([row]);
-                  }}
-                  onAllBtnClick={(rows) => {
-                    readMessage(rows);
-                  }}
-                />
-              </Tabs.TabPane>
-            );
-          })}
-        </Tabs>
-      </Spin>
-      <div className={styles.footer}>
-        <Button type="text" long onClick={() => setSourceData([])}>
-          {t['message.empty']}
-        </Button>
+      <div className="min-h-0 flex-1 overflow-auto p-2">
+        <div className="mb-2 flex items-center gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={cs(
+                'h-6 cursor-pointer appearance-none rounded-sm border-0 bg-transparent px-2 text-xs leading-5 text-arco-text-2 hover:text-arco-text-1',
+                activeTab === tab.key && 'bg-arco-fill-2 text-arco-text-1'
+              )}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <Spin loading={loading} style={{ display: 'block' }}>
+          <MessageList
+            data={listData}
+            unReadData={unreadAll}
+            onItemClick={(row) => {
+              readMessage([row]);
+            }}
+            onAllBtnClick={(rows) => {
+              readMessage(rows);
+            }}
+          />
+        </Spin>
+      </div>
+      <div className="box-border flex h-12 items-center justify-end gap-2 border-t border-arco-border-2 bg-arco-bg-popup p-2">
         <Button
-          type="text"
-          long
-          onClick={() => readMessage(sourceData.filter((i) => !i.status))}
+          type="secondary"
+          size="small"
+          className="!rounded"
+          onClick={() => readMessage(unreadAll)}
         >
           {t['message.allRead']}
+        </Button>
+        <Button type="primary" size="small" className="!rounded">
+          {t['message.seeMore']}
         </Button>
       </div>
     </div>
   );
 }
 
-function MessageBox({ children }: { children: React.ReactNode }) {
+function MessageBox({
+  children,
+  onVisibleChange
+}: {
+  children: React.ReactNode;
+  onVisibleChange?: (visible: boolean) => void;
+}) {
   return (
     <Trigger
       trigger="click"
@@ -150,6 +132,7 @@ function MessageBox({ children }: { children: React.ReactNode }) {
       position="br"
       unmountOnExit={false}
       popupAlign={{ bottom: 4 }}
+      onVisibleChange={onVisibleChange}
     >
       {children}
     </Trigger>

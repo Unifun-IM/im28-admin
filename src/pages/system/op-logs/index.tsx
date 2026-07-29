@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, Select, DatePicker } from '@arco-design/web-react';
-import { BizListPage, FilterField } from '@widgets/biz-list';
+import { Form, Input, DatePicker } from '@arco-design/web-react';
+import { BizListPage, FilterField, FilterSelect } from '@widgets/biz-list';
 import { getOpLogs } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -11,7 +11,7 @@ export default function OpLogsPage() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -43,7 +43,7 @@ export default function OpLogsPage() {
             <Input.Search placeholder="请输入搜索内容" allowClear />
           </FormItem>
           <FormItem field="action" label="操作类型">
-            <Select
+            <FilterSelect
               allowClear
               placeholder="单选内容"
               options={[
@@ -56,7 +56,7 @@ export default function OpLogsPage() {
             />
           </FormItem>
           <FormItem field="path" label="操作路径">
-            <Select
+            <FilterSelect
               mode="multiple"
               allowClear
               placeholder="多选内容"

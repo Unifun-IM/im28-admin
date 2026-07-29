@@ -1,4 +1,8 @@
-@nav-size-height: 64px;
+@nav-size-height: 44px;
+@page-tabs-height: 32px;
+@header-navbar-gap: 10px;
+@header-size-height: @nav-size-height + @header-navbar-gap + @page-tabs-height;
+@sider-logo-height: 64px;
 @sider-width: 240px;
 @sider-collapsed-width: 56px;
 @layout-max-width: 1100px;
@@ -12,26 +16,39 @@
   position: fixed;
   min-width: 0;
   top: 0;
-  height: @nav-size-height;
+  height: @header-size-height;
   z-index: 100;
+  box-sizing: border-box;
+  padding: 0 12px;
+  /* Figma 741:29115：顶栏白底，与内容区 fill-1 区分 */
+  background-color: var(--color-bg-2, #fff);
   transition: left 0.2s, width 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: @header-navbar-gap;
 
   &-hidden {
     height: 0;
     overflow: hidden;
+    padding: 0;
+    gap: 0;
   }
 }
 
-/* —— Figma 左侧导航栏：常规 240 / 最小 56 —— */
+/* —— Figma 862:20168：贴边全高 240，仅右边框，无圆角/外边距 —— */
 .layout-sider {
   position: fixed;
-  height: 100%;
   top: 0;
   left: 0;
   z-index: 99;
   box-sizing: border-box;
+  height: 100% !important;
   background-color: var(--color-bg-2, #fff);
-  border-right: 1px solid var(--color-border-2, #e5e6eb);
+  border: none;
+  border-right: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+  border-radius: 0;
+  overflow: hidden;
+  transition: width 0.2s;
 
   ::-webkit-scrollbar {
     width: 12px;
@@ -56,6 +73,7 @@
   > :global(.arco-layout-sider-children) {
     display: flex;
     flex-direction: column;
+    height: 100%;
     overflow-y: hidden;
   }
 
@@ -69,8 +87,8 @@
   align-items: center;
   gap: 0;
   flex-shrink: 0;
-  height: @nav-size-height;
-  padding: 0 8px;
+  height: @sider-logo-height;
+  padding: 0 8px 0 8px;
   box-sizing: border-box;
 
   svg {
@@ -119,6 +137,7 @@
     padding: 0;
   }
 
+  /* L1：Figma menu-item — px12 py5 / gap16 / 圆角 2 / text-2 */
   :global(.arco-menu-item),
   :global(.arco-menu-inline-header) {
     display: flex;
@@ -128,10 +147,11 @@
     min-height: 32px;
     margin-bottom: 4px;
     padding: 5px 12px !important;
-    line-height: 21px;
-    border-radius: 8px;
+    line-height: 22px;
+    border-radius: 2px;
     color: var(--color-text-2, #4e5969);
     font-size: 14px;
+    font-weight: 400;
     background: transparent;
 
     &:hover {
@@ -144,11 +164,11 @@
     font-weight: 400;
   }
 
-  /* 选中：灰底 + 深色字，不用主题色块 */
+  /* 选中：fill-3 + text-1 Medium（Figma 741:24736） */
   :global(.arco-menu-selected),
   :global(.arco-menu-selected.arco-menu-item),
   :global(.arco-menu-item.arco-menu-selected) {
-    background-color: var(--color-fill-2, #f2f3f5) !important;
+    background-color: var(--color-fill-3, #e5e6eb) !important;
     color: var(--color-text-1, #1d2129) !important;
     font-weight: 500;
 
@@ -158,10 +178,16 @@
     }
   }
 
+  /* L1 SubMenu 头：有选中子项时不套选中底 */
   :global(.arco-menu-inline-header.arco-menu-selected) {
     background-color: transparent !important;
     color: var(--color-text-2, #4e5969) !important;
     font-weight: 400;
+
+    :global(svg),
+    :global(.arco-icon) {
+      color: inherit !important;
+    }
   }
 
   :global(.arco-menu-icon-suffix) {
@@ -169,39 +195,144 @@
     font-size: 12px;
   }
 
-  :global(.arco-menu-inline-content .arco-menu-item) {
-    padding-left: 42px !important;
-    gap: 0;
+  /*
+   * 嵌套 SubMenu（如「用户管理」）：fill-1 + 圆角 8 + p4；
+   * 组标题 text-3；组内项近似稿面 pl-56 / 选中 fill-3
+   * L2 叶子：pl-42 / 圆角 2
+   */
+  :global(.arco-menu-inline-content) {
+    > :global(.arco-menu-item) {
+      padding-left: 42px !important;
+      padding-right: 12px !important;
+      gap: 0;
+      border-radius: 2px;
+    }
+
+    > :global(.arco-menu-item.arco-menu-selected) {
+      border-radius: 8px;
+    }
+  }
+
+  :global(.arco-menu-inline .arco-menu-inline) {
+    box-sizing: border-box;
+    margin-bottom: 4px;
+    padding: 4px;
+    border-radius: 8px;
+    background-color: var(--color-fill-1, #f7f8fa);
+
+    > :global(.arco-menu-inline-header) {
+      gap: 0;
+      margin-bottom: 4px;
+      padding: 5px 8px 5px 40px !important;
+      border-radius: 8px;
+      color: var(--color-text-3, #86909c) !important;
+      background: transparent !important;
+
+      &:hover {
+        color: var(--color-text-2, #4e5969) !important;
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+      }
+
+      /* 组头无左侧图标 */
+      > :global(svg),
+      > :global(.arco-icon) {
+        display: none;
+      }
+    }
+
+    > :global(.arco-menu-inline-header.arco-menu-selected) {
+      color: var(--color-text-3, #86909c) !important;
+      background: transparent !important;
+      font-weight: 400;
+    }
+
+    :global(.arco-menu-inline-content) > :global(.arco-menu-item) {
+      padding-left: 52px !important;
+      padding-right: 8px !important;
+      margin-bottom: 4px;
+      border-radius: 8px;
+      color: var(--color-text-1, #1d2129);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 
   :global(.arco-menu-pop-header) {
     border-radius: 8px;
   }
 
-  /* 折叠：仅图标，40×40 触控块 */
+  /* 折叠：仅图标（Figma 602:35590 menu最小展示）
+   * 默认 40×32 / 圆角 2；选中·悬停 40×40 / 圆角 12 / fill-2
+   */
   &:global(.arco-menu-collapse) {
     width: 40px !important;
     margin: 0 auto;
 
     :global(.arco-menu-item),
     :global(.arco-menu-pop-header) {
+      display: flex !important;
       width: 40px !important;
-      height: 40px !important;
-      min-height: 40px;
+      height: 32px !important;
+      min-height: 32px;
       margin: 0 auto 4px;
       padding: 0 !important;
       justify-content: center;
+      align-items: center;
       gap: 0;
-      border-radius: 12px;
+      border-radius: 2px;
+      background: transparent !important;
+      overflow: hidden;
+      color: var(--color-text-2, #4e5969);
+
+      /* 只留图标，藏标题与箭头 */
+      > span {
+        display: none !important;
+      }
+
+      :global(.arco-icon),
+      :global(svg) {
+        display: block;
+        flex-shrink: 0;
+        margin: 0 !important;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: inherit;
+      }
+
+      &:hover {
+        height: 40px !important;
+        min-height: 40px;
+        border-radius: 12px;
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+        color: var(--color-text-1, #1d2129);
+      }
     }
 
     :global(.arco-menu-item.arco-menu-selected),
     :global(.arco-menu-pop-header.arco-menu-selected) {
+      height: 40px !important;
+      min-height: 40px;
+      border-radius: 12px;
       background-color: var(--color-fill-2, #f2f3f5) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 400;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
     }
 
     :global(.arco-menu-icon-suffix) {
-      display: none;
+      display: none !important;
+    }
+
+    :global(.arco-menu-item-inner),
+    :global(.arco-menu-pop-header) {
+      justify-content: center;
     }
   }
 }
@@ -231,16 +362,24 @@
 }
 
 .layout-sider:global(.arco-layout-sider-collapsed) {
+  .sider-logo {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .sider-logo :global(svg) {
+    margin: 0;
+  }
+
   .collapse-btn {
-    margin-left: auto;
-    margin-right: auto;
+    /* Figma shrink-wrapper：高 48 = 上下 12 + 按钮 24，水平居中 */
+    margin: 12px auto;
   }
 
   .menu-wrapper {
     display: flex;
     justify-content: center;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding: 0 8px 16px;
   }
 }
 
@@ -257,7 +396,7 @@
 }
 
 .layout-content {
-  background-color: var(--color-fill-2);
+  background-color: var(--color-bg-1, #f7f8fa);
   min-width: @layout-max-width;
   min-height: 100vh;
   transition: padding-left 0.2s;
@@ -265,7 +404,7 @@
 }
 
 .layout-content-wrapper {
-  padding: 16px 20px 0;
+  padding: 12px;
 }
 
 .spin {

@@ -11,7 +11,7 @@ export default function Page() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
   const [current, setCurrent] = useState<Record<string, unknown> | null>(null);
 
   const fetchData = useCallback(async (p = page, size = pageSize) => {

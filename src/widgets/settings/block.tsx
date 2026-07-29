@@ -3,7 +3,6 @@ import { Switch, Divider, InputNumber } from '@arco-design/web-react';
 import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
 import useLocale from '@shared/lib/useLocale';
-import styles from './style/block.module.less';
 
 export interface BlockProps {
   title?: ReactNode;
@@ -18,14 +17,17 @@ export default function Block(props: BlockProps) {
   const dispatch = useGlobalDispatch();
 
   return (
-    <div className={styles.block}>
-      <h5 className={styles.title}>{title}</h5>
+    <div className="mb-6">
+      <h5 className="m-[10px_0] p-0 text-sm">{title}</h5>
       {options &&
         options.map((option) => {
           const type = option.type || 'switch';
 
           return (
-            <div className={styles['switch-wrapper']} key={option.value}>
+            <div
+              className="flex h-8 items-center justify-between"
+              key={option.value}
+            >
               <span>{locale[option.name]}</span>
               {type === 'switch' && (
                 <Switch

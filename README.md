@@ -2,6 +2,8 @@
 
 IM 管理后台。基于 **Arco Design Pro（Vite 精简版）** 能力，按 **Feature-Sliced Design (FSD)** 组织代码，状态管理使用 **MobX**（不使用 Redux）。UI/交互以 Figma「业务1.0」为准。
 
+**全局基本准则：** 优先采用 Arco Design 标准组件；Figma 约束交互细节；非标准组件强制像素级布局（详见 `AGENTS.md`）。
+
 ## 技术栈
 
 - React 18 + TypeScript + Vite 5
@@ -57,7 +59,7 @@ src/
 
 通用列表积木：`widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage`）。
 
-壳层对齐：侧栏展开 **240px**、收起 **56px**；主题色默认 `#635CFF`。
+壳层对齐：侧栏展开 **240px**、收起 **56px**（贴边全高、仅右边框，见 Figma `862:20168`）；主题色默认 `#635CFF`。
 
 ## 接口引入方式（OpenAPI 生成）
 

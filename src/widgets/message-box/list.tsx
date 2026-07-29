@@ -1,15 +1,7 @@
-import React from 'react';
-import {
-  List,
-  Avatar,
-  Typography,
-  Button,
-  Space,
-  Result,
-  Tag,
-} from '@arco-design/web-react';
+import React, { useMemo } from 'react';
+import { Result } from '@arco-design/web-react';
 import useLocale from '@shared/lib/useLocale';
-import styles from './style/index.module.less';
+import cs from 'classnames';
 
 export interface MessageItemData {
   id: string;
@@ -37,89 +29,84 @@ interface MessageListProps {
   ) => void;
 }
 
+function getGroupLabel(time?: string) {
+  if (!time) return 'earlier';
+  // 简单启发：带日期的归「更早之前」，仅时刻归「今天」
+  if (/^\d{1,2}:\d{2}$/.test(time.trim())) return 'today';
+  return 'earlier';
+}
+
 function MessageList(props: MessageListProps) {
   const t = useLocale();
-  const { data, unReadData } = props;
+  const { data } = props;
+
+  const groups = useMemo(() => {
+    const today: MessageItemData[] = [];
+    const earlier: MessageItemData[] = [];
+    data.forEach((item) => {
+      if (getGroupLabel(item.time) === 'today') today.push(item);
+      else earlier.push(item);
+    });
+    return [
+      { key: 'today', label: '今天', items: today },
+      { key: 'earlier', label: '更早之前', items: earlier }
+    ].filter((g) => g.items.length);
+  }, [data]);
 
   function onItemClick(item: MessageItemData, index: number) {
     if (item.status) return;
-    props.onItemClick && props.onItemClick(item, index);
+    props.onItemClick?.(item, index);
   }
 
-  function onAllBtnClick() {
-    props.onAllBtnClick && props.onAllBtnClick(unReadData, data);
+  if (!data.length) {
+    return (
+      <div className="use-message-empty py-6 pb-4">
+        <Result status="404" subTitle={t['message.empty.tips']} />
+      </div>
+    );
   }
 
   return (
-    <List
-      noDataElement={<Result status="404" subTitle={t['message.empty.tips']} />}
-      footer={
-        <div className={styles.footer}>
-          <div className={styles['footer-item']}>
-            <Button type="text" size="small" onClick={onAllBtnClick}>
-              {t['message.allRead']}
-            </Button>
+    <div className="flex flex-col gap-2">
+      {groups.map((group) => (
+        <div key={group.key}>
+          <div className="mb-1 text-xs leading-5 text-arco-text-3">
+            {group.label}
           </div>
-          <div className={styles['footer-item']}>
-            <Button type="text" size="small">
-              {t['message.seeMore']}
-            </Button>
-          </div>
+          {group.items.map((item, index) => {
+            const unread = !item.status;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className="flex w-full cursor-pointer flex-col gap-1 border-0 border-b border-arco-border-2 bg-transparent py-2 text-left last:border-b-0 hover:opacity-[0.85]"
+                onClick={() => onItemClick(item, index)}
+              >
+                <div className="flex w-full items-center justify-between gap-2">
+                  <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-arco-text-1">
+                    {item.title}
+                  </span>
+                  <span className="inline-flex shrink-0 items-center gap-1">
+                    <span className="text-[10px] leading-[14px] text-arco-text-3">
+                      {item.time}
+                    </span>
+                    <span
+                      className={cs(
+                        'h-2 w-2 rounded-full bg-arco-danger',
+                        !unread && 'opacity-0'
+                      )}
+                    />
+                  </span>
+                </div>
+                <p className="m-0 line-clamp-2 text-xs leading-5 text-arco-text-3">
+                  {item.content}
+                </p>
+              </button>
+            );
+          })}
         </div>
-      }
-    >
-      {data.map((item, index) => (
-        <List.Item
-          key={item.id}
-          actionLayout="vertical"
-          style={{
-            opacity: item.status ? 0.5 : 1,
-          }}
-        >
-          <div
-            style={{
-              cursor: 'pointer',
-            }}
-            onClick={() => {
-              onItemClick(item, index);
-            }}
-          >
-            <List.Item.Meta
-              avatar={
-                item.avatar && (
-                  <Avatar shape="circle" size={36}>
-                    <img src={item.avatar} />
-                  </Avatar>
-                )
-              }
-              title={
-                <div className={styles['message-title']}>
-                  <Space size={4}>
-                    <span>{item.title}</span>
-                    <Typography.Text type="secondary">
-                      {item.subTitle}
-                    </Typography.Text>
-                  </Space>
-                  {item.tag && item.tag.text ? (
-                    <Tag color={item.tag.color}>{item.tag.text}</Tag>
-                  ) : null}
-                </div>
-              }
-              description={
-                <div>
-                  <Typography.Paragraph style={{ marginBottom: 0 }} ellipsis>
-                    {item.content}
-                  </Typography.Paragraph>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {item.time}
-                  </Typography.Text>
-                </div>
-              }
-            />
-          </div>
-        </List.Item>
       ))}
-    </List>
+    </div>
   );
 }
 

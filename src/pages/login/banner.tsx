@@ -2,7 +2,6 @@ import React from 'react';
 import { Carousel } from '@arco-design/web-react';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
-import styles from './style/index.module.less';
 
 export default function LoginBanner() {
   const t = useLocale(locale);
@@ -27,15 +26,15 @@ export default function LoginBanner() {
     },
   ];
   return (
-    <Carousel className={styles.carousel} animation="fade">
+    <Carousel className="h-full" animation="fade">
       {data.map((item, index) => (
         <div key={`${index}`}>
-          <div className={styles['carousel-item']}>
-            <div className={styles['carousel-title']}>{item.slogan}</div>
-            <div className={styles['carousel-sub-title']}>{item.subSlogan}</div>
+          <div className="flex h-full flex-col items-center justify-center px-10 text-center text-white">
+            <div className="mb-2 text-2xl font-semibold">{item.slogan}</div>
+            <div className="mb-6 text-sm text-white/80">{item.subSlogan}</div>
             <img
               alt="banner-image"
-              className={styles['carousel-image']}
+              className="max-w-full"
               src={item.image}
             />
           </div>

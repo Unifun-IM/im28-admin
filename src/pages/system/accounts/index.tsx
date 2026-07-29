@@ -20,7 +20,7 @@ export default function AccountsPage() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
   const [visible, setVisible] = useState(false);
 
   const fetchData = useCallback(
@@ -102,7 +102,7 @@ export default function AccountsPage() {
             { title: '创建时间', dataIndex: 'createdAt', width: 180 },
             {
               title: '操作',
-              width: 100,
+              width: 108,
               render: () => (
                 <ActionLinks
                   items={[
@@ -112,9 +112,20 @@ export default function AccountsPage() {
                       onClick: () => setVisible(true)
                     },
                     {
-                      key: 'more',
-                      label: '更多',
-                      onClick: () => Message.info('更多操作（mock）')
+                      key: 'delete',
+                      label: '删除',
+                      danger: true,
+                      onClick: () => Message.info('删除（mock）')
+                    },
+                    {
+                      key: 'resetPwd',
+                      label: '重置密码',
+                      onClick: () => Message.info('重置密码（mock）')
+                    },
+                    {
+                      key: 'disable',
+                      label: '停用',
+                      onClick: () => Message.info('停用（mock）')
                     }
                   ]}
                 />

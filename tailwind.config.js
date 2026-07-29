@@ -22,9 +22,11 @@ export default {
           10: 'rgb(var(--arcoblue-10))'
         },
         // 对齐 Arco / Figma token（用于布局壳层）
+        'arco-bg-1': 'var(--color-bg-1, #f7f8fa)',
         'arco-bg-2': 'var(--color-bg-2, #fff)',
         'arco-bg-popup': 'var(--color-bg-popup, #fff)',
         'arco-fill-1': 'var(--color-fill-1, #f7f8fa)',
+        'arco-fill-2': 'var(--color-fill-2, #f2f3f5)',
         'arco-border-2': 'var(--color-border-2, #e5e6eb)',
         'arco-text-1': 'var(--color-text-1, #1d2129)',
         'arco-text-2': 'var(--color-text-2, #4e5969)',

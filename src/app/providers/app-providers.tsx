@@ -10,7 +10,6 @@ import {
 } from '@shared/api/request';
 import { getApiUserUserInfo } from '@shared/api/user';
 import { GlobalContext } from '@shared/lib/global-context';
-import applyThemeColor from '@shared/lib/applyThemeColor';
 import changeTheme from '@shared/lib/changeTheme';
 import checkLogin from '@shared/lib/checkLogin';
 import useStorage from '@shared/lib/useStorage';
@@ -76,10 +75,6 @@ export function AppProviders({ children }: PropsWithChildren) {
   useEffect(() => {
     changeTheme(theme, globalStore.settings.themeColor);
   }, [theme]);
-
-  useEffect(() => {
-    applyThemeColor(globalStore.settings.themeColor);
-  }, []);
 
   return (
     <ConfigProvider

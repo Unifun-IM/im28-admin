@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, Select, DatePicker, Button, Message, Modal } from '@arco-design/web-react';
+import { Form, Input, DatePicker, Button, Message, Modal } from '@arco-design/web-react';
 import { useNavigate } from 'react-router-dom';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
   FilterField,
+  FilterSelect,
   StatusBadge,
   type SummaryItem
 } from '@widgets/biz-list';
@@ -27,7 +28,7 @@ export default function UserQueryPage() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
   const [summary, setSummary] = useState<SummaryItem[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
 
@@ -77,7 +78,7 @@ export default function UserQueryPage() {
             <Input.Search placeholder="请输入搜索内容" allowClear />
           </FormItem>
           <FormItem field="online" label="在线状态">
-            <Select
+            <FilterSelect
               allowClear
               placeholder="单选内容"
               options={[
@@ -87,7 +88,7 @@ export default function UserQueryPage() {
             />
           </FormItem>
           <FormItem field="status" label="账号状态">
-            <Select
+            <FilterSelect
               mode="multiple"
               allowClear
               placeholder="多选内容"
@@ -147,6 +148,7 @@ export default function UserQueryPage() {
             title: '用户',
             dataIndex: 'nickname',
             width: 200,
+            ellipsis: false,
             render: (_: unknown, row: Record<string, unknown>) => (
               <AvatarNameCell
                 name={row.nickname as string}
@@ -180,7 +182,7 @@ export default function UserQueryPage() {
           {
             title: '操作',
             dataIndex: 'op',
-            width: 100,
+            width: 108,
             render: (_: unknown, row: Record<string, unknown>) => (
               <ActionLinks
                 items={[
@@ -190,9 +192,20 @@ export default function UserQueryPage() {
                     onClick: () => navigate(`/user/detail/${row.id}`)
                   },
                   {
-                    key: 'more',
-                    label: '更多',
-                    onClick: () => Message.info('更多操作（mock）')
+                    key: 'edit',
+                    label: '编辑',
+                    onClick: () => Message.info('编辑用户（mock）')
+                  },
+                  {
+                    key: 'blacklist',
+                    label: '拉黑',
+                    danger: true,
+                    onClick: () => Message.info('拉黑（mock）')
+                  },
+                  {
+                    key: 'reset',
+                    label: '重置密码',
+                    onClick: () => Message.info('重置密码（mock）')
                   }
                 ]}
               />

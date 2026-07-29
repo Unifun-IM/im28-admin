@@ -7,7 +7,6 @@ import Shortcuts from './shortcuts';
 import Announcement from './announcement';
 import Carousel from './carousel';
 import Docs from './docs';
-import styles from './style/index.module.less';
 import './mock';
 
 const { Row, Col } = Grid;
@@ -16,8 +15,8 @@ const gutter = 16;
 
 function Workplace() {
   return (
-    <div className={styles.wrapper}>
-      <Space size={16} direction="vertical" className={styles.left}>
+    <div className="flex w-full">
+      <Space size={16} direction="vertical" className="mr-4 w-[calc(100%-296px)]">
         <Overview />
         <Row gutter={gutter}>
           <Col span={12}>
@@ -28,7 +27,7 @@ function Workplace() {
           </Col>
         </Row>
       </Space>
-      <Space className={styles.right} size={16} direction="vertical">
+      <Space className="w-[280px]" size={16} direction="vertical">
         <Shortcuts />
         <Carousel />
         <Announcement />

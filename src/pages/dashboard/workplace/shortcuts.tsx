@@ -15,7 +15,6 @@ import {
 } from '@arco-design/web-react/icon';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
-import styles from './style/shortcuts.module.less';
 
 function Shortcuts() {
   const t = useLocale(locale);
@@ -76,6 +75,9 @@ function Shortcuts() {
     });
   }
 
+  const shortcutItemClass =
+    'group box-border flex cursor-pointer flex-col items-center justify-center p-3';
+
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -84,29 +86,39 @@ function Shortcuts() {
         </Typography.Title>
         <Link>{t['workplace.seeMore']}</Link>
       </div>
-      <div className={styles.shortcuts}>
+      <div className="grid grid-cols-3">
         {shortcuts.map((shortcut) => (
           <div
-            className={styles.item}
+            className={shortcutItemClass}
             key={shortcut.key}
             onClick={() => onClickShortcut(shortcut.key)}
           >
-            <div className={styles.icon}>{shortcut.icon}</div>
-            <div className={styles.title}>{shortcut.title}</div>
+            <div className="mb-1 flex h-8 w-8 items-center justify-center rounded-[6px] bg-arco-fill-2 group-hover:bg-[var(--color-primary-light-1)] group-hover:[&_svg]:text-primary-6 [&_svg]:text-lg">
+              {shortcut.icon}
+            </div>
+            <div className="text-xs leading-5 text-arco-text-1 group-hover:text-primary-6">
+              {shortcut.title}
+            </div>
           </div>
         ))}
       </div>
       <Divider />
-      <div className={styles.recent}>{t['workplace.recent']}</div>
-      <div className={styles.shortcuts}>
+      <div className="mb-4 text-base font-medium leading-6 text-arco-text-1">
+        {t['workplace.recent']}
+      </div>
+      <div className="grid grid-cols-3">
         {recentShortcuts.map((shortcut) => (
           <div
-            className={styles.item}
+            className={shortcutItemClass}
             key={shortcut.key}
             onClick={() => onClickShortcut(shortcut.key)}
           >
-            <div className={styles.icon}>{shortcut.icon}</div>
-            <div className={styles.title}>{shortcut.title}</div>
+            <div className="mb-1 flex h-8 w-8 items-center justify-center rounded-[6px] bg-arco-fill-2 group-hover:bg-[var(--color-primary-light-1)] group-hover:[&_svg]:text-primary-6 [&_svg]:text-lg">
+              {shortcut.icon}
+            </div>
+            <div className="text-xs leading-5 text-arco-text-1 group-hover:text-primary-6">
+              {shortcut.title}
+            </div>
           </div>
         ))}
       </div>

@@ -1,6 +1,5 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
-  Tooltip,
   Input,
   Avatar,
   Select,
@@ -10,8 +9,7 @@ import {
   Message,
   Button,
   Breadcrumb,
-  Badge,
-  Trigger
+  Badge
 } from '@arco-design/web-react';
 import {
   IconLanguage,
@@ -21,7 +19,9 @@ import {
   IconPoweroff,
   IconLoading,
   IconSettings,
-  IconPalette
+  IconClockCircle,
+  IconObliqueLine,
+  IconSearch
 } from '@arco-design/web-react/icon';
 import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
@@ -30,16 +30,22 @@ import useLocale from '@shared/lib/useLocale';
 import MessageBox from '@widgets/message-box';
 import IconButton from './IconButton';
 import Settings from '@widgets/settings';
-import ColorPanel from '@widgets/settings/color';
-import styles from './style/index.module.less';
 import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
 import { generatePermission } from '@shared/config/routes';
 import { setAccessToken } from '@shared/api/request';
+import cs from 'classnames';
+
+export type NavbarBreadcrumbItem =
+  | string
+  | {
+      name: string;
+      icon?: React.ReactNode;
+    };
 
 export type NavbarProps = {
   show: boolean;
-  breadcrumb?: React.ReactNode[];
+  breadcrumb?: NavbarBreadcrumbItem[];
 };
 
 function Navbar({ show, breadcrumb = [] }: NavbarProps) {
@@ -50,6 +56,8 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
 
   const [_, setUserStatus] = useStorage('userStatus');
   const [role] = useStorage('userRole', 'admin');
+  const [messageVisible, setMessageVisible] = useState(false);
+  const [userMenuVisible, setUserMenuVisible] = useState(false);
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
@@ -73,7 +81,7 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
 
   if (!show) {
     return (
-      <div className={styles['fixed-settings']}>
+      <div className="fixed right-0 top-[280px] [&_svg]:align-[-4px] [&_svg]:text-lg">
         <Settings
           trigger={
             <Button icon={<IconSettings />} type="primary" size="large" />
@@ -85,52 +93,88 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
 
   const droplist = (
     <Menu
-      className={styles['profile-menu']}
+      className="use-profile-menu"
       onClickMenuItem={(key) => {
         if (key === 'logout') logout();
       }}
     >
-      <Menu.Item key="profile" className={styles['profile-menu-item']} disabled>
-        <div className={styles['profile-block']}>
-          <Avatar size={32}>
+      <Menu.Item key="profile" className="use-profile-menu-item" disabled>
+        <div className="flex items-center gap-2 p-0">
+          <Avatar size={40} className="shrink-0">
             {userInfo?.avatar ? <img alt="avatar" src={userInfo.avatar} /> : null}
           </Avatar>
-          <div className={styles['profile-meta']}>
-            <div className={styles['profile-name']}>{userInfo?.name || 'admin'}</div>
-            <div className={styles['profile-email']}>
-              {userInfo?.email || 'admin@example.com'}
+          <div className="min-w-0">
+            <div className="text-sm font-medium leading-[14px] text-arco-text-1">
+              {userInfo?.name || 'Admin-sp'}
+            </div>
+            <div className="mt-1 text-xs leading-3 text-arco-text-3">
+              {userInfo?.email || 'Admin-sp@gmail.com'}
             </div>
           </div>
         </div>
       </Menu.Item>
-      <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item key="logout">
-        <IconPoweroff className={styles['dropdown-icon']} />
+      <Divider className="!my-2" />
+      <Menu.Item key="logout" className="use-profile-logout">
+        <IconPoweroff className="mr-0 text-base text-arco-text-1" />
         {t['navbar.logout']}
       </Menu.Item>
     </Menu>
   );
 
+  const themeToggleLabel =
+    theme === 'light'
+      ? t['settings.navbar.theme.toDark']
+      : t['settings.navbar.theme.toLight'];
+
   return (
-    <div className={styles.navbar}>
-      <div className={styles.left}>
+    <div className="box-border flex h-[44px] shrink-0 items-center justify-between gap-[12px] bg-transparent">
+      <div className="flex min-w-0 flex-1 items-center">
         {breadcrumb.length > 0 && (
-          <Breadcrumb className={styles.breadcrumb}>
-            {breadcrumb.map((node, index) => (
-              <Breadcrumb.Item key={index}>
-                {typeof node === 'string' ? locale[node] || node : node}
-              </Breadcrumb.Item>
-            ))}
+          <Breadcrumb
+            className="use-navbar-breadcrumb"
+            separator={
+              <IconObliqueLine className="text-xs text-arco-text-3" />
+            }
+          >
+            {breadcrumb.map((node, index) => {
+              const isLast = index === breadcrumb.length - 1;
+              const name = typeof node === 'string' ? node : node.name;
+              const icon = typeof node === 'string' ? null : node.icon;
+              const label = locale[name] || name;
+              return (
+                <Breadcrumb.Item key={`${name}-${index}`}>
+                  <span
+                    className={cs(
+                      'inline-flex items-center gap-1 p-1 text-sm font-normal leading-[22px] text-arco-text-2',
+                      isLast && 'px-1 font-medium text-arco-text-1'
+                    )}
+                  >
+                    {icon ? (
+                      <span className="inline-flex h-4 w-4 items-center justify-center text-arco-text-2 [&_svg]:h-4 [&_svg]:w-4">
+                        {icon}
+                      </span>
+                    ) : null}
+                    {label}
+                  </span>
+                </Breadcrumb.Item>
+              );
+            })}
           </Breadcrumb>
         )}
       </div>
-      <div className={styles.right}>
-        <Input.Search
-          className={styles.search}
+      <div className="flex shrink-0 items-center gap-[12px]">
+        <Input
+          className="use-navbar-search"
+          prefix={<IconSearch />}
           placeholder={t['navbar.search.placeholder']}
           allowClear
         />
-        <div className={styles.iconGroup}>
+        <div className="flex items-center gap-[8px]">
+          <Settings
+            trigger={
+              <IconButton icon={<IconClockCircle />} tip={t['settings.title']} />
+            }
+          />
           <Select
             triggerElement={
               <IconButton icon={<IconLanguage />} tip={t['message.lang.tips']} />
@@ -152,42 +196,35 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
               Message.info(`${nextLang['message.lang.tips']}${value}`);
             }}
           />
-          <Tooltip
-            content={
-              theme === 'light'
-                ? t['settings.navbar.theme.toDark']
-                : t['settings.navbar.theme.toLight']
-            }
-          >
-            <IconButton
-              icon={theme !== 'dark' ? <IconMoonFill /> : <IconSunFill />}
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            />
-          </Tooltip>
-          <MessageBox>
-            <Badge count={9} maxCount={99}>
-              <IconButton icon={<IconNotification />} />
+          <MessageBox onVisibleChange={setMessageVisible}>
+            <Badge count={11} maxCount={99} className="use-navbar-badge">
+              <IconButton
+                active={messageVisible}
+                icon={<IconNotification />}
+              />
             </Badge>
           </MessageBox>
-          <Trigger
-            trigger="click"
-            position="br"
-            popupAlign={{ bottom: 4 }}
-            popup={() => (
-              <div className={styles['theme-panel']}>
-                <div className={styles['theme-panel-title']}>
-                  {t['settings.themeColor']}
-                </div>
-                <ColorPanel />
-              </div>
-            )}
-          >
-            <IconButton icon={<IconPalette />} />
-          </Trigger>
+          <IconButton
+            icon={theme !== 'dark' ? <IconSunFill /> : <IconMoonFill />}
+            tip={themeToggleLabel}
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          />
         </div>
         {userInfo && (
-          <Dropdown droplist={droplist} position="br" disabled={userLoading}>
-            <div className={styles['user-trigger']}>
+          <Dropdown
+            droplist={droplist}
+            position="br"
+            disabled={userLoading}
+            trigger="click"
+            popupVisible={userMenuVisible}
+            onVisibleChange={setUserMenuVisible}
+          >
+            <div
+              className={cs(
+                'inline-flex h-[32px] cursor-pointer items-center gap-2 rounded-full p-1 transition-[background] hover:bg-arco-fill-2',
+                userMenuVisible && 'bg-[var(--color-fill-3,#e5e6eb)]'
+              )}
+            >
               <Avatar size={24}>
                 {userLoading ? (
                   <IconLoading />
@@ -195,7 +232,9 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
                   <img alt="avatar" src={userInfo.avatar} />
                 )}
               </Avatar>
-              <span className={styles['user-name']}>{userInfo.name || 'admin'}</span>
+              <span className="max-w-24 overflow-hidden text-ellipsis whitespace-nowrap pr-1 text-sm font-medium leading-[22px] text-arco-text-1 max-[900px]:hidden">
+                {userInfo.name || 'Admin-sp'}
+              </span>
             </div>
           </Dropdown>
         )}

@@ -41,7 +41,11 @@ export class GlobalStore {
 
   updateSettings(settings: AppSettings) {
     this.settings = settings;
-    applyThemeColor(settings.themeColor);
+    applyThemeColor(settings.themeColor, {
+      dark:
+        typeof document !== 'undefined' &&
+        document.body.getAttribute('arco-theme') === 'dark'
+    });
   }
 
   updateUserInfo(payload: { userInfo?: UserInfo; userLoading?: boolean }) {

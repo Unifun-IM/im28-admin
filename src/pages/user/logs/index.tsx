@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, Select, DatePicker } from '@arco-design/web-react';
-import { BizListPage, FilterField } from '@widgets/biz-list';
+import { Form, Input, DatePicker } from '@arco-design/web-react';
+import { BizListPage, FilterField, FilterSelect } from '@widgets/biz-list';
 import { getUserLogs } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -11,7 +11,7 @@ export default function Page() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
 
   const fetchData = useCallback(async (p = page, size = pageSize) => {
     setLoading(true);
@@ -38,7 +38,7 @@ export default function Page() {
             <Input.Search placeholder="请输入搜索内容" allowClear />
           </FormItem>
           <FormItem field="action" label="行为类型">
-            <Select
+            <FilterSelect
               allowClear
               placeholder="单选内容"
               options={['登录', '注册', '修改资料', '好友关系', '群聊', '钱包操作', '消息操作'].map(
@@ -47,7 +47,7 @@ export default function Page() {
             />
           </FormItem>
           <FormItem field="client" label="客户端">
-            <Select
+            <FilterSelect
               mode="multiple"
               allowClear
               placeholder="多选内容"

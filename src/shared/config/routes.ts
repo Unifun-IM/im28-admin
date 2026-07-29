@@ -18,9 +18,16 @@ export const routes: IRoute[] = [
     name: 'menu.user',
     key: 'user',
     children: [
-      { name: 'menu.user.query', key: 'user/query' },
-      { name: 'menu.user.blacklist', key: 'user/blacklist' },
-      { name: 'menu.user.whitelist', key: 'user/whitelist' },
+      {
+        name: 'menu.user.manage',
+        key: 'user/manage',
+        breadcrumb: false,
+        children: [
+          { name: 'menu.user.query', key: 'user/query' },
+          { name: 'menu.user.blacklist', key: 'user/blacklist' },
+          { name: 'menu.user.whitelist', key: 'user/whitelist' }
+        ]
+      },
       { name: 'menu.user.inviteCode', key: 'user/invite-code' },
       { name: 'menu.user.logs', key: 'user/logs' },
       {
@@ -112,15 +119,16 @@ export const getName = (path: string, routeList: IRoute[] = routes): string | un
 export const generatePermission = (role: string) => {
   const actions = role === 'admin' ? ['*'] : ['read'];
   const result: Record<string, string[]> = {};
-  routes.forEach((item) => {
-    if (item.children) {
-      item.children.forEach((child) => {
-        result[child.name] = actions;
-      });
-    } else {
-      result[item.name] = actions;
-    }
-  });
+  const walk = (list: IRoute[]) => {
+    list.forEach((item) => {
+      if (item.children?.length) {
+        walk(item.children);
+      } else if (!item.ignore) {
+        result[item.name] = actions;
+      }
+    });
+  };
+  walk(routes);
   return result;
 };
 
@@ -161,15 +169,24 @@ const useRoute = (userPermission: Record<string, string[]>): [IRoute[], string] 
   }, [JSON.stringify(userPermission)]);
 
   const defaultRoute = useMemo(() => {
-    const hasDefault = permissionRoute.some(
-      (r) => r.key === 'user' && r.children?.some((c) => c.key === DEFAULT_ROUTE)
-    );
-    if (hasDefault) return DEFAULT_ROUTE;
-    const first = permissionRoute[0];
-    if (first) {
-      return first?.children?.[0]?.key || first.key;
-    }
-    return DEFAULT_ROUTE;
+    const hasKey = (list: IRoute[], key: string): boolean =>
+      list.some(
+        (r) =>
+          r.key === key || (r.children ? hasKey(r.children, key) : false)
+      );
+    if (hasKey(permissionRoute, DEFAULT_ROUTE)) return DEFAULT_ROUTE;
+    const firstLeaf = (list: IRoute[]): string | undefined => {
+      for (const r of list) {
+        if (r.children?.length) {
+          const leaf = firstLeaf(r.children);
+          if (leaf) return leaf;
+        } else if (!r.ignore) {
+          return r.key;
+        }
+      }
+      return undefined;
+    };
+    return firstLeaf(permissionRoute) || DEFAULT_ROUTE;
   }, [permissionRoute]);
 
   return [permissionRoute, defaultRoute];

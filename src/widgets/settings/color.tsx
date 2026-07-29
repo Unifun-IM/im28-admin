@@ -6,7 +6,6 @@ import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-h
 import { GlobalState } from '@entities/global-state';
 import applyThemeColor from '@shared/lib/applyThemeColor';
 import useLocale from '@shared/lib/useLocale';
-import styles from './style/color-panel.module.less';
 
 function ColorPanel() {
   const settings = useGlobalSelector((state: GlobalState) => state.settings);
@@ -29,24 +28,26 @@ function ColorPanel() {
                 type: 'update-settings',
                 payload: { settings: { ...settings, themeColor: newColor } }
               });
-              applyThemeColor(newColor);
+              applyThemeColor(newColor, {
+                dark: document.body.getAttribute('arco-theme') === 'dark'
+              });
             }}
           />
         )}
       >
-        <div className={styles.input}>
+        <div className="box-border flex h-8 w-full border border-[var(--color-border)] p-[3px]">
           <div
-            className={styles.color}
+            className="mr-2.5 h-6 w-[100px]"
             style={{ backgroundColor: themeColor }}
           />
           <span>{themeColor}</span>
         </div>
       </Trigger>
-      <ul className={styles.ul}>
+      <ul className="flex list-none p-0">
         {list.map((item, index) => (
           <li
             key={index}
-            className={styles.li}
+            className="h-[26px] w-[10%]"
             style={{ backgroundColor: item }}
           />
         ))}

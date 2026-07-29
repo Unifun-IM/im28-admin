@@ -6,6 +6,7 @@ import {
   Table,
   Tooltip,
   type FormInstance,
+  type TableColumnProps,
   type TableProps
 } from '@arco-design/web-react';
 import { IconRefresh, IconSettings } from '@arco-design/web-react/icon';
@@ -14,7 +15,10 @@ import cs from 'classnames';
 import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';
 import TableBatchBar from './TableBatchBar';
-import styles from './style/index.module.less';
+import {
+  normalizeBizColumns,
+  resolveBizPagination
+} from './tableDefaults';
 
 export type BizListPageProps<T = Record<string, unknown>> = {
   form?: FormInstance;
@@ -59,6 +63,7 @@ export default function BizListPage<T extends Record<string, unknown>>({
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const enableColumnSetting = showColumnSetting ?? Boolean(title);
 
+  const hasRowSelection = Boolean(tableProps.rowSelection);
   const selectedRowKeys = (tableProps.rowSelection?.selectedRowKeys ||
     []) as (string | number)[];
   const selectedCount = selectedRowKeys.length;
@@ -83,36 +88,73 @@ export default function BizListPage<T extends Record<string, unknown>>({
     selectedRowKeys
   ]);
 
-  const pagination =
-    tableProps.pagination === false
-      ? false
-      : {
-          showTotal: true,
-          sizeCanChange: true,
-          sizeOptions: [10, 20, 50, 100],
-          ...(typeof tableProps.pagination === 'object' ? tableProps.pagination : {})
-        };
+  const columns = useMemo(
+    () =>
+      normalizeBizColumns(
+        (tableProps.columns || []) as TableColumnProps<T>[]
+      ),
+    [tableProps.columns]
+  );
+
+  const hasFixedRight = columns.some((col) => col.fixed === 'right');
+
+  const pagination = resolveBizPagination(
+    tableProps.pagination as false | undefined | Record<string, unknown>,
+    displayData.length
+  );
+
+  const scroll = useMemo(() => {
+    const incoming = tableProps.scroll || {};
+    if (!hasFixedRight) return incoming;
+    return {
+      x: true as const,
+      ...incoming
+    };
+  }, [hasFixedRight, tableProps.scroll]);
 
   return (
-    <div className={cs(styles.bizListPage, className)}>
+    <div className={cs('flex flex-col gap-4', className)}>
       {filter && (
         <SearchFilterBar form={form} onSearch={onSearch} onReset={onReset}>
           {filter}
         </SearchFilterBar>
       )}
       {summary && summary.length > 0 && <DataSummary items={summary} />}
-      <Card className={cs(styles.sectionCard, styles.tableCard)} bordered={false}>
-        {(title || toolbar || onRefresh || enableColumnSetting) && (
-          <div className={styles.tableHeader}>
-            <div className={styles.tableTitle}>{title}</div>
-            <div className={styles.tableToolbar}>
+      <Card
+        className="use-biz-table-card relative overflow-visible !p-0"
+        bordered={false}
+      >
+        {(title ||
+          toolbar ||
+          onRefresh ||
+          enableColumnSetting ||
+          hasRowSelection) && (
+          <div className="relative box-border flex h-14 items-center justify-between gap-4 px-3 max-md:h-auto max-md:flex-wrap max-md:p-3">
+            <div className="flex min-w-0 items-center gap-3">
+              {title != null && title !== '' && (
+                <div className="text-sm font-medium leading-[21px] text-arco-text-1">
+                  {title}
+                </div>
+              )}
+              {/* 无批量条时，标题旁兜底展示已选数量 */}
+              {hasRowSelection && !batchActions && selectedCount > 0 && (
+                <div className="text-sm leading-[21px] text-arco-text-3">
+                  已选{' '}
+                  <span className="font-medium text-primary-6">
+                    {selectedCount}
+                  </span>{' '}
+                  项
+                </div>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
               {(onRefresh || enableColumnSetting) && (
-                <div className={styles.tableIconGroup}>
+                <div className="flex items-center gap-2">
                   {onRefresh && (
                     <Tooltip content="刷新">
                       <Button
                         type="text"
-                        className={styles.tableIconBtn}
+                        className="!h-8 !w-8 !rounded !p-0 !text-arco-text-2 hover:!bg-arco-fill-2 hover:!text-arco-text-1"
                         icon={<IconRefresh />}
                         onClick={onRefresh}
                       />
@@ -122,7 +164,7 @@ export default function BizListPage<T extends Record<string, unknown>>({
                     <Tooltip content="列设置">
                       <Button
                         type="text"
-                        className={styles.tableIconBtn}
+                        className="!h-8 !w-8 !rounded !p-0 !text-arco-text-2 hover:!bg-arco-fill-2 hover:!text-arco-text-1"
                         icon={<IconSettings />}
                         onClick={onColumnSetting}
                       />
@@ -132,40 +174,43 @@ export default function BizListPage<T extends Record<string, unknown>>({
               )}
               {toolbar && <Space size={8}>{toolbar}</Space>}
             </div>
+            {batchActions && (
+              <TableBatchBar
+                count={selectedCount}
+                showSelectedOnly={showSelectedOnly}
+                onShowSelectedOnlyChange={setShowSelectedOnly}
+                className="pointer-events-auto absolute left-1/2 top-3 z-20 -translate-x-1/2 max-md:static max-md:translate-x-0 max-md:self-center"
+                onArchive={
+                  batchActions.onArchive
+                    ? () => batchActions.onArchive?.(selectedRowKeys)
+                    : undefined
+                }
+                onEdit={
+                  batchActions.onEdit
+                    ? () => batchActions.onEdit?.(selectedRowKeys)
+                    : undefined
+                }
+                onDelete={
+                  batchActions.onDelete
+                    ? () => batchActions.onDelete?.(selectedRowKeys)
+                    : undefined
+                }
+                extra={batchActions.extra}
+              />
+            )}
           </div>
         )}
-        <div className={styles.tableWrap}>
+        <div className="relative">
           <Table
             rowKey="id"
             border={false}
             {...tableProps}
-            className={cs(styles.bizTable, tableProps.className)}
+            className={cs('use-biz-table', tableProps.className)}
+            columns={columns}
             data={displayData}
-            pagination={pagination}
+            scroll={scroll}
+            pagination={pagination as TableProps<T>['pagination']}
           />
-          {batchActions && (
-            <TableBatchBar
-              count={selectedCount}
-              showSelectedOnly={showSelectedOnly}
-              onShowSelectedOnlyChange={setShowSelectedOnly}
-              onArchive={
-                batchActions.onArchive
-                  ? () => batchActions.onArchive?.(selectedRowKeys)
-                  : undefined
-              }
-              onEdit={
-                batchActions.onEdit
-                  ? () => batchActions.onEdit?.(selectedRowKeys)
-                  : undefined
-              }
-              onDelete={
-                batchActions.onDelete
-                  ? () => batchActions.onDelete?.(selectedRowKeys)
-                  : undefined
-              }
-              extra={batchActions.extra}
-            />
-          )}
         </div>
       </Card>
     </div>

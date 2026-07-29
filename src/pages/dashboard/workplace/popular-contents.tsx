@@ -4,7 +4,6 @@ import { IconCaretDown, IconCaretUp } from '@arco-design/web-react/icon';
 import { getApiWorkplacePopularContents } from '@shared/api/workplace';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
-import styles from './style/popular-contents.module.less';
 
 function PopularContent() {
   const t = useLocale(locale);
@@ -66,7 +65,7 @@ function PopularContent() {
         return (
           <span>
             {`${(text * 100).toFixed(2)}%`}
-            <span className={styles['symbol']}>
+            <span className="ml-1 text-[10px] [&>svg]:align-baseline">
               {text < 0 ? (
                 <IconCaretUp style={{ color: 'rgb(var(--green-6))' }} />
               ) : (

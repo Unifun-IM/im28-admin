@@ -76,7 +76,7 @@ export default function DataSummary({
       <button
         type="button"
         className={cs(
-          'box-border flex h-9 w-full cursor-pointer items-center justify-center gap-1 rounded border border-arco-border-2 bg-arco-bg-2 px-3 py-2 text-xs text-arco-text-1 hover:bg-arco-fill-1',
+          'use-biz-summary box-border flex h-9 w-full cursor-pointer items-center justify-center gap-1 px-3 py-2 text-xs text-arco-text-1 hover:bg-arco-fill-1',
           className
         )}
         onClick={() => setCollapsed(false)}
@@ -90,7 +90,7 @@ export default function DataSummary({
   return (
     <div
       className={cs(
-        'box-border w-full overflow-hidden rounded border border-arco-border-2 bg-arco-bg-2',
+        'use-biz-summary box-border w-full overflow-hidden',
         className
       )}
     >

@@ -1,6 +1,61 @@
 @import 'nprogress/nprogress.css';
+@import './theme-tokens.less';
 
-/* 默认主题色 #635CFF → --arcoblue-*（--primary-* 已 alias） */
+/**
+ * Patch：@arco-themes/react-arco-pro 基于旧版 Select DOM，缺少单选 view-selector / value-mirror 布局。
+ * 官方 @arco-design/web-react@2.66 依赖这些规则，否则 input 非 absolute，「全部」会重影漏出。
+ */
+.arco-select-single .arco-select-view-selector,
+.arco-tree-select-single .arco-tree-select-view-selector,
+.arco-cascader-single .arco-cascader-view-selector {
+  position: relative;
+  display: inline-flex;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}
+
+.arco-select-single .arco-select-view-selector .arco-select-view-input,
+.arco-tree-select-single .arco-tree-select-view-selector .arco-tree-select-view-input,
+.arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-input {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.arco-select-single .arco-select-view-selector .arco-select-view-value-mirror,
+.arco-tree-select-single .arco-tree-select-view-selector .arco-tree-select-view-value-mirror,
+.arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-value-mirror {
+  opacity: 0;
+}
+
+.arco-select-single .arco-select-view-value,
+.arco-select-single .arco-select-view-value-mirror,
+.arco-tree-select-single .arco-tree-select-view-value,
+.arco-tree-select-single .arco-tree-select-view-value-mirror,
+.arco-cascader-single .arco-cascader-view-value,
+.arco-cascader-single .arco-cascader-view-value-mirror {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.arco-select-single .arco-select-view .arco-select-hidden,
+.arco-tree-select-single .arco-tree-select-view .arco-tree-select-hidden {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+/* 默认主题色 #635CFF → --arcoblue-*（运行时由 applyThemeColor 覆盖；此处作 SSR/首屏兜底）
+ * Figma：浅/暗 primary/6 均为 #635CFF
+ */
 body {
   --arcoblue-1: 237, 232, 255;
   --arcoblue-2: 213, 204, 255;
@@ -14,13 +69,14 @@ body {
   --arcoblue-10: 0, 6, 77;
 }
 
+/* 暗色阶梯（1 深 → 10 浅），但 --arcoblue-6 仍钉品牌色 */
 body[arco-theme='dark'] {
   --arcoblue-1: 0, 6, 77;
   --arcoblue-2: 9, 14, 121;
   --arcoblue-3: 30, 32, 166;
   --arcoblue-4: 63, 61, 210;
   --arcoblue-5: 109, 102, 255;
-  --arcoblue-6: 140, 130, 255;
+  --arcoblue-6: 99, 92, 255;
   --arcoblue-7: 168, 156, 255;
   --arcoblue-8: 192, 181, 255;
   --arcoblue-9: 215, 207, 255;
@@ -35,11 +91,14 @@ body {
   padding: 0;
   font-size: 14px;
   background-color: var(--color-bg-1);
+  color: var(--color-text-1);
 }
 
-/* 侧栏折叠时二级菜单浮层（portal 渲染，需全局样式） */
-.arco-menu-pop,
-.arco-trigger-popup .arco-menu {
+/* 侧栏折叠时二级菜单浮层（portal 渲染，需全局样式）
+ * 勿用 .arco-menu-pop：折叠态一级项也带该类，会误伤侧栏图标
+ */
+.arco-trigger-popup .arco-menu,
+.arco-menu-pop-slide {
   padding: 8px !important;
   border-radius: 12px !important;
   border: 1px solid var(--color-border-2, #e5e6eb);
@@ -51,7 +110,7 @@ body {
     height: 32px !important;
     margin: 0;
     padding: 0 12px !important;
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--color-text-1, #1d2129);
     font-size: 14px;
     line-height: 32px;
@@ -61,6 +120,7 @@ body {
       background: var(--color-fill-2, #f2f3f5) !important;
       color: var(--color-text-1, #1d2129) !important;
       font-weight: 500;
+      border-radius: 6px;
     }
 
     &::before,
@@ -99,3 +159,815 @@ body[arco-theme='dark'] {
     }
   }
 }
+
+/* —— 页面标签：Arco Tabs + Figma 741:29115 视觉 —— */
+.use-page-tabs.arco-tabs {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: visible;
+  /* 顶栏白底，激活态用页面底色衔接内容区 */
+  background-color: transparent;
+}
+
+.use-page-tabs .arco-tabs-content {
+  display: none;
+}
+
+.use-page-tabs .arco-tabs-header-nav {
+  height: 32px;
+  overflow: visible;
+}
+
+.use-page-tabs .arco-tabs-header-nav::before {
+  height: 0;
+}
+
+.use-page-tabs .arco-tabs-header-nav-card-gutter {
+  .arco-tabs-header-title {
+    position: relative;
+    box-sizing: border-box;
+    height: 32px;
+    margin: 0;
+    margin-right: 2px;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background-color: transparent;
+    color: var(--color-text-3, #86909c);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .arco-tabs-header-title:hover {
+    color: var(--color-text-2, #4e5969);
+    background-color: transparent;
+  }
+
+  .arco-tabs-header-title:last-child {
+    margin-right: 0;
+  }
+
+  .arco-tabs-header-title-editable {
+    padding-right: 12px;
+  }
+
+  /* 激活：页面底色盖住底边线 + Subtract 凹角（衔接内容区 bg-1） */
+  .arco-tabs-header-title-active,
+  .arco-tabs-header-title-active:hover {
+    z-index: 1;
+    height: 33px;
+    margin-bottom: -1px;
+    border-bottom-color: var(--color-bg-1, #f7f8fa);
+    background-color: var(--color-bg-1, #f7f8fa);
+    color: rgb(var(--primary-6));
+    line-height: 22px;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      width: 16px;
+      height: 8px;
+      background-color: var(--color-bg-1, #f7f8fa);
+      pointer-events: none;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cpath d='M8 0C8 4.41828 11.5817 8 16 8H0C4.41828 8 8 4.41828 8 0Z' fill='black'/%3E%3C/svg%3E")
+        center / 100% 100% no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cpath d='M8 0C8 4.41828 11.5817 8 16 8H0C4.41828 8 8 4.41828 8 0Z' fill='black'/%3E%3C/svg%3E")
+        center / 100% 100% no-repeat;
+    }
+
+    &::before {
+      left: -8px;
+    }
+
+    &::after {
+      right: -8px;
+    }
+  }
+}
+
+.use-page-tab-title {
+  display: inline-block;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.use-page-tabs .arco-tabs-close-icon {
+  margin-left: 8px;
+  color: inherit;
+
+  .arco-icon-hover::before {
+    width: 12px;
+    height: 12px;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.use-page-tabs
+  .arco-tabs-header-title-active
+  .arco-tabs-close-icon {
+  color: rgb(var(--primary-6));
+}
+
+/* 溢出左右箭头：与右侧操作按钮同规格 */
+.use-page-tabs .arco-tabs-left-icon,
+.use-page-tabs .arco-tabs-right-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 4px;
+  border-radius: 4px;
+  color: var(--color-text-2, #4e5969);
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover:not(.arco-tabs-nav-icon-disabled) {
+    background: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1, #1d2129);
+  }
+}
+
+.use-page-tabs .arco-tabs-header-extra {
+  line-height: 32px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.use-page-tabs-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 12px;
+}
+
+.use-page-tabs-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-2, #4e5969);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1, #1d2129);
+  }
+
+  svg {
+    font-size: 14px;
+  }
+}
+
+/* —— Navbar：共用 Arco 深度覆盖（Figma 741:29115） —— */
+.use-navbar-breadcrumb {
+  .arco-breadcrumb-item {
+    padding: 0;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .arco-breadcrumb-item-separator {
+    margin: 0;
+    padding: 0;
+    color: var(--color-text-3, #86909c);
+  }
+}
+
+.use-navbar-search {
+  width: 254px;
+
+  .arco-input-inner-wrapper {
+    height: 32px;
+    padding-left: 16px;
+    background: var(--color-fill-2, #f2f3f5);
+    border: none;
+    border-radius: 8px;
+  }
+
+  .arco-input-inner-wrapper .arco-input-group-prefix {
+    padding-right: 12px;
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-inner-wrapper input {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--color-text-1);
+  }
+
+  .arco-input-inner-wrapper input::placeholder {
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-inner-wrapper:hover,
+  .arco-input-inner-wrapper:focus-within {
+    background: var(--color-fill-2, #f2f3f5);
+    border: 1px solid var(--color-border-2, #e5e6eb);
+  }
+}
+
+@media (max-width: 900px) {
+  .use-navbar-search {
+    width: 160px;
+  }
+}
+
+.use-navbar-badge {
+  .arco-badge-number {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 16px;
+    box-shadow: none;
+  }
+}
+
+/* Figma 741:29115：右侧图标 32×32 / gap 8 */
+.use-navbar-icon-btn.arco-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-2, #4e5969);
+
+  &:hover {
+    background: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1, #1d2129);
+  }
+
+  > svg {
+    font-size: 16px;
+    vertical-align: -3px;
+  }
+
+  &.is-active {
+    border-radius: 50%;
+    background: var(--color-fill-3, #e5e6eb);
+    color: var(--color-text-1, #1d2129);
+
+    &:hover {
+      background: var(--color-fill-3, #e5e6eb);
+    }
+  }
+}
+
+.use-profile-menu {
+  width: 258px !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+
+  .arco-menu-inner {
+    padding: 0;
+  }
+
+  .use-profile-menu-item {
+    height: auto !important;
+    line-height: normal !important;
+    cursor: default !important;
+    padding: 4px !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+
+    &:hover {
+      background: transparent !important;
+    }
+  }
+
+  .use-profile-logout {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    height: 32px !important;
+    padding: 4px 0 !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+    font-size: 14px;
+    color: var(--color-text-1) !important;
+  }
+}
+
+/* —— 登录表单：Arco 圆角重置 —— */
+.use-login-form {
+  .arco-input-inner-wrapper,
+  .arco-btn {
+    border-radius: 8px;
+  }
+}
+
+/* —— 消息面板空态 —— */
+.use-message-empty {
+  .arco-result-subtitle {
+    color: var(--color-text-3);
+  }
+}
+
+/* —— 图表 tooltip badge —— */
+.use-customer-tooltip-item {
+  .arco-badge-status-dot {
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+  }
+}
+
+body[arco-theme='dark'] {
+  .use-customer-tooltip-item {
+    background: #2a2a2b;
+  }
+}
+
+/* —— 业务列表区块外壳：筛选 / 汇总 / 表格 统一圆角+描边 —— */
+.use-biz-filter-bar.arco-card,
+.use-biz-summary,
+.use-biz-table-card.arco-card {
+  border-radius: 8px;
+  border: 1px solid var(--color-border-2, #e5e6eb);
+  background-color: var(--color-bg-2, #fff);
+  box-shadow: none;
+}
+
+/* —— 业务列表：筛选区（Arco Card + Form + Grid；视觉 token 对齐 Figma） —— */
+.use-biz-filter-bar {
+  .arco-card-body {
+    padding: 12px;
+  }
+
+  /* 操作列：贴底右对齐 */
+  .use-biz-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    min-height: 52px;
+    min-width: 120px;
+  }
+
+  .use-biz-filter-field {
+    max-width: 100%;
+  }
+
+  .arco-form-item {
+    margin-bottom: 0;
+    width: 100%;
+  }
+
+  .arco-form-item-wrapper-col {
+    width: 100%;
+    flex: 1;
+  }
+
+  .arco-form-item-control {
+    min-height: 0;
+  }
+
+  .arco-form-item-label-col {
+    padding-bottom: 0;
+  }
+
+  /* 标签：12px / text-2，与控件间距 8px */
+  .arco-form-label-item {
+    margin-bottom: 8px;
+    line-height: 1;
+    height: auto;
+  }
+
+  .arco-form-label-item > label {
+    font-size: 12px;
+    color: var(--color-text-2, #4e5969);
+    line-height: 12px;
+  }
+
+  .use-biz-filter-action-text.arco-btn {
+    padding: 0;
+    height: 32px;
+    font-size: 12px;
+    line-height: 20px;
+    color: rgb(var(--primary-6));
+  }
+
+  .use-biz-filter-action-text.arco-btn:hover {
+    background: transparent;
+    opacity: 0.85;
+  }
+
+  .use-biz-filter-action-search.arco-btn {
+    width: 80px;
+    min-width: 80px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  /* 填充型控件 */
+  .arco-input-inner-wrapper,
+  .arco-select-view,
+  .arco-picker,
+  .arco-input-group-wrapper .arco-input-inner-wrapper,
+  .arco-input-group-addbefore,
+  .arco-input-group-addafter {
+    background-color: var(--color-fill-1, #f7f8fa);
+    border: none;
+    border-radius: 8px;
+    min-height: 32px;
+    box-shadow: none;
+  }
+
+  .arco-input-inner-wrapper,
+  .arco-select-view,
+  .arco-picker {
+    height: 32px;
+    padding: 0 12px;
+  }
+
+  .arco-select-single .arco-select-view {
+    line-height: 30px;
+  }
+
+  .arco-input,
+  .arco-select-single .arco-select-view-value,
+  .arco-select-view-input,
+  .arco-picker-input input {
+    font-size: 14px;
+    line-height: 30px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-input::placeholder,
+  .arco-select-view-selector .arco-select-view-input::placeholder,
+  .arco-picker-input input::placeholder,
+  .arco-select-view-placeholder {
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-inner-wrapper:hover,
+  .arco-select-view:hover,
+  .arco-picker:hover,
+  .arco-input-inner-wrapper:focus-within,
+  .arco-select-view-focus,
+  .arco-picker-focused {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .arco-input-group {
+    display: flex;
+    width: 100%;
+  }
+
+  .arco-input-group-wrapper {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .arco-input-group-addbefore {
+    border-radius: 8px 0 0 8px;
+    border-right: 1px solid var(--color-border-2, #e5e6eb);
+    padding: 0 8px;
+    color: var(--color-text-2);
+  }
+
+  .arco-input-group-wrapper .arco-input-inner-wrapper {
+    border-radius: 0 8px 8px 0;
+  }
+
+  .arco-input-group-wrapper:not(.arco-input-group-wrapper-addbefore)
+    .arco-input-inner-wrapper {
+    border-radius: 8px;
+  }
+
+  .arco-input-search-btn {
+    background: transparent !important;
+    border: none !important;
+    color: var(--color-text-3, #86909c) !important;
+    width: 28px;
+  }
+
+  .arco-select-view-multiple {
+    height: auto;
+    min-height: 32px;
+    padding: 4px 12px 4px 4px;
+  }
+
+  .arco-select-view-multiple .arco-select-view-inner {
+    padding: 0;
+    gap: 4px;
+  }
+
+  .arco-tag.arco-select-view-tag,
+  .arco-select-view-tag {
+    background: var(--color-bg-2, #fff);
+    border: 1px solid var(--color-fill-3, #e5e6eb);
+    border-radius: 4px;
+    color: var(--color-text-1);
+    margin: 0 4px 0 0;
+    height: 24px;
+    line-height: 22px;
+    padding: 0 8px;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .arco-select-view-tag .arco-icon-hover {
+    color: var(--color-text-3);
+  }
+
+  .arco-select-view-suffix,
+  .arco-picker-suffix,
+  .arco-input-clear-icon {
+    color: var(--color-text-3, #86909c);
+    font-size: 12px;
+  }
+
+  .arco-picker-range {
+    width: 100%;
+  }
+
+  .arco-picker-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .arco-picker-separator {
+    color: var(--color-text-3, #86909c);
+    padding: 0 8px;
+    width: 28px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .use-biz-filter-bar {
+    .use-biz-filter-actions {
+      min-height: 32px;
+    }
+  }
+}
+
+/* 筛选下拉：圆角 12 + 内边距 8 + 选项高 32（Figma 602:35100 / 35108 / 35116） */
+.use-biz-filter-dropdown.arco-select-popup,
+.arco-select-popup.use-biz-filter-dropdown {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  box-sizing: border-box;
+
+  .arco-select-popup-inner {
+    max-height: 280px;
+  }
+
+  /* 多选内嵌搜索 */
+  .arco-select-popup-inner .arco-input-inner-wrapper,
+  .arco-select-highlight + .arco-input-inner-wrapper,
+  > .arco-input-inner-wrapper,
+  .arco-select-popup-search .arco-input-inner-wrapper {
+    background: var(--color-bg-2, #fff);
+    border: 1px solid var(--color-border-2, #e5e6eb);
+    border-radius: 8px;
+    margin-bottom: 4px;
+  }
+
+  .arco-select-option {
+    border-radius: 8px;
+    min-height: 32px;
+    line-height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .arco-select-option:hover,
+  .arco-select-option-hover {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .arco-select-option-selected {
+    background-color: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1);
+    font-weight: 400;
+  }
+
+  .arco-select-option-selected:hover {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .arco-select-option .arco-checkbox {
+    margin-right: 4px;
+    padding-left: 0;
+  }
+
+  .use-biz-filter-select-all {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-text-1);
+  }
+
+  .use-biz-filter-select-all:hover {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .use-biz-filter-select-all .arco-checkbox {
+    padding-left: 0;
+  }
+
+  .use-biz-filter-select-clear {
+    padding: 2px 12px;
+    font-size: 14px;
+    line-height: 21px;
+    color: rgb(var(--primary-6));
+    cursor: pointer;
+  }
+
+  .use-biz-filter-select-clear.is-disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+.use-biz-table-card {
+  .arco-card-body {
+    padding: 0;
+  }
+}
+
+/* 批量操作条内 Switch：深色底适配（Figma 602:34650） */
+.use-table-batch-bar {
+  .arco-switch {
+    background-color: rgba(255, 255, 255, 0.16);
+    min-width: 28px;
+    height: 16px;
+    line-height: 16px;
+  }
+
+  .arco-switch-dot {
+    width: 12px;
+    height: 12px;
+    top: 2px;
+    left: 2px;
+  }
+
+  .arco-switch-checked {
+    background-color: rgb(var(--primary-6));
+  }
+
+  .arco-switch-checked .arco-switch-dot {
+    left: calc(100% - 14px);
+  }
+}
+
+.use-biz-table {
+  /* 单元格固定行高，禁止撑高；省略由列 ellipsis + Tooltip 负责 */
+  .arco-table-th {
+    background: var(--color-fill-2, #f2f3f5);
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-1);
+    border-bottom: 1px solid var(--color-border-2, #e5e6eb);
+  }
+
+  .arco-table-td {
+    height: 40px;
+    max-height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+    color: var(--color-text-1);
+    border-bottom: 1px solid var(--color-border-2, #e5e6eb);
+    vertical-align: middle;
+    overflow: hidden;
+  }
+
+  .arco-table-cell {
+    overflow: hidden;
+  }
+
+  .arco-table-cell-ellipsis .arco-table-cell-content,
+  .arco-table-td .arco-typography,
+  .arco-table-td .arco-table-cell-wrap-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 斑马纹：偶数行浅灰；Hover / 选中优先 */
+  .arco-table-tbody > .arco-table-tr:nth-child(even) > .arco-table-td {
+    background-color: var(--color-fill-1, #f7f8fa);
+  }
+
+  .arco-table-tbody > .arco-table-tr:nth-child(odd) > .arco-table-td {
+    background-color: var(--color-bg-2, #fff);
+  }
+
+  .arco-table-tbody > .arco-table-tr:hover > .arco-table-td {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+  }
+
+  .arco-table-tbody > .arco-table-tr-checked > .arco-table-td,
+  .arco-table-tbody > .arco-table-tr-checked:hover > .arco-table-td {
+    background-color: rgba(var(--primary-6), 0.06) !important;
+  }
+
+  .arco-table-checkbox {
+    width: 40px;
+  }
+
+  .arco-table-th.arco-table-checkbox,
+  .arco-table-td.arco-table-checkbox,
+  .arco-table-checkbox .arco-table-cell-wrap-value {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  /* 右侧固定操作列：左侧阴影分隔（Figma 602:34915） */
+  .arco-table-col-fixed-right {
+    background-clip: padding-box;
+  }
+
+  .arco-table-col-fixed-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 12px;
+    transform: translateX(-100%);
+    box-shadow: inset -8px 0 8px -8px rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+  }
+
+  /* 固定列也跟随斑马 / hover / 选中 */
+  .arco-table-tbody > .arco-table-tr:nth-child(even) > .arco-table-td.arco-table-col-fixed-right {
+    background-color: var(--color-fill-1, #f7f8fa);
+  }
+
+  .arco-table-tbody > .arco-table-tr:nth-child(odd) > .arco-table-td.arco-table-col-fixed-right {
+    background-color: var(--color-bg-2, #fff);
+  }
+
+  .arco-table-tbody > .arco-table-tr:hover > .arco-table-td.arco-table-col-fixed-right {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+  }
+
+  .arco-table-tbody
+    > .arco-table-tr-checked
+    > .arco-table-td.arco-table-col-fixed-right {
+    background-color: rgba(var(--primary-6), 0.06) !important;
+  }
+
+  .arco-table-th.arco-table-col-fixed-right {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .arco-table-pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 8px 12px 12px;
+  }
+
+  .arco-pagination-item,
+  .arco-pagination-item-previous,
+  .arco-pagination-item-next {
+    min-width: 32px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 8px;
+  }
+
+  .arco-pagination-item-active {
+    background: var(--color-fill-1, #f7f8fa);
+    color: var(--color-text-1);
+  }
+
+  .arco-pagination-option .arco-select-view {
+    background: var(--color-fill-2, #f2f3f5);
+    border: none;
+    border-radius: 8px;
+  }
+}
+

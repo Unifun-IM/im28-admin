@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, Card, Typography } from '@arco-design/web-react';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
-import styles from './style/docs.module.less';
 
 const links = {
   react: 'https://arco.design/react/docs/start',
@@ -19,9 +18,14 @@ function QuickOperation() {
         <Typography.Title heading={6}>{t['workplace.docs']}</Typography.Title>
         <Link>{t['workplace.seeMore']}</Link>
       </div>
-      <div className={styles.docs}>
+      <div className="grid grid-cols-2">
         {Object.entries(links).map(([key, value]) => (
-          <Link className={styles.link} key={key} href={value} target="_blank">
+          <Link
+            className="box-border mb-3 p-1 text-arco-text-2 hover:text-primary-6"
+            key={key}
+            href={value}
+            target="_blank"
+          >
             {t[`workplace.${key}`]}
           </Link>
         ))}

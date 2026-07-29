@@ -13,7 +13,7 @@ export default function RedpacketRecordsPage() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(15);
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {

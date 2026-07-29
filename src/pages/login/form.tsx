@@ -18,7 +18,6 @@ import useLocale from '@shared/lib/useLocale';
 import useStorage from '@shared/lib/useStorage';
 
 import locale from './locale';
-import styles from './style/index.module.less';
 
 export default function LoginForm() {
   const formRef = useRef<FormInstance>();
@@ -82,12 +81,16 @@ export default function LoginForm() {
   }, [loginParams]);
 
   return (
-    <div className={styles['login-form-wrapper']}>
-      <div className={styles['login-form-title']}>{t['login.form.title']}</div>
-      <div className={styles['login-form-sub-title']}>{t['login.form.subTitle']}</div>
-      <div className={styles['login-form-error-msg']}>{errorMessage}</div>
+    <div className="w-full">
+      <div className="text-[36px] font-bold leading-[44px] text-[#1d2129]">
+        {t['login.form.title']}
+      </div>
+      <div className="mt-1 text-xs leading-[18px] text-[#86909c]">
+        {t['login.form.subTitle']}
+      </div>
+      <div className="h-8 leading-8 text-[rgb(var(--red-6))]">{errorMessage}</div>
       <Form
-        className={styles['login-form']}
+        className="use-login-form"
         layout="vertical"
         ref={formRef}
         initialValues={{ userName: 'admin', password: 'admin' }}
@@ -123,7 +126,7 @@ export default function LoginForm() {
           />
         </Form.Item>
         <Space size={16} direction="vertical" style={{ width: '100%' }}>
-          <div className={styles['login-form-password-actions']}>
+          <div className="flex justify-between">
             <Checkbox checked={rememberPassword} onChange={setRememberPassword}>
               {t['login.form.rememberPassword']}
             </Checkbox>

@@ -3,7 +3,6 @@ import { Link, Card, Skeleton, Tag, Typography } from '@arco-design/web-react';
 import { getApiWorkplaceAnnouncement } from '@shared/api/workplace';
 import useLocale from '@shared/lib/useLocale';
 import locale from './locale';
-import styles from './style/announcement.module.less';
 
 function Announcement() {
   const [data, setData] = useState([]);
@@ -50,11 +49,13 @@ function Announcement() {
       <Skeleton loading={loading} text={{ rows: 5, width: '100%' }} animation>
         <div>
           {data.map((d) => (
-            <div key={d.key} className={styles.item}>
+            <div key={d.key} className="mb-1 flex h-6 w-full items-center">
               <Tag color={getTagColor(d.type)} size="small">
                 {t[`workplace.${d.type}`]}
               </Tag>
-              <span className={styles.link}>{d.content}</span>
+              <span className="ml-1 flex-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-arco-text-2 no-underline">
+                {d.content}
+              </span>
             </div>
           ))}
         </div>
