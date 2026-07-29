@@ -2,7 +2,7 @@
   "colorWeek": false,
   "navbar": true,
   "menu": true,
-  "footer": true,
-  "themeColor": "#165DFF",
-  "menuWidth": 220
+  "footer": false,
+  "themeColor": "#635CFF",
+  "menuWidth": 240
 }

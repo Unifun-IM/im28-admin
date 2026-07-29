@@ -15,20 +15,85 @@ export type IRoute = AuthParams & {
 
 export const routes: IRoute[] = [
   {
-    name: 'menu.dashboard',
-    key: 'dashboard',
+    name: 'menu.user',
+    key: 'user',
     children: [
+      { name: 'menu.user.query', key: 'user/query' },
+      { name: 'menu.user.blacklist', key: 'user/blacklist' },
+      { name: 'menu.user.whitelist', key: 'user/whitelist' },
+      { name: 'menu.user.inviteCode', key: 'user/invite-code' },
+      { name: 'menu.user.logs', key: 'user/logs' },
       {
-        name: 'menu.dashboard.workplace',
-        key: 'dashboard/workplace'
+        name: 'menu.user.detail',
+        key: 'user/detail',
+        ignore: true,
+        path: '/user/detail/:id'
       }
     ]
   },
   {
-    name: 'Example',
-    key: 'example'
+    name: 'menu.system',
+    key: 'system',
+    children: [
+      { name: 'menu.system.accounts', key: 'system/accounts' },
+      { name: 'menu.system.roles', key: 'system/roles' },
+      { name: 'menu.system.opLogs', key: 'system/op-logs' }
+    ]
+  },
+  {
+    name: 'menu.systemParams',
+    key: 'system-params',
+    children: [{ name: 'menu.systemParams.settings', key: 'system-params/settings' }]
+  },
+  {
+    name: 'menu.finance',
+    key: 'finance',
+    children: [
+      { name: 'menu.finance.rechargeOrders', key: 'finance/recharge-orders' },
+      { name: 'menu.finance.rechargeAbnormal', key: 'finance/recharge-abnormal' },
+      { name: 'menu.finance.rechargeChannels', key: 'finance/recharge-channels' },
+      { name: 'menu.finance.withdrawAudit', key: 'finance/withdraw-audit' },
+      { name: 'menu.finance.withdrawAbnormal', key: 'finance/withdraw-abnormal' },
+      { name: 'menu.finance.withdrawChannels', key: 'finance/withdraw-channels' }
+    ]
+  },
+  {
+    name: 'menu.trade',
+    key: 'trade',
+    children: [
+      { name: 'menu.trade.redpacketRecords', key: 'trade/redpacket-records' },
+      { name: 'menu.trade.redpacketConfig', key: 'trade/redpacket-config' },
+      {
+        name: 'menu.trade.redpacketDetail',
+        key: 'trade/redpacket-detail',
+        ignore: true,
+        path: '/trade/redpacket-detail/:id'
+      }
+    ]
+  },
+  {
+    name: 'menu.session',
+    key: 'session',
+    children: [
+      { name: 'menu.session.user', key: 'session/user' },
+      { name: 'menu.session.group', key: 'session/group' },
+      {
+        name: 'menu.session.groupDetail',
+        key: 'session/group-detail',
+        ignore: true,
+        path: '/session/group-detail/:id'
+      },
+      {
+        name: 'menu.session.chat',
+        key: 'session/chat',
+        ignore: true,
+        path: '/session/chat/:type/:id'
+      }
+    ]
   }
 ];
+
+export const DEFAULT_ROUTE = 'user/query';
 
 export const getName = (path: string, routeList: IRoute[] = routes): string | undefined => {
   for (const item of routeList) {
@@ -96,11 +161,15 @@ const useRoute = (userPermission: Record<string, string[]>): [IRoute[], string] 
   }, [JSON.stringify(userPermission)]);
 
   const defaultRoute = useMemo(() => {
+    const hasDefault = permissionRoute.some(
+      (r) => r.key === 'user' && r.children?.some((c) => c.key === DEFAULT_ROUTE)
+    );
+    if (hasDefault) return DEFAULT_ROUTE;
     const first = permissionRoute[0];
     if (first) {
       return first?.children?.[0]?.key || first.key;
     }
-    return ''
+    return DEFAULT_ROUTE;
   }, [permissionRoute]);
 
   return [permissionRoute, defaultRoute];

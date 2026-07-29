@@ -15,17 +15,57 @@
 .logo {
   display: flex;
   align-items: center;
-  width: 200px;
+  width: 240px;
   padding-left: 20px;
   box-sizing: border-box;
 }
 
 .logo-name {
   color: var(--color-text-1);
-  font-weight: 500;
-  font-size: 20px;
+  font-weight: 600;
+  font-size: 16px;
   margin-left: 10px;
-  font-family: 'PingFang SC';
+  white-space: nowrap;
+}
+
+.user-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+
+  &:hover {
+    background: var(--color-fill-2);
+  }
+}
+
+.user-name {
+  color: var(--color-text-1);
+  font-size: 14px;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.profile-name {
+  font-size: 14px;
+  color: var(--color-text-1);
+  font-weight: 500;
+}
+
+.profile-email {
+  font-size: 12px;
+  color: var(--color-text-3);
 }
 
 .right {

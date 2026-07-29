@@ -8,7 +8,7 @@ import {
   Menu,
   Divider,
   Message,
-  Button,
+  Button
 } from '@arco-design/web-react';
 import {
   IconLanguage,
@@ -18,11 +18,7 @@ import {
   IconUser,
   IconSettings,
   IconPoweroff,
-  IconExperiment,
-  IconDashboard,
-  IconInteraction,
-  IconTag,
-  IconLoading,
+  IconLoading
 } from '@arco-design/web-react/icon';
 import { useSelector, useDispatch } from '@shared/lib/redux-compat';
 import { GlobalState } from '@entities/global-state';
@@ -54,11 +50,9 @@ function Navbar({ show }: { show: boolean }) {
     window.location.href = '/login';
   }
 
-  function onMenuItemClick(key) {
+  function onMenuItemClick(key: string) {
     if (key === 'logout') {
       logout();
-    } else {
-      Message.info(`You clicked ${key}`);
     }
   }
 
@@ -68,9 +62,9 @@ function Navbar({ show }: { show: boolean }) {
       payload: {
         userInfo: {
           ...userInfo,
-          permissions: generatePermission(role),
-        },
-      },
+          permissions: generatePermission(role)
+        }
+      }
     });
   }, [role]);
 
@@ -93,48 +87,22 @@ function Navbar({ show }: { show: boolean }) {
 
   const droplist = (
     <Menu onClickMenuItem={onMenuItemClick}>
-      <Menu.SubMenu
-        key="role"
-        title={
-          <>
-            <IconUser className={styles['dropdown-icon']} />
-            <span className={styles['user-role']}>
-              {role === 'admin'
-                ? t['menu.user.role.admin']
-                : t['menu.user.role.user']}
-            </span>
-          </>
-        }
-      >
-        <Menu.Item onClick={handleChangeRole} key="switch role">
-          <IconTag className={styles['dropdown-icon']} />
-          {t['menu.user.switchRoles']}
-        </Menu.Item>
-      </Menu.SubMenu>
-      <Menu.Item key="setting">
-        <IconSettings className={styles['dropdown-icon']} />
-        {t['menu.user.setting']}
-      </Menu.Item>
-      <Menu.SubMenu
-        key="more"
-        title={
-          <div style={{ width: 80 }}>
-            <IconExperiment className={styles['dropdown-icon']} />
-            {t['message.seeMore']}
+      <Menu.Item key="profile" disabled>
+        <div className={styles['profile-block']}>
+          <Avatar size={32}>
+            {userInfo?.avatar ? <img alt="avatar" src={userInfo.avatar} /> : null}
+          </Avatar>
+          <div>
+            <div className={styles['profile-name']}>{userInfo?.name || 'admin'}</div>
+            <div className={styles['profile-email']}>{userInfo?.email}</div>
           </div>
-        }
-      >
-        <Menu.Item key="workplace">
-          <IconDashboard className={styles['dropdown-icon']} />
-          {t['menu.dashboard.workplace']}
-        </Menu.Item>
-        <Menu.Item key="card list">
-          <IconInteraction className={styles['dropdown-icon']} />
-          {t['menu.list.cardList']}
-        </Menu.Item>
-      </Menu.SubMenu>
-
+        </div>
+      </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
+      <Menu.Item key="switch-role" onClick={handleChangeRole}>
+        <IconUser className={styles['dropdown-icon']} />
+        {t['menu.user.switchRoles']}
+      </Menu.Item>
       <Menu.Item key="logout">
         <IconPoweroff className={styles['dropdown-icon']} />
         {t['navbar.logout']}
@@ -147,7 +115,7 @@ function Navbar({ show }: { show: boolean }) {
       <div className={styles.left}>
         <div className={styles.logo}>
           <Logo />
-          <div className={styles['logo-name']}>Arco Pro</div>
+          <div className={styles['logo-name']}>IM-28 Management</div>
         </div>
       </div>
       <ul className={styles.right}>
@@ -155,6 +123,7 @@ function Navbar({ show }: { show: boolean }) {
           <Input.Search
             className={styles.round}
             placeholder={t['navbar.search.placeholder']}
+            allowClear
           />
         </li>
         <li>
@@ -162,13 +131,13 @@ function Navbar({ show }: { show: boolean }) {
             triggerElement={<IconButton icon={<IconLanguage />} />}
             options={[
               { label: '中文', value: 'zh-CN' },
-              { label: 'English', value: 'en-US' },
+              { label: 'English', value: 'en-US' }
             ]}
             value={lang}
             triggerProps={{
               autoAlignPopupWidth: false,
               autoAlignPopupMinWidth: true,
-              position: 'br',
+              position: 'br'
             }}
             trigger="hover"
             onChange={(value) => {
@@ -177,11 +146,6 @@ function Navbar({ show }: { show: boolean }) {
               Message.info(`${nextLang['message.lang.tips']}${value}`);
             }}
           />
-        </li>
-        <li>
-          <MessageBox>
-            <IconButton icon={<IconNotification />} />
-          </MessageBox>
         </li>
         <li>
           <Tooltip
@@ -197,17 +161,24 @@ function Navbar({ show }: { show: boolean }) {
             />
           </Tooltip>
         </li>
-        <Settings />
+        <li>
+          <MessageBox>
+            <IconButton icon={<IconNotification />} />
+          </MessageBox>
+        </li>
         {userInfo && (
           <li>
             <Dropdown droplist={droplist} position="br" disabled={userLoading}>
-              <Avatar size={32} style={{ cursor: 'pointer' }}>
-                {userLoading ? (
-                  <IconLoading />
-                ) : (
-                  <img alt="avatar" src={userInfo.avatar} />
-                )}
-              </Avatar>
+              <div className={styles['user-trigger']}>
+                <Avatar size={24} style={{ cursor: 'pointer' }}>
+                  {userLoading ? (
+                    <IconLoading />
+                  ) : (
+                    <img alt="avatar" src={userInfo.avatar} />
+                  )}
+                </Avatar>
+                <span className={styles['user-name']}>{userInfo.name || 'admin'}</span>
+              </div>
             </Dropdown>
           </li>
         )}

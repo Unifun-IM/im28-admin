@@ -2,10 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Spin } from '@arco-design/web-react';
 import {
-  IconDashboard,
+  IconApps,
+  IconGift,
   IconMenuFold,
   IconMenuUnfold,
-  IconTag
+  IconSettings,
+  IconStorage,
+  IconUserGroup,
+  IconMessage
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import NProgress from 'nprogress';
@@ -30,19 +34,37 @@ const Content = Layout.Content;
 
 const Exception403 = lazyload(() => import('@pages/exception/403'));
 
+const COLLAPSED_WIDTH = 56;
+
 function getIconFromKey(key: string) {
   switch (key) {
-    case 'dashboard':
-      return <IconDashboard className={styles.icon} />;
-    case 'example':
-      return <IconTag className={styles.icon} />;
+    case 'user':
+      return <IconUserGroup className={styles.icon} />;
+    case 'system':
+      return <IconApps className={styles.icon} />;
+    case 'system-params':
+      return <IconSettings className={styles.icon} />;
+    case 'finance':
+      return <IconStorage className={styles.icon} />;
+    case 'trade':
+      return <IconGift className={styles.icon} />;
+    case 'session':
+      return <IconMessage className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }
 }
 
 function getFlattenRoutes(routeList: IRoute[]) {
-  const mod = import.meta.glob(['../../pages/dashboard/**/index.tsx','../../pages/example/**/index.tsx','../../pages/exception/**/index.tsx']);
+  const mod = import.meta.glob([
+    '../../pages/user/**/index.tsx',
+    '../../pages/system/**/index.tsx',
+    '../../pages/system-params/**/index.tsx',
+    '../../pages/finance/**/index.tsx',
+    '../../pages/trade/**/index.tsx',
+    '../../pages/session/**/index.tsx',
+    '../../pages/exception/**/index.tsx'
+  ]);
   const res: IRoute[] = [];
 
   function travel(_routes: IRoute[]) {
@@ -89,7 +111,7 @@ export function PageLayout() {
   );
 
   const navbarHeight = 60;
-  const menuWidth = collapsed ? 48 : settings.menuWidth;
+  const menuWidth = collapsed ? COLLAPSED_WIDTH : settings.menuWidth;
   const showNavbar = settings.navbar && urlParams.navbar !== false;
   const showMenu = settings.menu && urlParams.menu !== false;
   const showFooter = settings.footer && urlParams.footer !== false;
@@ -182,12 +204,40 @@ export function PageLayout() {
       }
       pathKeys.pop();
     }
+    // detail pages: highlight parent list
+    if (!newSelectedKeys.length) {
+      if (pathname.startsWith('/user/detail')) newSelectedKeys.push('user/query');
+      if (pathname.startsWith('/trade/redpacket-detail')) {
+        newSelectedKeys.push('trade/redpacket-records');
+      }
+      if (pathname.startsWith('/session/group-detail')) {
+        newSelectedKeys.push('session/group');
+      }
+      if (pathname.startsWith('/session/chat')) {
+        newSelectedKeys.push('session/user');
+      }
+    }
     setSelectedKeys(newSelectedKeys);
     setOpenKeys(newOpenKeys);
   }
 
   useEffect(() => {
-    const routeConfig = routeMap.current.get(pathname);
+    let routeConfig = routeMap.current.get(pathname);
+    if (!routeConfig) {
+      // 动态详情页：/user/detail/:id 等
+      const prefixes = [
+        '/user/detail',
+        '/trade/redpacket-detail',
+        '/session/group-detail',
+        '/session/chat'
+      ];
+      for (const prefix of prefixes) {
+        if (pathname.startsWith(prefix)) {
+          routeConfig = routeMap.current.get(prefix);
+          break;
+        }
+      }
+    }
     setBreadCrumb(routeConfig || []);
     updateMenuStatus();
   }, [pathname]);
@@ -210,6 +260,7 @@ export function PageLayout() {
               breakpoint="xl"
               className={styles['layout-sider']}
               collapsed={collapsed}
+              collapsedWidth={COLLAPSED_WIDTH}
               collapsible
               onCollapse={setCollapsed}
               style={paddingTop}
@@ -251,7 +302,7 @@ export function PageLayout() {
                     <Route
                       element={<route.component />}
                       key={route.key}
-                      path={`/${route.key}`}
+                      path={route.path || `/${route.key}`}
                     />
                   ))}
                   <Route

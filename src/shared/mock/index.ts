@@ -3,6 +3,7 @@ import { isSSR } from '@shared/lib/is';
 
 import './user';
 import './message-box';
+import './biz';
 
 if (!isSSR) {
   Mock.setup({
