@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
+  Descriptions,
   Drawer,
   Message,
   Spin,
-  Tabs
+  Table,
+  Tabs,
+  type TableColumnProps
 } from '@arco-design/web-react';
 import { IconClose, IconCopy, IconRight } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
-import cs from 'classnames';
 import { getUserDetail } from '@shared/api/biz';
 import { StatusBadge } from '@widgets/biz-list';
 
@@ -70,112 +72,51 @@ function CopyValue({ value }: { value: string }) {
   );
 }
 
-function InfoGrid({
-  rows
-}: {
-  rows: Array<Array<{ label: string; value: React.ReactNode }>>;
-}) {
-  return (
-    <div className="overflow-hidden rounded-[8px] border border-solid border-[rgba(0,0,0,0.08)]">
-      {rows.map((pair, rowIndex) => (
-        <div
-          key={rowIndex}
-          className={cs(
-            'flex w-full items-stretch',
-            rowIndex < rows.length - 1 &&
-              'border-b border-solid border-[rgba(0,0,0,0.08)]'
-          )}
-        >
-          {pair.map((cell) => (
-            <div key={cell.label} className="flex min-w-0 flex-1 items-stretch">
-              <div className="box-border flex h-[32px] w-[120px] shrink-0 items-center border-r border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)] px-[12px] text-[12px] font-medium leading-[22px] text-arco-text-3">
-                {cell.label}
-              </div>
-              <div className="box-border flex h-[32px] min-w-0 flex-1 items-center px-[12px] text-[14px] leading-[21px] text-arco-text-1">
-                {cell.value}
-              </div>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function SocialCell({
-  label,
+function SocialLink({
   value,
   onClick
 }: {
-  label: string;
   value: React.ReactNode;
   onClick?: () => void;
 }) {
   return (
-    <div className="flex min-w-0 flex-1 items-stretch">
-      <div className="box-border flex h-[32px] w-[120px] shrink-0 items-center border-r border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)] px-[12px] text-[12px] font-medium leading-[22px] text-arco-text-3">
-        {label}
-      </div>
-      <button
-        type="button"
-        className="box-border flex h-[32px] min-w-0 flex-1 cursor-pointer items-center justify-between border-0 bg-transparent px-[12px] text-left"
-        onClick={onClick}
-      >
-        <span className="text-[14px] leading-[21px] text-[rgb(var(--link-6))]">
-          {value}
-        </span>
-        <IconRight className="text-[14px] text-arco-text-3" />
-      </button>
-    </div>
+    <button
+      type="button"
+      className="inline-flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
+      onClick={onClick}
+    >
+      <span className="text-[14px] leading-[21px] text-[rgb(var(--link-6))]">
+        {value}
+      </span>
+      <IconRight className="text-[14px] text-arco-text-3" />
+    </button>
   );
 }
 
-function LogTimeline({ items }: { items: LogItem[] }) {
-  return (
-    <div className="relative flex w-full items-start">
-      <div className="relative mr-[10px] w-[7px] shrink-0 self-stretch">
-        <div className="absolute bottom-[12px] left-1/2 top-[18px] w-px -translate-x-1/2 bg-[var(--color-border-2,#e5e6eb)]" />
-        {items.map((item, index) => (
-          <div
-            key={item.id || index}
-            className="absolute left-1/2 size-[7px] -translate-x-1/2 rounded-full"
-            style={{
-              top: 18 + index * 44,
-              background:
-                index === 0
-                  ? 'rgb(var(--primary-6))'
-                  : 'var(--color-fill-3, #e5e6eb)'
-            }}
-          />
-        ))}
-      </div>
-      <div className="min-w-0 flex-1">
-        {items.map((item, index) => (
-          <div
-            key={item.id || `row-${index}`}
-            className="flex gap-[12px] pb-[12px] pt-[12px] text-[12px] leading-[20px]"
-          >
-            <span className="w-[119px] shrink-0 text-arco-text-3">
-              {formatLogTime(item.time)}
-            </span>
-            <div className="flex min-w-0 flex-1 items-center gap-[12px]">
-              <span className="w-[200px] shrink-0 text-arco-text-1">
-                {item.action || '-'}
-              </span>
-              <span className="min-w-0 truncate text-arco-text-3">
-                {item.detail || '-'}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+const LOG_COLUMNS: TableColumnProps<LogItem>[] = [
+  {
+    title: '时间',
+    dataIndex: 'time',
+    width: 160,
+    render: (v) => formatLogTime(v as string)
+  },
+  {
+    title: '行为',
+    dataIndex: 'action',
+    width: 200,
+    render: (v) => (v as string) || '-'
+  },
+  {
+    title: '详情',
+    dataIndex: 'detail',
+    ellipsis: true,
+    render: (v) => (v as string) || '-'
+  }
+];
 
 /**
  * 用户详情抽屉 — Figma 666:21862（基本信息）/ 750:23153（操作日志）
- * 宽 640，右侧滑出
+ * 宽 640，右侧滑出；信息用 Descriptions，日志用 Table
  */
 export default function UserDetailDrawer({
   visible,
@@ -283,46 +224,45 @@ export default function UserDetailDrawer({
                       <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
                         基础信息
                       </div>
-                      <InfoGrid
-                        rows={[
-                          [
-                            {
-                              label: '用户ID',
-                              value: String(detail?.userId || '-')
-                            },
-                            {
-                              label: '账号',
-                              value: (
-                                <CopyValue
-                                  value={String(detail?.account || '-')}
-                                />
-                              )
-                            }
-                          ],
-                          [
-                            {
-                              label: '手机号',
-                              value: formatPhone(detail?.phone)
-                            },
-                            {
-                              label: '邮箱',
-                              value: String(detail?.email || '-')
-                            }
-                          ],
-                          [
-                            {
-                              label: '注册时间',
-                              value: String(detail?.registerTime || '-')
-                            },
-                            {
-                              label: '最后操作时间',
-                              value: String(
-                                detail?.lastActiveTime ||
-                                  detail?.lastLoginTime ||
-                                  '-'
-                              )
-                            }
-                          ]
+                      <Descriptions
+                        className="use-user-detail-descriptions"
+                        bordered
+                        column={2}
+                        size="small"
+                        tableLayout="fixed"
+                        data={[
+                          {
+                            label: '用户ID',
+                            value: String(detail?.userId || '-')
+                          },
+                          {
+                            label: '账号',
+                            value: (
+                              <CopyValue
+                                value={String(detail?.account || '-')}
+                              />
+                            )
+                          },
+                          {
+                            label: '手机号',
+                            value: formatPhone(detail?.phone)
+                          },
+                          {
+                            label: '邮箱',
+                            value: String(detail?.email || '-')
+                          },
+                          {
+                            label: '注册时间',
+                            value: String(detail?.registerTime || '-')
+                          },
+                          {
+                            label: '最后操作时间',
+                            value: String(
+                              detail?.lastActiveTime ||
+                                detail?.lastLoginTime ||
+                                '-'
+                            )
+                          }
                         ]}
                       />
                     </div>
@@ -331,33 +271,61 @@ export default function UserDetailDrawer({
                       <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
                         社交关系
                       </div>
-                      <div className="flex overflow-hidden rounded-[8px] border border-solid border-[rgba(0,0,0,0.08)]">
-                        <SocialCell
-                          label="好友数量"
-                          value={String(detail?.friendCount ?? 0)}
-                          onClick={() => Message.info('查看好友列表（mock）')}
-                        />
-                        <SocialCell
-                          label="群聊数量"
-                          value={String(detail?.groupCount ?? 0)}
-                          onClick={() => Message.info('查看群聊列表（mock）')}
-                        />
-                      </div>
+                      <Descriptions
+                        className="use-user-detail-descriptions"
+                        bordered
+                        column={2}
+                        size="small"
+                        tableLayout="fixed"
+                        data={[
+                          {
+                            label: '好友数量',
+                            value: (
+                              <SocialLink
+                                value={String(detail?.friendCount ?? 0)}
+                                onClick={() =>
+                                  Message.info('查看好友列表（mock）')
+                                }
+                              />
+                            )
+                          },
+                          {
+                            label: '群聊数量',
+                            value: (
+                              <SocialLink
+                                value={String(detail?.groupCount ?? 0)}
+                                onClick={() =>
+                                  Message.info('查看群聊列表（mock）')
+                                }
+                              />
+                            )
+                          }
+                        ]}
+                      />
                     </div>
                   </div>
                 </Tabs.TabPane>
 
                 <Tabs.TabPane key="logs" title="操作日志">
                   <div className="pt-[12px]">
-                    {logs.length ? (
-                      <LogTimeline items={logs} />
-                    ) : (
-                      !loading && (
-                        <div className="py-8 text-center text-[12px] text-arco-text-3">
-                          暂无操作日志
-                        </div>
-                      )
-                    )}
+                    <Table
+                      className="use-user-detail-table"
+                      rowKey={(row, index) =>
+                        String(row.id ?? `${row.time ?? 'log'}-${index}`)
+                      }
+                      columns={LOG_COLUMNS}
+                      data={logs}
+                      border
+                      borderCell
+                      pagination={false}
+                      noDataElement={
+                        !loading ? (
+                          <div className="py-8 text-center text-[12px] text-arco-text-3">
+                            暂无操作日志
+                          </div>
+                        ) : null
+                      }
+                    />
                   </div>
                 </Tabs.TabPane>
               </Tabs>

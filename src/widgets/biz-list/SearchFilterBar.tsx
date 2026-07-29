@@ -2,42 +2,47 @@ import React, { useState } from 'react';
 import {
   Button,
   Card,
-  ConfigProvider,
   Form,
+  Grid,
   Space,
   type FormInstance
 } from '@arco-design/web-react';
 import { IconDown, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 
-/**
- * 对齐 Figma 602:35072：
- * - 窄字段 224 / 宽字段 456（=224×2+8）/ 通栏 full
- * - 容器 flex-wrap + gap 8
- */
+const { Row, Col } = Grid;
+
 export type FilterFieldProps = {
   children: React.ReactNode;
   /**
-   * 1 | narrow → 224px；
-   * 2 → 456px（时间区间等）；
-   * full → 通栏
+   * 1 | narrow → Col span 6（约一行 4 个）；
+   * 2 → span 12；
+   * full → span 24
    */
   span?: 1 | 2 | 'narrow' | 'full';
   className?: string;
 };
 
-/** 筛选项：固定宽字段，由外层 flex-wrap 排布 */
-export function FilterField({ children, span = 1, className }: FilterFieldProps) {
-  const dataSpan =
-    span === 'full' ? 'full' : span === 2 ? '2' : '1';
+function resolveColSpan(span: FilterFieldProps['span'] = 1): number {
+  if (span === 'full') return 24;
+  if (span === 2) return 12;
+  return 6;
+}
+
+/** 筛选项：薄封装 Grid.Col；视觉由 .use-biz-filter-bar 补齐 */
+export function FilterField({
+  children,
+  span = 1,
+  className
+}: FilterFieldProps) {
   return (
-    <div
+    <Col
       className={cs('use-biz-filter-field', className)}
       data-filter-field="true"
-      data-span={dataSpan}
+      span={resolveColSpan(span)}
     >
       {children}
-    </div>
+    </Col>
   );
 }
 
@@ -71,10 +76,6 @@ function flattenFilterChildren(children: React.ReactNode): React.ReactElement[] 
   return out;
 }
 
-export const bizFilterSelectProps = {
-  // 面板样式由 dropdownRender 包裹的 .use-biz-filter-dropdown 驱动
-} as const;
-
 export type SearchFilterBarProps = {
   children: React.ReactNode;
   form?: FormInstance;
@@ -93,8 +94,8 @@ export type SearchFilterBarProps = {
 };
 
 /**
- * 搜索筛选 — Figma 602:35071 / 602:35072
- * Card + Form(vertical) + flex-wrap gap-8；视觉 token 用 use-biz-filter-bar
+ * 搜索筛选 — Arco 标准：Card + Form(vertical) + Grid + Space
+ * 视觉 token：.use-biz-filter-bar
  */
 export default function SearchFilterBar({
   children,
@@ -123,52 +124,46 @@ export default function SearchFilterBar({
       className={cs('use-biz-filter-bar', className)}
       bodyStyle={{ padding: 12 }}
     >
-      <ConfigProvider
-        componentConfig={{
-          Select: { ...bizFilterSelectProps }
-        }}
-      >
-        <Form form={form} layout="vertical" requiredSymbol={false} size="default">
-          <div className="use-biz-filter-fields">
-            {visibleChildren.map((child, index) => {
-              const key = child.key ?? index;
-              if (isFilterFieldElement(child)) {
-                return React.cloneElement(child, { key });
-              }
-              return <FilterField key={key}>{child}</FilterField>;
-            })}
-            <div className="use-biz-filter-actions">
-              <Space size={8}>
-                {showToggle && (
-                  <Button
-                    type="text"
-                    className="use-biz-filter-action-text"
-                    icon={collapsed ? <IconDown /> : <IconUp />}
-                    onClick={() => setCollapsed((v) => !v)}
-                  >
-                    {collapsed ? expandText : collapseText}
-                  </Button>
-                )}
-                {extraActions}
+      <Form form={form} layout="vertical" requiredSymbol={false} size="default">
+        <Row gutter={[16, 16]} align="end">
+          {visibleChildren.map((child, index) => {
+            const key = child.key ?? index;
+            if (isFilterFieldElement(child)) {
+              return React.cloneElement(child, { key });
+            }
+            return <FilterField key={key}>{child}</FilterField>;
+          })}
+          <Col flex="auto" className="use-biz-filter-actions">
+            <Space size={8}>
+              {showToggle && (
                 <Button
                   type="text"
                   className="use-biz-filter-action-text"
-                  onClick={onReset}
+                  icon={collapsed ? <IconDown /> : <IconUp />}
+                  onClick={() => setCollapsed((v) => !v)}
                 >
-                  {resetText}
+                  {collapsed ? expandText : collapseText}
                 </Button>
-                <Button
-                  type="primary"
-                  className="use-biz-filter-action-search"
-                  onClick={onSearch}
-                >
-                  {searchText}
-                </Button>
-              </Space>
-            </div>
-          </div>
-        </Form>
-      </ConfigProvider>
+              )}
+              {extraActions}
+              <Button
+                type="text"
+                className="use-biz-filter-action-text"
+                onClick={onReset}
+              >
+                {resetText}
+              </Button>
+              <Button
+                type="primary"
+                className="use-biz-filter-action-search"
+                onClick={onSearch}
+              >
+                {searchText}
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Form>
     </Card>
   );
 }

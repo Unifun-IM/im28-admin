@@ -4,18 +4,17 @@ import {
   Input,
   DatePicker,
   Button,
-  Select,
   Tag,
   Dropdown,
   Menu
 } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
   DoubleLineCell,
   FilterField,
+  FilterKeywordInput,
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
@@ -144,19 +143,11 @@ export default function UserQueryPage() {
           label="邀请人关键词搜索"
           triggerPropName="value"
         >
-          <Input
-            allowClear
-            placeholder="请输入"
-            addBefore={
-              <FormItem field="inviterKeywordType" noStyle initialValue="inviteCode">
-                <Select
-                  options={INVITER_KEYWORD_OPTIONS}
-                  style={{ width: 108 }}
-                  triggerProps={{ autoAlignPopupWidth: false }}
-                />
-              </FormItem>
-            }
-            suffix={<IconSearch className="text-arco-text-3" />}
+          <FilterKeywordInput
+            typeField="inviterKeywordType"
+            typeOptions={INVITER_KEYWORD_OPTIONS}
+            typeInitialValue="inviteCode"
+            typeWidth={108}
           />
         </FormItem>
       </FilterField>
@@ -217,19 +208,11 @@ export default function UserQueryPage() {
           <>
             <FilterField span="narrow">
               <FormItem field="keyword" label="关键词搜索">
-                <Input
-                  allowClear
-                  placeholder="请输入"
-                  addBefore={
-                    <FormItem field="keywordType" noStyle initialValue="userId">
-                      <Select
-                        options={USER_KEYWORD_OPTIONS}
-                        style={{ width: 80 }}
-                        triggerProps={{ autoAlignPopupWidth: false }}
-                      />
-                    </FormItem>
-                  }
-                  suffix={<IconSearch className="text-arco-text-3" />}
+                <FilterKeywordInput
+                  typeField="keywordType"
+                  typeOptions={USER_KEYWORD_OPTIONS}
+                  typeInitialValue="userId"
+                  typeWidth={80}
                 />
               </FormItem>
             </FilterField>

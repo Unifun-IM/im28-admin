@@ -2,10 +2,10 @@ export { default as BizListPage } from './BizListPage';
 export { default as DataSummary } from './DataSummary';
 export {
   default as SearchFilterBar,
-  FilterField,
-  bizFilterSelectProps
+  FilterField
 } from './SearchFilterBar';
 export { default as FilterSelect } from './FilterSelect';
+export { default as FilterKeywordInput } from './FilterKeywordInput';
 export { default as TableBatchBar } from './TableBatchBar';
 export { default as EllipsisCell } from './EllipsisCell';
 export {
@@ -23,6 +23,7 @@ export {
 } from './tableDefaults';
 export type { SummaryItem } from './DataSummary';
 export type { FilterFieldProps, SearchFilterBarProps } from './SearchFilterBar';
+export type { FilterKeywordInputProps } from './FilterKeywordInput';
 export type { TableBatchBarProps } from './TableBatchBar';
 export type { EllipsisCellProps } from './EllipsisCell';
 export type {

@@ -739,106 +739,32 @@ body[arco-theme='dark'] {
   box-shadow: none;
 }
 
-/* —— 业务列表：筛选区（Figma 602:35072 — flex-wrap gap-8 + 固定字段宽） —— */
+/* —— 业务列表：筛选区（Arco Card + Form + Grid；视觉 token） —— */
 .use-biz-filter-bar {
   .arco-card-body {
     padding: 12px;
   }
 
-  /* 字段容器：与稿面 gap-[8px] flex-wrap 一致 */
-  .use-biz-filter-fields {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 8px;
-    width: 100%;
-  }
-
-  /* 操作列：贴底右对齐，占满剩余宽；高度对齐字段（标签+间距+控件=52） */
+  /* 操作列：贴底右对齐 */
   .use-biz-filter-actions {
     display: flex;
-    flex: 1 1 auto;
     justify-content: flex-end;
     align-items: flex-end;
-    height: 52px;
+    min-height: 52px;
     min-width: 120px;
   }
 
-  /* 窄字段 224；宽字段 456；通栏 full */
-  .use-biz-filter-field {
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 auto;
-    width: 224px;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .use-biz-filter-field[data-span='2'] {
-    width: 456px;
-  }
-
-  .use-biz-filter-field[data-span='full'] {
-    flex: 1 0 100%;
-    width: 100%;
-    max-width: 100%;
-  }
-
   .arco-form-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
     margin-bottom: 0;
     width: 100%;
-  }
-
-  /* 垂直布局下强制标签/控件区占满字段宽（Arco wrapper 默认按内容收缩） */
-  .arco-form-item-wrapper,
-  .arco-form-item-wrapper-col,
-  .arco-form-item-control-wrapper,
-  .arco-form-item-control,
-  .arco-form-label-item,
-  .arco-form-item-label-col {
-    width: 100% !important;
-    max-width: 100%;
-    flex: 0 0 auto;
-    box-sizing: border-box;
-  }
-
-  /* 控件在字段内撑满宽度（Select / Picker 默认按内容收缩） */
-  .arco-form-item-control-children {
-    display: block;
-    width: 100%;
-  }
-
-  .arco-form-item-control-children > .arco-select,
-  .arco-form-item-control-children > .arco-picker,
-  .arco-form-item-control-children > .arco-input-wrapper,
-  .arco-form-item-control-children > .arco-input-group-wrapper,
-  .arco-form-item-control-children > .arco-textarea-wrapper {
-    display: block;
-    width: 100% !important;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .arco-form-item-control-children > .arco-select .arco-select-view,
-  .arco-form-item-control-children > .arco-picker {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .arco-form-item-control {
-    min-height: 0;
   }
 
   .arco-form-item-label-col {
     padding-bottom: 0;
   }
 
-  /* 标签：12px / text-2；间距由 form-item gap 承担 */
   .arco-form-label-item {
-    margin-bottom: 0 !important;
+    margin-bottom: 8px !important;
     line-height: 12px;
     min-height: 12px;
     height: auto;
@@ -886,7 +812,6 @@ body[arco-theme='dark'] {
     border-radius: 8px;
   }
 
-  /* 标签行内附注 / 右侧链接（批量输入等） */
   .use-biz-filter-label-row {
     display: flex;
     align-items: center;
@@ -909,6 +834,20 @@ body[arco-theme='dark'] {
     width: 100%;
   }
 
+  /* Col 内控件撑满 */
+  .arco-form-item-control-children > .arco-select,
+  .arco-form-item-control-children > .arco-picker,
+  .arco-form-item-control-children > .arco-input-wrapper,
+  .arco-form-item-control-children > .arco-input-group-wrapper,
+  .arco-form-item-control-children > .arco-textarea-wrapper {
+    width: 100%;
+  }
+
+  .arco-form-item-control-children > .arco-select .arco-select-view,
+  .arco-form-item-control-children > .arco-picker {
+    width: 100%;
+  }
+
   /* 填充型控件 — 高 32 / 圆角 8 / fill-1 */
   .arco-input-inner-wrapper,
   .arco-select-view,
@@ -922,7 +861,6 @@ body[arco-theme='dark'] {
     box-shadow: none;
   }
 
-  /* 带 addBefore 的输入：右侧圆角，左侧与前缀拼接 */
   .arco-input-group-addbefore + .arco-input-inner-wrapper,
   .arco-input-group:has(.arco-input-group-addbefore) > .arco-input-inner-wrapper {
     background-color: var(--color-fill-1, #f7f8fa);
@@ -983,7 +921,6 @@ body[arco-theme='dark'] {
   }
 
   .arco-input-group-addbefore {
-    /* Arco 默认 width:1px 是给 table-cell 用的，flex 下会把前缀压扁 */
     width: auto;
     white-space: nowrap;
     border-radius: 8px 0 0 8px;
@@ -1008,6 +945,7 @@ body[arco-theme='dark'] {
 
     .arco-select-view-value {
       font-size: 14px;
+      line-height: 30px;
       color: var(--color-text-1, #1d2129);
     }
   }
@@ -1021,7 +959,6 @@ body[arco-theme='dark'] {
     border-radius: 0 8px 8px 0;
   }
 
-  /* 批量用户ID TextArea — Figma 811:22055 */
   .arco-textarea-wrapper {
     background-color: var(--color-fill-1, #f7f8fa);
     border: none;
@@ -1099,12 +1036,10 @@ body[arco-theme='dark'] {
     padding: 0;
   }
 
-  /* 结束时间侧：稿面 pl-8 */
   .arco-picker-separator + .arco-picker-input {
     padding-left: 8px;
   }
 
-  /* 分隔：固定 28 宽居中「-」（Figma picker-separator） */
   .arco-picker-separator {
     box-sizing: border-box;
     flex: none;
@@ -1131,16 +1066,17 @@ body[arco-theme='dark'] {
 
 @media (max-width: 768px) {
   .use-biz-filter-bar {
-    .use-biz-filter-field,
-    .use-biz-filter-field[data-span='2'] {
-      width: 100%;
-    }
-
     .use-biz-filter-actions {
-      height: auto;
       min-height: 32px;
       width: 100%;
       flex: 1 0 100%;
+      max-width: 100%;
+    }
+
+    .use-biz-filter-field.arco-col {
+      flex: 0 0 100%;
+      max-width: 100%;
+      width: 100%;
     }
   }
 }
@@ -1418,16 +1354,23 @@ body[arco-theme='dark'] {
     overflow: hidden;
   }
 
+  /* 最后一行保留底边框，与分页区分 */
+  .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
   .arco-table-td:last-child,
   .arco-table-td.arco-table-col-fixed-right {
     border-right: none;
   }
 
-  /* 操作列 — Figma 866:44025 / 602:35711 */
+  /* 操作列 padding；投影交给 Arco fixed 标准（scroll-position + col-fixed-right-first::after） */
   .arco-table-td.arco-table-col-fixed-right,
   .arco-table-th.arco-table-col-fixed-right {
     padding-left: 12px;
     padding-right: 12px;
+    /* 勿裁切 Arco 固定列左侧 ::after 阴影 */
+    overflow: visible;
   }
 
   .arco-table-cell {
@@ -1487,24 +1430,7 @@ body[arco-theme='dark'] {
     padding-right: 13px;
   }
 
-  /* 右侧固定操作列：左侧阴影分隔（Figma 602:34915） */
-  .arco-table-col-fixed-right {
-    background-clip: padding-box;
-  }
-
-  .arco-table-col-fixed-right::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 12px;
-    transform: translateX(-100%);
-    box-shadow: inset -8px 0 8px -8px rgba(0, 0, 0, 0.12);
-    pointer-events: none;
-  }
-
-  /* 固定列也跟随 Stripe / hover / 选中 */
+  /* 右侧固定列背景跟随 Stripe / hover / 选中；投影由 Arco scroll-position 控制 */
   &.arco-table-stripe
     .arco-table-content-inner
     tbody
@@ -1666,6 +1592,67 @@ body[arco-theme='dark'] {
 
     .arco-tabs-content-item {
       padding: 0;
+    }
+  }
+
+  /* Descriptions — 对齐原 InfoGrid：标签 120 / 行高 32 / 圆角边框 */
+  .use-user-detail-descriptions.arco-descriptions {
+    border-radius: 8px;
+    overflow: hidden;
+
+    .arco-descriptions-item-label,
+    .arco-descriptions-item-value {
+      padding: 5px 12px;
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .arco-descriptions-item-label {
+      width: 120px;
+      min-width: 120px;
+      background: var(--color-fill-1, #f7f8fa);
+      color: var(--color-text-3, #86909c);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 22px;
+    }
+
+    .arco-descriptions-item-value {
+      color: var(--color-text-1, #1d2129);
+      font-size: 14px;
+      line-height: 21px;
+    }
+  }
+
+  /* 操作日志 Table — 轻量表格，贴合抽屉内宽 */
+  .use-user-detail-table.arco-table {
+    .arco-table-th {
+      background: var(--color-fill-1, #f7f8fa);
+      height: 32px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 22px;
+      color: var(--color-text-3, #86909c);
+      border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .arco-table-td {
+      height: 40px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--color-text-1, #1d2129);
+      border-color: rgba(0, 0, 0, 0.08) !important;
+      vertical-align: middle;
+    }
+
+    .arco-table-th-item {
+      padding: 0;
+    }
+
+    .arco-table-container {
+      border-radius: 8px;
+      overflow: hidden;
     }
   }
 }

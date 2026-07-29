@@ -8,8 +8,6 @@ import {
 import { IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 
-import { bizFilterSelectProps } from './SearchFilterBar';
-
 function getOptionValues(
   options: SelectProps['options']
 ): (string | number)[] {
@@ -32,8 +30,8 @@ function getOptionLabel(opt: NonNullable<SelectProps['options']>[number]): strin
 }
 
 /**
- * 筛选区 Select — 基于 Arco Select；多选下拉对齐 Figma 602:35141
- *（内嵌搜索 / 全选 / checkbox 选项 / 清除）
+ * 筛选区 Select — 基于 Arco Select。
+ * 多选时增强：下拉内搜索 / 全选 / 清除（Figma 602:35141）；单选也可复用统一下拉皮肤。
  */
 export default function FilterSelect(props: SelectProps) {
   const {
@@ -146,7 +144,6 @@ export default function FilterSelect(props: SelectProps) {
 
   return (
     <Select
-      {...bizFilterSelectProps}
       {...rest}
       mode={mode}
       options={isMultiple ? filteredOptions : options}

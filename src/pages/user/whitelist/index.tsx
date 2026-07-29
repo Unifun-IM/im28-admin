@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, DatePicker, Button, Select, Message } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { Form, DatePicker, Button, Message } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
   DoubleLineCell,
   FilterField,
+  FilterKeywordInput,
   FilterSelect
 } from '@widgets/biz-list';
 import { getWhitelist } from '@shared/api/biz';
@@ -88,19 +88,11 @@ export default function Page() {
           <>
             <FilterField span={2}>
               <FormItem field="keyword" label="关键词搜索">
-                <Input
-                  allowClear
-                  placeholder="请输入"
-                  addBefore={
-                    <FormItem field="keywordType" noStyle initialValue="userId">
-                      <Select
-                        options={USER_KEYWORD_OPTIONS}
-                        style={{ width: 96 }}
-                        triggerProps={{ autoAlignPopupWidth: false }}
-                      />
-                    </FormItem>
-                  }
-                  suffix={<IconSearch className="text-arco-text-3" />}
+                <FilterKeywordInput
+                  typeField="keywordType"
+                  typeOptions={USER_KEYWORD_OPTIONS}
+                  typeInitialValue="userId"
+                  typeWidth={96}
                 />
               </FormItem>
             </FilterField>

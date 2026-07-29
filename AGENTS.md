@@ -77,7 +77,7 @@ src/app | pages | widgets | features | entities | shared
 4. 语义色以 `src/app/styles/theme-tokens.less` 为准；壳层用 `--color-bg-1` / `--color-bg-2` 等变量，勿写死浅色 hex
 5. 样式入口：`arco.css` → `tailwind.css` → `global.less`（含 theme-tokens）
 6. **新增**自定义 UI 默认不建 `style/index.module.less`
-7. 筛选区参考：`SearchFilterBar`（`Card` + `Form` + `Grid` + `Space`）；`.use-biz-filter-bar` 只补视觉
+7. 筛选区参考：`SearchFilterBar`（`Card` + `Form` + `Grid` + `Space`）；`.use-biz-filter-bar` 只补视觉；关键词类型前缀用 `FilterKeywordInput`；多选下拉增强用 `FilterSelect`
 8. 壳层菜单仍用 `admin-shell/style/layout.module.less`（复杂侧栏覆盖）
 
 
@@ -85,7 +85,7 @@ src/app | pages | widgets | features | entities | shared
 
 - 视觉与交互以 Figma「IM管理后台 / 业务1.0」为准；侧栏常规 **240px** / 最小 **56px**（贴边全高、仅右边框，Figma `862:20168`；折叠见 `602:35590`）
 - 通用列表积木复用 `@widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage` / `TableBatchBar`）
-- 业务表格约定（`BizListPage`）：单元格默认单行省略 + 溢出 Tooltip；默认斑马纹（Hover/选中优先）；`操作` 列自动右侧固定并带左阴影；分页默认 15 条、选项 15/30/50，**total ≤ 15 不展示分页**；多选时标题旁展示已选数量
+- 业务表格约定（`BizListPage`）：单元格默认单行省略 + 溢出 Tooltip；默认斑马纹（Hover/选中优先）；`操作` 列自动 `fixed: 'right'`，左侧投影走 Arco 横向滚动标准（仅 fixed + 未滚到最右时出现）；分页默认 15 条、选项 15/30/50，**total ≤ 15 不展示分页**；多选时标题旁展示已选数量
 - 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉（Figma `602:34917`）
 - 批量操作条 `TableBatchBar`：选中后顶栏居中浮出深色条（Figma `602:34650`），含「只显示已选」开关 + 归档/编辑/删除
 - 页面打开记录快捷导航复用 `@widgets/page-tabs`（Figma `609:47633`），由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
