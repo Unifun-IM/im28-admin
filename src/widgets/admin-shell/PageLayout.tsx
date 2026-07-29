@@ -20,7 +20,7 @@ import useRoute, { type IRoute } from '@shared/config/routes';
 import { isArray } from '@shared/lib/is';
 import getUrlParams from '@shared/lib/getUrlParams';
 import lazyload from '@shared/lib/lazyload';
-import { useSelector } from '@shared/lib/redux-compat';
+import { useGlobalSelector } from '@shared/lib/global-store-hooks';
 import useLocale from '@shared/lib/useLocale';
 import Footer from '@widgets/footer';
 import Navbar from '@widgets/navbar';
@@ -91,7 +91,7 @@ export function PageLayout() {
   const { pathname } = useLocation();
   const currentComponent = qs.parseUrl(pathname).url.slice(1);
   const locale = useLocale();
-  const { settings, userLoading, userInfo } = useSelector(
+  const { settings, userLoading, userInfo } = useGlobalSelector(
     (state: GlobalState) => state
   );
 

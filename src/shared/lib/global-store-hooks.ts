@@ -19,8 +19,8 @@ type UpdateUserInfoAction = {
 
 export type GlobalAction = UpdateSettingsAction | UpdateUserInfoAction;
 
-/** Redux-compatible hooks backed by MobX (Arco Pro simple scaffold API). */
-export function useSelector<T>(selector: (state: GlobalState) => T): T {
+/** MobX globalStore 的 React 订阅 / 派发钩子 */
+export function useGlobalSelector<T>(selector: (state: GlobalState) => T): T {
   const select = () => selector(globalStore.snapshot);
   const [selected, setSelected] = useState(select);
 
@@ -34,7 +34,7 @@ export function useSelector<T>(selector: (state: GlobalState) => T): T {
   return selected;
 }
 
-export function useDispatch() {
+export function useGlobalDispatch() {
   return (action: GlobalAction) => {
     switch (action.type) {
       case 'update-settings':

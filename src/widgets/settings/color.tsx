@@ -2,7 +2,7 @@ import React from 'react';
 import { Trigger, Typography } from '@arco-design/web-react';
 import { SketchPicker } from 'react-color';
 import { generate, getRgbStr } from '@arco-design/color';
-import { useSelector, useDispatch } from '@shared/lib/redux-compat';
+import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
 import useLocale from '@shared/lib/useLocale';
 import styles from './style/color-panel.module.less';
@@ -10,11 +10,11 @@ import styles from './style/color-panel.module.less';
 function ColorPanel() {
   const theme =
     document.querySelector('body').getAttribute('arco-theme') || 'light';
-  const settings = useSelector((state: GlobalState) => state.settings);
+  const settings = useGlobalSelector((state: GlobalState) => state.settings);
   const locale = useLocale();
   const themeColor = settings.themeColor;
   const list = generate(themeColor, { list: true });
-  const dispatch = useDispatch();
+  const dispatch = useGlobalDispatch();
 
   return (
     <div>

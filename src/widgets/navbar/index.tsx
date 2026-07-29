@@ -20,7 +20,7 @@ import {
   IconPoweroff,
   IconLoading
 } from '@arco-design/web-react/icon';
-import { useSelector, useDispatch } from '@shared/lib/redux-compat';
+import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
 import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
@@ -36,8 +36,8 @@ import { setAccessToken } from '@shared/api/request';
 
 function Navbar({ show }: { show: boolean }) {
   const t = useLocale();
-  const { userInfo, userLoading } = useSelector((state: GlobalState) => state);
-  const dispatch = useDispatch();
+  const { userInfo, userLoading } = useGlobalSelector((state: GlobalState) => state);
+  const dispatch = useGlobalDispatch();
 
   const [_, setUserStatus] = useStorage('userStatus');
   const [role, setRole] = useStorage('userRole', 'admin');

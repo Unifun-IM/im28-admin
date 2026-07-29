@@ -7,7 +7,7 @@ import {
   Skeleton,
   Link,
 } from '@arco-design/web-react';
-import { useSelector } from '@shared/lib/redux-compat';
+import { useGlobalSelector } from '@shared/lib/global-store-hooks';
 import { IconCaretUp } from '@arco-design/web-react/icon';
 import OverviewAreaLine from '@widgets/chart/overview-area-line';
 import { getApiWorkplaceOverviewContent } from '@shared/api/workplace';
@@ -61,7 +61,7 @@ function Overview() {
   const [loading, setLoading] = useState(true);
   const t = useLocale(locale);
 
-  const userInfo = useSelector((state: any) => state.userInfo || {});
+  const userInfo = useGlobalSelector((state: any) => state.userInfo || {});
 
   const fetchData = () => {
     setLoading(true);

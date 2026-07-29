@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Switch, Divider, InputNumber } from '@arco-design/web-react';
-import { useSelector, useDispatch } from '@shared/lib/redux-compat';
+import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
 import useLocale from '@shared/lib/useLocale';
 import styles from './style/block.module.less';
@@ -14,8 +14,8 @@ export interface BlockProps {
 export default function Block(props: BlockProps) {
   const { title, options, children } = props;
   const locale = useLocale();
-  const settings = useSelector((state: GlobalState) => state.settings);
-  const dispatch = useDispatch();
+  const settings = useGlobalSelector((state: GlobalState) => state.settings);
+  const dispatch = useGlobalDispatch();
 
   return (
     <div className={styles.block}>
