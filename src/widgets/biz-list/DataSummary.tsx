@@ -1,61 +1,160 @@
-import React, { useState } from 'react';
-import { Button, Grid, Statistic } from '@arco-design/web-react';
-import { IconDown, IconUp } from '@arco-design/web-react/icon';
+import React, { useMemo, useState } from 'react';
+import { Tooltip } from '@arco-design/web-react';
+import { IconDown, IconQuestionCircle, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
-
-import styles from './style/index.module.less';
-
-const { Row, Col } = Grid;
 
 export type SummaryItem = {
   label: string;
   value: string | number;
   suffix?: string;
+  /** 问号提示文案；有值时展示图标 */
+  tip?: string;
+  /**
+   * 数值色：success 绿 / danger 红；
+   * auto 根据正负号推断；默认正文色
+   */
+  tone?: 'default' | 'success' | 'danger' | 'auto';
 };
 
 export type DataSummaryProps = {
   items: SummaryItem[];
+  /** 每行列数，默认按数量自动：≤3→3，≤4→4，否则 5 */
+  columns?: 3 | 4 | 5;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
+  title?: string;
   className?: string;
 };
 
-/** Figma 数据汇总区域 */
+function resolveColumns(count: number, columns?: 3 | 4 | 5): 3 | 4 | 5 {
+  if (columns) return columns;
+  if (count <= 3) return 3;
+  if (count <= 4) return 4;
+  return 5;
+}
+
+function resolveTone(
+  value: string | number,
+  tone: SummaryItem['tone'] = 'default'
+): 'default' | 'success' | 'danger' {
+  if (tone === 'success' || tone === 'danger') return tone;
+  if (tone === 'auto') {
+    const text = String(value).trim();
+    if (text.startsWith('+')) return 'success';
+    if (text.startsWith('-')) return 'danger';
+  }
+  return 'default';
+}
+
+/** Figma 数据汇总区域（node 688:24611）— 布局由 Tailwind 承担 */
 export default function DataSummary({
   items,
+  columns,
   collapsible = true,
   defaultCollapsed = false,
+  title = '数据汇总',
   className
 }: DataSummaryProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const cols = resolveColumns(items.length, columns);
+
+  const cells = useMemo(() => {
+    const list = [...items];
+    const remainder = list.length % cols;
+    if (remainder !== 0) {
+      for (let i = 0; i < cols - remainder; i += 1) {
+        list.push({ label: '', value: '' });
+      }
+    }
+    return list;
+  }, [items, cols]);
+
   if (!items.length) return null;
 
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        className={cs(
+          'box-border flex h-9 w-full cursor-pointer items-center justify-center gap-1 rounded border border-arco-border-2 bg-arco-bg-2 px-3 py-2 text-xs text-arco-text-1 hover:bg-arco-fill-1',
+          className
+        )}
+        onClick={() => setCollapsed(false)}
+      >
+        <span>{title}</span>
+        <IconDown className="text-xs" />
+      </button>
+    );
+  }
+
   return (
-    <div className={cs(styles.summary, className)}>
-      <div className={styles.summaryHeader}>
-        <span className={styles.summaryTitle}>数据汇总</span>
+    <div
+      className={cs(
+        'box-border w-full overflow-hidden rounded border border-arco-border-2 bg-arco-bg-2',
+        className
+      )}
+    >
+      <div className="box-border flex h-8 items-center justify-between gap-2.5 border-b border-arco-border-2 px-3">
+        <span className="min-w-0 flex-1 text-xs font-normal text-arco-text-1">
+          {title}
+        </span>
         {collapsible && (
-          <Button
-            type="text"
-            size="mini"
-            icon={collapsed ? <IconDown /> : <IconUp />}
-            onClick={() => setCollapsed((v) => !v)}
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-xs text-arco-text-2 hover:text-arco-text-1"
+            onClick={() => setCollapsed(true)}
           >
-            {collapsed ? '展开' : '收起'}
-          </Button>
+            收起
+            <IconUp className="text-xs" />
+          </button>
         )}
       </div>
-      {!collapsed && (
-        <Row gutter={16}>
-          {items.map((item) => (
-            <Col key={item.label} xs={12} sm={8} md={6} lg={4}>
-              <div className={styles.summaryCard}>
-                <Statistic title={item.label} value={item.value} suffix={item.suffix} />
+      <div
+        className="grid w-full"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+      >
+        {cells.map((item, index) => {
+          const empty = !item.label && (item.value === '' || item.value == null);
+          const isLastCol = (index + 1) % cols === 0;
+          const isLastRow = index >= cells.length - cols;
+          const cellBorder = cs(
+            'box-border flex h-8 min-w-0 items-center justify-between gap-2 border-arco-border-2 px-3',
+            !isLastCol && 'border-r',
+            !isLastRow && 'border-b'
+          );
+
+          if (empty) {
+            return <div key={`empty-${index}`} className={cellBorder} />;
+          }
+
+          const tone = resolveTone(item.value, item.tone);
+          return (
+            <div key={`${item.label}-${index}`} className={cellBorder}>
+              <div className="flex min-w-0 flex-1 items-center gap-1">
+                <span className="truncate text-xs text-arco-text-3">
+                  {item.label}
+                </span>
+                {item.tip != null && item.tip !== '' && (
+                  <Tooltip content={item.tip}>
+                    <IconQuestionCircle className="shrink-0 cursor-help text-sm text-arco-text-4" />
+                  </Tooltip>
+                )}
               </div>
-            </Col>
-          ))}
-        </Row>
-      )}
+              <span
+                className={cs(
+                  'shrink-0 text-xs tabular-nums',
+                  tone === 'success' && 'text-arco-success',
+                  tone === 'danger' && 'text-arco-danger',
+                  tone === 'default' && 'text-arco-text-1'
+                )}
+              >
+                {item.value}
+                {item.suffix != null ? item.suffix : null}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import groupBy from 'lodash/groupBy';
 import {
   Trigger,
-  Badge,
   Tabs,
   Avatar,
   Spin,
   Button,
+  Switch
 } from '@arco-design/web-react';
 import {
   IconMessage,
   IconCustomerService,
   IconFile,
-  IconDesktop,
+  IconDesktop
 } from '@arco-design/web-react/icon';
 import { getApiMessageList, postApiMessageRead } from '@shared/api/message';
 import useLocale from '@shared/lib/useLocale';
@@ -22,6 +22,7 @@ import styles from './style/index.module.less';
 function DropContent() {
   const t = useLocale();
   const [loading, setLoading] = useState(false);
+  const [onlyUnread, setOnlyUnread] = useState(false);
   const [groupData, setGroupData] = useState<{
     [key: string]: MessageListType;
   }>({});
@@ -50,23 +51,20 @@ function DropContent() {
   }, []);
 
   useEffect(() => {
-    const groupData: { [key: string]: MessageListType } = groupBy(
-      sourceData,
-      'type'
-    );
-    setGroupData(groupData);
+    const next = groupBy(sourceData, 'type');
+    setGroupData(next);
   }, [sourceData]);
 
   const tabList = [
     {
       key: 'message',
       title: t['message.tab.title.message'],
-      titleIcon: <IconMessage />,
+      titleIcon: <IconMessage />
     },
     {
       key: 'notice',
       title: t['message.tab.title.notice'],
-      titleIcon: <IconCustomerService />,
+      titleIcon: <IconCustomerService />
     },
     {
       key: 'todo',
@@ -76,28 +74,33 @@ function DropContent() {
         <Avatar style={{ backgroundColor: '#0FC6C2' }}>
           <IconDesktop />
         </Avatar>
-      ),
-    },
+      )
+    }
   ];
 
   return (
     <div className={styles['message-box']}>
+      <div className={styles['message-header']}>
+        <span className={styles['message-header-title']}>
+          {t['message.box.title']}
+        </span>
+        <div className={styles['message-header-extra']}>
+          <span>{t['message.onlyUnread']}</span>
+          <Switch size="small" checked={onlyUnread} onChange={setOnlyUnread} />
+        </div>
+      </div>
       <Spin loading={loading} style={{ display: 'block' }}>
         <Tabs
           overflow="dropdown"
           type="rounded"
           defaultActiveTab="message"
           destroyOnHide
-          extra={
-            <Button type="text" onClick={() => setSourceData([])}>
-              {t['message.empty']}
-            </Button>
-          }
         >
           {tabList.map((item) => {
-            const { key, title, avatar } = item;
+            const { key, title } = item;
             const data = groupData[key] || [];
-            const unReadData = data.filter((item) => !item.status);
+            const unReadData = data.filter((row) => !row.status);
+            const listData = onlyUnread ? unReadData : data;
             return (
               <Tabs.TabPane
                 key={key}
@@ -109,13 +112,13 @@ function DropContent() {
                 }
               >
                 <MessageList
-                  data={data}
+                  data={listData}
                   unReadData={unReadData}
-                  onItemClick={(item) => {
-                    readMessage([item]);
+                  onItemClick={(row) => {
+                    readMessage([row]);
                   }}
-                  onAllBtnClick={(unReadData) => {
-                    readMessage(unReadData);
+                  onAllBtnClick={(rows) => {
+                    readMessage(rows);
                   }}
                 />
               </Tabs.TabPane>
@@ -123,22 +126,32 @@ function DropContent() {
           })}
         </Tabs>
       </Spin>
+      <div className={styles.footer}>
+        <Button type="text" long onClick={() => setSourceData([])}>
+          {t['message.empty']}
+        </Button>
+        <Button
+          type="text"
+          long
+          onClick={() => readMessage(sourceData.filter((i) => !i.status))}
+        >
+          {t['message.allRead']}
+        </Button>
+      </div>
     </div>
   );
 }
 
-function MessageBox({ children }) {
+function MessageBox({ children }: { children: React.ReactNode }) {
   return (
     <Trigger
-      trigger="hover"
+      trigger="click"
       popup={() => <DropContent />}
       position="br"
       unmountOnExit={false}
       popupAlign={{ bottom: 4 }}
     >
-      <Badge count={9} dot>
-        {children}
-      </Badge>
+      {children}
     </Trigger>
   );
 }

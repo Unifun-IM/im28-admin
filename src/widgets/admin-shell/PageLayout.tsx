@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Breadcrumb, Layout, Menu, Spin } from '@arco-design/web-react';
+import { Layout, Menu, Spin } from '@arco-design/web-react';
 import {
   IconApps,
   IconGift,
@@ -16,6 +16,7 @@ import NProgress from 'nprogress';
 import qs from 'query-string';
 
 import { type GlobalState } from '@entities/global-state';
+import Logo from '@shared/assets/logo.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import { isArray } from '@shared/lib/is';
 import getUrlParams from '@shared/lib/getUrlParams';
@@ -110,7 +111,7 @@ export function PageLayout() {
     new Map()
   );
 
-  const navbarHeight = 60;
+  const navbarHeight = 64;
   const menuWidth = collapsed ? COLLAPSED_WIDTH : settings.menuWidth;
   const showNavbar = settings.navbar && urlParams.navbar !== false;
   const showMenu = settings.menu && urlParams.menu !== false;
@@ -138,6 +139,10 @@ export function PageLayout() {
   const paddingLeft = showMenu ? { paddingLeft: menuWidth } : {};
   const paddingTop = showNavbar ? { paddingTop: navbarHeight } : {};
   const paddingStyle = { ...paddingLeft, ...paddingTop };
+  const navbarStyle = {
+    left: showMenu ? menuWidth : 0,
+    width: showMenu ? `calc(100% - ${menuWidth}px)` : '100%'
+  };
 
   function renderRoutes(localeMap: Record<string, string>) {
     routeMap.current.clear();
@@ -148,10 +153,11 @@ export function PageLayout() {
     ) {
       return _routes.map((route) => {
         const { breadcrumb: showBreadcrumb = true, ignore } = route;
-        const iconDom = getIconFromKey(route.key);
+        const iconDom = _level <= 1 ? getIconFromKey(route.key) : null;
         const titleDom = (
           <>
-            {iconDom} {localeMap[route.name] || route.name}
+            {iconDom}
+            <span>{localeMap[route.name] || route.name}</span>
           </>
         );
 
@@ -248,8 +254,9 @@ export function PageLayout() {
         className={cs(styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar
         })}
+        style={navbarStyle}
       >
-        <Navbar show={showNavbar} />
+        <Navbar show={showNavbar} breadcrumb={breadcrumb} />
       </div>
       {userLoading ? (
         <Spin className={styles.spin} />
@@ -263,12 +270,20 @@ export function PageLayout() {
               collapsedWidth={COLLAPSED_WIDTH}
               collapsible
               onCollapse={setCollapsed}
-              style={paddingTop}
               trigger={null}
               width={menuWidth}
             >
+              <div
+                className={cs(styles['sider-logo'], {
+                  [styles['sider-logo-collapsed']]: collapsed
+                })}
+              >
+                <Logo />
+                {!collapsed && <span>后台管理系统</span>}
+              </div>
               <div className={styles['menu-wrapper']}>
                 <Menu
+                  className={styles.sideMenu}
                   collapse={collapsed}
                   onClickMenuItem={onClickMenuItem}
                   onClickSubMenu={(_, keys) => setOpenKeys(keys)}
@@ -285,17 +300,6 @@ export function PageLayout() {
           )}
           <Layout className={styles['layout-content']} style={paddingStyle}>
             <div className={styles['layout-content-wrapper']}>
-              {!!breadcrumb.length && (
-                <div className={styles['layout-breadcrumb']}>
-                  <Breadcrumb>
-                    {breadcrumb.map((node, index) => (
-                      <Breadcrumb.Item key={index}>
-                        {typeof node === 'string' ? locale[node] || node : node}
-                      </Breadcrumb.Item>
-                    ))}
-                  </Breadcrumb>
-                </div>
-              )}
               <Content>
                 <Routes>
                   {flattenRoutes.map((route) => (

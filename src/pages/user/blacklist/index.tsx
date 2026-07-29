@@ -42,6 +42,7 @@ export default function Page() {
   return (
     <BizListPage
       form={form}
+      title="黑名单"
       filter={
         <>
           <FormItem field="keyword" label="关键词">
@@ -51,6 +52,7 @@ export default function Page() {
       }
       onSearch={() => { setPage(1); fetchData(1, pageSize); }}
       onReset={() => { form.resetFields(); setPage(1); fetchData(1, pageSize); }}
+      onRefresh={() => fetchData(page, pageSize)}
       toolbar={
         <Button
           disabled={!selectedRowKeys.length}
@@ -59,6 +61,9 @@ export default function Page() {
           批量解除
         </Button>
       }
+      batchActions={{
+        onDelete: () => remove(selectedRowKeys.map(String))
+      }}
       tableProps={{
         loading,
         data,

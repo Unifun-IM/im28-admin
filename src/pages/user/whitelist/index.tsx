@@ -58,15 +58,20 @@ export default function Page() {
   return (
     <BizListPage
       form={form}
+      title="白名单"
       filter={<FormItem field="keyword" label="关键词"><Input placeholder="用户ID / 昵称" /></FormItem>}
       onSearch={() => { setPage(1); fetchData(1, pageSize); }}
       onReset={() => { form.resetFields(); setPage(1); fetchData(1, pageSize); }}
+      onRefresh={() => fetchData(page, pageSize)}
       toolbar={
         <>
           <Button type="primary" onClick={add}>添加白名单</Button>
           <Button disabled={!selectedRowKeys.length} onClick={() => remove(selectedRowKeys.map(String))}>批量移除</Button>
         </>
       }
+      batchActions={{
+        onDelete: () => remove(selectedRowKeys.map(String))
+      }}
       tableProps={{
         loading,
         data,

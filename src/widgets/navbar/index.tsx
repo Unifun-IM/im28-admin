@@ -8,39 +8,48 @@ import {
   Menu,
   Divider,
   Message,
-  Button
+  Button,
+  Breadcrumb,
+  Badge,
+  Trigger
 } from '@arco-design/web-react';
 import {
   IconLanguage,
   IconNotification,
   IconSunFill,
   IconMoonFill,
-  IconUser,
-  IconSettings,
   IconPoweroff,
-  IconLoading
+  IconLoading,
+  IconSettings,
+  IconPalette
 } from '@arco-design/web-react/icon';
 import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
 import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
-import Logo from '@shared/assets/logo.svg?react';
 import MessageBox from '@widgets/message-box';
 import IconButton from './IconButton';
 import Settings from '@widgets/settings';
+import ColorPanel from '@widgets/settings/color';
 import styles from './style/index.module.less';
 import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
 import { generatePermission } from '@shared/config/routes';
 import { setAccessToken } from '@shared/api/request';
 
-function Navbar({ show }: { show: boolean }) {
+export type NavbarProps = {
+  show: boolean;
+  breadcrumb?: React.ReactNode[];
+};
+
+function Navbar({ show, breadcrumb = [] }: NavbarProps) {
   const t = useLocale();
+  const locale = useLocale();
   const { userInfo, userLoading } = useGlobalSelector((state: GlobalState) => state);
   const dispatch = useGlobalDispatch();
 
   const [_, setUserStatus] = useStorage('userStatus');
-  const [role, setRole] = useStorage('userRole', 'admin');
+  const [role] = useStorage('userRole', 'admin');
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
@@ -48,12 +57,6 @@ function Navbar({ show }: { show: boolean }) {
     setUserStatus('logout');
     setAccessToken(null);
     window.location.href = '/login';
-  }
-
-  function onMenuItemClick(key: string) {
-    if (key === 'logout') {
-      logout();
-    }
   }
 
   useEffect(() => {
@@ -80,29 +83,27 @@ function Navbar({ show }: { show: boolean }) {
     );
   }
 
-  const handleChangeRole = () => {
-    const newRole = role === 'admin' ? 'user' : 'admin';
-    setRole(newRole);
-  };
-
   const droplist = (
-    <Menu onClickMenuItem={onMenuItemClick}>
-      <Menu.Item key="profile" disabled>
+    <Menu
+      className={styles['profile-menu']}
+      onClickMenuItem={(key) => {
+        if (key === 'logout') logout();
+      }}
+    >
+      <Menu.Item key="profile" className={styles['profile-menu-item']} disabled>
         <div className={styles['profile-block']}>
           <Avatar size={32}>
             {userInfo?.avatar ? <img alt="avatar" src={userInfo.avatar} /> : null}
           </Avatar>
-          <div>
+          <div className={styles['profile-meta']}>
             <div className={styles['profile-name']}>{userInfo?.name || 'admin'}</div>
-            <div className={styles['profile-email']}>{userInfo?.email}</div>
+            <div className={styles['profile-email']}>
+              {userInfo?.email || 'admin@example.com'}
+            </div>
           </div>
         </div>
       </Menu.Item>
       <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item key="switch-role" onClick={handleChangeRole}>
-        <IconUser className={styles['dropdown-icon']} />
-        {t['menu.user.switchRoles']}
-      </Menu.Item>
       <Menu.Item key="logout">
         <IconPoweroff className={styles['dropdown-icon']} />
         {t['navbar.logout']}
@@ -113,22 +114,27 @@ function Navbar({ show }: { show: boolean }) {
   return (
     <div className={styles.navbar}>
       <div className={styles.left}>
-        <div className={styles.logo}>
-          <Logo />
-          <div className={styles['logo-name']}>IM-28 Management</div>
-        </div>
+        {breadcrumb.length > 0 && (
+          <Breadcrumb className={styles.breadcrumb}>
+            {breadcrumb.map((node, index) => (
+              <Breadcrumb.Item key={index}>
+                {typeof node === 'string' ? locale[node] || node : node}
+              </Breadcrumb.Item>
+            ))}
+          </Breadcrumb>
+        )}
       </div>
-      <ul className={styles.right}>
-        <li>
-          <Input.Search
-            className={styles.round}
-            placeholder={t['navbar.search.placeholder']}
-            allowClear
-          />
-        </li>
-        <li>
+      <div className={styles.right}>
+        <Input.Search
+          className={styles.search}
+          placeholder={t['navbar.search.placeholder']}
+          allowClear
+        />
+        <div className={styles.iconGroup}>
           <Select
-            triggerElement={<IconButton icon={<IconLanguage />} />}
+            triggerElement={
+              <IconButton icon={<IconLanguage />} tip={t['message.lang.tips']} />
+            }
             options={[
               { label: '中文', value: 'zh-CN' },
               { label: 'English', value: 'en-US' }
@@ -146,8 +152,6 @@ function Navbar({ show }: { show: boolean }) {
               Message.info(`${nextLang['message.lang.tips']}${value}`);
             }}
           />
-        </li>
-        <li>
           <Tooltip
             content={
               theme === 'light'
@@ -160,29 +164,42 @@ function Navbar({ show }: { show: boolean }) {
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             />
           </Tooltip>
-        </li>
-        <li>
           <MessageBox>
-            <IconButton icon={<IconNotification />} />
+            <Badge count={9} maxCount={99}>
+              <IconButton icon={<IconNotification />} />
+            </Badge>
           </MessageBox>
-        </li>
-        {userInfo && (
-          <li>
-            <Dropdown droplist={droplist} position="br" disabled={userLoading}>
-              <div className={styles['user-trigger']}>
-                <Avatar size={24} style={{ cursor: 'pointer' }}>
-                  {userLoading ? (
-                    <IconLoading />
-                  ) : (
-                    <img alt="avatar" src={userInfo.avatar} />
-                  )}
-                </Avatar>
-                <span className={styles['user-name']}>{userInfo.name || 'admin'}</span>
+          <Trigger
+            trigger="click"
+            position="br"
+            popupAlign={{ bottom: 4 }}
+            popup={() => (
+              <div className={styles['theme-panel']}>
+                <div className={styles['theme-panel-title']}>
+                  {t['settings.themeColor']}
+                </div>
+                <ColorPanel />
               </div>
-            </Dropdown>
-          </li>
+            )}
+          >
+            <IconButton icon={<IconPalette />} />
+          </Trigger>
+        </div>
+        {userInfo && (
+          <Dropdown droplist={droplist} position="br" disabled={userLoading}>
+            <div className={styles['user-trigger']}>
+              <Avatar size={24}>
+                {userLoading ? (
+                  <IconLoading />
+                ) : (
+                  <img alt="avatar" src={userInfo.avatar} />
+                )}
+              </Avatar>
+              <span className={styles['user-name']}>{userInfo.name || 'admin'}</span>
+            </div>
+          </Dropdown>
         )}
-      </ul>
+      </div>
     </div>
   );
 }

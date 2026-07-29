@@ -6,10 +6,9 @@ import {
   Button,
   Drawer,
   Message,
-  Tag,
   Space
 } from '@arco-design/web-react';
-import { BizListPage } from '@widgets/biz-list';
+import { ActionLinks, BizListPage, StatusBadge } from '@widgets/biz-list';
 import { getAccounts } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -49,6 +48,7 @@ export default function AccountsPage() {
     <>
       <BizListPage
         form={form}
+        title="账号列表"
         filter={
           <>
             <FormItem field="keyword" label="关键词">
@@ -75,6 +75,7 @@ export default function AccountsPage() {
           setPage(1);
           fetchData(1, pageSize);
         }}
+        onRefresh={() => fetchData(page, pageSize)}
         toolbar={
           <Button type="primary" onClick={() => setVisible(true)}>
             新建账号
@@ -91,11 +92,34 @@ export default function AccountsPage() {
               title: '状态',
               dataIndex: 'status',
               render: (v: string) => (
-                <Tag color={v === '启用' ? 'green' : 'gray'}>{v}</Tag>
+                <StatusBadge
+                  status={v === '启用' ? 'success' : 'default'}
+                  text={v}
+                />
               )
             },
             { title: '最近登录', dataIndex: 'lastLogin', width: 180 },
-            { title: '创建时间', dataIndex: 'createdAt', width: 180 }
+            { title: '创建时间', dataIndex: 'createdAt', width: 180 },
+            {
+              title: '操作',
+              width: 100,
+              render: () => (
+                <ActionLinks
+                  items={[
+                    {
+                      key: 'edit',
+                      label: '编辑',
+                      onClick: () => setVisible(true)
+                    },
+                    {
+                      key: 'more',
+                      label: '更多',
+                      onClick: () => Message.info('更多操作（mock）')
+                    }
+                  ]}
+                />
+              )
+            }
           ],
           pagination: {
             current: page,

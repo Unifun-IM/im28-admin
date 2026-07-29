@@ -1,10 +1,24 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, Select, Button, Tag } from '@arco-design/web-react';
+import { Form, Input, Select, DatePicker, Button, Message, Modal } from '@arco-design/web-react';
 import { useNavigate } from 'react-router-dom';
-import { BizListPage } from '@widgets/biz-list';
+import {
+  ActionLinks,
+  AvatarNameCell,
+  BizListPage,
+  FilterField,
+  StatusBadge,
+  type SummaryItem
+} from '@widgets/biz-list';
 import { getUserList } from '@shared/api/biz';
 
 const FormItem = Form.Item;
+
+function statusToBadge(v: string): 'success' | 'error' | 'warning' | 'default' {
+  if (v === '正常') return 'success';
+  if (v === '黑名单') return 'error';
+  if (v === '注销') return 'warning';
+  return 'default';
+}
 
 export default function UserQueryPage() {
   const navigate = useNavigate();
@@ -14,9 +28,7 @@ export default function UserQueryPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [summary, setSummary] = useState<{ label: string; value: string | number }[]>(
-    []
-  );
+  const [summary, setSummary] = useState<SummaryItem[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
 
   const fetchData = useCallback(
@@ -28,15 +40,16 @@ export default function UserQueryPage() {
         setData((res.list || []) as Record<string, unknown>[]);
         setTotal(res.total || 0);
         if (res.summary) {
-          const labelMap: Record<string, string> = {
-            total: '用户总数',
-            online: '在线',
-            blacklist: '黑名单',
-            cancelled: '注销'
+          const meta: Record<string, { label: string; tip: string }> = {
+            total: { label: '用户总数', tip: '当前系统注册用户总量' },
+            online: { label: '在线', tip: '当前在线用户数' },
+            blacklist: { label: '黑名单', tip: '处于黑名单中的用户数' },
+            cancelled: { label: '注销', tip: '已注销账号数' }
           };
           setSummary(
             Object.entries(res.summary).map(([key, value]) => ({
-              label: labelMap[key] || key,
+              label: meta[key]?.label || key,
+              tip: meta[key]?.tip,
               value: value as string | number
             }))
           );
@@ -57,31 +70,28 @@ export default function UserQueryPage() {
   return (
     <BizListPage
       form={form}
+      title="用户列表"
       filter={
         <>
-          <FormItem field="keyword" label="关键词">
-            <Input
-              addBefore={
-                <FormItem field="keywordType" noStyle initialValue="userId">
-                  <Select
-                    options={[
-                      { label: '用户ID', value: 'userId' },
-                      { label: '昵称', value: 'nickname' },
-                      { label: '手机号', value: 'phone' },
-                      { label: '邮箱', value: 'email' },
-                      { label: '账号', value: 'account' }
-                    ]}
-                    style={{ width: 100 }}
-                  />
-                </FormItem>
-              }
-              placeholder="请输入关键词"
+          <FormItem field="keyword" label="搜索">
+            <Input.Search placeholder="请输入搜索内容" allowClear />
+          </FormItem>
+          <FormItem field="online" label="在线状态">
+            <Select
+              allowClear
+              placeholder="单选内容"
+              options={[
+                { label: '在线', value: '在线' },
+                { label: '离线', value: '离线' }
+              ]}
             />
           </FormItem>
           <FormItem field="status" label="账号状态">
             <Select
+              mode="multiple"
               allowClear
-              placeholder="全部"
+              placeholder="多选内容"
+              maxTagCount={2}
               options={[
                 { label: '正常', value: '正常' },
                 { label: '黑名单', value: '黑名单' },
@@ -89,16 +99,14 @@ export default function UserQueryPage() {
               ]}
             />
           </FormItem>
-          <FormItem field="online" label="在线状态">
-            <Select
-              allowClear
-              placeholder="全部"
-              options={[
-                { label: '在线', value: '在线' },
-                { label: '离线', value: '离线' }
-              ]}
-            />
-          </FormItem>
+          <FilterField span={2}>
+            <FormItem field="registerTime" label="时间区间">
+              <DatePicker.RangePicker
+                style={{ width: '100%' }}
+                placeholder={['开始时间', '结束时间']}
+              />
+            </FormItem>
+          </FilterField>
         </>
       }
       onSearch={() => {
@@ -110,34 +118,84 @@ export default function UserQueryPage() {
         setPage(1);
         fetchData(1, pageSize);
       }}
+      onRefresh={() => fetchData(page, pageSize)}
       summary={summary.length ? summary : undefined}
+      toolbar={
+        <Button type="primary" disabled={!selectedRowKeys.length}>
+          批量操作
+        </Button>
+      }
+      batchActions={{
+        onArchive: () => Message.info(`归档 ${selectedRowKeys.length} 项（mock）`),
+        onEdit: () => Message.info(`编辑 ${selectedRowKeys.length} 项（mock）`),
+        onDelete: () => {
+          Modal.confirm({
+            title: '确认删除',
+            content: `将删除已选 ${selectedRowKeys.length} 项，是否继续？`,
+            onOk: () => {
+              Message.success('已删除（mock）');
+              setSelectedRowKeys([]);
+            }
+          });
+        }
+      }}
       tableProps={{
         loading,
         data,
         columns: [
-          { title: '用户ID', dataIndex: 'userId' },
-          { title: '昵称', dataIndex: 'nickname' },
+          {
+            title: '用户',
+            dataIndex: 'nickname',
+            width: 200,
+            render: (_: unknown, row: Record<string, unknown>) => (
+              <AvatarNameCell
+                name={row.nickname as string}
+                sub={row.userId as string}
+                avatar={row.avatar as string | undefined}
+              />
+            )
+          },
           { title: '账号', dataIndex: 'account' },
           { title: '手机号', dataIndex: 'phone' },
           {
             title: '状态',
             dataIndex: 'status',
+            width: 100,
             render: (v: string) => (
-              <Tag color={v === '正常' ? 'green' : v === '黑名单' ? 'red' : 'gray'}>
-                {v}
-              </Tag>
+              <StatusBadge status={statusToBadge(v)} text={v} />
             )
           },
-          { title: '在线', dataIndex: 'online' },
+          {
+            title: '在线',
+            dataIndex: 'online',
+            width: 90,
+            render: (v: string) => (
+              <StatusBadge
+                status={v === '在线' ? 'success' : 'default'}
+                text={v}
+              />
+            )
+          },
           { title: '注册时间', dataIndex: 'registerTime', width: 180 },
           {
             title: '操作',
             dataIndex: 'op',
             width: 100,
             render: (_: unknown, row: Record<string, unknown>) => (
-              <Button type="text" onClick={() => navigate(`/user/detail/${row.id}`)}>
-                详情
-              </Button>
+              <ActionLinks
+                items={[
+                  {
+                    key: 'detail',
+                    label: '详情',
+                    onClick: () => navigate(`/user/detail/${row.id}`)
+                  },
+                  {
+                    key: 'more',
+                    label: '更多',
+                    onClick: () => Message.info('更多操作（mock）')
+                  }
+                ]}
+              />
             )
           }
         ],

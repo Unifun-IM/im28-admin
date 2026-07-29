@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Form, Input, Select, DatePicker } from '@arco-design/web-react';
-import { BizListPage } from '@widgets/biz-list';
+import { BizListPage, FilterField } from '@widgets/biz-list';
 import { getUserLogs } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -30,16 +30,43 @@ export default function Page() {
   return (
     <BizListPage
       form={form}
+      title="用户日志"
+      onRefresh={() => fetchData(page, pageSize)}
       filter={
         <>
-          <FormItem field="keyword" label="关键词"><Input placeholder="用户ID / 昵称" /></FormItem>
+          <FormItem field="keyword" label="搜索">
+            <Input.Search placeholder="请输入搜索内容" allowClear />
+          </FormItem>
           <FormItem field="action" label="行为类型">
-            <Select allowClear placeholder="全部" options={['登录','注册','修改资料','好友关系','群聊','钱包操作','消息操作'].map(v=>({label:v,value:v}))} />
+            <Select
+              allowClear
+              placeholder="单选内容"
+              options={['登录', '注册', '修改资料', '好友关系', '群聊', '钱包操作', '消息操作'].map(
+                (v) => ({ label: v, value: v })
+              )}
+            />
           </FormItem>
           <FormItem field="client" label="客户端">
-            <Select allowClear placeholder="全部" options={['iOS','Android','Web','PC'].map(v=>({label:v,value:v}))} />
+            <Select
+              mode="multiple"
+              allowClear
+              placeholder="多选内容"
+              maxTagCount={2}
+              options={['iOS', 'Android', 'Web', 'PC'].map((v) => ({
+                label: v,
+                value: v
+              }))}
+            />
           </FormItem>
-          <FormItem field="timeRange" label="操作时间"><DatePicker.RangePicker style={{width:'100%'}} /></FormItem>
+          <FilterField span={2}>
+            <FormItem field="timeRange" label="时间区间">
+              <DatePicker.RangePicker
+                style={{ width: '100%' }}
+                placeholder={['开始时间', '结束时间']}
+                showTime
+              />
+            </FormItem>
+          </FilterField>
         </>
       }
       onSearch={() => { setPage(1); fetchData(1, pageSize); }}

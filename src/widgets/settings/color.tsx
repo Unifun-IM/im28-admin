@@ -1,15 +1,14 @@
 import React from 'react';
 import { Trigger, Typography } from '@arco-design/web-react';
 import { SketchPicker } from 'react-color';
-import { generate, getRgbStr } from '@arco-design/color';
+import { generate } from '@arco-design/color';
 import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
 import { GlobalState } from '@entities/global-state';
+import applyThemeColor from '@shared/lib/applyThemeColor';
 import useLocale from '@shared/lib/useLocale';
 import styles from './style/color-panel.module.less';
 
 function ColorPanel() {
-  const theme =
-    document.querySelector('body').getAttribute('arco-theme') || 'light';
   const settings = useGlobalSelector((state: GlobalState) => state.settings);
   const locale = useLocale();
   const themeColor = settings.themeColor;
@@ -28,19 +27,9 @@ function ColorPanel() {
               const newColor = color.hex;
               dispatch({
                 type: 'update-settings',
-                payload: { settings: { ...settings, themeColor: newColor } },
+                payload: { settings: { ...settings, themeColor: newColor } }
               });
-              const newList = generate(newColor, {
-                list: true,
-                dark: theme === 'dark',
-              });
-              newList.forEach((l, index) => {
-                const rgbStr = getRgbStr(l);
-                document.body.style.setProperty(
-                  `--arcoblue-${index + 1}`,
-                  rgbStr
-                );
-              });
+              applyThemeColor(newColor);
             }}
           />
         )}

@@ -1,5 +1,32 @@
 @import 'nprogress/nprogress.css';
 
+/* 默认主题色 #635CFF → --arcoblue-*（--primary-* 已 alias） */
+body {
+  --arcoblue-1: 237, 232, 255;
+  --arcoblue-2: 213, 204, 255;
+  --arcoblue-3: 188, 176, 255;
+  --arcoblue-4: 161, 148, 255;
+  --arcoblue-5: 131, 120, 255;
+  --arcoblue-6: 99, 92, 255;
+  --arcoblue-7: 59, 57, 210;
+  --arcoblue-8: 30, 32, 166;
+  --arcoblue-9: 11, 16, 121;
+  --arcoblue-10: 0, 6, 77;
+}
+
+body[arco-theme='dark'] {
+  --arcoblue-1: 0, 6, 77;
+  --arcoblue-2: 9, 14, 121;
+  --arcoblue-3: 30, 32, 166;
+  --arcoblue-4: 63, 61, 210;
+  --arcoblue-5: 109, 102, 255;
+  --arcoblue-6: 140, 130, 255;
+  --arcoblue-7: 168, 156, 255;
+  --arcoblue-8: 192, 181, 255;
+  --arcoblue-9: 215, 207, 255;
+  --arcoblue-10: 237, 232, 255;
+}
+
 html,
 body {
   width: 100%;
@@ -8,6 +35,39 @@ body {
   padding: 0;
   font-size: 14px;
   background-color: var(--color-bg-1);
+}
+
+/* 侧栏折叠时二级菜单浮层（portal 渲染，需全局样式） */
+.arco-menu-pop,
+.arco-trigger-popup .arco-menu {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--color-border-2, #e5e6eb);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  background: var(--color-bg-popup, #fff) !important;
+
+  .arco-menu-item {
+    min-width: 120px;
+    height: 32px !important;
+    margin: 0;
+    padding: 0 12px !important;
+    border-radius: 6px;
+    color: var(--color-text-1, #1d2129);
+    font-size: 14px;
+    line-height: 32px;
+
+    &:hover,
+    &.arco-menu-selected {
+      background: var(--color-fill-2, #f2f3f5) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 500;
+    }
+
+    &::before,
+    &::after {
+      display: none !important;
+    }
+  }
 }
 
 .chart-wrapper {

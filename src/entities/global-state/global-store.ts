@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 
 import defaultSettings from '@shared/config/settings.json';
+import applyThemeColor from '@shared/lib/applyThemeColor';
 
 export type AppSettings = typeof defaultSettings;
 
@@ -40,6 +41,7 @@ export class GlobalStore {
 
   updateSettings(settings: AppSettings) {
     this.settings = settings;
+    applyThemeColor(settings.themeColor);
   }
 
   updateUserInfo(payload: { userInfo?: UserInfo; userLoading?: boolean }) {

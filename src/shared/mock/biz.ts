@@ -181,6 +181,7 @@ setupMock({
           name: '@pick(["超级管理员","运营","客服","财务","审计"])',
           desc: '@csentence(8,20)',
           memberCount: '@integer(1,40)',
+          'status|1': ['启用', '启用', '启用', '停用'],
           updatedAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
       );

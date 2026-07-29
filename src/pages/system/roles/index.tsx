@@ -6,9 +6,14 @@ import {
   Drawer,
   Message,
   Checkbox,
-  Space
+  Space,
+  Modal
 } from '@arco-design/web-react';
-import { BizListPage } from '@widgets/biz-list';
+import {
+  ActionLinks,
+  BizListPage,
+  StatusBadge
+} from '@widgets/biz-list';
 import { getRoles } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -37,6 +42,7 @@ export default function RolesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [visible, setVisible] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -63,6 +69,7 @@ export default function RolesPage() {
     <>
       <BizListPage
         form={form}
+        title="角色列表"
         filter={
           <FormItem field="keyword" label="角色名称">
             <Input placeholder="请输入" />
@@ -77,11 +84,41 @@ export default function RolesPage() {
           setPage(1);
           fetchData(1, pageSize);
         }}
+        onRefresh={() => fetchData(page, pageSize)}
         toolbar={
-          <Button type="primary" onClick={() => setVisible(true)}>
-            新增角色
-          </Button>
+          <>
+            <Button
+              onClick={() => {
+                Modal.confirm({
+                  title: '二次确认',
+                  content: '确认执行该操作？',
+                  onOk: () => {
+                    Message.success('已确认（mock）');
+                  }
+                });
+              }}
+            >
+              二次确认
+            </Button>
+            <Button type="primary" onClick={() => setVisible(true)}>
+              新建角色
+            </Button>
+          </>
         }
+        batchActions={{
+          onArchive: () => Message.info(`归档 ${selectedRowKeys.length} 项（mock）`),
+          onEdit: () => Message.info(`编辑 ${selectedRowKeys.length} 项（mock）`),
+          onDelete: () => {
+            Modal.confirm({
+              title: '确认删除',
+              content: `将删除已选 ${selectedRowKeys.length} 项，是否继续？`,
+              onOk: () => {
+                Message.success('已删除（mock）');
+                setSelectedRowKeys([]);
+              }
+            });
+          }
+        }}
         tableProps={{
           loading,
           data,
@@ -91,15 +128,37 @@ export default function RolesPage() {
             { title: '成员数', dataIndex: 'memberCount' },
             { title: '更新时间', dataIndex: 'updatedAt', width: 180 },
             {
+              title: '状态',
+              dataIndex: 'status',
+              width: 100,
+              render: (v?: string) => (
+                <StatusBadge
+                  status={v === '停用' ? 'error' : 'success'}
+                  text={v || '启用'}
+                />
+              )
+            },
+            {
               title: '操作',
               width: 100,
               render: () => (
-                <Button type="text" onClick={() => setVisible(true)}>
-                  编辑
-                </Button>
+                <ActionLinks
+                  items={[
+                    { key: 'edit', label: '编辑', onClick: () => setVisible(true) },
+                    {
+                      key: 'more',
+                      label: '更多',
+                      onClick: () => Message.info('更多操作（mock）')
+                    }
+                  ]}
+                />
               )
             }
           ],
+          rowSelection: {
+            selectedRowKeys,
+            onChange: (keys) => setSelectedRowKeys(keys)
+          },
           pagination: {
             current: page,
             pageSize,

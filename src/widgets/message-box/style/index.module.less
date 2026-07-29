@@ -1,15 +1,18 @@
 @import '@arco-themes/react-arco-pro/variables.less';
 
 .message-box {
-  width: 400px;
-  max-height: 800px;
+  width: 384px;
+  max-height: 480px;
+  overflow: hidden;
   background-color: var(--color-bg-popup);
   border: 1px solid var(--color-border-2);
   box-shadow: @shadow2-down;
-  border-radius: @border-radius-medium;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
 
   :global(.arco-tabs-header-nav) {
-    padding: 8px 16px;
+    padding: 0 8px;
     border-bottom: 1px solid var(--color-border-2);
   }
 
@@ -26,6 +29,29 @@
   }
 }
 
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--color-border-2);
+}
+
+.message-header-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.message-header-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-3);
+}
+
 .message-title {
   display: flex;
   justify-content: space-between;
@@ -33,14 +59,15 @@
 
 .footer {
   display: flex;
-}
+  border-top: 1px solid var(--color-border-2);
 
-.footer-item {
-  display: flex;
-  justify-content: center;
-  width: 50%;
+  :global(.arco-btn) {
+    flex: 1;
+    height: 48px;
+    border-radius: 0;
 
-  &:first-child {
-    border-right: 1px solid var(--color-border-2);
+    &:first-child {
+      border-right: 1px solid var(--color-border-2);
+    }
   }
 }

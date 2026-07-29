@@ -1,9 +1,30 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, Select, Button, Drawer, Descriptions, Message, Tag } from '@arco-design/web-react';
-import { BizListPage } from '@widgets/biz-list';
+import {
+  Form,
+  Input,
+  Select,
+  Button,
+  Drawer,
+  Descriptions,
+  Message,
+  Tag
+} from '@arco-design/web-react';
+import { BizListPage, type SummaryItem } from '@widgets/biz-list';
 import { getRechargeOrders } from '@shared/api/biz';
 
 const FormItem = Form.Item;
+
+/** 对齐 Figma 数据汇总区域示例数据 */
+const FINANCE_SUMMARY: SummaryItem[] = [
+  { label: '充值订单入账-TON', value: '1123.32', tip: 'TON 充值成功入账合计' },
+  { label: '充值订单入账-USDT', value: '2212.00', tip: 'USDT 充值成功入账合计' },
+  { label: '提现扣减-TON', value: '772.12', tip: 'TON 提现扣减合计' },
+  { label: '提现扣减-USDT', value: '241.68', tip: 'USDT 提现扣减合计' },
+  { label: '提现退回-TON', value: '0.00', tip: 'TON 提现失败退回' },
+  { label: '提现退回-USDT', value: '0.00', tip: 'USDT 提现失败退回' },
+  { label: '累计(TON)', value: '+635.85', tip: 'TON 净累计', tone: 'auto' },
+  { label: '累计(USDT)', value: '-30.22', tip: 'USDT 净累计', tone: 'auto' }
+];
 
 export default function Page() {
   const [form] = Form.useForm();
@@ -14,17 +35,20 @@ export default function Page() {
   const [pageSize, setPageSize] = useState(10);
   const [current, setCurrent] = useState<Record<string, unknown> | null>(null);
 
-  const fetchData = useCallback(async (p = page, size = pageSize) => {
-    setLoading(true);
-    try {
-      const values = form.getFieldsValue();
-      const res = await getRechargeOrders({ page: p, pageSize: size, ...values });
-      setData((res.list || []) as Record<string, unknown>[]);
-      setTotal(res.total || 0);
-    } finally {
-      setLoading(false);
-    }
-  }, [form, page, pageSize]);
+  const fetchData = useCallback(
+    async (p = page, size = pageSize) => {
+      setLoading(true);
+      try {
+        const values = form.getFieldsValue();
+        const res = await getRechargeOrders({ page: p, pageSize: size, ...values });
+        setData((res.list || []) as Record<string, unknown>[]);
+        setTotal(res.total || 0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [form, page, pageSize]
+  );
 
   useEffect(() => {
     fetchData(1, pageSize);
@@ -36,6 +60,9 @@ export default function Page() {
     <>
       <BizListPage
         form={form}
+        title="充值订单"
+        onRefresh={() => fetchData(page, pageSize)}
+        summary={FINANCE_SUMMARY}
         filter={
           <>
             <FormItem field="keyword" label="关键词">
