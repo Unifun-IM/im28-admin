@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   Form,
   Input,
-  DatePicker,
   Button,
   Tag,
   Dropdown,
@@ -13,6 +12,7 @@ import {
   AvatarNameCell,
   BizListPage,
   DoubleLineCell,
+  FilterDateRange,
   FilterField,
   FilterKeywordInput,
   FilterSelect,
@@ -96,7 +96,7 @@ export default function UserQueryPage() {
 
   const sharedFilters = (
     <>
-      <FilterField span="narrow">
+      <FilterField>
         <FormItem field="status" label="账号状态" initialValue="">
           <FilterSelect
             placeholder="全部"
@@ -109,7 +109,7 @@ export default function UserQueryPage() {
           />
         </FormItem>
       </FilterField>
-      <FilterField span="narrow">
+      <FilterField>
         <FormItem field="online" label="在线状态" initialValue="">
           <FilterSelect
             placeholder="全部"
@@ -121,23 +121,17 @@ export default function UserQueryPage() {
           />
         </FormItem>
       </FilterField>
-      <FilterField span={2}>
+      <FilterField>
         <FormItem field="registerTime" label="注册时间">
-          <DatePicker.RangePicker
-            style={{ width: '100%' }}
-            placeholder={['开始时间', '结束时间']}
-          />
+          <FilterDateRange />
         </FormItem>
       </FilterField>
-      <FilterField span={2}>
+      <FilterField>
         <FormItem field="lastActiveTime" label="最后操作时间">
-          <DatePicker.RangePicker
-            style={{ width: '100%' }}
-            placeholder={['开始时间', '结束时间']}
-          />
+          <FilterDateRange />
         </FormItem>
       </FilterField>
-      <FilterField span={2}>
+      <FilterField>
         <FormItem
           field="inviterKeyword"
           label="邀请人关键词搜索"
@@ -206,7 +200,7 @@ export default function UserQueryPage() {
           </>
         ) : (
           <>
-            <FilterField span="narrow">
+            <FilterField>
               <FormItem field="keyword" label="关键词搜索">
                 <FilterKeywordInput
                   typeField="keywordType"

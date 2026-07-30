@@ -10,8 +10,10 @@
 .arco-cascader-single .arco-cascader-view-selector {
   position: relative;
   display: inline-flex;
+  align-items: center;
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -745,13 +747,21 @@ body[arco-theme='dark'] {
     padding: 12px;
   }
 
-  /* 操作列：贴底右对齐 */
+  /* gutter 默认 flex-start 会使操作列矮于筛选项；拉齐行高后贴底对齐控件 */
+  .arco-row {
+    align-items: stretch;
+  }
+
+  /* 操作列：与同排筛选项同高，按钮贴底右对齐（对齐输入控件） */
   .use-biz-filter-actions {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
-    min-height: 52px;
-    min-width: 120px;
+    margin-bottom: 0;
+  }
+
+  .use-biz-filter-field {
+    margin-bottom: 0;
   }
 
   .arco-form-item {
@@ -877,17 +887,31 @@ body[arco-theme='dark'] {
     padding: 0 12px;
   }
 
+  .arco-select-view {
+    display: inline-flex;
+    align-items: center;
+  }
+
   .arco-select-single .arco-select-view {
     height: 32px;
     line-height: 32px;
   }
 
-  .arco-input,
+  /* line-height 与控件同高，避免中文字形 ascent 偏大导致视觉偏上 */
   .arco-select-single .arco-select-view-value,
+  .arco-select-single .arco-select-view-placeholder,
   .arco-select-view-input,
   .arco-picker-input input {
     font-size: 14px;
-    line-height: 21px;
+    line-height: 32px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-input {
+    font-size: 14px;
+    line-height: 32px;
+    height: 100%;
+    padding: 0;
     color: var(--color-text-1, #1d2129);
   }
 
@@ -903,6 +927,7 @@ body[arco-theme='dark'] {
   .arco-picker:hover,
   .arco-input-inner-wrapper:focus-within,
   .arco-select-view-focus,
+  .arco-select-focused .arco-select-view,
   .arco-picker-focused {
     background-color: var(--color-fill-2, #f2f3f5);
   }
@@ -925,7 +950,7 @@ body[arco-theme='dark'] {
     white-space: nowrap;
     border-radius: 8px 0 0 8px;
     border-right: 1px solid var(--color-border-2, #e5e6eb);
-    padding: 0 8px;
+    padding: 0 11px;
     color: var(--color-text-1, #1d2129);
     background-color: var(--color-fill-1, #f7f8fa);
     flex: none;
@@ -939,13 +964,16 @@ body[arco-theme='dark'] {
     .arco-select-view {
       background: transparent;
       padding: 0 4px 0 0;
-      min-height: 30px;
-      height: 30px;
+      min-height: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
     }
 
-    .arco-select-view-value {
+    .arco-select-view-value,
+    .arco-select-view-placeholder {
       font-size: 14px;
-      line-height: 30px;
+      line-height: 32px;
       color: var(--color-text-1, #1d2129);
     }
   }
@@ -1067,16 +1095,8 @@ body[arco-theme='dark'] {
 @media (max-width: 768px) {
   .use-biz-filter-bar {
     .use-biz-filter-actions {
-      min-height: 32px;
-      width: 100%;
-      flex: 1 0 100%;
-      max-width: 100%;
-    }
-
-    .use-biz-filter-field.arco-col {
-      flex: 0 0 100%;
-      max-width: 100%;
-      width: 100%;
+      justify-content: flex-start;
+      align-items: center;
     }
   }
 }
@@ -1134,7 +1154,6 @@ body[arco-theme='dark'] {
     min-height: 32px;
     height: 32px;
     margin: 0;
-    padding: 0 4px 0 0 !important;
     border-radius: 8px;
     line-height: 22px;
     font-size: 14px;
@@ -1535,16 +1554,22 @@ body[arco-theme='dark'] {
   }
 }
 
-/* 用户详情 Drawer — Figma 666:21862 / 750:23153 */
+/* 用户详情 Drawer — 标准 title；内容区视觉 token */
 .use-user-detail-drawer {
   .arco-drawer-header {
-    display: none;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .arco-drawer-header-title {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    color: var(--color-text-1, #1d2129);
   }
 
   .arco-drawer-body {
-    height: 100%;
-    padding: 0;
-    overflow: hidden;
+    padding: 16px;
   }
 
   .use-user-detail-avatar.arco-avatar {

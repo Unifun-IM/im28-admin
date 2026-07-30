@@ -30,8 +30,8 @@ function getOptionLabel(opt: NonNullable<SelectProps['options']>[number]): strin
 }
 
 /**
- * 筛选区 Select — 基于 Arco Select。
- * 多选时增强：下拉内搜索 / 全选 / 清除（Figma 602:35141）；单选也可复用统一下拉皮肤。
+ * 筛选区下拉单选 — Arco Select。
+ * 多选请用 FilterMultiSelect（或传 mode="multiple"）：下拉内搜索 / 全选 / 清除。
  */
 export default function FilterSelect(props: SelectProps) {
   const {

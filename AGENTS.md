@@ -71,13 +71,13 @@ src/app | pages | widgets | features | entities | shared
 
 硬性约束：
 
-1. **`preflight: false`**（`tailwind.config.js`），禁止打开，避免冲掉 Arco 基础样式
+1. **`preflight: false`**（`tailwind.config.js`），禁止打开，避免冲掉 Arco 基础样式。边框重置见 `src/app/styles/tailwind.css`（`@layer base` 仅补 `border-width:0`，修复 `border-b`+`border-solid` 其它边变 3px）
 2. **不要用 Tailwind 全面替换** Arco 主题 / 组件内部样式；当前无 prefix，勿另起一套工具类前缀
 3. 主题色走 `applyThemeColor` + `settings.json` 的 `themeColor`（默认 `#635CFF`）；**浅/暗色 primary/6 均钉品牌色**
 4. 语义色以 `src/app/styles/theme-tokens.less` 为准；壳层用 `--color-bg-1` / `--color-bg-2` 等变量，勿写死浅色 hex
 5. 样式入口：`arco.css` → `tailwind.css` → `global.less`（含 theme-tokens）
 6. **新增**自定义 UI 默认不建 `style/index.module.less`
-7. 筛选区参考：`SearchFilterBar`（`Card` + `Form` + `Grid` + `Space`）；`.use-biz-filter-bar` 只补视觉；关键词类型前缀用 `FilterKeywordInput`；多选下拉增强用 `FilterSelect`
+7. 筛选区参考 Arco Design Pro search-table：`SearchFilterBar`（`Card` + `Form` + `Grid` gutter=`[24, 16]`，默认 Col span=6 **一行四个**；操作区占满行末剩余栅格右对齐）；`.use-biz-filter-bar` 只补视觉；控件用 `FilterKeywordInput` / `FilterInput` / `FilterSelect` / `FilterMultiSelect` / `FilterDateRange`
 8. 壳层菜单仍用 `admin-shell/style/layout.module.less`（复杂侧栏覆盖）
 
 

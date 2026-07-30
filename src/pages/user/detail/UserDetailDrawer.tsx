@@ -9,7 +9,7 @@ import {
   Tabs,
   type TableColumnProps
 } from '@arco-design/web-react';
-import { IconClose, IconCopy, IconRight } from '@arco-design/web-react/icon';
+import { IconCopy, IconRight } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import { getUserDetail } from '@shared/api/biz';
 import { StatusBadge } from '@widgets/biz-list';
@@ -163,9 +163,8 @@ export default function UserDetailDrawer({
       width={640}
       visible={visible}
       placement="right"
+      title="用户详情"
       footer={null}
-      title={null}
-      closable={false}
       unmountOnExit
       maskClosable
       onCancel={onClose}
@@ -174,165 +173,147 @@ export default function UserDetailDrawer({
         backdropFilter: 'blur(3.5px)'
       }}
     >
-      <div className="flex h-full flex-col">
-        <div className="box-border flex h-[48px] shrink-0 items-center justify-between border-b border-solid border-[rgba(0,0,0,0.08)] px-[16px]">
-          <div className="text-[16px] font-medium leading-[24px] text-arco-text-1">
-            用户详情
+      <Spin loading={loading} className="block w-full">
+        <div className="flex flex-col gap-[12px]">
+          <div className="flex h-[56px] items-center gap-[16px]">
+            <Avatar
+              size={56}
+              className="use-user-detail-avatar shrink-0"
+            >
+              {initials(nickname)}
+            </Avatar>
+            <div className="min-w-0">
+              <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
+                {nickname}
+              </div>
+              <div className="mt-[2px]">
+                <StatusBadge
+                  status={online === '在线' ? 'success' : 'default'}
+                  text={online || '-'}
+                  className="!text-[14px] !leading-[21px] !text-arco-text-2"
+                />
+              </div>
+            </div>
           </div>
-          <button
-            type="button"
-            className="inline-flex size-[16px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-2 hover:text-arco-text-1"
-            aria-label="关闭"
-            onClick={onClose}
-          >
-            <IconClose className="text-[12px]" />
-          </button>
-        </div>
 
-        <div className="min-h-0 flex-1 overflow-auto p-[16px]">
-          <Spin loading={loading} className="block w-full">
-            <div className="flex flex-col gap-[12px]">
-              <div className="flex h-[56px] items-center gap-[16px]">
-                <Avatar
-                  size={56}
-                  className="use-user-detail-avatar shrink-0"
-                >
-                  {initials(nickname)}
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
-                    {nickname}
+          <Tabs
+            activeTab={tab}
+            onChange={setTab}
+            className="use-user-detail-tabs"
+          >
+            <Tabs.TabPane key="basic" title="基本信息">
+              <div className="flex flex-col gap-[12px] pt-[12px]">
+                <div>
+                  <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    基础信息
                   </div>
-                  <div className="mt-[2px]">
-                    <StatusBadge
-                      status={online === '在线' ? 'success' : 'default'}
-                      text={online || '-'}
-                      className="!text-[14px] !leading-[21px] !text-arco-text-2"
-                    />
+                  <Descriptions
+                    className="use-user-detail-descriptions"
+                    bordered
+                    column={2}
+                    size="small"
+                    tableLayout="fixed"
+                    data={[
+                      {
+                        label: '用户ID',
+                        value: String(detail?.userId || '-')
+                      },
+                      {
+                        label: '账号',
+                        value: (
+                          <CopyValue
+                            value={String(detail?.account || '-')}
+                          />
+                        )
+                      },
+                      {
+                        label: '手机号',
+                        value: formatPhone(detail?.phone)
+                      },
+                      {
+                        label: '邮箱',
+                        value: String(detail?.email || '-')
+                      },
+                      {
+                        label: '注册时间',
+                        value: String(detail?.registerTime || '-')
+                      },
+                      {
+                        label: '最后操作时间',
+                        value: String(
+                          detail?.lastActiveTime ||
+                            detail?.lastLoginTime ||
+                            '-'
+                        )
+                      }
+                    ]}
+                  />
+                </div>
+
+                <div>
+                  <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    社交关系
                   </div>
+                  <Descriptions
+                    className="use-user-detail-descriptions"
+                    bordered
+                    column={2}
+                    size="small"
+                    tableLayout="fixed"
+                    data={[
+                      {
+                        label: '好友数量',
+                        value: (
+                          <SocialLink
+                            value={String(detail?.friendCount ?? 0)}
+                            onClick={() =>
+                              Message.info('查看好友列表（mock）')
+                            }
+                          />
+                        )
+                      },
+                      {
+                        label: '群聊数量',
+                        value: (
+                          <SocialLink
+                            value={String(detail?.groupCount ?? 0)}
+                            onClick={() =>
+                              Message.info('查看群聊列表（mock）')
+                            }
+                          />
+                        )
+                      }
+                    ]}
+                  />
                 </div>
               </div>
+            </Tabs.TabPane>
 
-              <Tabs
-                activeTab={tab}
-                onChange={setTab}
-                className="use-user-detail-tabs"
-              >
-                <Tabs.TabPane key="basic" title="基本信息">
-                  <div className="flex flex-col gap-[12px] pt-[12px]">
-                    <div>
-                      <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                        基础信息
+            <Tabs.TabPane key="logs" title="操作日志">
+              <div className="pt-[12px]">
+                <Table
+                  className="use-user-detail-table"
+                  rowKey={(row, index) =>
+                    String(row.id ?? `${row.time ?? 'log'}-${index}`)
+                  }
+                  columns={LOG_COLUMNS}
+                  data={logs}
+                  border
+                  borderCell
+                  pagination={false}
+                  noDataElement={
+                    !loading ? (
+                      <div className="py-8 text-center text-[12px] text-arco-text-3">
+                        暂无操作日志
                       </div>
-                      <Descriptions
-                        className="use-user-detail-descriptions"
-                        bordered
-                        column={2}
-                        size="small"
-                        tableLayout="fixed"
-                        data={[
-                          {
-                            label: '用户ID',
-                            value: String(detail?.userId || '-')
-                          },
-                          {
-                            label: '账号',
-                            value: (
-                              <CopyValue
-                                value={String(detail?.account || '-')}
-                              />
-                            )
-                          },
-                          {
-                            label: '手机号',
-                            value: formatPhone(detail?.phone)
-                          },
-                          {
-                            label: '邮箱',
-                            value: String(detail?.email || '-')
-                          },
-                          {
-                            label: '注册时间',
-                            value: String(detail?.registerTime || '-')
-                          },
-                          {
-                            label: '最后操作时间',
-                            value: String(
-                              detail?.lastActiveTime ||
-                                detail?.lastLoginTime ||
-                                '-'
-                            )
-                          }
-                        ]}
-                      />
-                    </div>
-
-                    <div>
-                      <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                        社交关系
-                      </div>
-                      <Descriptions
-                        className="use-user-detail-descriptions"
-                        bordered
-                        column={2}
-                        size="small"
-                        tableLayout="fixed"
-                        data={[
-                          {
-                            label: '好友数量',
-                            value: (
-                              <SocialLink
-                                value={String(detail?.friendCount ?? 0)}
-                                onClick={() =>
-                                  Message.info('查看好友列表（mock）')
-                                }
-                              />
-                            )
-                          },
-                          {
-                            label: '群聊数量',
-                            value: (
-                              <SocialLink
-                                value={String(detail?.groupCount ?? 0)}
-                                onClick={() =>
-                                  Message.info('查看群聊列表（mock）')
-                                }
-                              />
-                            )
-                          }
-                        ]}
-                      />
-                    </div>
-                  </div>
-                </Tabs.TabPane>
-
-                <Tabs.TabPane key="logs" title="操作日志">
-                  <div className="pt-[12px]">
-                    <Table
-                      className="use-user-detail-table"
-                      rowKey={(row, index) =>
-                        String(row.id ?? `${row.time ?? 'log'}-${index}`)
-                      }
-                      columns={LOG_COLUMNS}
-                      data={logs}
-                      border
-                      borderCell
-                      pagination={false}
-                      noDataElement={
-                        !loading ? (
-                          <div className="py-8 text-center text-[12px] text-arco-text-3">
-                            暂无操作日志
-                          </div>
-                        ) : null
-                      }
-                    />
-                  </div>
-                </Tabs.TabPane>
-              </Tabs>
-            </div>
-          </Spin>
+                    ) : null
+                  }
+                />
+              </div>
+            </Tabs.TabPane>
+          </Tabs>
         </div>
-      </div>
+      </Spin>
     </Drawer>
   );
 }

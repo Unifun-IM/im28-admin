@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, DatePicker, Button, Message } from '@arco-design/web-react';
+import { Form, Button, Message } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
   DoubleLineCell,
+  FilterDateRange,
   FilterField,
   FilterKeywordInput,
   FilterSelect
@@ -85,7 +86,7 @@ export default function Page() {
         filterResetText="重置"
         filter={
           <>
-            <FilterField span={2}>
+            <FilterField>
               <FormItem field="keyword" label="关键词搜索">
                 <FilterKeywordInput
                   typeField="keywordType"
@@ -95,7 +96,7 @@ export default function Page() {
                 />
               </FormItem>
             </FilterField>
-            <FilterField span="narrow">
+            <FilterField>
               <FormItem field="operateType" label="操作类型" initialValue="">
                 <FilterSelect
                   placeholder="全部"
@@ -103,12 +104,9 @@ export default function Page() {
                 />
               </FormItem>
             </FilterField>
-            <FilterField span={2}>
+            <FilterField>
               <FormItem field="operateTime" label="操作时间">
-                <DatePicker.RangePicker
-                  style={{ width: '100%' }}
-                  placeholder={['开始时间', '结束时间']}
-                />
+                <FilterDateRange />
               </FormItem>
             </FilterField>
           </>

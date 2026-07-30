@@ -1,6 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Input, DatePicker } from '@arco-design/web-react';
-import { BizListPage, FilterField, FilterSelect } from '@widgets/biz-list';
+import { Form } from '@arco-design/web-react';
+import {
+  BizListPage,
+  FilterDateRange,
+  FilterField,
+  FilterInput,
+  FilterMultiSelect,
+  FilterSelect
+} from '@widgets/biz-list';
 import { getOpLogs } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -40,7 +47,10 @@ export default function OpLogsPage() {
       filter={
         <>
           <FormItem field="keyword" label="搜索">
-            <Input.Search placeholder="请输入搜索内容" allowClear />
+            <FilterInput
+              placeholder="请输入搜索内容"
+              showSearchIcon
+            />
           </FormItem>
           <FormItem field="action" label="操作类型">
             <FilterSelect
@@ -56,8 +66,7 @@ export default function OpLogsPage() {
             />
           </FormItem>
           <FormItem field="path" label="操作路径">
-            <FilterSelect
-              mode="multiple"
+            <FilterMultiSelect
               allowClear
               placeholder="多选内容"
               maxTagCount={2}
@@ -68,13 +77,9 @@ export default function OpLogsPage() {
               ].map((v) => ({ label: v, value: v }))}
             />
           </FormItem>
-          <FilterField span={2}>
+          <FilterField>
             <FormItem field="timeRange" label="时间区间">
-              <DatePicker.RangePicker
-                style={{ width: '100%' }}
-                placeholder={['开始时间', '结束时间']}
-                showTime
-              />
+              <FilterDateRange showTime />
             </FormItem>
           </FilterField>
         </>

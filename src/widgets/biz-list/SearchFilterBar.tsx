@@ -12,12 +12,18 @@ import cs from 'classnames';
 
 const { Row, Col } = Grid;
 
+/** 一行 4 个筛选项（24 / 4 = 6），对齐 Arco Design Pro search-table */
+export const FILTER_COLS_PER_ROW = 4;
+export const FILTER_COL_SPAN = 24 / FILTER_COLS_PER_ROW;
+
 export type FilterFieldProps = {
   children: React.ReactNode;
   /**
-   * 1 | narrow → Col span 6（约一行 4 个）；
-   * 2 → span 12；
-   * full → span 24
+   * 占位列数（按「一行 4 格」计）：
+   * - 1 | narrow → 1 格（Col span 6）
+   * - 2 → 2 格（Col span 12，少用）
+   * - full → 通栏（Col span 24）
+   * @default 1
    */
   span?: 1 | 2 | 'narrow' | 'full';
   className?: string;
@@ -25,11 +31,18 @@ export type FilterFieldProps = {
 
 function resolveColSpan(span: FilterFieldProps['span'] = 1): number {
   if (span === 'full') return 24;
-  if (span === 2) return 12;
-  return 6;
+  if (span === 2) return FILTER_COL_SPAN * 2;
+  return FILTER_COL_SPAN;
 }
 
-/** 筛选项：薄封装 Grid.Col；视觉由 .use-biz-filter-bar 补齐 */
+/** 操作区占满当前行剩余栅格（Pro search-table 惯例） */
+function resolveActionsSpan(fieldSpans: number[]): number {
+  const usedInLastRow =
+    fieldSpans.reduce((sum, s) => sum + s, 0) % 24;
+  return usedInLastRow === 0 ? 24 : 24 - usedInLastRow;
+}
+
+/** 筛选项：薄封装 Grid.Col；默认一行四个 */
 export function FilterField({
   children,
   span = 1,
@@ -39,7 +52,11 @@ export function FilterField({
     <Col
       className={cs('use-biz-filter-field', className)}
       data-filter-field="true"
+      data-span={span === 'full' ? 'full' : span === 2 ? '2' : '1'}
       span={resolveColSpan(span)}
+      xs={24}
+      sm={span === 'full' ? 24 : 12}
+      md={resolveColSpan(span)}
     >
       {children}
     </Col>
@@ -55,6 +72,15 @@ function isFilterFieldElement(
       (child.props as { 'data-filter-field'?: string })?.['data-filter-field'] ===
         'true')
   );
+}
+
+function getChildColSpan(child: React.ReactElement): number {
+  if (isFilterFieldElement(child)) {
+    return resolveColSpan(
+      (child.props as FilterFieldProps).span
+    );
+  }
+  return FILTER_COL_SPAN;
 }
 
 /** 展开 Fragment，避免 `<>` 被当成单个 child */
@@ -94,8 +120,9 @@ export type SearchFilterBarProps = {
 };
 
 /**
- * 搜索筛选 — Arco 标准：Card + Form(vertical) + Grid + Space
- * 视觉 token：.use-biz-filter-bar
+ * 搜索筛选 — 对齐 Arco Design Pro search-table：
+ * Card + Form(vertical) + Grid.Row(gutter=[24, 16]) + Col span=6（一行四个）
+ * 操作按钮占满行末剩余栅格并右对齐
  */
 export default function SearchFilterBar({
   children,
@@ -104,12 +131,12 @@ export default function SearchFilterBar({
   onReset,
   extraActions,
   collapsible = true,
-  collapsedCount = 4,
+  collapsedCount = FILTER_COLS_PER_ROW,
   defaultCollapsed = true,
   searchText = '查询',
   resetText = '重置',
-  expandText = '展开筛选',
-  collapseText = '收起筛选',
+  expandText = '展开',
+  collapseText = '收起',
   className
 }: SearchFilterBarProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
@@ -118,6 +145,9 @@ export default function SearchFilterBar({
   const visibleChildren =
     showToggle && collapsed ? childArray.slice(0, collapsedCount) : childArray;
 
+  const fieldSpans = visibleChildren.map(getChildColSpan);
+  const actionsSpan = resolveActionsSpan(fieldSpans);
+
   return (
     <Card
       bordered={false}
@@ -125,7 +155,8 @@ export default function SearchFilterBar({
       bodyStyle={{ padding: 12 }}
     >
       <Form form={form} layout="vertical" requiredSymbol={false} size="default">
-        <Row gutter={[16, 16]} align="end">
+        {/* Pro：横向 24 / 上下行 16 */}
+        <Row gutter={[24, 16]}>
           {visibleChildren.map((child, index) => {
             const key = child.key ?? index;
             if (isFilterFieldElement(child)) {
@@ -133,7 +164,13 @@ export default function SearchFilterBar({
             }
             return <FilterField key={key}>{child}</FilterField>;
           })}
-          <Col flex="auto" className="use-biz-filter-actions">
+          <Col
+            className="use-biz-filter-actions"
+            span={actionsSpan}
+            xs={24}
+            sm={actionsSpan === 24 ? 24 : Math.max(actionsSpan, 12)}
+            md={actionsSpan}
+          >
             <Space size={8}>
               {showToggle && (
                 <Button
