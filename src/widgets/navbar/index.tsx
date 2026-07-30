@@ -34,6 +34,7 @@ import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
 import { generatePermission } from '@shared/config/routes';
 import { setAccessToken } from '@shared/api/request';
+import { UserCenterModal } from '@features/user-center';
 import cs from 'classnames';
 
 export type NavbarBreadcrumbItem =
@@ -58,6 +59,7 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
   const [role] = useStorage('userRole', 'admin');
   const [messageVisible, setMessageVisible] = useState(false);
   const [userMenuVisible, setUserMenuVisible] = useState(false);
+  const [userCenterVisible, setUserCenterVisible] = useState(false);
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
@@ -96,9 +98,13 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
       className="use-profile-menu"
       onClickMenuItem={(key) => {
         if (key === 'logout') logout();
+        if (key === 'profile') {
+          setUserMenuVisible(false);
+          setUserCenterVisible(true);
+        }
       }}
     >
-      <Menu.Item key="profile" className="use-profile-menu-item" disabled>
+      <Menu.Item key="profile" className="use-profile-menu-item">
         <div className="flex items-center gap-2 p-0">
           <Avatar size={40} className="shrink-0">
             {userInfo?.avatar ? <img alt="avatar" src={userInfo.avatar} /> : null}
@@ -239,6 +245,10 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
           </Dropdown>
         )}
       </div>
+      <UserCenterModal
+        visible={userCenterVisible}
+        onCancel={() => setUserCenterVisible(false)}
+      />
     </div>
   );
 }

@@ -1,27 +1,78 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Form,
-  Input,
-  Select,
   Button,
-  Drawer,
   Message,
-  Space
+  Modal,
+  Switch,
+  Tooltip
 } from '@arco-design/web-react';
-import { ActionLinks, BizListPage, StatusBadge } from '@widgets/biz-list';
-import { getAccounts } from '@shared/api/biz';
+import {
+  IconExpand,
+  IconShrink
+} from '@arco-design/web-react/icon';
+import { observer } from 'mobx-react-lite';
+import {
+  ActionLinks,
+  BizListPage,
+  FilterField,
+  FilterInput,
+  FilterSelect
+} from '@widgets/biz-list';
+import { pageTabsStore } from '@entities/page-tabs';
+import {
+  getAccounts,
+  updateAccountStatus
+} from '@shared/api/biz';
+import { CreateAccountModal } from '@features/admin-account-create';
+import {
+  ResetPasswordModal,
+  type ResetPasswordTarget
+} from '@features/admin-account-reset-password';
+import {
+  ResetGaModal,
+  type ResetGaTarget
+} from '@features/admin-account-reset-ga';
 
 const FormItem = Form.Item;
 
-export default function AccountsPage() {
+const ROLE_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '超级管理员', value: '超级管理员' },
+  { label: '管理员', value: '管理员' },
+  { label: '客服', value: '客服' },
+  { label: '财务', value: '财务' },
+  { label: 'AAA', value: 'AAA' }
+];
+
+const STATUS_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '启用', value: '启用' },
+  { label: '停用', value: '停用' }
+];
+
+/**
+ * 后台账号管理 — Figma 741:21002
+ * 新增账号 666:21799 / 成功 921:44334
+ */
+function AccountsPage() {
   const [form] = Form.useForm();
-  const [createForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [visible, setVisible] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
+    []
+  );
+  const [createVisible, setCreateVisible] = useState(false);
+  const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(
+    null
+  );
+  const [resetGaTarget, setResetGaTarget] = useState<ResetGaTarget | null>(
+    null
+  );
+  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -44,26 +95,57 @@ export default function AccountsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onToggleStatus = async (row: Record<string, unknown>, checked: boolean) => {
+    const next = checked ? '启用' : '停用';
+    try {
+      await updateAccountStatus({
+        id: String(row.id),
+        status: next
+      });
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === row.id ? { ...item, status: next } : item
+        )
+      );
+      Message.success(checked ? '已启用' : '已停用');
+    } catch {
+      Message.error('状态更新失败');
+    }
+  };
+
   return (
     <>
       <BizListPage
         form={form}
-        title="账号列表"
+        title={`后台账号管理列表(${total})`}
+        filterResetText="清除全部"
+        showColumnSetting={false}
         filter={
           <>
-            <FormItem field="keyword" label="关键词">
-              <Input placeholder="账号 / 姓名" />
-            </FormItem>
-            <FormItem field="status" label="状态">
-              <Select
-                allowClear
-                placeholder="全部"
-                options={[
-                  { label: '启用', value: '启用' },
-                  { label: '停用', value: '停用' }
-                ]}
-              />
-            </FormItem>
+            <FilterField>
+              <FormItem field="account" label="账号">
+                <FilterInput
+                  placeholder="请输入账号"
+                  showSearchIcon
+                />
+              </FormItem>
+            </FilterField>
+            <FilterField>
+              <FormItem field="role" label="角色" initialValue="">
+                <FilterSelect
+                  placeholder="请选择"
+                  options={ROLE_OPTIONS}
+                />
+              </FormItem>
+            </FilterField>
+            <FilterField>
+              <FormItem field="status" label="状态" initialValue="">
+                <FilterSelect
+                  placeholder="请选择"
+                  options={STATUS_OPTIONS}
+                />
+              </FormItem>
+            </FilterField>
           </>
         }
         onSearch={() => {
@@ -77,55 +159,109 @@ export default function AccountsPage() {
         }}
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
-          <Button type="primary" onClick={() => setVisible(true)}>
-            新建账号
-          </Button>
+          <>
+            <Tooltip
+              content={
+                contentFullscreen ? '退出全屏' : '全屏（隐藏导航）'
+              }
+            >
+              <Button
+                type="secondary"
+                className="use-biz-table-icon-btn"
+                icon={contentFullscreen ? <IconShrink /> : <IconExpand />}
+                onClick={() => pageTabsStore.toggleContentFullscreen()}
+              />
+            </Tooltip>
+            <Button
+              className="use-biz-table-secondary-btn"
+              onClick={() => {
+                if (!selectedRowKeys.length) {
+                  Message.info('请先勾选账号');
+                  return;
+                }
+                Modal.confirm({
+                  title: '批量操作',
+                  content: `已选 ${selectedRowKeys.length} 个账号，确认执行批量操作？`,
+                  onOk: () => {
+                    Message.success('批量操作已提交（mock）');
+                    setSelectedRowKeys([]);
+                  }
+                });
+              }}
+            >
+              批量操作
+            </Button>
+            <Button type="primary" onClick={() => setCreateVisible(true)}>
+              新增账号
+            </Button>
+          </>
         }
         tableProps={{
           loading,
           data,
+          rowKey: 'id',
+          rowSelection: {
+            selectedRowKeys,
+            onChange: setSelectedRowKeys
+          },
           columns: [
             { title: '账号', dataIndex: 'account' },
-            { title: '姓名', dataIndex: 'name' },
             { title: '角色', dataIndex: 'role' },
+            {
+              title: '创建时间',
+              dataIndex: 'createdAt',
+              width: 180
+            },
+            {
+              title: '最后登录',
+              dataIndex: 'lastLogin',
+              width: 180
+            },
             {
               title: '状态',
               dataIndex: 'status',
-              render: (v: string) => (
-                <StatusBadge
-                  status={v === '启用' ? 'success' : 'default'}
-                  text={v}
+              width: 100,
+              render: (v: string, row: Record<string, unknown>) => (
+                <Switch
+                  checked={v === '启用'}
+                  checkedText=""
+                  uncheckedText=""
+                  checkedColor="rgb(var(--success-6))"
+                  onChange={(checked) => onToggleStatus(row, checked)}
                 />
               )
             },
-            { title: '最近登录', dataIndex: 'lastLogin', width: 180 },
-            { title: '创建时间', dataIndex: 'createdAt', width: 180 },
             {
               title: '操作',
-              width: 108,
-              render: () => (
+              width: 220,
+              fixed: 'right' as const,
+              render: (_: unknown, row: Record<string, unknown>) => (
                 <ActionLinks
                   items={[
                     {
-                      key: 'edit',
-                      label: '编辑',
-                      onClick: () => setVisible(true)
-                    },
-                    {
-                      key: 'delete',
-                      label: '删除',
-                      danger: true,
-                      onClick: () => Message.info('删除（mock）')
-                    },
-                    {
                       key: 'resetPwd',
                       label: '重置密码',
-                      onClick: () => Message.info('重置密码（mock）')
+                      onClick: () =>
+                        setResetTarget({
+                          id: String(row.id),
+                          account: String(row.account || ''),
+                          name: row.name ? String(row.name) : undefined
+                        })
                     },
                     {
-                      key: 'disable',
-                      label: '停用',
-                      onClick: () => Message.info('停用（mock）')
+                      key: 'resetGa',
+                      label: '重置谷歌',
+                      onClick: () =>
+                        setResetGaTarget({
+                          id: String(row.id),
+                          account: String(row.account || ''),
+                          name: row.name ? String(row.name) : undefined
+                        })
+                    },
+                    {
+                      key: 'detail',
+                      label: '详情',
+                      onClick: () => Message.info('账号详情（后续接入）')
                     }
                   ]}
                 />
@@ -144,58 +280,23 @@ export default function AccountsPage() {
           }
         }}
       />
-      <Drawer
-        width={420}
-        title="新建账号"
-        visible={visible}
-        onCancel={() => setVisible(false)}
-        footer={
-          <Space>
-            <Button onClick={() => setVisible(false)}>取消</Button>
-            <Button
-              type="primary"
-              onClick={async () => {
-                await createForm.validate();
-                Message.success('已创建（mock）');
-                setVisible(false);
-                createForm.resetFields();
-                fetchData(page, pageSize);
-              }}
-            >
-              确定
-            </Button>
-          </Space>
-        }
-      >
-        <Form form={createForm} layout="vertical">
-          <FormItem
-            field="account"
-            label="账号"
-            rules={[{ required: true, message: '请输入账号' }]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            field="name"
-            label="姓名"
-            rules={[{ required: true, message: '请输入姓名' }]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem
-            field="role"
-            label="角色"
-            rules={[{ required: true, message: '请选择角色' }]}
-          >
-            <Select
-              options={['超级管理员', '运营', '客服', '财务'].map((v) => ({
-                label: v,
-                value: v
-              }))}
-            />
-          </FormItem>
-        </Form>
-      </Drawer>
+      <CreateAccountModal
+        visible={createVisible}
+        onCancel={() => setCreateVisible(false)}
+        onSuccess={() => fetchData(page, pageSize)}
+      />
+      <ResetPasswordModal
+        visible={Boolean(resetTarget)}
+        target={resetTarget}
+        onCancel={() => setResetTarget(null)}
+      />
+      <ResetGaModal
+        visible={Boolean(resetGaTarget)}
+        target={resetGaTarget}
+        onCancel={() => setResetGaTarget(null)}
+      />
     </>
   );
 }
+
+export default observer(AccountsPage);

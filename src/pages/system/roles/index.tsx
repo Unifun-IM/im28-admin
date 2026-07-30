@@ -1,48 +1,49 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Form,
-  Input,
   Button,
-  Drawer,
   Message,
-  Checkbox,
-  Space,
-  Modal
+  Modal,
+  Tooltip
 } from '@arco-design/web-react';
+import {
+  IconExpand,
+  IconShrink
+} from '@arco-design/web-react/icon';
+import { observer } from 'mobx-react-lite';
 import {
   ActionLinks,
   BizListPage,
+  FilterField,
+  FilterInput,
+  FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
+import { pageTabsStore } from '@entities/page-tabs';
 import { getRoles } from '@shared/api/biz';
+import { CreateRoleModal } from '@features/admin-role-create';
 
 const FormItem = Form.Item;
 
-const PERMS = [
-  '用户查询',
-  '用户拉黑',
-  '白名单管理',
-  '后台账号管理',
-  '角色管理',
-  '系统参数设置',
-  '操作日志查看',
-  '群聊查询',
-  '聊天记录查看',
-  '充值管理',
-  '提现管理',
-  '红包管理'
+const STATUS_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '启用', value: '启用' },
+  { label: '禁用', value: '禁用' }
 ];
 
-export default function RolesPage() {
+/**
+ * 角色管理 — Figma 741:19446
+ * 新建角色 — Figma 666:21515
+ */
+function RolesPage() {
   const [form] = Form.useForm();
-  const [createForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [visible, setVisible] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
+  const [createVisible, setCreateVisible] = useState(false);
+  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -70,10 +71,26 @@ export default function RolesPage() {
       <BizListPage
         form={form}
         title="角色列表"
+        filterResetText="清除全部"
+        showColumnSetting={false}
         filter={
-          <FormItem field="keyword" label="角色名称">
-            <Input placeholder="请输入" />
-          </FormItem>
+          <>
+            <FilterField>
+              <FormItem field="name" label="角色名称">
+                <FilterInput placeholder="请输入角色名" showSearchIcon />
+              </FormItem>
+            </FilterField>
+            <FilterField>
+              <FormItem field="desc" label="角色描述">
+                <FilterInput placeholder="请输入角色描述" showSearchIcon />
+              </FormItem>
+            </FilterField>
+            <FilterField>
+              <FormItem field="status" label="状态" initialValue="">
+                <FilterSelect placeholder="请选择" options={STATUS_OPTIONS} />
+              </FormItem>
+            </FilterField>
+          </>
         }
         onSearch={() => {
           setPage(1);
@@ -87,94 +104,85 @@ export default function RolesPage() {
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
           <>
-            <Button
-              className="use-biz-table-secondary-btn"
-              onClick={() => {
-                Modal.confirm({
-                  title: '二次确认',
-                  content: '确认执行该操作？',
-                  onOk: () => {
-                    Message.success('已确认（mock）');
-                  }
-                });
-              }}
+            <Tooltip
+              content={
+                contentFullscreen ? '退出全屏' : '全屏（隐藏导航）'
+              }
             >
-              二次确认
-            </Button>
-            <Button type="primary" onClick={() => setVisible(true)}>
-              新建角色
+              <Button
+                type="secondary"
+                className="use-biz-table-icon-btn"
+                icon={contentFullscreen ? <IconShrink /> : <IconExpand />}
+                onClick={() => pageTabsStore.toggleContentFullscreen()}
+              />
+            </Tooltip>
+            <Button type="primary" onClick={() => setCreateVisible(true)}>
+              新增角色
             </Button>
           </>
         }
-        batchActions={{
-          onArchive: () => Message.info(`归档 ${selectedRowKeys.length} 项（mock）`),
-          onEdit: () => Message.info(`编辑 ${selectedRowKeys.length} 项（mock）`),
-          onDelete: () => {
-            Modal.confirm({
-              title: '确认删除',
-              content: `将删除已选 ${selectedRowKeys.length} 项，是否继续？`,
-              onOk: () => {
-                Message.success('已删除（mock）');
-                setSelectedRowKeys([]);
-              }
-            });
-          }
-        }}
         tableProps={{
           loading,
           data,
+          rowKey: 'id',
           columns: [
             { title: '角色名称', dataIndex: 'name' },
-            { title: '角色描述', dataIndex: 'desc' },
-            { title: '成员数', dataIndex: 'memberCount' },
-            { title: '更新时间', dataIndex: 'updatedAt', width: 180 },
+            {
+              title: '角色描述',
+              dataIndex: 'desc',
+              render: (v?: string) => v || '—'
+            },
+            {
+              title: '创建时间',
+              dataIndex: 'createdAt',
+              width: 180
+            },
+            {
+              title: '修改时间',
+              dataIndex: 'updatedAt',
+              width: 180
+            },
             {
               title: '状态',
               dataIndex: 'status',
               width: 100,
               render: (v?: string) => (
                 <StatusBadge
-                  status={v === '停用' ? 'error' : 'success'}
-                  text={v || '启用'}
+                  status={v === '禁用' || v === '停用' ? 'default' : 'success'}
+                  text={v === '停用' ? '禁用' : v || '启用'}
                 />
               )
             },
             {
               title: '操作',
-              width: 108,
-              render: () => (
+              width: 120,
+              fixed: 'right' as const,
+              render: (_: unknown, row: Record<string, unknown>) => (
                 <ActionLinks
                   items={[
                     {
-                      key: 'edit',
-                      label: '编辑',
-                      onClick: () => setVisible(true)
+                      key: 'detail',
+                      label: '详情',
+                      onClick: () =>
+                        Message.info(`角色详情：${String(row.name)}（后续接入）`)
                     },
                     {
                       key: 'delete',
                       label: '删除',
                       danger: true,
-                      onClick: () => Message.info('删除（mock）')
-                    },
-                    {
-                      key: 'perms',
-                      label: '权限配置',
-                      onClick: () => Message.info('权限配置（mock）')
-                    },
-                    {
-                      key: 'copy',
-                      label: '复制角色',
-                      onClick: () => Message.info('复制角色（mock）')
+                      onClick: () =>
+                        Modal.confirm({
+                          title: '删除角色',
+                          content: `确认删除角色「${String(row.name)}」？`,
+                          okButtonProps: { status: 'danger' },
+                          onOk: () => Message.success('已删除（mock）')
+                        })
                     }
                   ]}
                 />
               )
             }
           ],
-          rowSelection: {
-            selectedRowKeys,
-            onChange: (keys) => setSelectedRowKeys(keys)
-          },
           pagination: {
             current: page,
             pageSize,
@@ -187,49 +195,13 @@ export default function RolesPage() {
           }
         }}
       />
-      <Drawer
-        width={480}
-        title="新建角色"
-        visible={visible}
-        onCancel={() => setVisible(false)}
-        footer={
-          <Space>
-            <Button onClick={() => setVisible(false)}>取消</Button>
-            <Button
-              type="primary"
-              onClick={async () => {
-                await createForm.validate();
-                Message.success('已保存（mock）');
-                setVisible(false);
-                createForm.resetFields();
-                fetchData(page, pageSize);
-              }}
-            >
-              确定
-            </Button>
-          </Space>
-        }
-      >
-        <Form form={createForm} layout="vertical">
-          <FormItem
-            field="name"
-            label="角色名称"
-            rules={[{ required: true, message: '请输入角色名称' }]}
-          >
-            <Input />
-          </FormItem>
-          <FormItem field="desc" label="角色描述">
-            <Input.TextArea />
-          </FormItem>
-          <FormItem
-            field="perms"
-            label="管理权限"
-            rules={[{ required: true, message: '请选择权限' }]}
-          >
-            <Checkbox.Group options={PERMS} direction="vertical" />
-          </FormItem>
-        </Form>
-      </Drawer>
+      <CreateRoleModal
+        visible={createVisible}
+        onCancel={() => setCreateVisible(false)}
+        onSuccess={() => fetchData(page, pageSize)}
+      />
     </>
   );
 }
+
+export default observer(RolesPage);

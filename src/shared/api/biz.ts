@@ -99,10 +99,57 @@ export async function getAccounts(params: PageParams) {
   });
 }
 
+export async function createAccount(body: {
+  account: string;
+  password: string;
+  role: string;
+}) {
+  return request.post<{ account: string; password: string; id: string }>(
+    '/api/biz/system/accounts',
+    body
+  );
+}
+
+export async function updateAccountStatus(body: {
+  id: string;
+  status: string;
+}) {
+  return request.post('/api/biz/system/accounts/status', body);
+}
+
+export async function resetAccountPassword(body: {
+  id: string;
+  account: string;
+  remark?: string;
+  gaCode: string;
+}) {
+  return request.post<{ account: string; password: string }>(
+    '/api/biz/system/accounts/reset-password',
+    body
+  );
+}
+
+export async function resetAccountGa(body: {
+  id: string;
+  account: string;
+  remark?: string;
+}) {
+  return request.post('/api/biz/system/accounts/reset-ga', body);
+}
+
 export async function getRoles(params: PageParams) {
   return request.get<PageResult<Record<string, unknown>>>('/api/biz/system/roles', {
     params
   });
+}
+
+export async function createRole(body: {
+  name: string;
+  desc?: string;
+  enabled?: boolean;
+  perms: string[];
+}) {
+  return request.post('/api/biz/system/roles', body);
 }
 
 export async function getOpLogs(params: PageParams) {
@@ -137,48 +184,6 @@ export async function getSessionUserSettings() {
 
 export async function saveSessionUserSettings(body: Record<string, unknown>) {
   return request.post('/api/biz/session/settings/user', body);
-}
-
-export async function getRechargeOrders(params: PageParams) {
-  return request.get<PageResult<Record<string, unknown>>>(
-    '/api/biz/finance/recharge-orders',
-    { params }
-  );
-}
-
-export async function getRechargeAbnormal(params: PageParams) {
-  return request.get<PageResult<Record<string, unknown>>>(
-    '/api/biz/finance/recharge-abnormal',
-    { params }
-  );
-}
-
-export async function getRechargeChannels(params: PageParams) {
-  return request.get<PageResult<Record<string, unknown>>>(
-    '/api/biz/finance/recharge-channels',
-    { params }
-  );
-}
-
-export async function getWithdrawAudit(params: PageParams) {
-  return request.get<PageResult<Record<string, unknown>>>(
-    '/api/biz/finance/withdraw-audit',
-    { params }
-  );
-}
-
-export async function getWithdrawAbnormal(params: PageParams) {
-  return request.get<PageResult<Record<string, unknown>>>(
-    '/api/biz/finance/withdraw-abnormal',
-    { params }
-  );
-}
-
-export async function getWithdrawChannels(params: PageParams) {
-  return request.get<PageResult<Record<string, unknown>>>(
-    '/api/biz/finance/withdraw-channels',
-    { params }
-  );
 }
 
 export async function getRedpacketRecords(params: PageParams) {

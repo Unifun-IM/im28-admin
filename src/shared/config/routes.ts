@@ -13,7 +13,15 @@ export type IRoute = AuthParams & {
   path?: string;
 };
 
+/**
+ * 侧栏顺序对齐稿面：首页看板 → 用户 → 会话 → 交易 → 系统
+ * 系统下：后台账号 / 角色 / 系统参数设置 / 系统操作日志
+ */
 export const routes: IRoute[] = [
+  {
+    name: 'menu.dashboard',
+    key: 'dashboard/workplace'
+  },
   {
     name: 'menu.user',
     key: 'user',
@@ -30,46 +38,6 @@ export const routes: IRoute[] = [
       },
       { name: 'menu.user.inviteCode', key: 'user/invite-code' },
       { name: 'menu.user.logs', key: 'user/logs' }
-    ]
-  },
-  {
-    name: 'menu.system',
-    key: 'system',
-    children: [
-      { name: 'menu.system.accounts', key: 'system/accounts' },
-      { name: 'menu.system.roles', key: 'system/roles' },
-      { name: 'menu.system.opLogs', key: 'system/op-logs' }
-    ]
-  },
-  {
-    name: 'menu.systemParams',
-    key: 'system-params',
-    children: [{ name: 'menu.systemParams.settings', key: 'system-params/settings' }]
-  },
-  {
-    name: 'menu.finance',
-    key: 'finance',
-    children: [
-      { name: 'menu.finance.rechargeOrders', key: 'finance/recharge-orders' },
-      { name: 'menu.finance.rechargeAbnormal', key: 'finance/recharge-abnormal' },
-      { name: 'menu.finance.rechargeChannels', key: 'finance/recharge-channels' },
-      { name: 'menu.finance.withdrawAudit', key: 'finance/withdraw-audit' },
-      { name: 'menu.finance.withdrawAbnormal', key: 'finance/withdraw-abnormal' },
-      { name: 'menu.finance.withdrawChannels', key: 'finance/withdraw-channels' }
-    ]
-  },
-  {
-    name: 'menu.trade',
-    key: 'trade',
-    children: [
-      { name: 'menu.trade.redpacketRecords', key: 'trade/redpacket-records' },
-      { name: 'menu.trade.redpacketConfig', key: 'trade/redpacket-config' },
-      {
-        name: 'menu.trade.redpacketDetail',
-        key: 'trade/redpacket-detail',
-        ignore: true,
-        path: '/trade/redpacket-detail/:id'
-      }
     ]
   },
   {
@@ -106,6 +74,33 @@ export const routes: IRoute[] = [
         ignore: true,
         path: '/session/chat/:type/:id'
       }
+    ]
+  },
+  {
+    name: 'menu.trade',
+    key: 'trade',
+    children: [
+      { name: 'menu.trade.redpacketRecords', key: 'trade/redpacket-records' },
+      { name: 'menu.trade.redpacketConfig', key: 'trade/redpacket-config' },
+      {
+        name: 'menu.trade.redpacketDetail',
+        key: 'trade/redpacket-detail',
+        ignore: true,
+        path: '/trade/redpacket-detail/:id'
+      }
+    ]
+  },
+  {
+    name: 'menu.system',
+    key: 'system',
+    children: [
+      { name: 'menu.system.accounts', key: 'system/accounts' },
+      { name: 'menu.system.roles', key: 'system/roles' },
+      {
+        name: 'menu.system.paramsSettings',
+        key: 'system-params/settings'
+      },
+      { name: 'menu.system.opLogs', key: 'system/op-logs' }
     ]
   }
 ];

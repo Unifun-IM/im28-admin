@@ -1,24 +1,51 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form } from '@arco-design/web-react';
+import { Form, Button, Tooltip } from '@arco-design/web-react';
+import { IconExpand, IconShrink } from '@arco-design/web-react/icon';
+import { observer } from 'mobx-react-lite';
 import {
   BizListPage,
   FilterDateRange,
   FilterField,
   FilterInput,
-  FilterMultiSelect,
   FilterSelect
 } from '@widgets/biz-list';
+import { pageTabsStore } from '@entities/page-tabs';
 import { getOpLogs } from '@shared/api/biz';
 
 const FormItem = Form.Item;
 
-export default function OpLogsPage() {
+const ACTION_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '查看用户详情', value: '查看用户详情' },
+  { label: '用户查询', value: '用户查询' },
+  { label: '用户拉黑', value: '用户拉黑' },
+  { label: '新增账号', value: '新增账号' },
+  { label: '重置密码', value: '重置密码' },
+  { label: '角色管理', value: '角色管理' },
+  { label: '系统参数设置', value: '系统参数设置' },
+  { label: '操作日志查看', value: '操作日志查看' }
+];
+
+const PATH_OPTIONS = [
+  { label: '全部', value: '' },
+  { label: '用户中心/用户查询', value: '用户中心/用户查询' },
+  { label: '系统/后台账号管理', value: '系统/后台账号管理' },
+  { label: '系统/角色管理', value: '系统/角色管理' },
+  { label: '系统/系统参数设置', value: '系统/系统参数设置' },
+  { label: '系统/系统操作日志', value: '系统/系统操作日志' }
+];
+
+/**
+ * 系统操作日志 — Figma 793:38382
+ */
+function OpLogsPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
+  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -44,42 +71,46 @@ export default function OpLogsPage() {
   return (
     <BizListPage
       form={form}
+      title="操作日志"
+      filterResetText="清除全部"
+      showColumnSetting={false}
       filter={
         <>
-          <FormItem field="keyword" label="搜索">
-            <FilterInput
-              placeholder="请输入搜索内容"
-              showSearchIcon
-            />
-          </FormItem>
-          <FormItem field="action" label="操作类型">
-            <FilterSelect
-              allowClear
-              placeholder="单选内容"
-              options={[
-                '用户查询',
-                '用户拉黑',
-                '角色管理',
-                '系统参数设置',
-                '操作日志查看'
-              ].map((v) => ({ label: v, value: v }))}
-            />
-          </FormItem>
-          <FormItem field="path" label="操作路径">
-            <FilterMultiSelect
-              allowClear
-              placeholder="多选内容"
-              maxTagCount={2}
-              options={[
-                '/user/query',
-                '/system/roles',
-                '/system-params/settings'
-              ].map((v) => ({ label: v, value: v }))}
-            />
-          </FormItem>
           <FilterField>
-            <FormItem field="timeRange" label="时间区间">
-              <FilterDateRange showTime />
+            <FormItem field="account" label="操作账号">
+              <FilterInput
+                placeholder="输入后台账号查询"
+                showSearchIcon
+              />
+            </FormItem>
+          </FilterField>
+          <FilterField>
+            <FormItem field="action" label="操作类型" initialValue="">
+              <FilterSelect placeholder="全部" options={ACTION_OPTIONS} />
+            </FormItem>
+          </FilterField>
+          <FilterField>
+            <FormItem field="ip" label="操作 IP">
+              <FilterInput placeholder="输入来源 IP" showSearchIcon />
+            </FormItem>
+          </FilterField>
+          <FilterField>
+            <FormItem field="timeRange" label="操作时间">
+              <FilterDateRange />
+            </FormItem>
+          </FilterField>
+          <FilterField>
+            <FormItem field="path" label="操作路径" initialValue="">
+              <FilterSelect
+                placeholder="可按页面路径查询"
+                options={PATH_OPTIONS}
+                allowClear
+              />
+            </FormItem>
+          </FilterField>
+          <FilterField>
+            <FormItem field="content" label="操作内容">
+              <FilterInput placeholder="支持关键词查询" showSearchIcon />
             </FormItem>
           </FilterField>
         </>
@@ -93,16 +124,54 @@ export default function OpLogsPage() {
         setPage(1);
         fetchData(1, pageSize);
       }}
+      onRefresh={() => fetchData(page, pageSize)}
+      toolbar={
+        <Tooltip
+          content={contentFullscreen ? '退出全屏' : '全屏（隐藏导航）'}
+        >
+          <Button
+            type="secondary"
+            className="use-biz-table-icon-btn"
+            icon={contentFullscreen ? <IconShrink /> : <IconExpand />}
+            onClick={() => pageTabsStore.toggleContentFullscreen()}
+          />
+        </Tooltip>
+      }
       tableProps={{
         loading,
         data,
+        rowKey: 'id',
         columns: [
-          { title: '操作账号', dataIndex: 'account' },
-          { title: '操作类型', dataIndex: 'action' },
-          { title: '操作路径', dataIndex: 'path' },
-          { title: '操作 IP', dataIndex: 'ip' },
-          { title: '操作内容', dataIndex: 'content', ellipsis: true },
-          { title: '时间', dataIndex: 'time', width: 180 }
+          {
+            title: '操作时间',
+            dataIndex: 'time',
+            width: 180
+          },
+          {
+            title: '操作账号',
+            dataIndex: 'account',
+            width: 140
+          },
+          {
+            title: '操作类型',
+            dataIndex: 'action',
+            width: 140
+          },
+          {
+            title: '操作IP',
+            dataIndex: 'ip',
+            width: 140
+          },
+          {
+            title: '操作路径',
+            dataIndex: 'path',
+            width: 200
+          },
+          {
+            title: '操作内容',
+            dataIndex: 'content',
+            ellipsis: true
+          }
         ],
         pagination: {
           current: page,
@@ -118,3 +187,5 @@ export default function OpLogsPage() {
     />
   );
 }
+
+export default observer(OpLogsPage);

@@ -269,30 +269,89 @@ setupMock({
       };
     });
 
-    Mock.mock(new RegExp('/api/biz/system/accounts'), (options: { url: string }) => {
+    Mock.mock(new RegExp('/api/biz/system/accounts/status'), 'post', () => ({
+      ok: true
+    }));
+
+    Mock.mock(
+      new RegExp('/api/biz/system/accounts/reset-password'),
+      'post',
+      (options: { body?: string }) => {
+        let body: Record<string, unknown> = {};
+        try {
+          body = JSON.parse(options.body || '{}') as Record<string, unknown>;
+        } catch {
+          body = {};
+        }
+        const chars =
+          'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789#@$%';
+        let password = '';
+        for (let i = 0; i < 14; i += 1) {
+          password += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return {
+          ok: true,
+          account: String(body.account || 'zhangsan'),
+          password
+        };
+      }
+    );
+
+    Mock.mock(new RegExp('/api/biz/system/accounts/reset-ga'), 'post', () => ({
+      ok: true
+    }));
+
+    Mock.mock(new RegExp('/api/biz/system/accounts(\\?|$)'), 'post', (options: {
+      body?: string;
+    }) => {
+      let body: Record<string, unknown> = {};
+      try {
+        body = JSON.parse(options.body || '{}') as Record<string, unknown>;
+      } catch {
+        body = {};
+      }
+      return {
+        id: String(Mock.Random.id()),
+        account: String(body.account || 'newuser'),
+        password: String(body.password || Mock.Random.string('lower', 12)),
+        role: String(body.role || '客服'),
+        ok: true
+      };
+    });
+
+    Mock.mock(new RegExp('/api/biz/system/accounts(\\?|$)'), 'get', (options: {
+      url: string;
+    }) => {
       const q = parseQuery(options.url);
       return pageList(166, Number(q.page), Number(q.pageSize), () =>
         Mock.mock({
           id: '@id',
-          account: '@word(5,10)',
+          account: /[a-z]\.[a-z]{6,10}/,
           name: '@cname',
-          role: '@pick(["超级管理员","运营","客服","财务"])',
-          status: '@pick(["启用","停用"])',
+          role: '@pick(["超级管理员","管理员","客服","财务","AAA"])',
+          status: '@pick(["启用","启用","启用","停用"])',
           lastLogin: '@datetime("yyyy-MM-dd HH:mm:ss")',
           createdAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
       );
     });
 
-    Mock.mock(new RegExp('/api/biz/system/roles'), (options: { url: string }) => {
+    Mock.mock(new RegExp('/api/biz/system/roles(\\?|$)'), 'post', () => ({
+      ok: true,
+      id: String(Mock.Random.id())
+    }));
+
+    Mock.mock(new RegExp('/api/biz/system/roles(\\?|$)'), 'get', (options: {
+      url: string;
+    }) => {
       const q = parseQuery(options.url);
       return pageList(12, Number(q.page), Number(q.pageSize), () =>
         Mock.mock({
           id: '@id',
-          name: '@pick(["超级管理员","运营","客服","财务","审计"])',
-          desc: '@csentence(8,20)',
-          memberCount: '@integer(1,40)',
-          'status|1': ['启用', '启用', '启用', '停用'],
+          name: '@pick(["管理员","客服","AAA","超级管理员","财务"])',
+          desc: '@pick(["可查看用户和消息管理","","可查看用户和消息管理"])',
+          'status|1': ['启用', '启用', '启用', '禁用'],
+          createdAt: '@datetime("yyyy-MM-dd HH:mm:ss")',
           updatedAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
       );
@@ -300,14 +359,17 @@ setupMock({
 
     Mock.mock(new RegExp('/api/biz/system/op-logs'), (options: { url: string }) => {
       const q = parseQuery(options.url);
-      return pageList(90, Number(q.page), Number(q.pageSize), () =>
+      return pageList(300, Number(q.page), Number(q.pageSize), () =>
         Mock.mock({
           id: '@id',
-          account: '@word(5,8)',
-          action: '@pick(["用户查询","用户拉黑","角色管理","系统参数设置","操作日志查看"])',
-          path: '@pick(["/user/query","/system/roles","/system-params/settings"])',
+          account: '@pick(["admin01","admin02","ops_user","finance01","cs_agent"])',
+          action:
+            '@pick(["查看用户详情","用户查询","用户拉黑","新增账号","重置密码","角色管理","系统参数设置","操作日志查看"])',
+          path:
+            '@pick(["用户中心/用户查询","系统/后台账号管理","系统/角色管理","系统/系统参数设置","系统/系统操作日志"])',
           ip: '@ip',
-          content: '@csentence(10,24)',
+          content:
+            '@pick(["查看用户 100000123…","查询用户列表","拉黑用户 100000456","新建后台账号 admin03","重置账号密码","编辑角色权限","修改系统参数","查看操作日志"])',
           time: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
       );
@@ -384,63 +446,6 @@ setupMock({
     Mock.mock(new RegExp('/api/biz/session/settings/user'), 'post', () => ({
       ok: true
     }));
-
-    const financeItem = () =>
-      Mock.mock({
-        id: '@id',
-        orderNo: /R[0-9]{14}/,
-        userId: /1[0-9]{7}/,
-        nickname: '@cname',
-        amount: '@float(10,5000,2,2)',
-        currency: '@pick(["CNY","USDT"])',
-        channel: '@pick(["支付宝","微信","银行卡","链上"])',
-        status: '@pick(["成功","处理中","失败","异常"])',
-        createdAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
-      });
-
-    Mock.mock(new RegExp('/api/biz/finance/recharge-orders'), (options: { url: string }) => {
-      const q = parseQuery(options.url);
-      return pageList(200, Number(q.page), Number(q.pageSize), financeItem);
-    });
-    Mock.mock(new RegExp('/api/biz/finance/recharge-abnormal'), (options: { url: string }) => {
-      const q = parseQuery(options.url);
-      return pageList(32, Number(q.page), Number(q.pageSize), financeItem);
-    });
-    Mock.mock(new RegExp('/api/biz/finance/recharge-channels'), (options: { url: string }) => {
-      const q = parseQuery(options.url);
-      return pageList(8, Number(q.page), Number(q.pageSize), () =>
-        Mock.mock({
-          id: '@id',
-          name: '@pick(["支付宝","微信","银行卡","USDT-TRC20"])',
-          currency: '@pick(["CNY","USDT"])',
-          feeRate: '@float(0,2,1,2)',
-          status: '@pick(["启用","停用"])',
-          updatedAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
-        })
-      );
-    });
-    Mock.mock(new RegExp('/api/biz/finance/withdraw-audit'), (options: { url: string }) => {
-      const q = parseQuery(options.url);
-      return pageList(64, Number(q.page), Number(q.pageSize), financeItem);
-    });
-    Mock.mock(new RegExp('/api/biz/finance/withdraw-abnormal'), (options: { url: string }) => {
-      const q = parseQuery(options.url);
-      return pageList(20, Number(q.page), Number(q.pageSize), financeItem);
-    });
-    Mock.mock(new RegExp('/api/biz/finance/withdraw-channels'), (options: { url: string }) => {
-      const q = parseQuery(options.url);
-      return pageList(6, Number(q.page), Number(q.pageSize), () =>
-        Mock.mock({
-          id: '@id',
-          name: '@pick(["银行卡","支付宝","USDT"])',
-          currency: '@pick(["CNY","USDT"])',
-          minAmount: '@integer(10,100)',
-          maxAmount: '@integer(5000,50000)',
-          status: '@pick(["启用","停用"])',
-          updatedAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
-        })
-      );
-    });
 
     Mock.mock(new RegExp('/api/biz/trade/redpacket-records'), (options: { url: string }) => {
       const q = parseQuery(options.url);

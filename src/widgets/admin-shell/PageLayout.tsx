@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Spin } from '@arco-design/web-react';
 import {
+  IconApps,
   IconDoubleRight,
   IconGift,
   IconMenuFold,
   IconSettings,
-  IconStorage,
   IconUserGroup,
   IconMessage
 } from '@arco-design/web-react/icon';
@@ -43,14 +43,13 @@ const COLLAPSED_WIDTH = 56;
 
 function getIconFromKey(key: string) {
   switch (key) {
+    case 'dashboard':
+    case 'dashboard/workplace':
+      return <IconApps className={styles.icon} />;
     case 'user':
       return <IconUserGroup className={styles.icon} />;
     case 'system':
       return <IconSettings className={styles.icon} />;
-    case 'system-params':
-      return <IconSettings className={styles.icon} />;
-    case 'finance':
-      return <IconStorage className={styles.icon} />;
     case 'trade':
       return <IconGift className={styles.icon} />;
     case 'session':
@@ -62,10 +61,10 @@ function getIconFromKey(key: string) {
 
 function getFlattenRoutes(routeList: IRoute[]) {
   const mod = import.meta.glob([
+    '../../pages/dashboard/**/index.tsx',
     '../../pages/user/**/index.tsx',
     '../../pages/system/**/index.tsx',
     '../../pages/system-params/**/index.tsx',
-    '../../pages/finance/**/index.tsx',
     '../../pages/trade/**/index.tsx',
     '../../pages/session/**/index.tsx',
     '../../pages/exception/**/index.tsx'
