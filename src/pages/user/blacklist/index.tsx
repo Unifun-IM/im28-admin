@@ -11,7 +11,7 @@ import {
   FilterSelect
 } from '@widgets/biz-list';
 import { getBlacklist } from '@shared/api/biz';
-import { BlacklistActionModal } from '@features/blacklist-action';
+import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
 import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
 

@@ -244,9 +244,6 @@ export function PageLayout() {
       if (pathname.startsWith('/trade/redpacket-detail')) {
         newSelectedKeys.push('trade/redpacket-records');
       }
-      if (pathname.startsWith('/session/group-detail')) {
-        newSelectedKeys.push('session/group');
-      }
       if (pathname.startsWith('/session/chat')) {
         newSelectedKeys.push('session/user');
       }
@@ -288,7 +285,6 @@ export function PageLayout() {
       // 动态详情页：/trade/redpacket-detail/:id 等
       const prefixes = [
         '/trade/redpacket-detail',
-        '/session/group-detail',
         '/session/chat'
       ];
       for (const prefix of prefixes) {

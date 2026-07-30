@@ -12,7 +12,7 @@ import {
 } from '@widgets/biz-list';
 import { getWhitelist } from '@shared/api/biz';
 import { UserDetailDrawer } from '@features/user-detail';
-import { WhitelistActionModal } from '@features/whitelist-action';
+import { WhitelistActionModal } from '@features/user-whitelist-action';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 
 const FormItem = Form.Item;

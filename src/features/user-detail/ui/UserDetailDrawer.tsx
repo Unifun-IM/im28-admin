@@ -209,7 +209,7 @@ export default function UserDetailDrawer({
                   </div>
                   <Descriptions
                     className="use-user-detail-descriptions"
-                    bordered
+                    border
                     column={2}
                     size="small"
                     tableLayout="fixed"
@@ -256,7 +256,7 @@ export default function UserDetailDrawer({
                   </div>
                   <Descriptions
                     className="use-user-detail-descriptions"
-                    bordered
+                    border
                     column={2}
                     size="small"
                     tableLayout="fixed"
@@ -292,9 +292,9 @@ export default function UserDetailDrawer({
             <Tabs.TabPane key="logs" title="操作日志">
               <div className="pt-[12px]">
                 <Table
-                  className="use-user-detail-table"
-                  rowKey={(row, index) =>
-                    String(row.id ?? `${row.time ?? 'log'}-${index}`)
+                  className="use-biz-detail-table"
+                  rowKey={(row) =>
+                    String(row.id ?? `${row.time ?? 'log'}-${row.action ?? ''}`)
                   }
                   columns={LOG_COLUMNS}
                   data={logs}

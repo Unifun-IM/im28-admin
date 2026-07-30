@@ -2,11 +2,11 @@ import React from 'react';
 import {
   Form,
   Input,
-  Select,
   type InputProps,
   type SelectProps
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
+import FilterSelect from './FilterSelect';
 
 function firstOptionValue(
   options: SelectProps['options']
@@ -30,7 +30,7 @@ export type FilterKeywordInputProps = Omit<InputProps, 'addBefore'> & {
 
 /**
  * 关键词搜索：Input + addBefore(类型 Select) + 搜索图标
- * 超出 Arco 单控件能力，故抽成业务组件；内部仍用标准 Input / Select / Form.Item
+ * 超出 Arco 单控件能力，故抽成业务组件；前缀下拉复用 FilterSelect 样式
  */
 export default function FilterKeywordInput({
   typeField,
@@ -52,11 +52,7 @@ export default function FilterKeywordInput({
           noStyle
           initialValue={typeInitialValue ?? firstOptionValue(typeOptions)}
         >
-          <Select
-            options={typeOptions}
-            style={{ width: typeWidth }}
-            triggerProps={{ autoAlignPopupWidth: false }}
-          />
+          <FilterSelect options={typeOptions} style={{ width: typeWidth }} />
         </Form.Item>
       }
       suffix={suffix ?? <IconSearch className="text-arco-text-3" />}

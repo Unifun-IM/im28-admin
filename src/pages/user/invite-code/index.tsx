@@ -6,9 +6,9 @@ import {
   Input,
   Message,
   Tooltip,
-  Tree,
-  type TreeDataType
+  Tree
 } from '@arco-design/web-react';
+import type { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import {
   IconCopy,
   IconRefresh,
@@ -21,7 +21,7 @@ import {
   getUserHierarchy,
   type UserHierarchyNode
 } from '@shared/api/biz';
-import emptyHierarchy from './assets/empty-hierarchy.svg';
+import emptyState from '@shared/assets/empty-state.svg';
 
 /**
  * 用户层级查询 — Figma 741:35915（空态）/ 770:19037（结果）
@@ -210,7 +210,7 @@ export default function Page() {
           <div className="flex flex-col items-center py-[12px]">
             <img
               alt=""
-              src={emptyHierarchy}
+              src={emptyState}
               className="block h-[100px] w-[133px] max-w-none"
             />
             <div className="text-[14px] leading-[21px] text-arco-text-1">

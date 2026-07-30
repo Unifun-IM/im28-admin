@@ -492,7 +492,9 @@ setupMock({
           ownerId: /1[0-9]{7}/,
           ownerName: '@cname',
           memberCount: '@integer(3,500)',
-          status: '@pick(["正常","已解散","禁言"])',
+          status: '@pick(["正常","已解散","封禁"])',
+          avatar: '',
+          ownerAvatar: '',
           createdAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
       );
@@ -505,20 +507,48 @@ setupMock({
         name: '@ctitle(4,10)',
         ownerId: /1[0-9]{7}/,
         ownerName: '@cname',
+        creatorName: '@cname',
         memberCount: 142,
-        status: '正常',
+        status: '@pick(["正常","已解散","封禁"])',
         announcement: '@cparagraph(1,2)',
         createdAt: '@datetime("yyyy-MM-dd HH:mm:ss")',
+        lastActiveTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+        joinMethod: '邀请加入',
+        invitePermission: '开',
+        speakPermission: '无限制',
+        muteStatus: '不禁言',
         allowInvite: true,
         allowAddFriend: true,
-        speakPermission: '全员',
-        'members|10': [
+        'admins|4': [
           {
             id: '@id',
             userId: /1[0-9]{7}/,
             nickname: '@cname',
+            role: '管理员'
+          }
+        ],
+        'logs|6': [
+          {
+            id: '@id',
+            time: '@datetime("yyyy/MM/dd HH:mm:ss")',
+            action:
+              '@pick(["发布公告","修改昵称","修改群头像","设置管理员","创建群聊"])',
+            detail: '@csentence(6,20)'
+          }
+        ],
+        'members|20': [
+          {
+            id: '@id',
+            userId: /1[0-9]{7}/,
+            nickname: '@cname',
+            avatar: '',
             role: '@pick(["群主","管理员","成员"])',
-            joinTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
+            joinTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+            account: /1[0-9]{10}/,
+            phone: /1[3-9]\\d{9}/,
+            sharedGroupCount: '@integer(0,8)',
+            online: '@pick(["在线","离线"])',
+            isF1: '@boolean'
           }
         ]
       })
