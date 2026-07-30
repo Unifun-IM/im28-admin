@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu, Spin } from '@arco-design/web-react';
+import { Layout, Menu } from '@arco-design/web-react';
 import {
   IconApps,
   IconDoubleRight,
@@ -95,7 +95,7 @@ export const PageLayout = observer(function PageLayout() {
   const { pathname } = useLocation();
   const currentComponent = qs.parseUrl(pathname).url.slice(1);
   const locale = useLocale();
-  const { settings, userLoading, userInfo } = useGlobalSelector(
+  const { settings, userInfo } = useGlobalSelector(
     (state: GlobalState) => state
   );
   const contentFullscreen = pageTabsStore.contentFullscreen;
@@ -317,10 +317,7 @@ export const PageLayout = observer(function PageLayout() {
         </div>
         {showNavbar ? <PageTabs title={pageTabTitle} /> : null}
       </div>
-      {userLoading ? (
-        <Spin className={styles.spin} />
-      ) : (
-        <Layout>
+      <Layout>
           {showMenu && (
             <Sider
               breakpoint="xl"
@@ -385,7 +382,6 @@ export const PageLayout = observer(function PageLayout() {
             {showFooter && <Footer />}
           </Layout>
         </Layout>
-      )}
     </Layout>
   );
 });

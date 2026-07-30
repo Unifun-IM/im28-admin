@@ -13,6 +13,7 @@ import copy from 'copy-to-clipboard';
 import cs from 'classnames';
 import { resetAccountPassword } from '@shared/api/biz';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import './reset-password-modal.less';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;

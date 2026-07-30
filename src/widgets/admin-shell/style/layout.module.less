@@ -183,7 +183,13 @@
     padding: 0;
   }
 
-  /* L1：Figma menu-item — px12 py5 / gap16 / 圆角 2 / text-2 */
+  /*
+   * Figma 796:20719
+   * L1：text-2 / 透明底 / 圆角 2 / px12 py5 / gap16
+   * 选中叶子：fill-3 + text-1 Medium（非 primary 紫）
+   * L2 叶子：text-1 / pl42 / 选中 fill-3 圆角 8
+   * L2 分组（嵌套 SubMenu）：fill-1 圆角 8 p4；组头 text-3；组内 pl56
+   */
   :global(.arco-menu-item),
   :global(.arco-menu-inline-header) {
     display: flex;
@@ -195,28 +201,61 @@
     padding: 5px 12px !important;
     line-height: 22px;
     border-radius: 2px;
-    color: var(--color-text-2, #4e5969);
+    color: var(--color-text-2, #4e5969) !important;
     font-size: 14px;
     font-weight: 400;
-    background: transparent;
+    background: transparent !important;
+
+    > :global(.arco-icon),
+    > :global(svg),
+    :global(.arco-menu-item-inner) > :global(.arco-icon),
+    :global(.arco-menu-item-inner) > :global(svg) {
+      margin-right: 0 !important;
+      margin-left: 0 !important;
+      color: var(--color-text-2, #4e5969) !important;
+    }
 
     &:hover {
-      background-color: var(--color-fill-1, #f7f8fa);
-      color: var(--color-text-1, #1d2129);
+      background-color: var(--color-fill-1, #f7f8fa) !important;
+      color: var(--color-text-1, #1d2129) !important;
+
+      > :global(.arco-icon),
+      > :global(svg),
+      :global(.arco-menu-item-inner) > :global(.arco-icon),
+      :global(.arco-menu-item-inner) > :global(svg) {
+        color: var(--color-text-1, #1d2129) !important;
+      }
     }
+  }
+
+  :global(.arco-menu-item) > :global(.arco-menu-item-inner) {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+    padding: 0 !important;
+    color: inherit;
   }
 
   :global(.arco-menu-inline-header) {
     font-weight: 400;
   }
 
-  /* 选中：fill-3 + text-1 Medium（Figma 741:24736） */
-  :global(.arco-menu-selected),
-  :global(.arco-menu-selected.arco-menu-item),
-  :global(.arco-menu-item.arco-menu-selected) {
+  /* 选中叶子：fill-3 + text-1，去掉 Arco primary 紫 */
+  :global(.arco-menu-item.arco-menu-selected),
+  :global(.arco-menu-item.arco-menu-selected:hover) {
     background-color: var(--color-fill-3, #e5e6eb) !important;
     color: var(--color-text-1, #1d2129) !important;
     font-weight: 500;
+
+    > :global(.arco-icon),
+    > :global(svg),
+    :global(.arco-menu-item-inner),
+    :global(.arco-menu-item-inner) > :global(.arco-icon),
+    :global(.arco-menu-item-inner) > :global(svg) {
+      color: var(--color-text-1, #1d2129) !important;
+    }
 
     &::before,
     &::after {
@@ -224,41 +263,50 @@
     }
   }
 
-  /* L1 SubMenu 头：有选中子项时不套选中底 */
-  :global(.arco-menu-inline-header.arco-menu-selected) {
+  /* L1 SubMenu 头：有选中子项时保持未选中外观 */
+  :global(.arco-menu-inline-header.arco-menu-selected),
+  :global(.arco-menu-inline-header.arco-menu-selected:hover) {
     background-color: transparent !important;
     color: var(--color-text-2, #4e5969) !important;
     font-weight: 400;
 
-    :global(svg),
-    :global(.arco-icon) {
-      color: inherit !important;
+    > :global(svg),
+    > :global(.arco-icon) {
+      color: var(--color-text-2, #4e5969) !important;
     }
   }
 
   :global(.arco-menu-icon-suffix) {
-    color: var(--color-text-3, #86909c);
+    color: var(--color-text-3, #86909c) !important;
     font-size: 12px;
   }
 
-  /*
-   * 嵌套 SubMenu（如「用户管理」）：fill-1 + 圆角 8 + p4；
-   * 组标题 text-3；组内项近似稿面 pl-56 / 选中 fill-3
-   * L2 叶子：pl-42 / 圆角 2
-   */
+  /* L2：直接挂在一级下的叶子（用户日志 / 用户层级…） */
   :global(.arco-menu-inline-content) {
     > :global(.arco-menu-item) {
       padding-left: 42px !important;
       padding-right: 12px !important;
       gap: 0;
       border-radius: 2px;
+      color: var(--color-text-1, #1d2129) !important;
+      background: transparent !important;
+
+      &:hover {
+        background-color: var(--color-fill-1, #f7f8fa) !important;
+        color: var(--color-text-1, #1d2129) !important;
+      }
     }
 
-    > :global(.arco-menu-item.arco-menu-selected) {
+    > :global(.arco-menu-item.arco-menu-selected),
+    > :global(.arco-menu-item.arco-menu-selected:hover) {
       border-radius: 8px;
+      background-color: var(--color-fill-3, #e5e6eb) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 500;
     }
   }
 
+  /* L2 分组：嵌套 SubMenu（用户管理）— fill-1 容器 */
   :global(.arco-menu-inline .arco-menu-inline) {
     box-sizing: border-box;
     margin-bottom: 4px;
@@ -273,35 +321,53 @@
       border-radius: 8px;
       color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
+      font-weight: 400;
 
       &:hover {
         color: var(--color-text-2, #4e5969) !important;
         background-color: var(--color-fill-2, #f2f3f5) !important;
       }
 
-      /* 组头无左侧图标 */
       > :global(svg),
       > :global(.arco-icon) {
         display: none;
       }
     }
 
-    > :global(.arco-menu-inline-header.arco-menu-selected) {
+    > :global(.arco-menu-inline-header.arco-menu-selected),
+    > :global(.arco-menu-inline-header.arco-menu-selected:hover) {
       color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
       font-weight: 400;
     }
 
+    /* L3：组内项 pl56 / text-1 / 选中 fill-3 Medium 圆角 8 */
     :global(.arco-menu-inline-content) > :global(.arco-menu-item) {
-      padding-left: 52px !important;
+      padding-left: 56px !important;
       padding-right: 8px !important;
       margin-bottom: 4px;
       border-radius: 8px;
-      color: var(--color-text-1, #1d2129);
+      color: var(--color-text-1, #1d2129) !important;
+      background: transparent !important;
+      font-weight: 400;
+
+      &:hover {
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+        color: var(--color-text-1, #1d2129) !important;
+      }
 
       &:last-child {
         margin-bottom: 0;
       }
+    }
+
+    :global(.arco-menu-inline-content)
+      > :global(.arco-menu-item.arco-menu-selected),
+    :global(.arco-menu-inline-content)
+      > :global(.arco-menu-item.arco-menu-selected:hover) {
+      background-color: var(--color-fill-3, #e5e6eb) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 500;
     }
   }
 
@@ -330,10 +396,10 @@
       border-radius: 2px;
       background: transparent !important;
       overflow: hidden;
-      color: var(--color-text-2, #4e5969);
+      color: var(--color-text-2, #4e5969) !important;
 
-      /* 只留图标，藏标题与箭头 */
-      > span {
+      > span,
+      > :global(.arco-menu-item-inner) > span {
         display: none !important;
       }
 
@@ -345,7 +411,7 @@
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: inherit;
+        color: inherit !important;
       }
 
       &:hover {
@@ -353,7 +419,7 @@
         min-height: 40px;
         border-radius: 12px;
         background-color: var(--color-fill-2, #f2f3f5) !important;
-        color: var(--color-text-1, #1d2129);
+        color: var(--color-text-1, #1d2129) !important;
       }
     }
 

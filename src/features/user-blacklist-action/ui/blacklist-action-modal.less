@@ -1,0 +1,104 @@
+/* 加入 / 解除黑名单弹窗 — Figma 750:16425 / 750:16440 */
+.arco-modal.use-blacklist-action-modal {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-border-1, #f2f3f5);
+
+  .arco-modal-content {
+    padding: 0;
+    background: var(--color-bg-1, #f7f8fa);
+  }
+
+  .arco-modal-header,
+  .arco-modal-footer {
+    display: none;
+  }
+
+  .arco-btn {
+    border-radius: 6px;
+    height: 32px;
+  }
+
+  .arco-btn-secondary,
+  .arco-btn-outline,
+  .arco-btn-default {
+    border-color: rgba(0, 0, 0, 0.08);
+    color: var(--color-text-2, #4e5969);
+  }
+
+  .arco-btn-primary.arco-btn-status-danger {
+    background-color: rgb(var(--danger-6));
+    border-color: rgb(var(--danger-6));
+  }
+
+  .use-blacklist-action-form {
+    .arco-form-item {
+      margin-bottom: 0;
+    }
+
+    .arco-form-label-item {
+      padding-bottom: 8px;
+      margin-bottom: 0;
+      line-height: 21px;
+    }
+
+    .arco-form-label-item > label {
+      color: var(--color-text-1, #1d2129);
+      font-size: 14px;
+      line-height: 21px;
+    }
+
+    .arco-form-message {
+      min-height: 12px;
+      line-height: 12px;
+      margin-top: 0;
+    }
+
+    .arco-select-view,
+    .arco-textarea-wrapper {
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+
+    .arco-select-view {
+      height: 32px;
+      padding: 4px 12px;
+    }
+
+    .arco-textarea {
+      min-height: 42px;
+      padding: 4px 0;
+      font-size: 14px;
+      line-height: 21px;
+      background: transparent;
+    }
+
+    .arco-form-item-control {
+      min-height: auto;
+    }
+
+    .use-blacklist-duration-radio.arco-radio-group {
+      display: flex;
+      gap: 24px;
+      padding: 5px 0;
+
+      .arco-radio {
+        margin-right: 0;
+        padding-left: 0;
+      }
+
+      .arco-radio-text {
+        font-size: 14px;
+        line-height: 22px;
+        color: var(--color-text-1, #1d2129);
+      }
+    }
+  }
+}
+
+.use-blacklist-action-modal-wrap .arco-modal-mask {
+  backdrop-filter: blur(3.5px);
+  background: rgba(0, 0, 0, 0.4);
+}

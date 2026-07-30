@@ -175,7 +175,9 @@ function RolesPage() {
                           title: '删除角色',
                           content: `确认删除角色「${String(row.name)}」？`,
                           okButtonProps: { status: 'danger' },
-                          onOk: () => Message.success('已删除（mock）')
+                          onOk: () => {
+                            Message.success('已删除（mock）');
+                          }
                         })
                     }
                   ]}

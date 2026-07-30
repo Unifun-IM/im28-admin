@@ -1,0 +1,49 @@
+/* —— 新建角色 Modal（Figma 666:21515） —— */
+.arco-modal.use-create-role-modal {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-border-1, #f2f3f5);
+
+  .arco-modal-header {
+    height: 48px;
+    padding: 0 24px;
+    background: var(--color-bg-1, #f7f8fa);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    .arco-modal-title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      color: var(--color-text-1, #1d2129);
+    }
+  }
+
+  .arco-modal-content {
+    padding: 12px 24px 24px;
+    background: var(--color-bg-1, #f7f8fa);
+    max-height: min(70vh, 640px);
+    overflow-y: auto;
+  }
+
+  .arco-modal-footer {
+    height: 48px;
+    padding: 0 24px;
+    background: var(--color-bg-2, #fff);
+    border-top: 1px solid var(--color-border-1, #f2f3f5);
+  }
+
+  .arco-form-item-label > label {
+    color: var(--color-text-2, #4e5969);
+  }
+
+  .arco-input-inner-wrapper {
+    border-radius: 8px;
+    background: var(--color-bg-2, #fff);
+  }
+}
+
+.use-create-role-modal-wrap .arco-modal-mask {
+  backdrop-filter: blur(3.5px);
+  background: rgba(0, 0, 0, 0.4);
+}

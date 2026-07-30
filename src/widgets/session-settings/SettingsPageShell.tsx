@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Anchor, Button, Card, Space } from '@arco-design/web-react';
+import './session-settings.less';
 
 export type SettingsAnchorItem = {
   key: string;
@@ -70,7 +71,7 @@ export default function SettingsPageShell({
             className="use-session-settings-anchor"
             affix={false}
             hash={false}
-            scrollContainer={() => scrollRef.current || window}
+            scrollContainer="#session-settings-scroll"
             offsetTop={12}
           >
             {anchors.map((item) => (
@@ -84,6 +85,7 @@ export default function SettingsPageShell({
         </div>
 
         <div
+          id="session-settings-scroll"
           ref={scrollRef}
           className="max-h-[calc(100vh-220px)] min-w-0 flex-1 overflow-y-auto"
         >

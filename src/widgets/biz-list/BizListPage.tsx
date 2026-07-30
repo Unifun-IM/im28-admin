@@ -11,6 +11,7 @@ import {
 } from '@arco-design/web-react';
 import { IconRefresh, IconSettings } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import './biz-list.less';
 
 import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';

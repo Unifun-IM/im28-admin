@@ -36,6 +36,7 @@ import { generatePermission } from '@shared/config/routes';
 import { setAccessToken } from '@shared/api/request';
 import { UserCenterModal } from '@features/user-center';
 import cs from 'classnames';
+import './navbar.less';
 
 export type NavbarBreadcrumbItem =
   | string

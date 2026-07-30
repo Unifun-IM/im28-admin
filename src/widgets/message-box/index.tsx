@@ -5,6 +5,7 @@ import { getApiMessageList, postApiMessageRead } from '@shared/api/message';
 import useLocale from '@shared/lib/useLocale';
 import cs from 'classnames';
 import MessageList, { MessageListType } from './list';
+import './message-box.less';
 
 type TabKey = 'all' | 'unread' | 'message' | 'notice';
 

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import loginEffect from './assets/login-effect.svg';
 import loginLogo from './assets/login-logo.svg';
 import LoginForm from './form';
+import './login.less';
 
 /**
  * 登录页 — Figma 602:35197

@@ -34,6 +34,7 @@ import iconSession from '../assets/icon-session.svg';
 import iconStar from '../assets/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
 import useElementHeight from './useElementHeight';
+import './user-chat-modal.less';
 
 const { Text } = Typography;
 

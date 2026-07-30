@@ -1,0 +1,131 @@
+/* —— Navbar：共用 Arco 深度覆盖（Figma 741:29115） —— */
+.use-navbar-breadcrumb {
+  .arco-breadcrumb-item {
+    padding: 0;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .arco-breadcrumb-item-separator {
+    margin: 0;
+    padding: 0;
+    color: var(--color-text-3, #86909c);
+  }
+}
+
+.use-navbar-search {
+  width: 254px;
+
+  .arco-input-inner-wrapper {
+    height: 32px;
+    padding-left: 16px;
+    background: var(--color-fill-2, #f2f3f5);
+    border: none;
+    border-radius: 8px;
+  }
+
+  .arco-input-inner-wrapper .arco-input-group-prefix {
+    padding-right: 12px;
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-inner-wrapper input {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--color-text-1);
+  }
+
+  .arco-input-inner-wrapper input::placeholder {
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-inner-wrapper:hover,
+  .arco-input-inner-wrapper:focus-within {
+    background: var(--color-fill-2, #f2f3f5);
+    border: 1px solid var(--color-border-2, #e5e6eb);
+  }
+}
+
+@media (max-width: 900px) {
+  .use-navbar-search {
+    width: 160px;
+  }
+}
+
+.use-navbar-badge {
+  .arco-badge-number {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 16px;
+    box-shadow: none;
+  }
+}
+
+/* Figma 741:29115：右侧图标 32×32 / gap 8 */
+.use-navbar-icon-btn.arco-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-2, #4e5969);
+
+  &:hover {
+    background: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1, #1d2129);
+  }
+
+  > svg {
+    font-size: 16px;
+    vertical-align: -3px;
+  }
+
+  &.is-active {
+    border-radius: 50%;
+    background: var(--color-fill-3, #e5e6eb);
+    color: var(--color-text-1, #1d2129);
+
+    &:hover {
+      background: var(--color-fill-3, #e5e6eb);
+    }
+  }
+}
+
+.use-profile-menu {
+  width: 258px !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+
+  .arco-menu-inner {
+    padding: 0;
+  }
+
+  .use-profile-menu-item {
+    height: auto !important;
+    line-height: normal !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+
+    &:hover {
+      background: var(--color-fill-2, #f2f3f5) !important;
+    }
+  }
+
+  .use-profile-logout {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    height: 32px !important;
+    padding: 4px 0 !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+    font-size: 14px;
+    color: var(--color-text-1) !important;
+  }
+}

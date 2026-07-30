@@ -5,14 +5,15 @@ import {
   Drawer,
   Message,
   Spin,
-  Table,
   Tabs,
-  type TableColumnProps
+  Timeline
 } from '@arco-design/web-react';
 import { IconCopy, IconRight } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import { getUserDetail } from '@shared/api/biz';
 import { StatusBadge } from '@widgets/biz-list';
+import './user-detail-drawer.less';
+import '@widgets/biz-list/biz-detail-table.less';
 
 export type UserDetailDrawerProps = {
   visible: boolean;
@@ -93,30 +94,9 @@ function SocialLink({
   );
 }
 
-const LOG_COLUMNS: TableColumnProps<LogItem>[] = [
-  {
-    title: '时间',
-    dataIndex: 'time',
-    width: 160,
-    render: (v) => formatLogTime(v as string)
-  },
-  {
-    title: '行为',
-    dataIndex: 'action',
-    width: 200,
-    render: (v) => (v as string) || '-'
-  },
-  {
-    title: '详情',
-    dataIndex: 'detail',
-    ellipsis: true,
-    render: (v) => (v as string) || '-'
-  }
-];
-
 /**
- * 用户详情抽屉 — Figma 666:21862（基本信息）/ 750:23153（操作日志）
- * 宽 640，右侧滑出；信息用 Descriptions，日志用 Table
+ * 用户详情抽屉 — Figma 666:21862（基本信息）/ 750:23153（操作日志 Timeline）
+ * 宽 640，右侧滑出
  */
 export default function UserDetailDrawer({
   visible,
@@ -291,24 +271,38 @@ export default function UserDetailDrawer({
 
             <Tabs.TabPane key="logs" title="操作日志">
               <div className="pt-[12px]">
-                <Table
-                  className="use-biz-detail-table"
-                  rowKey={(row) =>
-                    String(row.id ?? `${row.time ?? 'log'}-${row.action ?? ''}`)
-                  }
-                  columns={LOG_COLUMNS}
-                  data={logs}
-                  border
-                  borderCell
-                  pagination={false}
-                  noDataElement={
-                    !loading ? (
-                      <div className="py-8 text-center text-[12px] text-arco-text-3">
-                        暂无操作日志
-                      </div>
-                    ) : null
-                  }
-                />
+                {logs.length ? (
+                  <Timeline className="use-user-detail-timeline">
+                    {logs.map((item, index) => (
+                      <Timeline.Item
+                        key={item.id || `${item.time}-${index}`}
+                        dotColor={
+                          index === 0
+                            ? 'rgb(var(--primary-6))'
+                            : 'var(--color-neutral-3, #c9cdd4)'
+                        }
+                      >
+                        <div className="flex flex-wrap items-start gap-[12px] text-[12px] leading-[20px]">
+                          <span className="w-[119px] shrink-0 text-arco-text-3">
+                            {formatLogTime(item.time)}
+                          </span>
+                          <span className="w-[200px] shrink-0 text-arco-text-1">
+                            {item.action || '-'}
+                          </span>
+                          <span className="min-w-0 flex-1 text-arco-text-3">
+                            {item.detail || ''}
+                          </span>
+                        </div>
+                      </Timeline.Item>
+                    ))}
+                  </Timeline>
+                ) : (
+                  !loading && (
+                    <div className="py-8 text-center text-[12px] text-arco-text-3">
+                      暂无操作日志
+                    </div>
+                  )
+                )}
               </div>
             </Tabs.TabPane>
           </Tabs>

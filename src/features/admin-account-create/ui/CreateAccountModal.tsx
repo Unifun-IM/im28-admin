@@ -12,6 +12,7 @@ import { IconCheckCircleFill, IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import cs from 'classnames';
 import { createAccount } from '@shared/api/biz';
+import './create-account-modal.less';
 
 const FormItem = Form.Item;
 

@@ -11,6 +11,7 @@ import {
 import { postBlacklistAction } from '@shared/api/biz';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
+import './blacklist-action-modal.less';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;

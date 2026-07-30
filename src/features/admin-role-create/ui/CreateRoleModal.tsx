@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { createRole } from '@shared/api/biz';
 import PermissionConfig from './PermissionConfig';
+import './create-role-modal.less';
 
 const FormItem = Form.Item;
 
@@ -81,7 +82,7 @@ export default function CreateRoleModal({
             </span>
             <Switch
               checked={enabled !== false}
-              checkedColor="rgb(var(--success-6))"
+              className="use-switch-success"
               onChange={(v) => form.setFieldValue('enabled', v)}
             />
           </div>

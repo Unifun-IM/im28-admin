@@ -226,7 +226,7 @@ function AccountsPage() {
                   checked={v === '启用'}
                   checkedText=""
                   uncheckedText=""
-                  checkedColor="rgb(var(--success-6))"
+                  className="use-switch-success"
                   onChange={(checked) => onToggleStatus(row, checked)}
                 />
               )

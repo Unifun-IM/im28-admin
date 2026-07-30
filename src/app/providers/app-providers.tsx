@@ -9,6 +9,7 @@ import {
   setUnauthorizedHandler
 } from '@shared/api/request';
 import { getApiUserUserInfo } from '@shared/api/user';
+import { generatePermission } from '@shared/config/routes';
 import { GlobalContext } from '@shared/lib/global-context';
 import changeTheme from '@shared/lib/changeTheme';
 import checkLogin from '@shared/lib/checkLogin';
@@ -26,6 +27,21 @@ function getArcoLocale(lang: string) {
       return zhCN;
   }
 }
+
+/** 登录态下首屏即注入权限，避免等 userInfo 才渲染侧栏菜单 */
+function bootstrapLoggedInShell() {
+  if (typeof window === 'undefined' || !checkLogin()) return;
+  const role = window.localStorage.getItem('userRole') || 'admin';
+  globalStore.updateUserInfo({
+    userLoading: true,
+    userInfo: {
+      ...globalStore.userInfo,
+      permissions: generatePermission(role)
+    }
+  });
+}
+
+bootstrapLoggedInShell();
 
 export function AppProviders({ children }: PropsWithChildren) {
   const [lang, setLang] = useStorage('arco-lang', 'zh-CN');
@@ -53,13 +69,18 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (checkLogin()) {
-      globalStore.updateUserInfo({ userLoading: true });
       getApiUserUserInfo()
         .then((userInfo) => {
+          const role = window.localStorage.getItem('userRole') || 'admin';
+          const apiPerms = userInfo?.permissions;
+          const permissions =
+            apiPerms && Object.keys(apiPerms).length
+              ? apiPerms
+              : generatePermission(role);
           globalStore.updateUserInfo({
             userInfo: {
-              permissions: {},
-              ...userInfo
+              ...userInfo,
+              permissions
             },
             userLoading: false
           });

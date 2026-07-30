@@ -8,6 +8,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import { useLocation, useNavigate } from 'react-router-dom';
 import cs from 'classnames';
+import './page-tabs.less';
 
 import { pageTabsStore } from '@entities/page-tabs';
 import useLocale from '@shared/lib/useLocale';

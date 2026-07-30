@@ -2,6 +2,7 @@ import React from 'react';
 import { Chart, Line, Axis, Area, Tooltip } from 'bizcharts';
 import { Spin } from '@arco-design/web-react';
 import CustomTooltip from './customer-tooltip';
+import './chart.less';
 
 function OverviewAreaLine({
   data,

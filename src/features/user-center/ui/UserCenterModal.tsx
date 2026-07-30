@@ -10,6 +10,7 @@ import cs from 'classnames';
 import { useGlobalDispatch, useGlobalSelector } from '@shared/lib/global-store-hooks';
 import type { GlobalState } from '@entities/global-state';
 import defaultAvatar from '../assets/default-avatar.svg';
+import './user-center-modal.less';
 
 export type UserCenterModalProps = {
   visible: boolean;

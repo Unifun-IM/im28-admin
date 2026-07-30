@@ -1,0 +1,822 @@
+/* —— 业务列表区块外壳：筛选 / 汇总 / 表格 统一圆角+描边 —— */
+.use-biz-filter-bar.arco-card,
+.use-biz-summary,
+.use-biz-table-card.arco-card {
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: var(--color-bg-2, #fff);
+  box-shadow: none;
+}
+
+/* —— 业务列表：筛选区（Arco Card + Form + Grid；视觉 token） —— */
+.use-biz-filter-bar {
+  .arco-card-body {
+    padding: 12px;
+  }
+
+  /* gutter 默认 flex-start 会使操作列矮于筛选项；拉齐行高后贴底对齐控件 */
+  .arco-row {
+    align-items: stretch;
+  }
+
+  /* 操作列：与同排筛选项同高，按钮贴底右对齐（对齐输入控件） */
+  .use-biz-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-bottom: 0;
+  }
+
+  .use-biz-filter-field {
+    margin-bottom: 0;
+  }
+
+  .arco-form-item {
+    margin-bottom: 0;
+    width: 100%;
+  }
+
+  .arco-form-item-label-col {
+    padding-bottom: 0;
+  }
+
+  .arco-form-label-item {
+    margin-bottom: 8px !important;
+    line-height: 12px;
+    min-height: 12px;
+    height: auto;
+    padding: 0;
+  }
+
+  .arco-form-label-item > label {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-2, #4e5969);
+    line-height: 12px;
+  }
+
+  /* 带 hint 的标签允许换行增高 */
+  .arco-form-label-item:has(.use-biz-filter-label-hint) {
+    height: auto;
+    line-height: 18px;
+
+    > label {
+      line-height: 18px;
+    }
+  }
+
+  .use-biz-filter-action-text.arco-btn {
+    padding: 0;
+    height: 32px;
+    font-size: 12px;
+    line-height: 20px;
+    color: rgb(var(--primary-6));
+  }
+
+  .use-biz-filter-action-text.arco-btn:hover {
+    background: transparent;
+    opacity: 0.85;
+  }
+
+  .use-biz-filter-action-text.is-danger.arco-btn {
+    color: rgb(var(--danger-6));
+  }
+
+  .use-biz-filter-action-search.arco-btn {
+    width: 80px;
+    min-width: 80px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .use-biz-filter-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .use-biz-filter-label-hint {
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 400;
+    color: var(--color-text-3, #86909c);
+  }
+
+  .use-biz-filter-label-row .arco-form-label-item > label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  /* Col 内控件撑满 */
+  .arco-form-item-control-children > .arco-select,
+  .arco-form-item-control-children > .arco-picker,
+  .arco-form-item-control-children > .arco-input-wrapper,
+  .arco-form-item-control-children > .arco-input-group-wrapper,
+  .arco-form-item-control-children > .arco-textarea-wrapper {
+    width: 100%;
+  }
+
+  .arco-form-item-control-children > .arco-select .arco-select-view,
+  .arco-form-item-control-children > .arco-picker {
+    width: 100%;
+  }
+
+  /* 填充型控件 — 高 32 / 圆角 8 / fill-1 */
+  .arco-input-inner-wrapper,
+  .arco-select-view,
+  .arco-picker,
+  .arco-input-group-addbefore,
+  .arco-input-group-addafter {
+    background-color: var(--color-fill-1, #f7f8fa);
+    border: none;
+    border-radius: 8px;
+    min-height: 32px;
+    box-shadow: none;
+  }
+
+  .arco-input-group-addbefore + .arco-input-inner-wrapper,
+  .arco-input-group:has(.arco-input-group-addbefore) > .arco-input-inner-wrapper {
+    background-color: var(--color-fill-1, #f7f8fa);
+    border: none;
+    border-radius: 0 8px 8px 0;
+    min-height: 32px;
+    box-shadow: none;
+  }
+
+  .arco-input-inner-wrapper,
+  .arco-select-view,
+  .arco-picker {
+    height: 32px;
+    padding: 0 12px;
+  }
+
+  .arco-select-view {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .arco-select-single .arco-select-view {
+    height: 32px;
+    line-height: 32px;
+  }
+
+  /* line-height 与控件同高，避免中文字形 ascent 偏大导致视觉偏上 */
+  .arco-select-single .arco-select-view-value,
+  .arco-select-single .arco-select-view-placeholder,
+  .arco-select-view-input,
+  .arco-picker-input input {
+    font-size: 14px;
+    line-height: 32px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-input {
+    font-size: 14px;
+    line-height: 32px;
+    height: 100%;
+    padding: 0;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-input::placeholder,
+  .arco-select-view-selector .arco-select-view-input::placeholder,
+  .arco-picker-input input::placeholder,
+  .arco-select-view-placeholder {
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-inner-wrapper:hover,
+  .arco-select-view:hover,
+  .arco-picker:hover,
+  .arco-input-inner-wrapper:focus-within,
+  .arco-select-view-focus,
+  .arco-select-focused .arco-select-view,
+  .arco-picker-focused {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .arco-input-group {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .arco-input-group-wrapper {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .arco-input-group-addbefore {
+    width: auto;
+    white-space: nowrap;
+    border-radius: 8px 0 0 8px;
+    border-right: 1px solid var(--color-border-2, #e5e6eb);
+    padding: 0 11px;
+    color: var(--color-text-1, #1d2129);
+    background-color: var(--color-fill-1, #f7f8fa);
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+
+    .arco-select {
+      margin: 0;
+    }
+
+    .arco-select-view {
+      background: transparent;
+      padding: 0 4px 0 0;
+      min-height: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .arco-select-view-value,
+    .arco-select-view-placeholder {
+      font-size: 14px;
+      line-height: 32px;
+      color: var(--color-text-1, #1d2129);
+    }
+  }
+
+  .arco-input-group > .arco-input-inner-wrapper {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .arco-input-group-addbefore + .arco-input-inner-wrapper {
+    border-radius: 0 8px 8px 0;
+  }
+
+  .arco-textarea-wrapper {
+    background-color: var(--color-fill-1, #f7f8fa);
+    border: none;
+    border-radius: 8px;
+    padding: 4px 12px;
+    min-height: 56px;
+    box-shadow: none;
+  }
+
+  .arco-textarea {
+    background: transparent;
+    font-size: 14px;
+    line-height: 21px;
+    min-height: 42px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-textarea::placeholder {
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-input-search-btn {
+    background: transparent !important;
+    border: none !important;
+    color: var(--color-text-3, #86909c) !important;
+    width: 28px;
+  }
+
+  .arco-select-view-multiple {
+    height: auto;
+    min-height: 32px;
+    padding: 4px 12px 4px 4px;
+  }
+
+  .arco-select-view-multiple .arco-select-view-inner {
+    padding: 0;
+    gap: 4px;
+  }
+
+  .arco-tag.arco-select-view-tag,
+  .arco-select-view-tag {
+    background: var(--color-bg-2, #fff);
+    border: 1px solid var(--color-fill-3, #e5e6eb);
+    border-radius: 4px;
+    color: var(--color-text-1);
+    margin: 0 4px 0 0;
+    height: 24px;
+    line-height: 22px;
+    padding: 0 8px;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .arco-select-view-tag .arco-icon-hover {
+    color: var(--color-text-3);
+  }
+
+  .arco-select-view-suffix,
+  .arco-picker-suffix,
+  .arco-input-clear-icon {
+    color: var(--color-text-3, #86909c);
+    font-size: 12px;
+  }
+
+  .arco-picker-range {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .arco-picker-input {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .arco-picker-separator + .arco-picker-input {
+    padding-left: 8px;
+  }
+
+  .arco-picker-separator {
+    box-sizing: border-box;
+    flex: none;
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+    color: var(--color-text-3, #86909c);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .arco-picker-suffix {
+    flex: none;
+    padding-left: 4px;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .arco-picker-suffix .arco-icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .use-biz-filter-bar {
+    .use-biz-filter-actions {
+      justify-content: flex-start;
+      align-items: center;
+    }
+  }
+}
+
+/* 筛选下拉：Figma 602:35141 多选 / 602:35100 单选 — 圆角 12 + 内边距 8 */
+.arco-select-popup:has(.use-biz-filter-dropdown) {
+  padding: 8px !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  box-sizing: border-box;
+}
+
+.use-biz-filter-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 120px;
+
+  .arco-select-popup-inner {
+    max-height: 280px;
+    padding: 0 !important;
+  }
+
+  /* 多选内嵌搜索 */
+  .use-biz-filter-dropdown-search {
+    margin-bottom: 4px;
+
+    .arco-input-inner-wrapper {
+      height: 32px;
+      padding-left: 12px;
+      background: var(--color-bg-2, #fff);
+      border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+      border-radius: 8px;
+    }
+
+    .arco-input-group-prefix {
+      padding-right: 12px;
+      color: var(--color-text-3, #86909c);
+    }
+
+    .arco-input-inner-wrapper input::placeholder {
+      color: var(--color-text-3, #86909c);
+    }
+  }
+
+  .arco-select-option-wrapper {
+    padding: 0 !important;
+  }
+
+  .arco-select-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 32px;
+    height: 32px;
+    margin: 0;
+    border-radius: 8px;
+    line-height: 22px;
+    font-size: 14px;
+    color: var(--color-text-1, #1d2129);
+    background: transparent !important;
+  }
+
+  .arco-select-option:hover,
+  .arco-select-option-hover {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+  }
+
+  /* 单选：选中行浅底 */
+  .arco-select-option-selected {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+    color: var(--color-text-1, #1d2129);
+    font-weight: 400;
+  }
+
+  .arco-select-checkbox,
+  .arco-select-option .arco-checkbox {
+    margin-right: 0;
+    padding-left: 0;
+  }
+
+  .use-biz-filter-select-all {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 32px;
+    padding: 0 4px 0 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--color-text-1, #1d2129);
+
+    .arco-checkbox {
+      padding-left: 0;
+    }
+  }
+
+  .use-biz-filter-select-all:hover {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .use-biz-filter-select-clear {
+    height: 22px;
+    margin-top: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 22px;
+    color: rgb(var(--primary-6));
+    cursor: pointer;
+  }
+
+  .use-biz-filter-select-clear.is-disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+/* 多选：选中态只靠 checkbox，行底不高亮（Figma 602:35141） */
+.arco-select-popup-multiple .use-biz-filter-dropdown {
+  .arco-select-option-selected {
+    background-color: transparent !important;
+  }
+
+  .arco-select-option-selected:hover {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+  }
+}
+
+/* 兼容旧选择器（若仍有挂在 popup-inner 的 class） */
+.arco-select-popup-inner.use-biz-filter-dropdown {
+  max-height: 280px;
+}
+
+/* 批量操作条内 Switch：深色底适配（Figma 602:34650） */
+.use-table-batch-bar {
+  .arco-switch {
+    background-color: rgba(255, 255, 255, 0.16);
+    min-width: 28px;
+    height: 16px;
+    line-height: 16px;
+  }
+
+  .arco-switch-dot {
+    width: 12px;
+    height: 12px;
+    top: 2px;
+    left: 2px;
+  }
+
+  .arco-switch-checked {
+    background-color: rgb(var(--primary-6));
+  }
+
+  .arco-switch-checked .arco-switch-dot {
+    left: calc(100% - 14px);
+  }
+}
+
+.use-biz-table-card {
+  .arco-card-body {
+    padding: 0;
+  }
+
+  /* 标题工具栏 — Figma 602:34722 / 602:35686 */
+  .use-biz-table-toolbar {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 56px;
+    padding: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .use-biz-table-toolbar-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .use-biz-table-icon-btn.arco-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-2, #4e5969);
+  }
+
+  .use-biz-table-icon-btn.arco-btn:hover {
+    background: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .use-biz-table-secondary-btn.arco-btn {
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-2, #4e5969);
+  }
+
+  .use-biz-table-secondary-btn.arco-btn:hover {
+    background: var(--color-fill-3, #e5e6eb);
+    color: var(--color-text-1, #1d2129);
+  }
+}
+
+.use-biz-table {
+  /* Figma 602:34721 / 602:35685 — 表头 fill-1 + text-3；单元格 12px + 网格线 */
+  .arco-table-container,
+  .arco-table-content-scroll,
+  .arco-table-content-inner,
+  .arco-table-header,
+  .arco-table-body {
+    border: none;
+  }
+
+  .arco-table-th {
+    background: var(--color-fill-1, #f7f8fa);
+    height: 40px;
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 21px;
+    color: var(--color-text-3, #86909c);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  /* Arco 默认 th-item 自带 padding，避免与 th 双重叠加导致表头变高 */
+  .arco-table-th-item {
+    padding: 0;
+    height: auto;
+    line-height: 21px;
+  }
+
+  .arco-table-th-item-title {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 21px;
+    color: var(--color-text-3, #86909c);
+  }
+
+  .arco-table-th:last-child,
+  .arco-table-th.arco-table-col-fixed-right {
+    border-right: none;
+  }
+
+  .arco-table-th.arco-table-col-fixed-right {
+    text-align: right;
+  }
+
+  .arco-table-td {
+    height: 40px;
+    min-height: 40px;
+    /* Figma：pl-16 pr-17 py-9 */
+    padding: 9px 17px 9px 16px;
+    font-size: 12px;
+    line-height: 12px;
+    color: var(--color-text-1, #1d2129);
+    /* 单元格无上下边框，仅保留列分隔 */
+    border-top: none !important;
+    border-bottom: none !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    vertical-align: middle;
+    overflow: hidden;
+  }
+
+  /* 最后一行保留底边框，与分页区分 */
+  .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .arco-table-td:last-child,
+  .arco-table-td.arco-table-col-fixed-right {
+    border-right: none;
+  }
+
+  /* 操作列 padding；投影交给 Arco fixed 标准（scroll-position + col-fixed-right-first::after） */
+  .arco-table-td.arco-table-col-fixed-right,
+  .arco-table-th.arco-table-col-fixed-right {
+    padding-left: 12px;
+    padding-right: 12px;
+    /* 勿裁切 Arco 固定列左侧 ::after 阴影 */
+    overflow: visible;
+  }
+
+  .arco-table-cell {
+    overflow: hidden;
+  }
+
+  .arco-table-cell-ellipsis .arco-table-cell-content,
+  .arco-table-td .arco-typography,
+  .arco-table-td .arco-table-cell-wrap-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 12px;
+  }
+
+  /* 表内状态点：跟随单元格 12px（Figma badge/status 高 20） */
+  .arco-table-td .use-status-badge {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  /* Stripe 斑马纹：偶数行 fill-1；Hover / 选中优先于斑马纹 */
+  &.arco-table-stripe
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:nth-child(even)
+    > .arco-table-td {
+    background-color: var(--color-fill-1, #f7f8fa);
+  }
+
+  &.arco-table-stripe
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:nth-child(odd)
+    > .arco-table-td {
+    background-color: var(--color-bg-2, #fff);
+  }
+
+  .arco-table-content-inner tbody > .arco-table-tr:hover > .arco-table-td {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+  }
+
+  .arco-table-content-inner tbody > .arco-table-tr-checked > .arco-table-td,
+  .arco-table-content-inner tbody > .arco-table-tr-checked:hover > .arco-table-td {
+    background-color: rgba(var(--primary-6), 0.06) !important;
+  }
+
+  .arco-table-checkbox {
+    width: 40px;
+  }
+
+  .arco-table-th.arco-table-checkbox,
+  .arco-table-td.arco-table-checkbox,
+  .arco-table-checkbox .arco-table-cell-wrap-value {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  /* 右侧固定列背景跟随 Stripe / hover / 选中；投影由 Arco scroll-position 控制 */
+  &.arco-table-stripe
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:nth-child(even)
+    > .arco-table-td.arco-table-col-fixed-right {
+    background-color: var(--color-fill-1, #f7f8fa);
+  }
+
+  &.arco-table-stripe
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:nth-child(odd)
+    > .arco-table-td.arco-table-col-fixed-right {
+    background-color: var(--color-bg-2, #fff);
+  }
+
+  .arco-table-content-inner
+    tbody
+    > .arco-table-tr:hover
+    > .arco-table-td.arco-table-col-fixed-right {
+    background-color: var(--color-fill-2, #f2f3f5) !important;
+  }
+
+  .arco-table-content-inner
+    tbody
+    > .arco-table-tr-checked
+    > .arco-table-td.arco-table-col-fixed-right {
+    background-color: rgba(var(--primary-6), 0.06) !important;
+  }
+
+  .arco-table-th.arco-table-col-fixed-right {
+    background-color: var(--color-fill-1, #f7f8fa);
+  }
+
+  /* 分页 — Figma 602:34978：顶 8，右对齐，项间距 8 */
+  .arco-table-pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 8px 12px;
+  }
+
+  .arco-pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .arco-pagination-item,
+  .arco-pagination-item-previous,
+  .arco-pagination-item-next {
+    min-width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    line-height: 32px;
+    border: none;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--color-text-2, #4e5969);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* 当前页 — Figma 602:34981：fill-1 底 + text-1 加粗 + 圆角 8 */
+  .arco-pagination-item-active {
+    background: var(--color-fill-1, #f7f8fa);
+    border-radius: 8px;
+    color: var(--color-text-1, #1d2129);
+    font-weight: 700;
+  }
+
+  .arco-pagination-item:hover:not(.arco-pagination-item-disabled):not(
+      .arco-pagination-item-active
+    ) {
+    background: var(--color-fill-1, #f7f8fa);
+    border-radius: 8px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-pagination-option .arco-select-view {
+    height: 32px;
+    padding: 0 12px;
+    background: var(--color-fill-2, #f2f3f5);
+    border: none;
+    border-radius: 8px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-pagination-total-text {
+    font-size: 14px;
+    line-height: 21px;
+    color: var(--color-text-1, #1d2129);
+  }
+}
+
+/* 表格超长省略 Tooltip — Figma 602:34994（class 挂在 Trigger 上） */
+.arco-tooltip.use-biz-table-tooltip {
+  .arco-tooltip-content {
+    padding: 4px 12px;
+    border-radius: 4px;
+  }
+}

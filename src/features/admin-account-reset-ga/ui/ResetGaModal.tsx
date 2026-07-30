@@ -11,6 +11,7 @@ import { IconCheckCircleFill } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { resetAccountGa } from '@shared/api/biz';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import './reset-ga-modal.less';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
