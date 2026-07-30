@@ -111,21 +111,46 @@
     padding: 4px !important;
     margin: 0 !important;
     border-radius: 8px !important;
+    background: transparent !important;
 
     &:hover {
       background: var(--color-fill-2, #f2f3f5) !important;
     }
   }
 
+  .use-profile-menu-divider.arco-divider-horizontal {
+    margin: 8px 0;
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  /* 退出登录：默认透明，悬停才铺满灰底；取消选中态残留 */
   .use-profile-logout {
     display: flex !important;
     align-items: center;
     gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
     height: 32px !important;
-    padding: 4px 0 !important;
     margin: 0 !important;
+    padding: 0 8px !important;
     border-radius: 8px !important;
+    background: transparent !important;
     font-size: 14px;
-    color: var(--color-text-1) !important;
+    font-weight: 400;
+    line-height: 22px;
+    color: var(--color-text-1, #1d2129) !important;
+
+    &:hover,
+    &.arco-menu-selected,
+    &.arco-menu-selected:hover {
+      background: var(--color-fill-2, #f2f3f5) !important;
+      color: var(--color-text-1, #1d2129) !important;
+    }
+  }
+
+  .use-profile-logout-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+    color: inherit;
   }
 }

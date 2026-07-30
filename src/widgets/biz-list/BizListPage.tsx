@@ -20,6 +20,7 @@ import {
   normalizeBizColumns,
   resolveBizPagination
 } from './tableDefaults';
+import { EmptyState } from '@shared/ui';
 
 export type BizListPageProps<T = Record<string, unknown>> = {
   form?: FormInstance;
@@ -266,6 +267,7 @@ export default function BizListPage<T extends Record<string, unknown>>({
             data={displayData}
             scroll={scroll}
             pagination={pagination as TableProps<T>['pagination']}
+            noDataElement={tableProps.noDataElement ?? <EmptyState />}
           />
         </div>
       </Card>

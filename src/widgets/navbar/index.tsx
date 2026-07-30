@@ -100,6 +100,7 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
   const droplist = (
     <Menu
       className="use-profile-menu"
+      selectable={false}
       onClickMenuItem={(key) => {
         if (key === 'logout') logout();
         if (key === 'profile') {
@@ -123,10 +124,10 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
           </div>
         </div>
       </Menu.Item>
-      <Divider className="!my-2" />
+      <Divider className="use-profile-menu-divider" />
       <Menu.Item key="logout" className="use-profile-logout">
-        <IconPoweroff className="mr-0 text-base text-arco-text-1" />
-        {t['navbar.logout']}
+        <IconPoweroff className="use-profile-logout-icon" />
+        <span>{t['navbar.logout']}</span>
       </Menu.Item>
     </Menu>
   );

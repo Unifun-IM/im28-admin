@@ -140,6 +140,25 @@ body {
   }
 }
 
+/* 折叠态叶子项 Tooltip：仅文字，浅色样式与二级浮层一致 */
+.arco-menu-item-tooltip {
+  .arco-tooltip-content {
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-2, #e5e6eb);
+    background: var(--color-bg-popup, #fff);
+    color: var(--color-text-1, #1d2129);
+    font-size: 14px;
+    line-height: 22px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .arco-tooltip-arrow {
+    background: var(--color-bg-popup, #fff);
+    border: 1px solid var(--color-border-2, #e5e6eb);
+  }
+}
+
 /* 全局 Message — Figma 602:35325（登录验证提醒） */
 .arco-message-wrapper .arco-message {
   padding: 9px 16px;

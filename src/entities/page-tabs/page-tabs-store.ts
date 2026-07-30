@@ -5,9 +5,14 @@ export type PageTabItem = {
   path: string;
   /** 展示标题（已本地化或 locale key） */
   title: string;
-  /** 是否可关闭，默认 true */
+  /** 是否可关闭，默认 true；固定标签视为不可关闭 */
   closable?: boolean;
+  /** 是否固定（靠左，默认最多 MAX_PINNED_TABS 个） */
+  pinned?: boolean;
 };
+
+/** 默认可固定标签数量上限 */
+export const MAX_PINNED_TABS = 3;
 
 const STORAGE_KEY = 'im-admin-page-tabs';
 
@@ -30,13 +35,23 @@ function saveTabs(tabs: PageTabItem[]) {
   }
 }
 
+function isCloseable(tab: PageTabItem) {
+  return tab.pinned !== true && tab.closable !== false;
+}
+
 export class PageTabsStore {
   tabs: PageTabItem[] = loadTabs();
   /** 内容区全屏：隐藏侧栏与顶部 Navbar，保留 PageTabs */
   contentFullscreen = false;
+  /** 固定标签上限，默认 3 */
+  maxPinned = MAX_PINNED_TABS;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  get pinnedCount() {
+    return this.tabs.filter((t) => t.pinned).length;
   }
 
   setContentFullscreen(value: boolean) {
@@ -47,19 +62,57 @@ export class PageTabsStore {
     this.contentFullscreen = !this.contentFullscreen;
   }
 
+  setMaxPinned(n: number) {
+    if (n < 0) return;
+    this.maxPinned = n;
+  }
+
   open(tab: PageTabItem) {
     const exists = this.tabs.find((t) => t.path === tab.path);
     if (exists) {
-      if (exists.title !== tab.title) {
-        exists.title = tab.title;
+      // 切换瞬间 title 可能短暂落到 pathname，避免覆盖已有展示标题导致宽度跳动
+      const nextTitle = tab.title;
+      const isFallback = !nextTitle || nextTitle === tab.path;
+      if (!isFallback && exists.title !== nextTitle) {
+        exists.title = nextTitle;
         saveTabs(this.tabs);
       }
       return;
     }
     this.tabs.push({
       ...tab,
-      closable: tab.closable !== false
+      closable: tab.closable !== false,
+      pinned: tab.pinned === true
     });
+    saveTabs(this.tabs);
+  }
+
+  /** 固定标签；已达上限时返回 false */
+  pin(path: string): boolean {
+    const index = this.tabs.findIndex((t) => t.path === path);
+    if (index < 0) return false;
+    const tab = this.tabs[index];
+    if (tab.pinned) return true;
+    if (this.pinnedCount >= this.maxPinned) return false;
+
+    tab.pinned = true;
+    this.tabs.splice(index, 1);
+    const insertAt = this.tabs.filter((t) => t.pinned).length;
+    this.tabs.splice(insertAt, 0, tab);
+    saveTabs(this.tabs);
+    return true;
+  }
+
+  unpin(path: string) {
+    const index = this.tabs.findIndex((t) => t.path === path);
+    if (index < 0) return;
+    const tab = this.tabs[index];
+    if (!tab.pinned) return;
+
+    tab.pinned = false;
+    this.tabs.splice(index, 1);
+    const insertAt = this.tabs.filter((t) => t.pinned).length;
+    this.tabs.splice(insertAt, 0, tab);
     saveTabs(this.tabs);
   }
 
@@ -67,26 +120,43 @@ export class PageTabsStore {
     const index = this.tabs.findIndex((t) => t.path === path);
     if (index < 0) return null;
     const target = this.tabs[index];
-    if (target.closable === false) return null;
+    if (!isCloseable(target)) return null;
     if (this.tabs.length <= 1) return null;
 
     this.tabs.splice(index, 1);
     saveTabs(this.tabs);
 
-    // 返回建议跳转的 path（关闭后由调用方判断是否跳转）
     const next = this.tabs[Math.max(0, index - 1)] || this.tabs[0];
     return next?.path ?? null;
   }
 
   closeOthers(path: string) {
     this.tabs = this.tabs.filter(
-      (t) => t.path === path || t.closable === false
+      (t) => t.path === path || t.pinned === true || t.closable === false
+    );
+    saveTabs(this.tabs);
+  }
+
+  closeLeft(path: string) {
+    const index = this.tabs.findIndex((t) => t.path === path);
+    if (index <= 0) return;
+    this.tabs = this.tabs.filter(
+      (t, i) => i >= index || !isCloseable(t)
+    );
+    saveTabs(this.tabs);
+  }
+
+  closeRight(path: string) {
+    const index = this.tabs.findIndex((t) => t.path === path);
+    if (index < 0 || index >= this.tabs.length - 1) return;
+    this.tabs = this.tabs.filter(
+      (t, i) => i <= index || !isCloseable(t)
     );
     saveTabs(this.tabs);
   }
 
   closeAll() {
-    const pinned = this.tabs.filter((t) => t.closable === false);
+    const pinned = this.tabs.filter((t) => t.pinned || t.closable === false);
     this.tabs = pinned.length ? pinned : this.tabs.slice(0, 1);
     saveTabs(this.tabs);
     return this.tabs[0]?.path ?? null;

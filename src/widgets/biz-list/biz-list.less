@@ -194,9 +194,21 @@
   .arco-picker:hover,
   .arco-input-inner-wrapper:focus-within,
   .arco-select-view-focus,
-  .arco-select-focused .arco-select-view,
-  .arco-picker-focused {
+  .arco-select-focused .arco-select-view {
     background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  /* RangePicker focus：保持 fill-1，去掉 Arco 默认的 active 浅紫底 */
+  .arco-picker-focused,
+  .arco-picker-focused:hover {
+    background-color: var(--color-fill-1, #f7f8fa);
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .arco-picker-focused .arco-picker-input-active input,
+  .arco-picker-focused:hover .arco-picker-input-active input {
+    background: transparent !important;
   }
 
   .arco-input-group {
@@ -615,6 +627,42 @@
     color: var(--color-text-3, #86909c);
   }
 
+  /*
+   * 可排序列表头：th 本身不再叠加 padding，由 cell-with-sorter 铺满，
+   * 去掉 mouseenter 灰底，避免出现「表头内嵌灰块」。
+   */
+  .arco-table-th.arco-table-col-has-sorter {
+    padding: 0;
+  }
+
+  .arco-table-th .arco-table-col-has-sorter {
+    padding: 0;
+    height: 100%;
+  }
+
+  .arco-table-th .arco-table-cell-with-sorter {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 16px;
+    background-color: transparent !important;
+  }
+
+  .arco-table-th .arco-table-cell-mouseenter {
+    background-color: transparent !important;
+  }
+
+  .arco-table-th.arco-table-col-sorted,
+  .arco-table-th.arco-table-col-sorted:hover {
+    background-color: var(--color-fill-1, #f7f8fa) !important;
+  }
+
+  .arco-table-sorter {
+    margin-left: 4px;
+  }
+
   .arco-table-th:last-child,
   .arco-table-th.arco-table-col-fixed-right {
     border-right: none;
@@ -677,6 +725,15 @@
   .arco-table-td .use-status-badge {
     font-size: 12px;
     line-height: 20px;
+  }
+
+  /* 空状态：去掉 Arco 默认 min-height 挤压，居中展示插画 */
+  .arco-table-no-data {
+    padding: 24px 16px;
+  }
+
+  .arco-table-no-data .use-empty-state {
+    min-height: 160px;
   }
 
   /* Stripe 斑马纹：偶数行 fill-1；Hover / 选中优先于斑马纹 */
@@ -751,9 +808,10 @@
     background-color: var(--color-fill-1, #f7f8fa);
   }
 
-  /* 分页 — Figma 602:34978：顶 8，右对齐，项间距 8 */
+  /* 分页 — Figma 602:34978：顶 8，右对齐，项间距 8；统一 32 高垂直居中 */
   .arco-table-pagination {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     margin: 0;
     padding: 8px 12px;
@@ -763,22 +821,47 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    height: 32px;
+    margin: 8px 0;
+  }
+
+  .arco-pagination-total-text {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  .arco-pagination-list {
+    display: inline-flex !important;
+    align-items: center;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
   }
 
   .arco-pagination-item,
   .arco-pagination-item-previous,
   .arco-pagination-item-next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-width: 32px;
     height: 32px;
     margin: 0;
     padding: 0;
-    line-height: 32px;
+    line-height: 1;
     border: none;
     border-radius: 2px;
     background: transparent;
     color: var(--color-text-2, #4e5969);
     font-size: 14px;
     font-weight: 600;
+    vertical-align: middle;
   }
 
   /* 当前页 — Figma 602:34981：fill-1 底 + text-1 加粗 + 圆角 8 */
@@ -797,19 +880,31 @@
     color: var(--color-text-1, #1d2129);
   }
 
+  .arco-pagination-option {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    margin: 0;
+    line-height: 0;
+    vertical-align: middle;
+  }
+
+  .arco-pagination-option .arco-select {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+  }
+
   .arco-pagination-option .arco-select-view {
+    display: inline-flex;
+    align-items: center;
     height: 32px;
     padding: 0 12px;
     background: var(--color-fill-2, #f2f3f5);
     border: none;
     border-radius: 8px;
     color: var(--color-text-1, #1d2129);
-  }
-
-  .arco-pagination-total-text {
-    font-size: 14px;
-    line-height: 21px;
-    color: var(--color-text-1, #1d2129);
+    line-height: 1;
   }
 }
 

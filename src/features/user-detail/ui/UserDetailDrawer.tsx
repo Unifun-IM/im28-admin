@@ -282,15 +282,17 @@ export default function UserDetailDrawer({
                             : 'var(--color-neutral-3, #c9cdd4)'
                         }
                       >
-                        <div className="flex flex-wrap items-start gap-[12px] text-[12px] leading-[20px]">
+                        <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
                           <span className="w-[119px] shrink-0 text-arco-text-3">
                             {formatLogTime(item.time)}
                           </span>
-                          <span className="w-[200px] shrink-0 text-arco-text-1">
-                            {item.action || '-'}
-                          </span>
-                          <span className="min-w-0 flex-1 text-arco-text-3">
-                            {item.detail || ''}
+                          <span className="flex min-w-0 flex-1 items-center gap-[12px]">
+                            <span className="w-[200px] shrink-0 text-arco-text-1">
+                              {item.action || '-'}
+                            </span>
+                            <span className="min-w-0 shrink truncate text-arco-text-3">
+                              {item.detail || ''}
+                            </span>
                           </span>
                         </div>
                       </Timeline.Item>

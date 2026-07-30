@@ -21,7 +21,7 @@ import {
   getUserHierarchy,
   type UserHierarchyNode
 } from '@shared/api/biz';
-import emptyState from '@shared/assets/empty-state.svg';
+import { EmptyState } from '@shared/ui';
 
 /**
  * 用户层级查询 — Figma 741:35915（空态）/ 770:19037（结果）
@@ -207,19 +207,11 @@ export default function Page() {
         </div>
 
         {!queried || !treeData.length ? (
-          <div className="flex flex-col items-center py-[12px]">
-            <img
-              alt=""
-              src={emptyState}
-              className="block h-[100px] w-[133px] max-w-none"
-            />
-            <div className="text-[14px] leading-[21px] text-arco-text-1">
-              请输入用户ID进行查询
-            </div>
-            <div className="text-[14px] leading-[21px] text-arco-text-3">
-              输入完整用户ID后点击查询，即可查看用户邀请关系
-            </div>
-          </div>
+          <EmptyState
+            className="py-[12px]"
+            description="请输入用户ID进行查询"
+            secondary="输入完整用户ID后点击查询，即可查看用户邀请关系"
+          />
         ) : (
           <div className="use-user-hierarchy-tree box-border px-[12px] pb-[12px] pt-[4px]">
             <div className="mb-[4px] flex h-[40px] items-center border-0 border-b border-solid border-[rgba(0,0,0,0.08)] px-[12px] text-[12px] leading-[20px] text-arco-text-3">

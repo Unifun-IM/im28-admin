@@ -2,13 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Layout, Menu } from '@arco-design/web-react';
 import {
-  IconApps,
   IconDoubleRight,
-  IconGift,
-  IconMenuFold,
-  IconSettings,
-  IconUserGroup,
-  IconMessage
+  IconMenuFold
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { observer } from 'mobx-react-lite';
@@ -20,6 +15,11 @@ import {
   type GlobalState
 } from '@entities/global-state';
 import { pageTabsStore } from '@entities/page-tabs';
+import IconDashboard from '@shared/assets/icon-dashboard.svg?react';
+import IconSession from '@shared/assets/icon-session.svg?react';
+import IconSystem from '@shared/assets/icon-system.svg?react';
+import IconTrade from '@shared/assets/icon-trade.svg?react';
+import IconUser from '@shared/assets/icon-user.svg?react';
 import Logo from '@shared/assets/logo.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import getUrlParams from '@shared/lib/getUrlParams';
@@ -52,15 +52,15 @@ function getIconFromKey(key: string) {
   switch (key) {
     case 'dashboard':
     case 'dashboard/workplace':
-      return <IconApps className={styles.icon} />;
+      return <IconDashboard className={styles.icon} />;
     case 'user':
-      return <IconUserGroup className={styles.icon} />;
+      return <IconUser className={styles.icon} />;
     case 'system':
-      return <IconSettings className={styles.icon} />;
+      return <IconSystem className={styles.icon} />;
     case 'trade':
-      return <IconGift className={styles.icon} />;
+      return <IconTrade className={styles.icon} />;
     case 'session':
-      return <IconMessage className={styles.icon} />;
+      return <IconSession className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }
@@ -90,6 +90,7 @@ export const PageLayout = observer(function PageLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(defaultSelectedKeys);
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
 
   const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
   const menuMap = useRef<Map<string, { menuItem?: boolean; subMenu?: boolean }>>(
@@ -113,17 +114,29 @@ export const PageLayout = observer(function PageLayout({
     : 0;
   const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
 
+  /** 按 pathname 同步取标题，避免 breadcrumb 滞后导致 tab 标题闪一下 */
   const pageTabTitle = useMemo(() => {
-    if (!breadcrumb.length) {
-      const flat = flattenRoutes.find(
-        (r) => pathname === `/${r.key}` || pathname.startsWith(`/${r.key}/`)
+    const matchRoute = (path: string) =>
+      flattenRoutes.find(
+        (r) => path === `/${r.key}` || path.startsWith(`/${r.key}/`)
       );
-      if (flat) return locale[flat.name] || flat.name;
-      return pathname;
+
+    let route = matchRoute(pathname);
+    if (!route) {
+      if (pathname.startsWith('/trade/redpacket-detail')) {
+        route = matchRoute('/trade/redpacket-detail');
+      } else if (pathname.startsWith('/session/chat')) {
+        route = matchRoute('/session/chat');
+      }
     }
-    const last = breadcrumb[breadcrumb.length - 1];
-    const name = typeof last === 'string' ? last : last.name;
-    return locale[name] || name;
+    if (route) return locale[route.name] || route.name;
+
+    if (breadcrumb.length) {
+      const last = breadcrumb[breadcrumb.length - 1];
+      const name = typeof last === 'string' ? last : last.name;
+      return locale[name] || name;
+    }
+    return pathname;
   }, [breadcrumb, flattenRoutes, locale, pathname]);
 
   function onClickMenuItem(key: string) {
@@ -203,7 +216,12 @@ export const PageLayout = observer(function PageLayout({
           );
         }
         menuMap.current.set(route.key, { menuItem: true });
-        return <MenuItem key={route.key}>{titleDom}</MenuItem>;
+        const label = localeMap[route.name] || route.name;
+        return (
+          <MenuItem key={route.key} renderItemInTooltip={() => label}>
+            {titleDom}
+          </MenuItem>
+        );
       });
     };
   }
@@ -265,6 +283,15 @@ export const PageLayout = observer(function PageLayout({
   }
 
   useEffect(() => {
+    const onScroll = () => {
+      setHeaderScrolled(window.scrollY > 0);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
     let routeConfig = routeMap.current.get(pathname);
     if (!routeConfig) {
       // 动态详情页：/trade/redpacket-detail/:id 等
@@ -289,7 +316,8 @@ export const PageLayout = observer(function PageLayout({
         className={cs(styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar,
           [styles['layout-navbar-content-fullscreen']]:
-            showNavbar && contentFullscreen
+            showNavbar && contentFullscreen,
+          [styles['layout-navbar-scrolled']]: headerScrolled
         })}
         style={navbarStyle}
       >

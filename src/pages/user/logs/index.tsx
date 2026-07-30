@@ -166,7 +166,8 @@ export default function Page() {
             {
               title: '操作时间',
               dataIndex: 'operateTime',
-              width: 110,
+              width: 120,
+              ellipsis: false,
               sorter: (a, b) =>
                 String(a.operateTime || '').localeCompare(
                   String(b.operateTime || '')

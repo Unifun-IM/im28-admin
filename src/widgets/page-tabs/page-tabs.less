@@ -27,7 +27,8 @@
     height: 32px;
     margin: 0;
     margin-right: 2px;
-    padding: 5px 12px;
+    /* 右侧固定预留关闭区，有无 × 宽度一致，避免切换跳动 */
+    padding: 5px 28px 5px 12px;
     border: none;
     border-radius: 8px 8px 0 0;
     background-color: transparent;
@@ -35,6 +36,7 @@
     font-size: 14px;
     font-weight: 400;
     line-height: 22px;
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
 
   .arco-tabs-header-title:hover {
@@ -47,17 +49,18 @@
   }
 
   .arco-tabs-header-title-editable {
-    padding-right: 12px;
+    padding-right: 28px;
   }
 
-  /* 激活：页面底色盖住底边线 + Subtract 凹角（衔接内容区 bg-1） */
+  /* 激活：高度保持 32，box-shadow 向下盖住底边，避免 32↔33 跳动 */
   .arco-tabs-header-title-active,
   .arco-tabs-header-title-active:hover {
     z-index: 1;
-    height: 33px;
-    margin-bottom: -1px;
-    border-bottom-color: var(--color-bg-1, #f7f8fa);
+    height: 32px;
+    margin-bottom: 0;
+    border-bottom-color: transparent;
     background-color: var(--color-bg-1, #f7f8fa);
+    box-shadow: 0 1px 0 0 var(--color-bg-1, #f7f8fa);
     color: rgb(var(--primary-6));
     line-height: 22px;
 
@@ -87,16 +90,46 @@
 }
 
 .use-page-tab-title {
-  display: inline-block;
+  display: inline-flex;
   max-width: 120px;
+  align-items: center;
+  gap: 4px;
+  vertical-align: top;
+  cursor: default;
+  user-select: none;
+}
+
+.use-page-tab-title-text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: top;
+}
+
+.use-page-tab-pin {
+  flex-shrink: 0;
+  width: 12px;
+  font-size: 12px;
+  color: var(--color-text-3, #86909c);
+}
+
+.use-page-tabs
+  .arco-tabs-header-title-active
+  .use-page-tab-pin {
+  color: rgb(var(--primary-6));
+}
+
+.use-page-tabs-context-menu.arco-dropdown-menu {
+  min-width: 140px;
+  padding: 4px 0;
 }
 
 .use-page-tabs .arco-tabs-close-icon {
-  margin-left: 8px;
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  margin-left: 0;
+  transform: translateY(-50%);
   color: inherit;
 
   .arco-icon-hover::before {
@@ -114,6 +147,14 @@
   .arco-tabs-header-title-active
   .arco-tabs-close-icon {
   color: rgb(var(--primary-6));
+}
+
+/* 固定标签隐藏 ×，仍占位，切换不挤动 */
+.use-page-tabs
+  .arco-tabs-header-title:has(.use-page-tab-title.is-pinned)
+  .arco-tabs-close-icon {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* 溢出左右箭头：与右侧操作按钮同规格 */
