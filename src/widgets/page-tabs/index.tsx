@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Space, Tabs, Tooltip } from '@arco-design/web-react';
 import {
   IconClose,
@@ -22,33 +22,16 @@ export type PageTabsProps = {
   className?: string;
 };
 
-function enterFullscreen(el: HTMLElement) {
-  const anyEl = el as HTMLElement & {
-    webkitRequestFullscreen?: () => void;
-  };
-  if (el.requestFullscreen) return el.requestFullscreen();
-  if (anyEl.webkitRequestFullscreen) return anyEl.webkitRequestFullscreen();
-  return Promise.resolve();
-}
-
-function exitFullscreen() {
-  const doc = document as Document & {
-    webkitExitFullscreen?: () => void;
-  };
-  if (document.exitFullscreen) return document.exitFullscreen();
-  if (doc.webkitExitFullscreen) return doc.webkitExitFullscreen();
-  return Promise.resolve();
-}
-
 /**
  * 页面打开记录快捷导航 — Figma 741:29115
  * 基于 Arco Tabs（overflow=scroll 自带左右箭头）；视觉由 .use-page-tabs 覆盖
+ * 「全屏」= 隐藏侧栏 + 顶部 Navbar（状态在 pageTabsStore.contentFullscreen）
  */
 function PageTabs({ title, closable = true, className }: PageTabsProps) {
   const t = useLocale();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [fullscreen, setFullscreen] = useState(false);
+  const fullscreen = pageTabsStore.contentFullscreen;
 
   useEffect(() => {
     if (!pathname || pathname === '/login') return;
@@ -60,12 +43,13 @@ function PageTabs({ title, closable = true, className }: PageTabsProps) {
   }, [pathname, title, closable]);
 
   useEffect(() => {
-    const onChange = () => {
-      setFullscreen(Boolean(document.fullscreenElement));
+    if (!fullscreen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') pageTabsStore.setContentFullscreen(false);
     };
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [fullscreen]);
 
   const tabs = pageTabsStore.tabs;
 
@@ -78,17 +62,6 @@ function PageTabs({ title, closable = true, className }: PageTabsProps) {
     if (!tab || tab.closable === false) return;
     const next = pageTabsStore.close(path);
     if (path === pathname && next) navigate(next);
-  }
-
-  function toggleFullscreen() {
-    const target =
-      document.querySelector<HTMLElement>('[data-layout-content]') ||
-      document.documentElement;
-    if (!document.fullscreenElement) {
-      void enterFullscreen(target);
-    } else {
-      void exitFullscreen();
-    }
   }
 
   if (!tabs.length) return null;
@@ -105,7 +78,8 @@ function PageTabs({ title, closable = true, className }: PageTabsProps) {
         <button
           type="button"
           className="use-page-tabs-action-btn"
-          onClick={toggleFullscreen}
+          aria-pressed={fullscreen}
+          onClick={() => pageTabsStore.toggleContentFullscreen()}
         >
           {fullscreen ? <IconShrink /> : <IconExpand />}
         </button>

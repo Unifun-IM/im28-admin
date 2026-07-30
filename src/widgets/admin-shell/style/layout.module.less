@@ -22,7 +22,12 @@
   padding: 0 12px;
   /* Figma 741:29115：顶栏白底，与内容区 fill-1 区分 */
   background-color: var(--color-bg-2, #fff);
-  transition: left 0.2s, width 0.2s;
+  transition:
+    left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    height 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    gap 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    padding 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
   display: flex;
   flex-direction: column;
   gap: @header-navbar-gap;
@@ -32,6 +37,32 @@
     overflow: hidden;
     padding: 0;
     gap: 0;
+  }
+
+  /* 内容全屏：仅保留 PageTabs，Navbar 收起 */
+  &-content-fullscreen {
+    height: @page-tabs-height;
+    gap: 0;
+    left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+.layout-navbar-main {
+  flex-shrink: 0;
+  height: @nav-size-height;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    height 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    opacity 0.2s ease,
+    margin 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
+
+  .layout-navbar-content-fullscreen & {
+    height: 0;
+    opacity: 0;
+    margin: 0;
+    pointer-events: none;
   }
 }
 
@@ -48,7 +79,12 @@
   border-right: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
   border-radius: 0;
   overflow: hidden;
-  transition: width 0.2s;
+  transition:
+    width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    min-width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    opacity 0.2s ease,
+    transform 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    border-color 0.2s ease;
 
   ::-webkit-scrollbar {
     width: 12px;
@@ -80,6 +116,16 @@
   :global(.arco-layout-sider-trigger) {
     display: none;
   }
+}
+
+.layout-sider-content-fullscreen {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0;
+  transform: translateX(-12px);
+  border-right-color: transparent !important;
+  pointer-events: none;
 }
 
 .sider-logo {
@@ -399,7 +445,9 @@
   background-color: var(--color-bg-1, #f7f8fa);
   min-width: @layout-max-width;
   min-height: 100vh;
-  transition: padding-left 0.2s;
+  transition:
+    padding-left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    padding-top 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
   box-sizing: border-box;
 }
 

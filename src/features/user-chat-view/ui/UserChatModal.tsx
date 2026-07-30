@@ -1,14 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Avatar,
   Button,
   Input,
+  List,
   Message,
   Modal,
   Spin,
   Typography
 } from '@arco-design/web-react';
+import type { ListHandle } from '@arco-design/web-react/es/List/interface';
 import {
   IconCopy,
   IconDown,
@@ -31,6 +33,7 @@ import iconPhone from '../assets/icon-phone.svg';
 import iconSession from '../assets/icon-session.svg';
 import iconStar from '../assets/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
+import useElementHeight from './useElementHeight';
 
 const { Text } = Typography;
 
@@ -889,11 +892,28 @@ function ChatPane({
   onBack: () => void;
 }) {
   const [historyOpen, setHistoryOpen] = useState(false);
+  const listRef = useRef<ListHandle>(null);
+  /** 从聊天记录定位回来时优先滚到目标，避免被「滚到底」覆盖 */
+  const pendingScrollIndex = useRef<number | null>(null);
+  const { ref: listWrapRef, height: listHeight } =
+    useElementHeight<HTMLDivElement>();
   const isGroup = peer.kind === 'group';
   const title =
     isGroup && peer.memberCount
       ? `${peer.name} (${peer.memberCount})`
       : peer.name;
+
+  useEffect(() => {
+    if (historyOpen || loading || !messages.length || listHeight <= 0) return;
+    const target =
+      pendingScrollIndex.current != null
+        ? pendingScrollIndex.current
+        : messages.length - 1;
+    pendingScrollIndex.current = null;
+    requestAnimationFrame(() => {
+      listRef.current?.scrollIntoView(target);
+    });
+  }, [historyOpen, loading, messages.length, listHeight, peer.id]);
 
   if (historyOpen) {
     return (
@@ -902,8 +922,13 @@ function ChatPane({
         chatId={peer.id}
         onClose={() => setHistoryOpen(false)}
         onLocate={(messageId) => {
+          const idx = messages.findIndex((m) => m.id === messageId);
+          if (idx >= 0) {
+            pendingScrollIndex.current = idx;
+          } else {
+            Message.success('已回到会话');
+          }
           setHistoryOpen(false);
-          Message.success(`已定位到消息 ${messageId.slice(0, 8)}`);
         }}
       />
     );
@@ -979,14 +1004,31 @@ function ChatPane({
         content="只读模式：您正在以管理员权限查看用户通讯记录。系统仅保留最近 180 天的消息内容。所有查阅操作均已记录在审计日志中，请遵守隐私合规规范。"
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-0 py-2">
+      <div ref={listWrapRef} className="min-h-0 flex-1 py-2">
         {loading ? (
           <div className="flex h-40 items-center justify-center">
             <Spin />
           </div>
-        ) : (
-          messages.map((m) => <MessageRow key={m.id} msg={m} />)
-        )}
+        ) : listHeight > 0 ? (
+          <List
+            className="use-chat-virtual-list"
+            bordered={false}
+            split={false}
+            dataSource={messages}
+            listRef={listRef}
+            virtualListProps={{
+              height: listHeight,
+              // 气泡高度不一（文字/图/文件），关闭定高，交给 Arco 测量
+              isStaticItemHeight: false,
+              itemHeight: 72,
+              // 少于 50 条走普通渲染，避免小列表虚拟化开销
+              threshold: 50
+            }}
+            render={(item: ChatMsg) => (
+              <MessageRow key={item.id} msg={item} />
+            )}
+          />
+        ) : null}
       </div>
     </div>
   );

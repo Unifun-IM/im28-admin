@@ -4,6 +4,7 @@ import {
   Button,
   Calendar,
   Input,
+  List,
   Spin,
   Tabs
 } from '@arco-design/web-react';
@@ -15,6 +16,7 @@ import {
 } from '@arco-design/web-react/icon';
 import dayjs, { Dayjs } from 'dayjs';
 import { searchChatHistory } from '@shared/api/biz';
+import useElementHeight from './useElementHeight';
 
 export type ChatHistoryTab = 'all' | 'media' | 'file' | 'date';
 
@@ -73,6 +75,8 @@ export default function ChatHistoryPanel({
   const [allList, setAllList] = useState<HistoryItem[]>([]);
   const [mediaGroups, setMediaGroups] = useState<MediaGroup[]>([]);
   const [fileGroups, setFileGroups] = useState<FileGroup[]>([]);
+  const { ref: listWrapRef, height: listHeight } =
+    useElementHeight<HTMLDivElement>();
 
   const runSearch = (nextQuery = keyword, nextTab = tab) => {
     setQuery(nextQuery);
@@ -214,7 +218,7 @@ export default function ChatHistoryPanel({
         </div>
       ) : null}
 
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+      <div ref={listWrapRef} className="relative min-h-0 flex-1 px-4 pb-4">
         {loading ? (
           <div className="flex h-40 items-center justify-center">
             <Spin />
@@ -226,37 +230,46 @@ export default function ChatHistoryPanel({
             </div>
           ) : empty ? (
             <EmptyResult />
-          ) : (
-            <ul className="m-0 list-none p-0">
-              {allList.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-[rgba(120,120,128,0.12)] bg-transparent py-3 text-left"
-                    onClick={() => onLocate?.(item.id)}
-                  >
-                    <Avatar size={40}>{item.senderName.slice(0, 1)}</Avatar>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[12px] text-arco-text-3">
-                        {item.senderName}
-                      </div>
-                      <div className="truncate text-[16px] text-arco-text-1">
-                        {highlight(item.content)}
-                      </div>
+          ) : listHeight > 0 ? (
+            <List
+              className="use-chat-virtual-list use-chat-history-result-list"
+              bordered={false}
+              split={false}
+              dataSource={allList}
+              virtualListProps={{
+                height: listHeight,
+                isStaticItemHeight: false,
+                itemHeight: 72,
+                threshold: 40
+              }}
+              render={(item: HistoryItem) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-[rgba(120,120,128,0.12)] bg-transparent py-3 text-left"
+                  onClick={() => onLocate?.(item.id)}
+                >
+                  <Avatar size={40}>{item.senderName.slice(0, 1)}</Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[12px] text-arco-text-3">
+                      {item.senderName}
                     </div>
-                    <span className="shrink-0 text-[12px] text-arco-text-3">
-                      {item.time}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )
+                    <div className="truncate text-[16px] text-arco-text-1">
+                      {highlight(item.content)}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[12px] text-arco-text-3">
+                    {item.time}
+                  </span>
+                </button>
+              )}
+            />
+          ) : null
         ) : tab === 'media' ? (
           empty ? (
             <EmptyResult />
           ) : (
-            <div>
+            <div className="h-full overflow-y-auto">
               {query ? (
                 <p className="m-0 mb-3 text-[12px] text-arco-text-3">
                   找到“{query}”相关的图片，共
@@ -293,43 +306,47 @@ export default function ChatHistoryPanel({
           empty ? (
             <EmptyResult />
           ) : (
-            fileGroups.map((g) => (
-              <div key={g.month} className="mb-4">
-                <div className="mb-2 text-[14px] text-arco-text-2">{g.month}</div>
-                {g.items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="mb-3 flex w-full cursor-pointer flex-col gap-2 border-0 bg-transparent p-0 text-left"
-                    onClick={() => onLocate?.(item.id)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Avatar size={28}>{item.senderName.slice(0, 1)}</Avatar>
-                      <span className="flex-1 text-[14px] text-arco-text-1">
-                        {item.senderName}
-                      </span>
-                      <span className="text-[12px] text-arco-text-3">
-                        {item.time}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 rounded-xl bg-[var(--color-fill-2,#f2f3f5)] px-3 py-2">
-                      <FileTypeIcon ext={item.fileExt || 'DOC'} />
-                      <div className="min-w-0">
-                        <div className="truncate text-[14px] text-arco-text-1">
-                          {item.fileName}
-                        </div>
-                        <div className="text-[12px] text-arco-text-3">
-                          {item.fileSize}
+            <div className="h-full overflow-y-auto">
+              {fileGroups.map((g) => (
+                <div key={g.month} className="mb-4">
+                  <div className="mb-2 text-[14px] text-arco-text-2">
+                    {g.month}
+                  </div>
+                  {g.items.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="mb-3 flex w-full cursor-pointer flex-col gap-2 border-0 bg-transparent p-0 text-left"
+                      onClick={() => onLocate?.(item.id)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Avatar size={28}>{item.senderName.slice(0, 1)}</Avatar>
+                        <span className="flex-1 text-[14px] text-arco-text-1">
+                          {item.senderName}
+                        </span>
+                        <span className="text-[12px] text-arco-text-3">
+                          {item.time}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 rounded-xl bg-[var(--color-fill-2,#f2f3f5)] px-3 py-2">
+                        <FileTypeIcon ext={item.fileExt || 'DOC'} />
+                        <div className="min-w-0">
+                          <div className="truncate text-[14px] text-arco-text-1">
+                            {item.fileName}
+                          </div>
+                          <div className="text-[12px] text-arco-text-3">
+                            {item.fileSize}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ))
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
           )
         ) : (
-          <div className="relative">
+          <div className="relative h-full">
             {showCalendar ? (
               <div className="absolute left-0 top-0 z-10 w-[280px] rounded-xl bg-[var(--color-bg-2,#fff)] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
                 <Calendar
@@ -352,38 +369,50 @@ export default function ChatHistoryPanel({
                 {selectedDate.format('YYYY年M月D日')} · 重选日期
               </button>
             )}
-            <div className={showCalendar ? 'pt-[320px]' : ''}>
+            <div
+              className={showCalendar ? 'h-full pt-[320px]' : 'h-full'}
+              style={{ overflow: showCalendar ? 'hidden' : undefined }}
+            >
               <div className="mb-2 text-[14px] text-arco-text-2">
                 {selectedDate.format('YYYY年M月D日')}
               </div>
-              {loading ? null : dateFiltered.length === 0 ? (
+              {dateFiltered.length === 0 ? (
                 <EmptyResult />
-              ) : (
-                <ul className="m-0 list-none p-0">
-                  {dateFiltered.map((item) => (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-[rgba(120,120,128,0.12)] bg-transparent py-3 text-left"
-                        onClick={() => onLocate?.(item.id)}
-                      >
-                        <Avatar size={40}>{item.senderName.slice(0, 1)}</Avatar>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[12px] text-arco-text-3">
-                            {item.senderName}
-                          </div>
-                          <div className="truncate text-[16px] text-arco-text-1">
-                            {highlight(item.content)}
-                          </div>
+              ) : listHeight > 0 ? (
+                <List
+                  className="use-chat-virtual-list use-chat-history-result-list"
+                  bordered={false}
+                  split={false}
+                  dataSource={dateFiltered}
+                  virtualListProps={{
+                    height: Math.max(120, listHeight - (showCalendar ? 360 : 40)),
+                    isStaticItemHeight: false,
+                    itemHeight: 72,
+                    threshold: 40
+                  }}
+                  render={(item: HistoryItem) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-[rgba(120,120,128,0.12)] bg-transparent py-3 text-left"
+                      onClick={() => onLocate?.(item.id)}
+                    >
+                      <Avatar size={40}>{item.senderName.slice(0, 1)}</Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[12px] text-arco-text-3">
+                          {item.senderName}
                         </div>
-                        <span className="shrink-0 text-[12px] text-arco-text-3">
-                          {item.time}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                        <div className="truncate text-[16px] text-arco-text-1">
+                          {highlight(item.content)}
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-[12px] text-arco-text-3">
+                        {item.time}
+                      </span>
+                    </button>
+                  )}
+                />
+              ) : null}
             </div>
           </div>
         )}

@@ -85,7 +85,21 @@ export const routes: IRoute[] = [
           { name: 'menu.session.user', key: 'session/user' }
         ]
       },
-      { name: 'menu.session.settings', key: 'session/settings' },
+      {
+        name: 'menu.session.settings',
+        key: 'session/settings',
+        breadcrumb: false,
+        children: [
+          {
+            name: 'menu.session.settings.group',
+            key: 'session/settings/group'
+          },
+          {
+            name: 'menu.session.settings.user',
+            key: 'session/settings/user'
+          }
+        ]
+      },
       {
         name: 'menu.session.chat',
         key: 'session/chat',

@@ -11,10 +11,12 @@ import {
   IconMessage
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import { observer } from 'mobx-react-lite';
 import NProgress from 'nprogress';
 import qs from 'query-string';
 
 import { type GlobalState } from '@entities/global-state';
+import { pageTabsStore } from '@entities/page-tabs';
 import Logo from '@shared/assets/logo.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import { isArray } from '@shared/lib/is';
@@ -88,7 +90,7 @@ function getFlattenRoutes(routeList: IRoute[]) {
   return res;
 }
 
-export function PageLayout() {
+export const PageLayout = observer(function PageLayout() {
   const urlParams = getUrlParams();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -97,6 +99,7 @@ export function PageLayout() {
   const { settings, userLoading, userInfo } = useGlobalSelector(
     (state: GlobalState) => state
   );
+  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const [routes, defaultRoute] = useRoute(userInfo?.permissions || {});
   const defaultSelectedKeys = [currentComponent || defaultRoute];
@@ -121,10 +124,12 @@ export function PageLayout() {
   const showFooter = settings.footer && urlParams.footer !== false;
   const expandedWidth = settings.menuWidth || EXPANDED_WIDTH;
   const menuWidth = collapsed ? COLLAPSED_WIDTH : expandedWidth;
-  /** 侧栏占位：常规 240 / 最小 56（贴边，无外边距） */
-  const siderOccupied = showMenu ? menuWidth : 0;
+  /** 侧栏占位：内容全屏时为 0，带动画收起 */
+  const siderOccupied = showMenu && !contentFullscreen ? menuWidth : 0;
   const headerHeight = showNavbar
-    ? navbarHeight + headerGap + pageTabsHeight
+    ? contentFullscreen
+      ? pageTabsHeight
+      : navbarHeight + headerGap + pageTabsHeight
     : 0;
   const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
 
@@ -302,11 +307,15 @@ export function PageLayout() {
     <Layout className={styles.layout}>
       <div
         className={cs(styles['layout-navbar'], {
-          [styles['layout-navbar-hidden']]: !showNavbar
+          [styles['layout-navbar-hidden']]: !showNavbar,
+          [styles['layout-navbar-content-fullscreen']]:
+            showNavbar && contentFullscreen
         })}
         style={navbarStyle}
       >
-        <Navbar show={showNavbar} breadcrumb={breadcrumb} />
+        <div className={styles['layout-navbar-main']}>
+          <Navbar show={showNavbar} breadcrumb={breadcrumb} />
+        </div>
         {showNavbar ? <PageTabs title={pageTabTitle} /> : null}
       </div>
       {userLoading ? (
@@ -316,13 +325,15 @@ export function PageLayout() {
           {showMenu && (
             <Sider
               breakpoint="xl"
-              className={styles['layout-sider']}
+              className={cs(styles['layout-sider'], {
+                [styles['layout-sider-content-fullscreen']]: contentFullscreen
+              })}
               collapsed={collapsed}
-              collapsedWidth={COLLAPSED_WIDTH}
+              collapsedWidth={contentFullscreen ? 0 : COLLAPSED_WIDTH}
               collapsible
               onCollapse={setCollapsed}
               trigger={null}
-              width={menuWidth}
+              width={contentFullscreen ? 0 : menuWidth}
             >
               <div
                 className={cs(styles['sider-logo'], {
@@ -378,4 +389,4 @@ export function PageLayout() {
       )}
     </Layout>
   );
-}
+});

@@ -32,9 +32,19 @@ function saveTabs(tabs: PageTabItem[]) {
 
 export class PageTabsStore {
   tabs: PageTabItem[] = loadTabs();
+  /** 内容区全屏：隐藏侧栏与顶部 Navbar，保留 PageTabs */
+  contentFullscreen = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  setContentFullscreen(value: boolean) {
+    this.contentFullscreen = value;
+  }
+
+  toggleContentFullscreen() {
+    this.contentFullscreen = !this.contentFullscreen;
   }
 
   open(tab: PageTabItem) {

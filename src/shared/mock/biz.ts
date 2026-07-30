@@ -353,6 +353,38 @@ setupMock({
 
     Mock.mock(new RegExp('/api/biz/system-params'), 'post', () => ({ ok: true }));
 
+    Mock.mock(new RegExp('/api/biz/session/settings/group'), 'get', () => ({
+      minGroupMembers: 3,
+      maxGroupMembers: 30000,
+      announcementMaxLen: 1000
+    }));
+    Mock.mock(new RegExp('/api/biz/session/settings/group'), 'post', () => ({
+      ok: true
+    }));
+
+    Mock.mock(new RegExp('/api/biz/session/settings/user'), 'get', () => ({
+      msgText: true,
+      msgImage: true,
+      msgVideo: true,
+      msgAudio: true,
+      msgFile: true,
+      msgVoice: true,
+      msgCard: true,
+      textMaxLen: 1000,
+      imageMaxMb: 10,
+      videoMaxMb: 100,
+      audioMaxMb: 100,
+      fileMaxMb: 100,
+      voiceMinSec: 2,
+      voiceMaxSec: 60,
+      albumMaxSelect: 12,
+      multiSelect: true,
+      multiSelectMax: 50
+    }));
+    Mock.mock(new RegExp('/api/biz/session/settings/user'), 'post', () => ({
+      ok: true
+    }));
+
     const financeItem = () =>
       Mock.mock({
         id: '@id',
@@ -764,36 +796,27 @@ setupMock({
       }
 
       const kw = keyword || '好';
-      const list = [
-        {
-          id: uid(),
-          senderName: 'Anan',
-          content: `${kw}的`,
-          time: '12:00',
-          dateLabel: '2025年10月20日'
-        },
-        {
-          id: uid(),
-          senderName: 'Anan',
-          content: `可以可以${kw}的吧`,
-          time: '12:00',
-          dateLabel: '2025年10月20日'
-        },
-        {
-          id: uid(),
-          senderName: 'Anan',
-          content: `我觉得这样挺${kw}`,
-          time: '12:00',
-          dateLabel: '2025年10月20日'
-        },
-        {
-          id: uid(),
-          senderName: '王晨',
-          content: `${kw}主意`,
-          time: '11:20',
-          dateLabel: '2025年10月20日'
-        }
+      const templates = [
+        { senderName: 'Anan', content: `${kw}的`, time: '12:00' },
+        { senderName: 'Anan', content: `可以可以${kw}的吧`, time: '12:00' },
+        { senderName: 'Anan', content: `我觉得这样挺${kw}`, time: '12:01' },
+        { senderName: '王晨', content: `${kw}主意`, time: '11:20' },
+        { senderName: '王晨', content: `这个方案${kw}不错`, time: '11:18' },
+        { senderName: 'Anan', content: `嗯嗯，那就按这个${kw}`, time: '11:15' },
+        { senderName: 'Philip', content: `我同意，挺${kw}的`, time: '10:50' },
+        { senderName: 'Shawn', content: `还有别的${kw}选吗`, time: '10:42' }
       ];
+      // 撑到 60+ 条，触发聊天记录虚拟列表 threshold
+      const list = Array.from({ length: 64 }, (_, i) => {
+        const t = templates[i % templates.length];
+        return {
+          id: uid(),
+          senderName: t.senderName,
+          content: i < templates.length ? t.content : `${t.content}（${i + 1}）`,
+          time: t.time,
+          dateLabel: '2025年10月20日'
+        };
+      });
 
       const mediaGroups = [
         {
@@ -889,9 +912,39 @@ setupMock({
 /** 固定会话脚本，贴合查聊天 Modal 消息类型（文字/语音/文件/通话/日期） */
 function buildChatMockMessages(isGroup: boolean, peerId: string) {
   const uid = () => String(Mock.Random.guid());
+  /** 在脚本前插入填充消息，保留脚本在底部（最新），便于验证虚拟列表 */
+  const padMessages = (
+    base: Array<Record<string, unknown>>,
+    peerName: string,
+    target = 100
+  ) => {
+    if (base.length >= target) return base;
+    const samples = [
+      '收到，我这边再确认一下。',
+      '好的，那就按这个来。',
+      '稍等，我翻一下之前的记录。',
+      '这个点可以，我到时候提醒你。',
+      '明白了，辛苦。'
+    ];
+    const filler: Array<Record<string, unknown>> = [
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '更早' }
+    ];
+    for (let i = filler.length; i < target - base.length; i += 1) {
+      const self = i % 3 !== 0;
+      filler.push({
+        id: uid(),
+        side: self ? 'self' : 'peer',
+        msgType: 'text',
+        ...(self ? {} : { senderName: peerName }),
+        content: `${samples[i % samples.length]} #${i}`,
+        time: `${String(8 + (i % 10)).padStart(2, '0')}:${String((i * 7) % 60).padStart(2, '0')}`
+      });
+    }
+    return [...filler, ...base];
+  };
 
   if (isGroup) {
-    return [
+    return padMessages([
       { id: uid(), side: 'peer', msgType: 'date', dateLabel: '5月11日' },
       {
         id: uid(),
@@ -989,7 +1042,7 @@ function buildChatMockMessages(isGroup: boolean, peerId: string) {
         content: '明天去爬山吗？',
         time: '19:10'
       }
-    ];
+    ], '张甜甜');
   }
 
   // 单聊：按联系人给几套不同文案，避免每次都一样
@@ -1140,10 +1193,16 @@ function buildChatMockMessages(isGroup: boolean, peerId: string) {
     ]
   };
 
-  if (scripts[peerId]) return scripts[peerId];
+  if (scripts[peerId]) {
+    const name =
+      (scripts[peerId].find((m) => m.senderName)?.senderName as string) ||
+      '对方';
+    return padMessages(scripts[peerId], name);
+  }
 
   // 默认单聊脚本（对齐 Figma 791:32208 Anan）
-  return [
+  const peerName = peerId === '10086101' ? 'Anan' : '对方';
+  return padMessages([
     { id: uid(), side: 'peer', msgType: 'date', dateLabel: '5月11日' },
     {
       id: uid(),
@@ -1259,5 +1318,5 @@ function buildChatMockMessages(isGroup: boolean, peerId: string) {
       content: '快来一起爬山🤓',
       time: '12:00'
     }
-  ];
+  ], peerName);
 }

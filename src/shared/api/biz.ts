@@ -119,6 +119,26 @@ export async function saveSystemParams(body: Record<string, unknown>) {
   return request.post('/api/biz/system-params', body);
 }
 
+export async function getSessionGroupSettings() {
+  return request.get<Record<string, unknown>>(
+    '/api/biz/session/settings/group'
+  );
+}
+
+export async function saveSessionGroupSettings(body: Record<string, unknown>) {
+  return request.post('/api/biz/session/settings/group', body);
+}
+
+export async function getSessionUserSettings() {
+  return request.get<Record<string, unknown>>(
+    '/api/biz/session/settings/user'
+  );
+}
+
+export async function saveSessionUserSettings(body: Record<string, unknown>) {
+  return request.post('/api/biz/session/settings/user', body);
+}
+
 export async function getRechargeOrders(params: PageParams) {
   return request.get<PageResult<Record<string, unknown>>>(
     '/api/biz/finance/recharge-orders',
