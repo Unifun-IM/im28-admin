@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Switch, Divider, InputNumber } from '@arco-design/web-react';
-import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
+import { useGlobalSelector, useGlobalDispatch } from '@entities/global-state';
 import { GlobalState } from '@entities/global-state';
 import useLocale from '@shared/lib/useLocale';
 

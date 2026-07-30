@@ -15,9 +15,9 @@ import {
   IconSearch
 } from '@arco-design/web-react/icon';
 import { getGroupDetail } from '@shared/api/biz';
-import { StatusBadge } from '@widgets/biz-list';
+import { StatusBadge } from '@shared/ui';
 import '@features/user-detail/ui/user-detail-drawer.less';
-import '@widgets/biz-list/biz-detail-table.less';
+import '@shared/ui/biz-detail-table.less';
 
 export type GroupDetailDrawerProps = {
   visible: boolean;

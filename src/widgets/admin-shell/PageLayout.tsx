@@ -15,14 +15,14 @@ import { observer } from 'mobx-react-lite';
 import NProgress from 'nprogress';
 import qs from 'query-string';
 
-import { type GlobalState } from '@entities/global-state';
+import {
+  useGlobalSelector,
+  type GlobalState
+} from '@entities/global-state';
 import { pageTabsStore } from '@entities/page-tabs';
 import Logo from '@shared/assets/logo.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
-import { isArray } from '@shared/lib/is';
 import getUrlParams from '@shared/lib/getUrlParams';
-import lazyload from '@shared/lib/lazyload';
-import { useGlobalSelector } from '@shared/lib/global-store-hooks';
 import useLocale from '@shared/lib/useLocale';
 import Footer from '@widgets/footer';
 import Navbar, { type NavbarBreadcrumbItem } from '@widgets/navbar';
@@ -35,11 +35,18 @@ const SubMenu = Menu.SubMenu;
 const Sider = Layout.Sider;
 const Content = Layout.Content;
 
-const Exception403 = lazyload(() => import('@pages/exception/403'));
-
 /** Figma 862:20168：常规 240 / 最小 56；贴边全高，无外边距 */
 const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 56;
+
+export type PageLayoutProps = {
+  /** 由 app 注入：页面模块发现与懒加载 */
+  getFlattenRoutes: (routeList: IRoute[]) => IRoute[];
+  /** 由 app 注入：403 页面（避免 widgets → pages） */
+  Exception403: React.ComponentType;
+  /** 打开用户中心（由 app 挂载 Modal） */
+  onOpenUserCenter?: () => void;
+};
 
 function getIconFromKey(key: string) {
   switch (key) {
@@ -59,37 +66,11 @@ function getIconFromKey(key: string) {
   }
 }
 
-function getFlattenRoutes(routeList: IRoute[]) {
-  const mod = import.meta.glob([
-    '../../pages/dashboard/**/index.tsx',
-    '../../pages/user/**/index.tsx',
-    '../../pages/system/**/index.tsx',
-    '../../pages/system-params/**/index.tsx',
-    '../../pages/trade/**/index.tsx',
-    '../../pages/session/**/index.tsx',
-    '../../pages/exception/**/index.tsx'
-  ]);
-  const res: IRoute[] = [];
-
-  function travel(_routes: IRoute[]) {
-    _routes.forEach((route) => {
-      if (route.key && !route.children) {
-        const loader = mod[`../../pages/${route.key}/index.tsx`];
-        if (loader) {
-          route.component = lazyload(loader);
-          res.push(route);
-        }
-      } else if (isArray(route.children) && route.children?.length) {
-        travel(route.children);
-      }
-    });
-  }
-
-  travel(routeList);
-  return res;
-}
-
-export const PageLayout = observer(function PageLayout() {
+export const PageLayout = observer(function PageLayout({
+  getFlattenRoutes,
+  Exception403,
+  onOpenUserCenter
+}: PageLayoutProps) {
   const urlParams = getUrlParams();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -313,7 +294,11 @@ export const PageLayout = observer(function PageLayout() {
         style={navbarStyle}
       >
         <div className={styles['layout-navbar-main']}>
-          <Navbar show={showNavbar} breadcrumb={breadcrumb} />
+          <Navbar
+            show={showNavbar}
+            breadcrumb={breadcrumb}
+            onOpenUserCenter={onOpenUserCenter}
+          />
         </div>
         {showNavbar ? <PageTabs title={pageTabTitle} /> : null}
       </div>

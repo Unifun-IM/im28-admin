@@ -23,18 +23,20 @@ import {
   IconObliqueLine,
   IconSearch
 } from '@arco-design/web-react/icon';
-import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
-import { GlobalState } from '@entities/global-state';
+import {
+  useGlobalSelector,
+  useGlobalDispatch,
+  type GlobalState
+} from '@entities/global-state';
 import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
+import { IconButton } from '@shared/ui';
 import MessageBox from '@widgets/message-box';
-import IconButton from './IconButton';
 import Settings from '@widgets/settings';
 import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
 import { generatePermission } from '@shared/config/routes';
 import { setAccessToken } from '@shared/api/request';
-import { UserCenterModal } from '@features/user-center';
 import cs from 'classnames';
 import './navbar.less';
 
@@ -48,9 +50,11 @@ export type NavbarBreadcrumbItem =
 export type NavbarProps = {
   show: boolean;
   breadcrumb?: NavbarBreadcrumbItem[];
+  /** 打开用户中心（由 app 挂载 Modal） */
+  onOpenUserCenter?: () => void;
 };
 
-function Navbar({ show, breadcrumb = [] }: NavbarProps) {
+function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
   const t = useLocale();
   const locale = useLocale();
   const { userInfo, userLoading } = useGlobalSelector((state: GlobalState) => state);
@@ -60,7 +64,6 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
   const [role] = useStorage('userRole', 'admin');
   const [messageVisible, setMessageVisible] = useState(false);
   const [userMenuVisible, setUserMenuVisible] = useState(false);
-  const [userCenterVisible, setUserCenterVisible] = useState(false);
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
@@ -101,7 +104,7 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
         if (key === 'logout') logout();
         if (key === 'profile') {
           setUserMenuVisible(false);
-          setUserCenterVisible(true);
+          onOpenUserCenter?.();
         }
       }}
     >
@@ -246,10 +249,6 @@ function Navbar({ show, breadcrumb = [] }: NavbarProps) {
           </Dropdown>
         )}
       </div>
-      <UserCenterModal
-        visible={userCenterVisible}
-        onCancel={() => setUserCenterVisible(false)}
-      />
     </div>
   );
 }

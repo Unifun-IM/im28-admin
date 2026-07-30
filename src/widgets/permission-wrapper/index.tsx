@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { GlobalState } from '@entities/global-state';
-import { useGlobalSelector } from '@shared/lib/global-store-hooks';
+import { useGlobalSelector } from '@entities/global-state';
 import authentication, { AuthParams } from '@shared/lib/authentication';
 
 type PermissionWrapperProps = AuthParams & {

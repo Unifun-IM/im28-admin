@@ -16,7 +16,10 @@ describe('PageLayout', () => {
             setTheme: () => undefined
           }}
         >
-          <PageLayout />
+          <PageLayout
+            Exception403={() => null}
+            getFlattenRoutes={() => []}
+          />
         </GlobalContext.Provider>
       </MemoryRouter>
     );

@@ -5,7 +5,7 @@ import {
   globalStore,
   type GlobalState,
   type UserInfo
-} from '@entities/global-state';
+} from './global-store';
 
 type UpdateSettingsAction = {
   type: 'update-settings';

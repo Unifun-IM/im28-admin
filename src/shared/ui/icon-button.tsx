@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { Button, ButtonProps } from '@arco-design/web-react';
 import cs from 'classnames';
 
-type IconButtonProps = ButtonProps & {
+export type IconButtonProps = ButtonProps & {
   tip?: string;
   active?: boolean;
 };

@@ -1,7 +1,8 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 
 import LoginPage from '@pages/login';
-import { PageLayout } from '@widgets/admin-shell/PageLayout';
+
+import { AdminLayout } from './admin-layout';
 
 export function appRoutes(): RouteObject[] {
   return [
@@ -12,7 +13,7 @@ export function appRoutes(): RouteObject[] {
     },
     {
       path: '/*',
-      element: <PageLayout />,
+      element: <AdminLayout />,
       handle: { title: 'Admin' }
     },
     {

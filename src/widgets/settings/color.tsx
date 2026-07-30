@@ -2,7 +2,7 @@ import React from 'react';
 import { Trigger, Typography } from '@arco-design/web-react';
 import { SketchPicker } from 'react-color';
 import { generate } from '@arco-design/color';
-import { useGlobalSelector, useGlobalDispatch } from '@shared/lib/global-store-hooks';
+import { useGlobalSelector, useGlobalDispatch } from '@entities/global-state';
 import { GlobalState } from '@entities/global-state';
 import applyThemeColor from '@shared/lib/applyThemeColor';
 import useLocale from '@shared/lib/useLocale';

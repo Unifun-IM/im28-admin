@@ -11,9 +11,9 @@ import {
 import { IconCopy, IconRight } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import { getUserDetail } from '@shared/api/biz';
-import { StatusBadge } from '@widgets/biz-list';
+import { StatusBadge } from '@shared/ui';
 import './user-detail-drawer.less';
-import '@widgets/biz-list/biz-detail-table.less';
+import '@shared/ui/biz-detail-table.less';
 
 export type UserDetailDrawerProps = {
   visible: boolean;

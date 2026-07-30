@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Drawer, Alert, Message } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
-import { useGlobalSelector } from '@shared/lib/global-store-hooks';
-import { GlobalState } from '@entities/global-state';
+import {
+  useGlobalSelector,
+  type GlobalState
+} from '@entities/global-state';
+import { IconButton } from '@shared/ui';
+import useLocale from '@shared/lib/useLocale';
 import Block from './block';
 import ColorPanel from './color';
-import IconButton from '@widgets/navbar/IconButton';
-import useLocale from '@shared/lib/useLocale';
 
 interface SettingProps {
   trigger?: React.ReactElement;

@@ -7,7 +7,7 @@ import {
 } from '@arco-design/web-react';
 import { IconClose } from '@arco-design/web-react/icon';
 import cs from 'classnames';
-import { useGlobalDispatch, useGlobalSelector } from '@shared/lib/global-store-hooks';
+import { useGlobalDispatch, useGlobalSelector } from '@entities/global-state';
 import type { GlobalState } from '@entities/global-state';
 import defaultAvatar from '../assets/default-avatar.svg';
 import './user-center-modal.less';

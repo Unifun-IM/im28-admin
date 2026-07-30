@@ -7,9 +7,9 @@ import {
   Skeleton,
   Link,
 } from '@arco-design/web-react';
-import { useGlobalSelector } from '@shared/lib/global-store-hooks';
+import { useGlobalSelector } from '@entities/global-state';
 import { IconCaretUp } from '@arco-design/web-react/icon';
-import OverviewAreaLine from '@widgets/chart/overview-area-line';
+import { OverviewAreaLine } from '@widgets/chart';
 import { getApiWorkplaceOverviewContent } from '@shared/api/workplace';
 import locale from './locale';
 import useLocale from '@shared/lib/useLocale';
