@@ -48,8 +48,8 @@ src/app | pages | widgets | features | entities | shared
 ```
 
 - 禁止在 `src/` 下新建 `components`、`containers`、`services`、`utils`、`hooks` 等遗留根目录
-- 页面放 `pages/`；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
-- 依赖方向：`pages → widgets/features → entities → shared`，禁止反向依赖
+- 页面放 `pages/`；用户交互特性放 `features/`（如拉黑/白名单弹窗、用户详情 Drawer）；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
+- 依赖方向：`pages → widgets/features → entities → shared`，禁止反向依赖；`features` 与 `widgets` 同层，优先不要互相依赖
 
 ## 样式优先级（强制）
 

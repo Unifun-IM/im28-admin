@@ -11,9 +11,9 @@ import {
   FilterSelect
 } from '@widgets/biz-list';
 import { getBlacklist } from '@shared/api/biz';
-import BlacklistActionModal from '../BlacklistActionModal';
-import UserDetailDrawer from '../detail/UserDetailDrawer';
-import iconSuccess from '../assets/icon-check-circle-fill.svg';
+import { BlacklistActionModal } from '@features/blacklist-action';
+import { UserDetailDrawer } from '@features/user-detail';
+import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
 
 const FormItem = Form.Item;
 

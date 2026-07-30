@@ -9,7 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch, IconUser } from '@arco-design/web-react/icon';
 import { getUserList, postWhitelistAction } from '@shared/api/biz';
-import iconWarning from './assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;

@@ -13,7 +13,7 @@ import {
 } from '@widgets/biz-list';
 import { getUserLogs } from '@shared/api/biz';
 import { USER_ACTION_CATEGORIES } from '@shared/config/user-action-types';
-import UserDetailDrawer from '../detail/UserDetailDrawer';
+import { UserDetailDrawer } from '@features/user-detail';
 
 const FormItem = Form.Item;
 const Option = Select.Option;

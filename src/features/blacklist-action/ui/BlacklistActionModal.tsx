@@ -9,8 +9,8 @@ import {
   Select
 } from '@arco-design/web-react';
 import { postBlacklistAction } from '@shared/api/biz';
-import iconWarning from './assets/icon-exclamation-circle-fill.svg';
-import iconSuccess from './assets/icon-check-circle-fill.svg';
+import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;

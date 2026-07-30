@@ -29,13 +29,7 @@ export const routes: IRoute[] = [
         ]
       },
       { name: 'menu.user.inviteCode', key: 'user/invite-code' },
-      { name: 'menu.user.logs', key: 'user/logs' },
-      {
-        name: 'menu.user.detail',
-        key: 'user/detail',
-        ignore: true,
-        path: '/user/detail/:id'
-      }
+      { name: 'menu.user.logs', key: 'user/logs' }
     ]
   },
   {

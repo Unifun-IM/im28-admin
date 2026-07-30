@@ -21,7 +21,7 @@ import {
   getUserHierarchy,
   type UserHierarchyNode
 } from '@shared/api/biz';
-import emptyHierarchy from '../assets/empty-hierarchy.svg';
+import emptyHierarchy from './assets/empty-hierarchy.svg';
 
 /**
  * 用户层级查询 — Figma 741:35915（空态）/ 770:19037（结果）

@@ -19,8 +19,8 @@ import {
   StatusBadge
 } from '@widgets/biz-list';
 import { getUserList } from '@shared/api/biz';
-import UserDetailDrawer from '../detail/UserDetailDrawer';
-import BlacklistActionModal from '../BlacklistActionModal';
+import { BlacklistActionModal } from '@features/blacklist-action';
+import { UserDetailDrawer } from '@features/user-detail';
 
 const FormItem = Form.Item;
 

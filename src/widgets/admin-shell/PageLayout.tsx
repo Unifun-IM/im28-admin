@@ -241,7 +241,6 @@ export function PageLayout() {
     }
     // detail pages: highlight parent list
     if (!newSelectedKeys.length) {
-      if (pathname.startsWith('/user/detail')) newSelectedKeys.push('user/query');
       if (pathname.startsWith('/trade/redpacket-detail')) {
         newSelectedKeys.push('trade/redpacket-records');
       }
@@ -286,9 +285,8 @@ export function PageLayout() {
   useEffect(() => {
     let routeConfig = routeMap.current.get(pathname);
     if (!routeConfig) {
-      // 动态详情页：/user/detail/:id 等
+      // 动态详情页：/trade/redpacket-detail/:id 等
       const prefixes = [
-        '/user/detail',
         '/trade/redpacket-detail',
         '/session/group-detail',
         '/session/chat'

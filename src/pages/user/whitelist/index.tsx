@@ -11,9 +11,9 @@ import {
   FilterSelect
 } from '@widgets/biz-list';
 import { getWhitelist } from '@shared/api/biz';
-import WhitelistActionModal from '../WhitelistActionModal';
-import UserDetailDrawer from '../detail/UserDetailDrawer';
-import iconWarning from '../assets/icon-exclamation-circle-fill.svg';
+import { UserDetailDrawer } from '@features/user-detail';
+import { WhitelistActionModal } from '@features/whitelist-action';
+import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 
 const FormItem = Form.Item;
 

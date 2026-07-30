@@ -45,7 +45,7 @@ src/
   app/           # 应用入口、Providers、路由
   pages/         # 业务页面：user / system / system-params / finance / trade / session / login
   widgets/       # 布局与复合 UI：admin-shell、navbar、biz-list（筛选/汇总/列表）…
-  features/      # 用户交互特性（可扩展）
+  features/      # 用户交互特性：blacklist-action / whitelist-action / user-detail …
   entities/      # 业务实体；global-state 为 MobX 全局状态
   shared/        # api、lib、locale、mock、config、assets
 ```
