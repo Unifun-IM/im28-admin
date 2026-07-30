@@ -473,11 +473,11 @@ setupMock({
           id: '@id',
           userId: /1[0-9]{7}/,
           nickname: '@cname',
-          peerId: /1[0-9]{7}/,
-          peerName: '@cname',
-          lastMessage: '@csentence(4,16)',
-          unread: '@integer(0,20)',
-          updatedAt: '@datetime("yyyy-MM-dd HH:mm:ss")'
+          avatar: '',
+          friendCount: '@integer(0,200)',
+          groupCount: '@integer(0,50)',
+          status: '@pick(["正常","黑名单","注销"])',
+          lastActiveTime: '@datetime("yyyy-MM-dd HH:mm:ss")'
         })
       );
     });
@@ -554,18 +554,710 @@ setupMock({
       })
     );
 
-    Mock.mock(new RegExp('/api/biz/session/chat'), (options: { url: string }) => {
+    Mock.mock(new RegExp('/api/biz/session/user-chat/'), () => {
+      const groups = [
+        {
+          id: '1400817',
+          name: 'DreamWeaver_',
+          kind: 'group',
+          sub: 'ID：1400817',
+          memberCount: 86,
+          onlineCount: 12,
+          unread: 1,
+          avatars: [] as string[]
+        },
+        {
+          id: '1330856',
+          name: '游戏达人max',
+          kind: 'group',
+          sub: 'ID：1330856',
+          memberCount: 120,
+          onlineCount: 22,
+          avatars: [] as string[]
+        },
+        {
+          id: '1523107',
+          name: '美食家日记',
+          kind: 'group',
+          sub: 'ID：1523107',
+          memberCount: 45,
+          onlineCount: 8,
+          avatars: [] as string[]
+        },
+        {
+          id: '1600120',
+          name: '登山俱乐部',
+          kind: 'group',
+          sub: 'ID：1600120',
+          memberCount: 120,
+          onlineCount: 22,
+          avatars: [] as string[]
+        }
+      ];
+
+      const contacts = [
+        {
+          id: '10086001',
+          name: '美食家日记',
+          kind: 'user' as const,
+          online: true,
+          starred: true,
+          remark: '',
+          source: '通过ID添加',
+          addedAt: '2025年11月'
+        },
+        {
+          id: '10086002',
+          name: '彩虹糖果酱',
+          kind: 'user' as const,
+          online: true,
+          starred: false,
+          source: '通过二维码添加',
+          addedAt: '2025年10月'
+        },
+        {
+          id: '10086003',
+          name: '一只小熊饼干',
+          kind: 'user' as const,
+          online: true,
+          starred: false,
+          source: '通过群聊添加',
+          addedAt: '2025年9月'
+        },
+        {
+          id: '10086004',
+          name: 'TimeTraveler_',
+          kind: 'user' as const,
+          online: false,
+          starred: false,
+          source: '通过ID添加',
+          addedAt: '2025年8月'
+        },
+        {
+          id: '10086005',
+          name: '快乐肥宅水',
+          kind: 'user' as const,
+          online: false,
+          starred: false,
+          source: '通过手机号添加',
+          addedAt: '2025年7月'
+        },
+        {
+          id: '10086006',
+          name: '艺术家的梦',
+          kind: 'user' as const,
+          online: true,
+          starred: false,
+          source: '通过ID添加',
+          addedAt: '2025年11月'
+        },
+        {
+          id: '10086007',
+          name: 'NekoChan_',
+          kind: 'user' as const,
+          online: false,
+          starred: false,
+          source: '通过ID添加',
+          addedAt: '2025年6月'
+        },
+        {
+          id: '10086008',
+          name: '马戏团小丑',
+          kind: 'user' as const,
+          online: false,
+          starred: false,
+          source: '通过群聊添加',
+          addedAt: '2025年5月'
+        },
+        {
+          id: '10086009',
+          name: '深海里的鱼_',
+          kind: 'user' as const,
+          online: true,
+          starred: false,
+          source: '通过ID添加',
+          addedAt: '2025年11月'
+        }
+      ];
+
+      const starred = contacts.filter((c) => c.starred);
+      const rest = contacts.filter((c) => !c.starred);
+      const contactSections = [
+        { letter: 'A', items: rest.slice(0, 3) },
+        { letter: 'B', items: rest.slice(3) }
+      ];
+
+      // 会话列表：单聊 + 群聊（Figma 791:32208 / 791:33221）
+      const sessions = [
+        {
+          id: '10086101',
+          name: 'Anan',
+          kind: 'session' as const,
+          online: true,
+          lastMessage: '[动画表情]',
+          time: '今日 12:00'
+        },
+        {
+          id: '10086102',
+          name: '南界',
+          kind: 'session' as const,
+          online: true,
+          lastMessage: '你好，有没有想过……',
+          time: '今日 12:00'
+        },
+        {
+          id: '10086103',
+          name: '王晨',
+          kind: 'session' as const,
+          online: false,
+          muted: true,
+          lastMessage: '好的',
+          time: '今日 12:00'
+        },
+        {
+          id: '10086104',
+          name: '黎笑笑',
+          kind: 'session' as const,
+          online: true,
+          lastMessage: '哈哈哈哈……',
+          time: '今日 12:00'
+        },
+        {
+          id: '10086105',
+          name: '爱吃冰淇淋',
+          kind: 'session' as const,
+          online: true,
+          lastMessage: '[语音]',
+          time: '今日 12:00'
+        },
+        {
+          id: '1600120',
+          name: '登山俱乐部',
+          kind: 'group' as const,
+          memberCount: 120,
+          onlineCount: 22,
+          lastMessage: '张甜甜：明天去爬山吗？',
+          time: '今日 12:00',
+          avatars: [] as string[]
+        }
+      ];
+
+      return {
+        sessions,
+        groups,
+        starred,
+        contactSections,
+        groupCount: groups.length,
+        contactCount: contacts.length
+      };
+    });
+
+    Mock.mock(new RegExp('/api/biz/session/chat-history'), (options: { url: string }) => {
       const q = parseQuery(options.url);
-      return pageList(120, Number(q.page), Number(q.pageSize), () =>
-        Mock.mock({
-          id: '@id',
-          senderId: /1[0-9]{7}/,
-          senderName: '@cname',
-          type: '@pick(["文字","图片","文件","名片"])',
-          content: '@csentence(5,30)',
-          time: '@datetime("yyyy-MM-dd HH:mm:ss")'
-        })
-      );
+      const keyword = String(q.keyword || '').trim();
+      const tab = String(q.tab || 'all');
+      const uid = () => String(Mock.Random.guid());
+
+      // 无结果：关键词为「无」或「zzz」
+      if (keyword && /^(无|zzz|none)$/i.test(keyword)) {
+        return { list: [], mediaGroups: [], fileGroups: [] };
+      }
+
+      const kw = keyword || '好';
+      const list = [
+        {
+          id: uid(),
+          senderName: 'Anan',
+          content: `${kw}的`,
+          time: '12:00',
+          dateLabel: '2025年10月20日'
+        },
+        {
+          id: uid(),
+          senderName: 'Anan',
+          content: `可以可以${kw}的吧`,
+          time: '12:00',
+          dateLabel: '2025年10月20日'
+        },
+        {
+          id: uid(),
+          senderName: 'Anan',
+          content: `我觉得这样挺${kw}`,
+          time: '12:00',
+          dateLabel: '2025年10月20日'
+        },
+        {
+          id: uid(),
+          senderName: '王晨',
+          content: `${kw}主意`,
+          time: '11:20',
+          dateLabel: '2025年10月20日'
+        }
+      ];
+
+      const mediaGroups = [
+        {
+          month: '这个月',
+          items: [
+            { id: uid(), kind: 'image' },
+            { id: uid(), kind: 'video' },
+            { id: uid(), kind: 'image' },
+            { id: uid(), kind: 'image' }
+          ]
+        },
+        {
+          month: '2026年3月',
+          items: [{ id: uid(), kind: 'image' }]
+        },
+        {
+          month: '2026年2月',
+          items: [
+            { id: uid(), kind: 'video' },
+            { id: uid(), kind: 'image' }
+          ]
+        }
+      ];
+
+      const fileGroups = [
+        {
+          month: '2026年3月',
+          items: [
+            {
+              id: uid(),
+              senderName: '王晨',
+              content: '',
+              time: '4月15日',
+              fileName: 'word-file.docx',
+              fileSize: '217 KB',
+              fileExt: 'DOC'
+            }
+          ]
+        },
+        {
+          month: '2025年7月',
+          items: [
+            {
+              id: uid(),
+              senderName: '王晨',
+              content: '',
+              time: '2025年7月3日',
+              fileName: 'pdf-file.pdf',
+              fileSize: '217 KB',
+              fileExt: 'PDF'
+            },
+            {
+              id: uid(),
+              senderName: 'Anan',
+              content: '',
+              time: '2025年7月1日',
+              fileName: 'file.zip',
+              fileSize: '217 KB',
+              fileExt: 'ZIP'
+            }
+          ]
+        }
+      ];
+
+      if (tab === 'media') {
+        return { list: [], mediaGroups, fileGroups: [] };
+      }
+      if (tab === 'file') {
+        return { list: [], mediaGroups: [], fileGroups };
+      }
+      if (tab === 'date') {
+        return { list, mediaGroups: [], fileGroups: [] };
+      }
+      return { list, mediaGroups, fileGroups };
+    });
+
+    Mock.mock(new RegExp('/api/biz/session/chat(\\?|$)'), (options: { url: string }) => {
+      const q = parseQuery(options.url);
+      const isGroup = q.type === 'group';
+      const peerId = String(q.id || '');
+      const list = buildChatMockMessages(isGroup, peerId);
+      const page = Number(q.page) || 1;
+      const pageSize = Number(q.pageSize) || 50;
+      const start = (page - 1) * pageSize;
+      return {
+        list: list.slice(start, start + pageSize),
+        total: list.length
+      };
     });
   }
 });
+
+/** 固定会话脚本，贴合查聊天 Modal 消息类型（文字/语音/文件/通话/日期） */
+function buildChatMockMessages(isGroup: boolean, peerId: string) {
+  const uid = () => String(Mock.Random.guid());
+
+  if (isGroup) {
+    return [
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '5月11日' },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'text',
+        content: '快来一起爬山😎',
+        time: '12:00'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'text',
+        content:
+          '为什么天空是蓝色的？简单说是瑞利散射：阳光里的短波蓝光更容易被大气分子散射，所以白天天空看起来偏蓝。',
+        time: '12:00'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: 'Philip',
+        content: '好哇，+1😎',
+        time: '12:01'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: 'Shawn',
+        content: '需要带什么装备吗？',
+        time: '12:02'
+      },
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '5月12日' },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'call',
+        content: '通话时长 00:10',
+        time: '09:20'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'call',
+        content: '视频通话',
+        callStatus: '已拒绝',
+        time: '09:21'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'call',
+        content: '通话时长 00:08',
+        time: '09:30'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'call',
+        senderName: 'Philip',
+        content: '视频通话',
+        callStatus: '已拒绝',
+        time: '09:31'
+      },
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '昨天' },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'voice',
+        duration: '4"',
+        time: '18:00'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'file',
+        fileName: 'word-file.docx',
+        fileSize: '217 KB',
+        time: '18:02'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'file',
+        senderName: 'Shawn',
+        fileName: 'word-file.docx',
+        fileSize: '217 KB',
+        time: '18:05'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '张甜甜',
+        content: '明天去爬山吗？',
+        time: '19:10'
+      }
+    ];
+  }
+
+  // 单聊：按联系人给几套不同文案，避免每次都一样
+  const scripts: Record<string, Array<Record<string, unknown>>> = {
+    '10086002': [
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '昨天' },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '彩虹糖果酱',
+        content: '明天有空吗？想请你帮忙看一下方案。',
+        time: '21:10'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'text',
+        content: '可以，下午三点之后都行。',
+        time: '21:12'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'voice',
+        senderName: '彩虹糖果酱',
+        duration: '6"',
+        time: '21:13'
+      },
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '今天' },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'file',
+        fileName: '方案备注.pdf',
+        fileSize: '1.2 MB',
+        time: '09:08'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '彩虹糖果酱',
+        content: '好的，那明天见',
+        time: '09:12'
+      }
+    ],
+    '10086003': [
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '昨天' },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'text',
+        content: '在吗？快递到了你帮我收一下。',
+        time: '18:20'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '一只小熊饼干',
+        content: '好，我在家。',
+        time: '18:21'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'voice',
+        senderName: '一只小熊饼干',
+        duration: '8"',
+        time: '18:22'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'call',
+        content: '通话时长 00:42',
+        time: '18:25'
+      }
+    ],
+    '10086001': [
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '昨天' },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '美食家日记',
+        content: '那家店真的绝了，周末再去一次？',
+        time: '20:01'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'text',
+        content: '行，我订位子。你还是老样子？',
+        time: '20:03'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '美食家日记',
+        content: '嗯，少辣。对了菜单我发你。',
+        time: '20:04'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'file',
+        senderName: '美食家日记',
+        fileName: '菜单.jpg',
+        fileSize: '860 KB',
+        time: '20:05'
+      }
+    ],
+    '10086005': [
+      { id: uid(), side: 'peer', msgType: 'date', dateLabel: '周一' },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'call',
+        content: '通话时长 00:10',
+        time: '14:02'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '快乐肥宅水',
+        content: '刚才信号不好，你再说一遍？',
+        time: '14:03'
+      },
+      {
+        id: uid(),
+        side: 'self',
+        msgType: 'voice',
+        duration: '12"',
+        time: '14:04'
+      },
+      {
+        id: uid(),
+        side: 'peer',
+        msgType: 'text',
+        senderName: '快乐肥宅水',
+        content: '明白了，我这边处理。',
+        time: '14:06'
+      }
+    ]
+  };
+
+  if (scripts[peerId]) return scripts[peerId];
+
+  // 默认单聊脚本（对齐 Figma 791:32208 Anan）
+  return [
+    { id: uid(), side: 'peer', msgType: 'date', dateLabel: '5月11日' },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'text',
+      content: '快来一起爬山😎',
+      time: '12:00'
+    },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'text',
+      content:
+        '为什么天空是蓝色的？简单说是瑞利散射：阳光里的短波蓝光更容易被大气分子散射，所以白天天空看起来偏蓝。',
+      time: '12:00'
+    },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'system',
+      content:
+        '你已添加了爱吃冰淇淋，通过了你的朋友验证请求，以上是打招呼的消息。'
+    },
+    { id: uid(), side: 'peer', msgType: 'date', dateLabel: '5月12日' },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'text',
+      senderName: peerId === '10086101' ? 'Anan' : '对方',
+      content: '好啊，几点出发？',
+      time: '09:10'
+    },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'call',
+      content: '通话时长 00:10',
+      time: '09:20'
+    },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'call',
+      senderName: peerId === '10086101' ? 'Anan' : '对方',
+      content: '视频通话',
+      callStatus: '已拒绝',
+      time: '09:21'
+    },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'call',
+      content: '通话时长 00:08',
+      time: '09:30'
+    },
+    { id: uid(), side: 'peer', msgType: 'date', dateLabel: '昨天' },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'file',
+      fileName: 'word-file.docx',
+      fileSize: '217 KB',
+      time: '18:02'
+    },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'file',
+      senderName: peerId === '10086101' ? 'Anan' : '对方',
+      fileName: '行程安排.docx',
+      fileSize: '128 KB',
+      time: '18:05'
+    },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'image',
+      time: '18:10'
+    },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'video',
+      time: '18:11'
+    },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'image',
+      senderName: peerId === '10086101' ? 'Anan' : '对方',
+      time: '18:12'
+    },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'video',
+      senderName: peerId === '10086101' ? 'Anan' : '对方',
+      time: '18:13'
+    },
+    { id: uid(), side: 'peer', msgType: 'date', dateLabel: '今天' },
+    {
+      id: uid(),
+      side: 'peer',
+      msgType: 'text',
+      senderName: peerId === '10086101' ? 'Anan' : '对方',
+      content: '嗯',
+      time: '12:00'
+    },
+    {
+      id: uid(),
+      side: 'self',
+      msgType: 'text',
+      content: '快来一起爬山🤓',
+      time: '12:00'
+    }
+  ];
+}

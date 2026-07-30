@@ -14,7 +14,6 @@ import {
   IconRight,
   IconSearch
 } from '@arco-design/web-react/icon';
-import { useNavigate } from 'react-router-dom';
 import { getGroupDetail } from '@shared/api/biz';
 import { StatusBadge } from '@widgets/biz-list';
 
@@ -23,6 +22,13 @@ export type GroupDetailDrawerProps = {
   groupId?: string | null;
   defaultTab?: 'basic' | 'logs';
   onClose: () => void;
+  /** 查看聊天：交给页面打开同一 UserChatModal（scene=group） */
+  onViewChat?: (payload: {
+    groupId: string;
+    groupName: string;
+    memberCount?: number;
+    ownerId?: string;
+  }) => void;
 };
 
 type DetailData = Record<string, unknown>;
@@ -139,9 +145,9 @@ export default function GroupDetailDrawer({
   visible,
   groupId,
   defaultTab = 'basic',
-  onClose
+  onClose,
+  onViewChat
 }: GroupDetailDrawerProps) {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState<DetailData | null>(null);
   const [tab, setTab] = useState<string>(defaultTab);
@@ -221,8 +227,13 @@ export default function GroupDetailDrawer({
 
   const openChat = () => {
     const gid = String(detail?.groupId || groupId || '');
+    onViewChat?.({
+      groupId: gid,
+      groupName: String(detail?.name || detail?.groupName || gid),
+      memberCount: Number(detail?.memberCount || 0) || undefined,
+      ownerId: String(detail?.ownerId || '')
+    });
     onClose();
-    navigate(`/session/chat/group/${gid}`);
   };
 
   const drawerTitle = (

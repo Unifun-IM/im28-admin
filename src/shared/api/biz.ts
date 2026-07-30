@@ -196,6 +196,10 @@ export async function getGroupDetail(id: string) {
   return request.get<Record<string, unknown>>(`/api/biz/session/group-detail/${id}`);
 }
 
+export async function getUserChatBook(userId: string) {
+  return request.get<Record<string, unknown>>(`/api/biz/session/user-chat/${userId}`);
+}
+
 export async function getChatMessages(params: {
   type: string;
   id: string;
@@ -203,6 +207,19 @@ export async function getChatMessages(params: {
   pageSize?: number;
 }) {
   return request.get<PageResult<Record<string, unknown>>>('/api/biz/session/chat', {
+    params
+  });
+}
+
+export async function searchChatHistory(params: {
+  type: string;
+  id: string;
+  keyword?: string;
+  tab?: string;
+  date?: string;
+  mediaFilter?: string;
+}) {
+  return request.get<Record<string, unknown>>('/api/biz/session/chat-history', {
     params
   });
 }

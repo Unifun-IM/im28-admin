@@ -11,6 +11,7 @@ import {
   StatusBadge
 } from '@widgets/biz-list';
 import { GroupDetailDrawer } from '@features/group-detail';
+import { UserChatModal } from '@features/user-chat-view';
 import { getGroupSessions } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -46,6 +47,14 @@ export default function GroupQueryPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatUserId, setChatUserId] = useState<string>('');
+  const [chatTarget, setChatTarget] = useState<{
+    type: 'group';
+    id: string;
+    name: string;
+    memberCount?: number;
+  } | null>(null);
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -216,6 +225,26 @@ export default function GroupQueryPage() {
         visible={!!detailGroupId}
         groupId={detailGroupId}
         onClose={() => setDetailGroupId(null)}
+        onViewChat={(payload) => {
+          setChatUserId(payload.ownerId || payload.groupId);
+          setChatTarget({
+            type: 'group',
+            id: payload.groupId,
+            name: payload.groupName,
+            memberCount: payload.memberCount
+          });
+          setChatOpen(true);
+        }}
+      />
+      <UserChatModal
+        visible={chatOpen}
+        scene="group"
+        userId={chatUserId || null}
+        target={chatTarget}
+        onClose={() => {
+          setChatOpen(false);
+          setChatTarget(null);
+        }}
       />
     </>
   );
