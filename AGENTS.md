@@ -94,9 +94,10 @@ src/app | pages | widgets | features | entities | shared
 
 ## API / Mock
 
-- 业务接口现阶段：`@shared/api/biz` + `shared/mock/biz.ts`（前缀 `/api/biz/...`）
-- OpenAPI 生成物在 `shared/api/user.ts` 等，**不要手改**；手写 axios 单例 `shared/api/request.ts` 勿删
-- 页面尽量只依赖 `@shared/api/*`，便于日后用生成客户端替换 mock
+- Admin 网关生成物：`src/shared/api/admin/**`（`npm run openapi`），**禁止任何手改**；适配写在页面 / feature / `biz`
+- 尚未进 OpenAPI 的业务：`@shared/api/biz` + `shared/mock/biz.ts`（前缀 `/api/biz/...`）
+- 手写 axios 单例 `shared/api/request.ts` 勿删
+- 页面优先 `import` `@shared/api/admin/*` 生成函数；无文档能力再用 `biz`
 
 ## 改动边界
 
