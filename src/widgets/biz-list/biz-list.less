@@ -602,42 +602,47 @@
   }
 
   .arco-table-th {
+    box-sizing: border-box;
     background: var(--color-fill-1, #f7f8fa);
     height: 40px;
-    padding: 9px 16px;
+    /* padding 统一放在 th-item / cell-with-sorter，避免有排序列时双重叠加变高 */
+    padding: 0 !important;
     font-size: 14px;
     font-weight: 400;
-    line-height: 21px;
+    line-height: 22px;
     color: var(--color-text-3, #86909c);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
     border-right: 1px solid rgba(0, 0, 0, 0.08);
+    vertical-align: middle;
   }
 
-  /* Arco 默认 th-item 自带 padding，避免与 th 双重叠加导致表头变高 */
+  /* Arco 默认 th-item 自带 padding；有排序时 class 在 th-item 上而非 th */
   .arco-table-th-item {
-    padding: 0;
-    height: auto;
-    line-height: 21px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 9px 16px;
+    line-height: 22px;
   }
 
   .arco-table-th-item-title {
     font-size: 14px;
     font-weight: 400;
-    line-height: 21px;
+    line-height: 22px;
     color: var(--color-text-3, #86909c);
   }
 
   /*
-   * 可排序列表头：th 本身不再叠加 padding，由 cell-with-sorter 铺满，
-   * 去掉 mouseenter 灰底，避免出现「表头内嵌灰块」。
+   * 可排序列表头：col-has-sorter 在 th-item 上；
+   * th-item 去 padding，由 cell-with-sorter 铺满 40px，避免表头变高。
    */
-  .arco-table-th.arco-table-col-has-sorter {
+  .arco-table-th-item.arco-table-col-has-sorter {
     padding: 0;
   }
 
   .arco-table-th .arco-table-col-has-sorter {
-    padding: 0;
-    height: 100%;
+    height: 40px;
   }
 
   .arco-table-th .arco-table-cell-with-sorter {
@@ -645,6 +650,7 @@
     align-items: center;
     box-sizing: border-box;
     width: 100%;
+    height: 40px;
     min-height: 40px;
     padding: 9px 16px;
     background-color: transparent !important;
@@ -699,12 +705,21 @@
   }
 
   /* 操作列 padding；投影交给 Arco fixed 标准（scroll-position + col-fixed-right-first::after） */
-  .arco-table-td.arco-table-col-fixed-right,
-  .arco-table-th.arco-table-col-fixed-right {
+  .arco-table-td.arco-table-col-fixed-right {
     padding-left: 12px;
     padding-right: 12px;
     /* 勿裁切 Arco 固定列左侧 ::after 阴影 */
     overflow: visible;
+  }
+
+  .arco-table-th.arco-table-col-fixed-right {
+    overflow: visible;
+
+    .arco-table-th-item,
+    .arco-table-cell-with-sorter {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
   }
 
   .arco-table-cell {

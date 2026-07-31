@@ -69,6 +69,7 @@ export default function SettingsPageShell({
         <div className="w-[240px] shrink-0 rounded-[12px] border border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)] p-2">
           <Anchor
             className="use-session-settings-anchor"
+            lineless
             affix={false}
             hash={false}
             scrollContainer="#session-settings-scroll"
