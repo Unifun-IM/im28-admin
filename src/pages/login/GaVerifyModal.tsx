@@ -1,21 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Modal, VerificationCode } from '@arco-design/web-react';
 
 export type GaVerifyModalProps = {
   visible: boolean;
   loading?: boolean;
+  /** 校验失败时递增，用于清空 OTP 并标红 */
+  errorTick?: number;
   onCancel: () => void;
   onOk: (code: string) => void;
 };
 
-/** GA 验证码弹窗 — Figma 602:35395 */
+/**
+ * GA 验证码弹窗 — 非首次登录（已绑定）
+ * Figma 602:35395
+ */
 export default function GaVerifyModal({
   visible,
   loading,
+  errorTick = 0,
   onCancel,
   onOk
 }: GaVerifyModalProps) {
   const [code, setCode] = useState('');
+  const [status, setStatus] = useState<'error' | undefined>();
+
+  useEffect(() => {
+    if (visible) {
+      setCode('');
+      setStatus(undefined);
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    if (!errorTick) return;
+    setCode('');
+    setStatus('error');
+  }, [errorTick]);
+
+  const submit = (value: string) => {
+    if (loading || value.length < 6) return;
+    setStatus(undefined);
+    onOk(value);
+  };
 
   return (
     <Modal
@@ -28,14 +54,17 @@ export default function GaVerifyModal({
       maskClosable={false}
       unmountOnExit
       onCancel={onCancel}
-      afterClose={() => setCode('')}
+      afterClose={() => {
+        setCode('');
+        setStatus(undefined);
+      }}
       style={{ width: 480 }}
     >
       <div className="box-border px-[24px] pb-[12px] pt-[24px]">
-        <div className="text-[20px] font-medium leading-[28px] text-arco-text-1">
+        <div className="text-[20px] font-medium leading-[28px] text-[var(--color-text-1,#1d2129)]">
           GA验证码
         </div>
-        <div className="text-[12px] leading-[20px] text-arco-text-3">
+        <div className="text-[12px] leading-[20px] text-[var(--color-text-3,#86909c)]">
           请输入由您的身份验证器应用生成的6位验证码
         </div>
       </div>
@@ -44,11 +73,18 @@ export default function GaVerifyModal({
           className="use-login-otp"
           length={6}
           value={code}
-          onChange={setCode}
+          status={status}
+          disabled={loading}
+          validate={({ inputValue }) => /^\d*$/.test(inputValue)}
+          onChange={(next) => {
+            setStatus(undefined);
+            setCode(next);
+          }}
+          onFinish={submit}
         />
       </div>
       <div className="box-border flex justify-end gap-[8px] px-[24px] pb-[24px] pt-[12px]">
-        <Button className="min-w-[80px]" onClick={onCancel}>
+        <Button className="min-w-[80px]" disabled={loading} onClick={onCancel}>
           取消
         </Button>
         <Button
@@ -56,7 +92,7 @@ export default function GaVerifyModal({
           type="primary"
           loading={loading}
           disabled={code.length < 6}
-          onClick={() => onOk(code)}
+          onClick={() => submit(code)}
         >
           确定
         </Button>

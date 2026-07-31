@@ -2,11 +2,10 @@ import {
   Form,
   Input,
   Button,
-  Message,
-  Modal
+  Message
 } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
-import { IconLock, IconUser } from '@arco-design/web-react/icon';
+import { IconUnlock, IconUser } from '@arco-design/web-react/icon';
 import React, { useRef, useState } from 'react';
 
 import {
@@ -19,8 +18,11 @@ import {
 import { setAccessToken } from '@shared/api/request';
 import useLocale from '@shared/lib/useLocale';
 
+import ForceChangePasswordModal from './ForceChangePasswordModal';
+import ForcePasswordNoticeModal from './ForcePasswordNoticeModal';
 import GaBindModal from './GaBindModal';
 import GaVerifyModal from './GaVerifyModal';
+import { mapLoginToast } from './mapLoginToast';
 import SlideCaptcha from './SlideCaptcha';
 import locale from './locale';
 
@@ -32,7 +34,9 @@ type PendingAuth = {
 };
 
 /**
- * 登录表单 — 对接 AdminAPI auth（username / password / next_step）
+ * 登录表单 — AdminAPI auth next_step
+ *
+ * Toast 文案仅用前端 Figma 979:39539，不透出后端 message
  */
 export default function LoginForm() {
   const formRef = useRef<FormInstance>();
@@ -41,15 +45,19 @@ export default function LoginForm() {
   const [sliderOk, setSliderOk] = useState(false);
   const [pending, setPending] = useState<PendingAuth | null>(null);
   const [setup, setSetup] = useState<AdminAPI.SetupTwoFactorEnvelope['data']>();
-  const [pwdVisible, setPwdVisible] = useState(false);
-  const [pwdForm] = Form.useForm<AdminAPI.ChangeSysUserPasswordRequest>();
+  const [pwdNoticeVisible, setPwdNoticeVisible] = useState(false);
+  const [pwdFormVisible, setPwdFormVisible] = useState(false);
+  /** 改密后进入的绑 GA 为强制流程 */
+  const [forceBind, setForceBind] = useState(false);
+  const [loginUsername, setLoginUsername] = useState('');
+  const [gaErrorTick, setGaErrorTick] = useState(0);
 
   const t = useLocale(locale);
 
   function finishLogin(token?: AdminAPI.Token) {
     const access = token?.access_token;
     if (!access) {
-      Message.error(t['login.form.login.errMsg']);
+      Message.error(t['login.msg.verifyFail']);
       return;
     }
     localStorage.setItem('userStatus', 'login');
@@ -60,6 +68,27 @@ export default function LoginForm() {
     }, 400);
   }
 
+  /** 退出首次强制流程 / 取消二步：回到登录表单 */
+  function exitOnboarding() {
+    setPending(null);
+    setSetup(undefined);
+    setPwdNoticeVisible(false);
+    setPwdFormVisible(false);
+    setForceBind(false);
+    setGaErrorTick(0);
+    setSliderOk(false);
+  }
+
+  async function openBindTwoFactor(preAuthToken: string, mandatory: boolean) {
+    setForceBind(mandatory);
+    setGaErrorTick(0);
+    const setupRes = await postV1AdminAuthTwoFactorSetup(
+      { pre_auth_token: preAuthToken },
+      { skipErrorHandler: true }
+    );
+    setSetup(setupRes.data);
+  }
+
   async function applyLoginData(
     data: NonNullable<AdminAPI.SysUserLoginEnvelope['data']>
   ) {
@@ -68,39 +97,48 @@ export default function LoginForm() {
       pre_auth_token: data.pre_auth_token
     };
     setPending(next);
+
     if (data.next_step === 'change_password') {
-      pwdForm.setFieldsValue({
-        pre_auth_token: data.pre_auth_token,
-        current_password: '',
-        new_password: ''
-      });
-      setPwdVisible(true);
+      setForceBind(false);
+      setSetup(undefined);
+      setPwdFormVisible(false);
+      setPwdNoticeVisible(true);
       return;
     }
+
     if (data.next_step === 'bind_two_factor') {
-      const setupRes = await postV1AdminAuthTwoFactorSetup({
-        pre_auth_token: data.pre_auth_token
-      });
-      setSetup(setupRes.data);
+      setPwdNoticeVisible(false);
+      setPwdFormVisible(false);
+      try {
+        // 绑定为首次强制步骤，不可跳过（取消=退出登录）
+        await openBindTwoFactor(data.pre_auth_token, true);
+      } catch (error) {
+        Message.error(mapLoginToast(error, 'gaSetup', t));
+        exitOnboarding();
+      }
       return;
     }
+
     // verify_two_factor
+    setPwdNoticeVisible(false);
+    setPwdFormVisible(false);
+    setForceBind(false);
     setSetup(undefined);
+    setGaErrorTick(0);
   }
 
   async function login(params: AdminAPI.SysUserLoginRequest) {
     setLoading(true);
+    setLoginUsername(params.username);
     try {
-      const res = await postV1AdminAuthLogin(params);
+      const res = await postV1AdminAuthLogin(params, {
+        skipErrorHandler: true
+      });
       if (res.data) {
         await applyLoginData(res.data);
       }
     } catch (error) {
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? String((error as { message: string }).message)
-          : t['login.form.login.errMsg'];
-      Message.error(message);
+      Message.error(mapLoginToast(error, 'login', t));
       setSliderOk(false);
     } finally {
       setLoading(false);
@@ -117,23 +155,21 @@ export default function LoginForm() {
     });
   }
 
-  function closeGa() {
-    setPending(null);
-    setSetup(undefined);
-    setSliderOk(false);
-  }
-
   async function submitVerify(code: string) {
     if (!pending) return;
     setGaLoading(true);
     try {
-      const res = await postV1AdminAuthTwoFactorVerify({
-        pre_auth_token: pending.pre_auth_token,
-        code
-      });
+      const res = await postV1AdminAuthTwoFactorVerify(
+        {
+          pre_auth_token: pending.pre_auth_token,
+          code
+        },
+        { skipErrorHandler: true }
+      );
       finishLogin(res.data?.token);
-    } catch {
-      // request 已 toast
+    } catch (error) {
+      Message.error(mapLoginToast(error, 'gaVerify', t));
+      setGaErrorTick((n) => n + 1);
     } finally {
       setGaLoading(false);
     }
@@ -143,24 +179,31 @@ export default function LoginForm() {
     if (!pending) return;
     setGaLoading(true);
     try {
-      const res = await postV1AdminAuthTwoFactorConfirm({
-        pre_auth_token: pending.pre_auth_token,
-        code
-      });
+      const res = await postV1AdminAuthTwoFactorConfirm(
+        {
+          pre_auth_token: pending.pre_auth_token,
+          code
+        },
+        { skipErrorHandler: true }
+      );
       finishLogin(res.data?.token);
-    } catch {
-      // request 已 toast
+    } catch (error) {
+      Message.error(mapLoginToast(error, 'gaBind', t));
+      setGaErrorTick((n) => n + 1);
     } finally {
       setGaLoading(false);
     }
   }
 
-  async function submitPasswordChange() {
+  async function submitPasswordChange(
+    values: AdminAPI.ChangeSysUserPasswordRequest
+  ) {
+    setLoading(true);
     try {
-      const values = await pwdForm.validate();
-      setLoading(true);
-      const res = await postV1AdminAuthPasswordChange(values);
-      setPwdVisible(false);
+      const res = await postV1AdminAuthPasswordChange(values, {
+        skipErrorHandler: true
+      });
+      setPwdFormVisible(false);
       if (res.data) {
         await applyLoginData({
           next_step: res.data.next_step,
@@ -168,8 +211,8 @@ export default function LoginForm() {
           expires_in: res.data.expires_in
         });
       }
-    } catch {
-      // validate / request
+    } catch (error) {
+      Message.error(mapLoginToast(error, 'passwordChange', t));
     } finally {
       setLoading(false);
     }
@@ -179,6 +222,9 @@ export default function LoginForm() {
   const qrUrl = otpauthUri
     ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUri)}`
     : undefined;
+
+  const bindVisible =
+    pending?.next_step === 'bind_two_factor' && Boolean(setup);
 
   return (
     <div className="flex w-full flex-col gap-[24px]">
@@ -216,7 +262,7 @@ export default function LoginForm() {
             rules={[{ required: true, message: t['login.form.password.errMsg'] }]}
           >
             <Input.Password
-              prefix={<IconLock />}
+              prefix={<IconUnlock />}
               placeholder={t['login.form.password.placeholder']}
               onPressEnter={onSubmitClick}
             />
@@ -228,52 +274,41 @@ export default function LoginForm() {
         </div>
       </Form>
 
+      <ForcePasswordNoticeModal
+        visible={pwdNoticeVisible}
+        onContinue={() => {
+          setPwdNoticeVisible(false);
+          setPwdFormVisible(true);
+        }}
+      />
+
+      <ForceChangePasswordModal
+        visible={pwdFormVisible}
+        loading={loading}
+        username={loginUsername}
+        initialToken={pending?.pre_auth_token}
+        onExit={exitOnboarding}
+        onSubmit={submitPasswordChange}
+      />
+
       <GaVerifyModal
         visible={pending?.next_step === 'verify_two_factor'}
         loading={gaLoading}
-        onCancel={closeGa}
+        errorTick={gaErrorTick}
+        onCancel={exitOnboarding}
         onOk={submitVerify}
       />
+
       <GaBindModal
-        visible={pending?.next_step === 'bind_two_factor' && Boolean(setup)}
+        visible={bindVisible}
         loading={gaLoading}
+        errorTick={gaErrorTick}
+        mandatory={forceBind}
         secret={setup?.secret}
         qrUrl={qrUrl}
-        onCancel={closeGa}
+        onCancel={exitOnboarding}
         onOk={submitBind}
       />
-
-      <Modal
-        title="修改密码"
-        visible={pwdVisible}
-        onCancel={() => {
-          setPwdVisible(false);
-          closeGa();
-        }}
-        onOk={submitPasswordChange}
-        confirmLoading={loading}
-        unmountOnExit
-      >
-        <Form form={pwdForm} layout="vertical">
-          <Form.Item field="pre_auth_token" hidden>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            field="current_password"
-            label="current_password"
-            rules={[{ required: true }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
-            field="new_password"
-            label="new_password"
-            rules={[{ required: true }]}
-          >
-            <Input.Password />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 }
