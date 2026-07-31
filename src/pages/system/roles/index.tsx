@@ -1,15 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Form,
-  Button,
-  Message,
-  Modal,
-  Tooltip
-} from '@arco-design/web-react';
-import {
-  IconExpand,
-  IconShrink
-} from '@arco-design/web-react/icon';
+import { Form, Button, Message, Modal } from '@arco-design/web-react';
 import { observer } from 'mobx-react-lite';
 import {
   ActionLinks,
@@ -19,7 +9,6 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { pageTabsStore } from '@entities/page-tabs';
 import { getRoles } from '@shared/api/biz';
 import { CreateRoleModal } from '@features/admin-role-create';
 
@@ -43,7 +32,6 @@ function RolesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [createVisible, setCreateVisible] = useState(false);
-  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -72,7 +60,6 @@ function RolesPage() {
         form={form}
         title="角色列表"
         filterResetText="清除全部"
-        showColumnSetting={false}
         filter={
           <>
             <FilterField>
@@ -103,23 +90,9 @@ function RolesPage() {
         }}
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
-          <>
-            <Tooltip
-              content={
-                contentFullscreen ? '退出全屏' : '全屏（隐藏导航）'
-              }
-            >
-              <Button
-                type="secondary"
-                className="use-biz-table-icon-btn"
-                icon={contentFullscreen ? <IconShrink /> : <IconExpand />}
-                onClick={() => pageTabsStore.toggleContentFullscreen()}
-              />
-            </Tooltip>
-            <Button type="primary" onClick={() => setCreateVisible(true)}>
-              新增角色
-            </Button>
-          </>
+          <Button type="primary" onClick={() => setCreateVisible(true)}>
+            新增角色
+          </Button>
         }
         tableProps={{
           loading,
@@ -159,12 +132,15 @@ function RolesPage() {
               fixed: 'right' as const,
               render: (_: unknown, row: Record<string, unknown>) => (
                 <ActionLinks
+                  variant="text"
                   items={[
                     {
                       key: 'detail',
                       label: '详情',
                       onClick: () =>
-                        Message.info(`角色详情：${String(row.name)}（后续接入）`)
+                        Message.info(
+                          `角色详情：${String(row.name)}（后续接入）`
+                        )
                     },
                     {
                       key: 'delete',
@@ -199,7 +175,7 @@ function RolesPage() {
       />
       <CreateRoleModal
         visible={createVisible}
-        onCancel={() => setCreateVisible(false)}
+        onClose={() => setCreateVisible(false)}
         onSuccess={() => fetchData(page, pageSize)}
       />
     </>

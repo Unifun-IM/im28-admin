@@ -44,12 +44,15 @@
     gap: 0;
   }
 
-  /* 内容全屏：仅保留 PageTabs，Navbar 收起 */
+  /* 内容全屏：Navbar + PageTabs 一并收起 */
   &-content-fullscreen {
-    height: @page-tabs-height;
+    height: 0;
     gap: 0;
+    padding: 0;
+    overflow: hidden;
     left: 0 !important;
     width: 100% !important;
+    pointer-events: none;
   }
 }
 
@@ -570,6 +573,25 @@
 
 .layout-content-wrapper {
   padding: 12px;
+}
+
+/* 内容全屏：主区撑满视口，供列表页仅展示表格 */
+.layout-content-fullscreen {
+  .layout-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100vh;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  :global(.arco-layout-content) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
 }
 
 .spin {

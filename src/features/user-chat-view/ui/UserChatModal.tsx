@@ -16,11 +16,9 @@ import {
   IconDown,
   IconFile,
   IconMute,
-  IconPhone,
   IconPlus,
   IconRight,
-  IconSearch,
-  IconVideoCamera
+  IconSearch
 } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import { getChatMessages, getUserChatBook } from '@shared/api/biz';
@@ -61,27 +59,68 @@ function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
     >
       {time}
       {isSelf ? (
-        <img src={iconChatRead} alt="" className="size-3" />
+        <img
+          src={iconChatRead}
+          alt=""
+          className="h-[6px] w-[11px] shrink-0"
+        />
       ) : null}
     </span>
   );
 }
 
-function bubbleShell(isSelf: boolean) {
-  return isSelf
-    ? 'relative inline-flex max-w-full items-end gap-2 rounded-xl bg-[#7b61ff] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
-    : 'relative inline-flex max-w-full items-end gap-2 rounded-xl border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] leading-[1.3] text-arco-text-1';
+/** 气泡外壳；群聊对方带昵称时改为纵向（Figma 791:33286）
+ * 尾巴一侧圆角去掉，避免与尾巴 SVG 在圆角处形成尖刺断层（稿里文件/视频气泡同理）。
+ */
+function bubbleShell(isSelf: boolean, withSenderName = false) {
+  const base = isSelf
+    ? 'relative max-w-full rounded-xl rounded-br-none bg-[#7b61ff] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
+    : 'relative max-w-full rounded-xl rounded-bl-none border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] leading-[1.3] text-black';
+  if (withSenderName) {
+    return `${base} inline-flex flex-col items-start gap-1`;
+  }
+  return `${base} inline-flex items-end gap-2`;
 }
 
+/**
+ * 气泡尾巴（Figma 791:32260 / 791:32267）
+ * 资源尖角在顶部，埋进气泡圆角；底部柔和弯角外露。
+ * 对方仅用水平翻转（-scale-x-100）。勿用 rotate(180)/scaleY 组合，实测会露出尖刺。
+ */
 function BubbleTail({ isSelf }: { isSelf: boolean }) {
+  if (isSelf) {
+    return (
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 right-[-6px] block h-[15px] w-3 overflow-visible"
+      >
+        <span className="absolute inset-[10.78%_5.83%_0_1.09%]">
+          <img
+            src={iconChatBubbleTailSelf}
+            alt=""
+            className="block size-full max-w-none"
+          />
+        </span>
+      </span>
+    );
+  }
   return (
-    <img
-      src={isSelf ? iconChatBubbleTailSelf : iconChatBubbleTailPeer}
-      alt=""
-      className={`pointer-events-none absolute bottom-0 h-[15px] w-3 ${
-        isSelf ? '-right-1.5' : '-left-1.5'
-      }`}
-    />
+    <span
+      aria-hidden
+      className="pointer-events-none absolute bottom-[-1px] left-[-7px] flex h-[15px] w-3 items-center justify-center overflow-visible"
+    >
+      <span className="-scale-x-100 flex-none">
+        <span className="relative block h-[15px] w-3">
+          <span className="absolute inset-[0_0_0_-8.33%]">
+            <img
+              src={iconChatBubbleTailPeer}
+              alt=""
+              className="block size-full max-w-none"
+            />
+          </span>
+        </span>
+      </span>
+    </span>
   );
 }
 
@@ -970,10 +1009,19 @@ function ChatPane({
       pendingScrollIndex.current != null
         ? pendingScrollIndex.current
         : messages.length - 1;
+    const locateEnd = pendingScrollIndex.current == null;
     pendingScrollIndex.current = null;
+    const scrollOpts = locateEnd ? { block: 'end' as const } : undefined;
+    // 可变高虚拟列表：首屏测高后 Filler 总高会收敛，需二次贴底消除底部空白
+    const scrollToTarget = () => {
+      listRef.current?.scrollIntoView(target, scrollOpts);
+    };
     requestAnimationFrame(() => {
-      listRef.current?.scrollIntoView(target);
+      scrollToTarget();
+      requestAnimationFrame(scrollToTarget);
     });
+    const t = window.setTimeout(scrollToTarget, 80);
+    return () => window.clearTimeout(t);
   }, [historyOpen, loading, messages.length, listHeight, peer.id]);
 
   if (historyOpen) {
@@ -1033,29 +1081,15 @@ function ChatPane({
             </div>
           ) : null}
         </div>
-        {!isGroup ? (
-          <div className="flex shrink-0 items-center gap-4 text-[20px] text-arco-text-2">
-            <IconPhone />
-            <IconVideoCamera />
-            <button
-              type="button"
-              aria-label="查看聊天记录"
-              className="inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[20px] text-arco-text-2"
-              onClick={() => setHistoryOpen(true)}
-            >
-              <IconSearch />
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            aria-label="查看聊天记录"
-            className="inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[18px] text-arco-text-2"
-            onClick={() => setHistoryOpen(true)}
-          >
-            <IconSearch />
-          </button>
-        )}
+        {/* 单聊顶栏右侧仅搜索（Figma 791:32242 phone/video opacity:0） */}
+        <button
+          type="button"
+          aria-label="查看聊天记录"
+          className="inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[20px] text-arco-text-2"
+          onClick={() => setHistoryOpen(true)}
+        >
+          <IconSearch />
+        </button>
       </header>
 
       <Alert
@@ -1065,7 +1099,7 @@ function ChatPane({
         content="只读模式：您正在以管理员权限查看用户通讯记录。系统仅保留最近 180 天的消息内容。所有查阅操作均已记录在审计日志中，请遵守隐私合规规范。"
       />
 
-      <div ref={listWrapRef} className="min-h-0 flex-1 py-2">
+      <div ref={listWrapRef} className="min-h-0 flex-1 overflow-hidden">
         {loading ? (
           <div className="flex h-40 items-center justify-center">
             <Spin />
@@ -1079,14 +1113,17 @@ function ChatPane({
             listRef={listRef}
             virtualListProps={{
               height: listHeight,
-              // 气泡高度不一（文字/图/文件），关闭定高，交给 Arco 测量
+              // 可变高：不写死 itemHeight。Arco Filler 总高 = itemHeight×count，
+              // 偏大（如 72）会在滚到底时留下大块空白；省略后由首屏实测取平均。
               isStaticItemHeight: false,
-              itemHeight: 72,
-              // 少于 50 条走普通渲染，避免小列表虚拟化开销
-              threshold: 50
+              threshold: 50,
+              scrollOptions: { block: 'end' }
             }}
             render={(item: ChatMsg) => (
-              <MessageRow key={item.id} msg={item} />
+              // 外层原生节点承接 VirtualList 的 ref 测高（FC 无法挂 ref）
+              <div key={item.id} className="use-chat-msg-row">
+                <MessageRow msg={item} isGroup={isGroup} />
+              </div>
             )}
           />
         ) : null}
@@ -1095,14 +1132,20 @@ function ChatPane({
   );
 }
 
-function MessageRow({ msg }: { msg: ChatMsg }) {
+function MessageRow({
+  msg,
+  isGroup
+}: {
+  msg: ChatMsg;
+  isGroup: boolean;
+}) {
   if (msg.msgType === 'date') {
     const label = msg.dateLabel || msg.content || '';
     const relative = /昨天|今天|星期|更早/.test(label);
     return (
       <div className="flex justify-center px-4 py-1">
         {relative ? (
-          <span className="px-1 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+          <span className="rounded-xl px-1 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
             {label}
           </span>
         ) : (
@@ -1123,36 +1166,59 @@ function MessageRow({ msg }: { msg: ChatMsg }) {
   }
 
   const isSelf = msg.side === 'self';
+  /** 群聊对方：行内头像；昵称在气泡内（Figma 791:33286）。单聊不展示。 */
+  const showPeerAvatar = isGroup && !isSelf;
+  const senderName = showPeerAvatar ? msg.senderName : undefined;
 
   return (
     <div
-      className={`flex items-end gap-1 px-4 py-1 ${
-        isSelf ? 'justify-end' : 'justify-start'
+      className={`flex items-end px-4 py-1 ${
+        isSelf
+          ? 'justify-end pl-[120px]'
+          : showPeerAvatar
+            ? 'justify-start gap-1'
+            : 'justify-start pr-[120px]'
       }`}
     >
-      {!isSelf && msg.senderName ? (
-        <Avatar size={24} className="mb-0.5 shrink-0">
-          {msg.senderName.slice(0, 1)}
+      {showPeerAvatar ? (
+        <Avatar size={24} className="shrink-0 overflow-hidden">
+          {msg.senderAvatar ? (
+            <img
+              src={msg.senderAvatar}
+              alt=""
+              className="size-full object-cover"
+            />
+          ) : (
+            (msg.senderName || '?').slice(0, 1)
+          )}
         </Avatar>
       ) : null}
-      <div
-        className={`flex min-w-0 max-w-[min(100%,520px)] flex-col gap-1 ${
-          isSelf ? 'items-end' : 'items-start'
-        }`}
-      >
-        {!isSelf && msg.senderName ? (
-          <span className="text-[10px] leading-none text-[rgba(0,0,0,0.6)]">
-            {msg.senderName}
-          </span>
-        ) : null}
-        <Bubble msg={msg} isSelf={isSelf} />
-      </div>
+      <Bubble msg={msg} isSelf={isSelf} senderName={senderName} />
     </div>
   );
 }
 
-function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
-  const shell = bubbleShell(isSelf);
+function BubbleSenderName({ name }: { name?: string }) {
+  if (!name) return null;
+  return (
+    <p className="m-0 text-[10px] leading-none text-[rgba(0,0,0,0.6)]">
+      {name}
+    </p>
+  );
+}
+
+function Bubble({
+  msg,
+  isSelf,
+  senderName
+}: {
+  msg: ChatMsg;
+  isSelf: boolean;
+  /** 群聊对方昵称，渲染在气泡内顶部 */
+  senderName?: string;
+}) {
+  const withName = Boolean(senderName);
+  const shell = bubbleShell(isSelf, withName);
   const rejected = Boolean(msg.callStatus?.includes('拒绝'));
   const isVideo =
     msg.content?.includes('视频') || msg.callStatus?.includes('视频');
@@ -1185,15 +1251,18 @@ function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
   if (msg.msgType === 'voice') {
     return (
       <div className={shell}>
-        <span className="inline-flex items-center gap-2">
-          <img
-            src={isSelf ? iconChatVoiceSelf : iconChatVoicePeer}
-            alt=""
-            className="h-4 w-auto"
-          />
-          <span>{msg.duration || msg.content || "1\""}</span>
-        </span>
-        <BubbleMeta time={msg.time} isSelf={isSelf} />
+        <BubbleSenderName name={senderName} />
+        <div className="inline-flex items-end gap-2">
+          <span className="inline-flex items-center gap-2">
+            <img
+              src={isSelf ? iconChatVoiceSelf : iconChatVoicePeer}
+              alt=""
+              className="h-4 w-auto"
+            />
+            <span>{msg.duration || msg.content || "1\""}</span>
+          </span>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </div>
         <BubbleTail isSelf={isSelf} />
       </div>
     );
@@ -1201,7 +1270,10 @@ function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
 
   if (msg.msgType === 'file') {
     return (
-      <div className={`${shell} min-w-[100px] flex-col items-stretch gap-1`}>
+      <div
+        className={`${bubbleShell(isSelf, true)} min-w-[100px] items-stretch`}
+      >
+        <BubbleSenderName name={senderName} />
         <div className="flex items-center gap-2">
           <IconFile className="text-[20px]" />
           <div className="min-w-0 flex-1">
@@ -1243,11 +1315,35 @@ function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
     }
     return (
       <div className={shell}>
-        <span className="inline-flex items-center gap-2">
-          <span>{label}</span>
-          <img src={iconSrc} alt="" className="size-4" />
+        <BubbleSenderName name={senderName} />
+        <div className="inline-flex items-end gap-2">
+          <span className="inline-flex items-center gap-2">
+            <span>{label}</span>
+            <img src={iconSrc} alt="" className="size-4" />
+          </span>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </div>
+        <BubbleTail isSelf={isSelf} />
+      </div>
+    );
+  }
+
+  /* 短文：文案与时间并排；长文：时间贴右下角（Figma 791:32260 / 32261） */
+  const longText = (msg.content || '').length > 40;
+  if (longText) {
+    return (
+      <div
+        className={`${bubbleShell(isSelf, true)} ${
+          withName ? '' : '!gap-0'
+        } relative w-fit max-w-full`}
+      >
+        <BubbleSenderName name={senderName} />
+        <p className="m-0 whitespace-pre-wrap break-words pr-[52px]">
+          {msg.content}
+        </p>
+        <span className="absolute bottom-1.5 right-2">
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
         </span>
-        <BubbleMeta time={msg.time} isSelf={isSelf} />
         <BubbleTail isSelf={isSelf} />
       </div>
     );
@@ -1255,10 +1351,22 @@ function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
 
   return (
     <div className={shell}>
-      <p className="m-0 min-w-0 whitespace-pre-wrap break-words">
-        {msg.content}
-      </p>
-      <BubbleMeta time={msg.time} isSelf={isSelf} />
+      <BubbleSenderName name={senderName} />
+      {withName ? (
+        <div className="inline-flex max-w-full items-end gap-2">
+          <p className="m-0 min-w-0 whitespace-pre-wrap break-words">
+            {msg.content}
+          </p>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </div>
+      ) : (
+        <>
+          <p className="m-0 min-w-0 whitespace-pre-wrap break-words">
+            {msg.content}
+          </p>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </>
+      )}
       <BubbleTail isSelf={isSelf} />
     </div>
   );

@@ -47,14 +47,52 @@
 
   .use-chat-history-search.arco-input-inner-wrapper {
     height: 40px;
-    background: var(--color-fill-2, #f0f0f0);
+    background: #f0f0f0;
     border: none;
     border-radius: 6px;
     padding: 0 12px;
+    box-shadow: none;
+
+    &:hover,
+    &.arco-input-inner-wrapper-focus {
+      background: #f0f0f0;
+      border: none;
+      box-shadow: none;
+    }
+
+    .arco-input-group-prefix {
+      padding-right: 4px;
+      color: rgba(0, 0, 0, 0.4);
+    }
 
     .arco-input {
       font-size: 16px;
       line-height: 24px;
+      color: rgba(0, 0, 0, 0.9);
+
+      &::placeholder {
+        color: rgba(0, 0, 0, 0.4);
+      }
+    }
+  }
+
+  .use-chat-history-search-btn.arco-btn {
+    height: 40px;
+    background: #7b61ff;
+    border: none;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: #6a52e6;
+      border: none;
+      color: #fff;
     }
   }
 
@@ -126,8 +164,29 @@
   }
 
   .use-chat-virtual-list.arco-list {
+    height: 100%;
     border: none;
     background: transparent;
+
+    /* 消息不足一屏时贴底（对齐 Figma 聊天区留白在上方） */
+    &:not(.arco-list-virtual) {
+      display: flex;
+      flex-direction: column;
+
+      > .arco-list-content-wrapper,
+      > .arco-spin {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .arco-list-content {
+        margin-top: auto;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+    }
 
     .arco-list-content,
     .arco-list-content-wrapper {
@@ -140,6 +199,8 @@
       padding: 0;
       border: none;
       background: transparent;
+      /* 气泡尾巴 / 群聊头像不被裁切 */
+      overflow: visible;
     }
 
     .arco-list-scroll-loading {

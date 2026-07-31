@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Card,
@@ -9,10 +9,16 @@ import {
   type TableColumnProps,
   type TableProps
 } from '@arco-design/web-react';
-import { IconRefresh, IconSettings } from '@arco-design/web-react/icon';
+import {
+  IconExpand,
+  IconRefresh,
+  IconShrink
+} from '@arco-design/web-react/icon';
+import { observer } from 'mobx-react-lite';
 import cs from 'classnames';
 import './biz-list.less';
 
+import { pageTabsStore } from '@entities/page-tabs';
 import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';
 import TableBatchBar from './TableBatchBar';
@@ -30,13 +36,13 @@ export type BizListPageProps<T = Record<string, unknown>> = {
   summary?: SummaryItem[];
   /** 表格卡片标题，如「角色列表」 */
   title?: React.ReactNode;
-  /** 右侧操作按钮区（不含刷新/列设置）；浅色批量条出现时会隐藏 */
+  /** 右侧操作按钮区（不含刷新/全屏）；浅色批量条出现时会隐藏 */
   toolbar?: React.ReactNode;
   /** 始终展示的右侧操作（如「添加白名单」），不受批量选中隐藏 */
   toolbarAlways?: React.ReactNode;
   onRefresh?: () => void;
-  showColumnSetting?: boolean;
-  onColumnSetting?: () => void;
+  /** 是否展示全屏按钮，默认有标题或刷新时展示 */
+  showFullscreen?: boolean;
   /** 透传 SearchFilterBar */
   filterExtraActions?: React.ReactNode;
   filterResetText?: string;
@@ -55,8 +61,8 @@ export type BizListPageProps<T = Record<string, unknown>> = {
   className?: string;
 };
 
-/** 标准业务列表：筛选 → 汇总 → 表格（含标题栏 / 批量条） */
-export default function BizListPage<T extends Record<string, unknown>>({
+/** 标准业务列表：筛选 → 汇总 → 表格（含标题栏 / 批量条 / 全屏） */
+function BizListPage<T extends Record<string, unknown>>({
   form,
   filter,
   onSearch,
@@ -66,8 +72,7 @@ export default function BizListPage<T extends Record<string, unknown>>({
   toolbar,
   toolbarAlways,
   onRefresh,
-  showColumnSetting,
-  onColumnSetting,
+  showFullscreen,
   filterExtraActions,
   filterResetText,
   filterCollapsible,
@@ -77,7 +82,18 @@ export default function BizListPage<T extends Record<string, unknown>>({
   className
 }: BizListPageProps<T>) {
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
-  const enableColumnSetting = showColumnSetting ?? Boolean(title);
+  const contentFullscreen = pageTabsStore.contentFullscreen;
+  const enableFullscreen =
+    showFullscreen ?? (title != null && title !== '' || Boolean(onRefresh));
+
+  useEffect(() => {
+    if (!contentFullscreen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') pageTabsStore.setContentFullscreen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [contentFullscreen]);
 
   const hasRowSelection = Boolean(tableProps.rowSelection);
   const selectedRowKeys = (tableProps.rowSelection?.selectedRowKeys ||
@@ -132,8 +148,15 @@ export default function BizListPage<T extends Record<string, unknown>>({
   const batchInToolbar = batchTheme === 'light';
 
   return (
-    <div className={cs('flex flex-col gap-4', className)}>
-      {filter && (
+    <div
+      className={cs(
+        'flex flex-col gap-4',
+        contentFullscreen && 'use-biz-list-fullscreen min-h-0 flex-1',
+        className
+      )}
+    >
+      {/* 全屏：隐藏筛选 / 汇总，仅保留表格 */}
+      {!contentFullscreen && filter ? (
         <SearchFilterBar
           form={form}
           onSearch={onSearch}
@@ -145,24 +168,27 @@ export default function BizListPage<T extends Record<string, unknown>>({
         >
           {filter}
         </SearchFilterBar>
-      )}
-      {summary && summary.length > 0 && <DataSummary items={summary} />}
+      ) : null}
+      {!contentFullscreen && summary && summary.length > 0 ? (
+        <DataSummary items={summary} />
+      ) : null}
       <Card
-        className="use-biz-table-card relative overflow-visible !p-0"
+        className={cs(
+          'use-biz-table-card relative overflow-visible !p-0',
+          contentFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
+        )}
         bordered={false}
       >
         {(title ||
           toolbar ||
           toolbarAlways ||
           onRefresh ||
-          enableColumnSetting ||
+          enableFullscreen ||
           hasRowSelection) && (
           <div className="use-biz-table-toolbar relative max-md:h-auto max-md:flex-wrap">
             <div className="flex min-w-0 items-center gap-3">
               {title != null && title !== '' && (
-                <div className="use-biz-table-toolbar-title">
-                  {title}
-                </div>
+                <div className="use-biz-table-toolbar-title">{title}</div>
               )}
               {/* 无批量条时，标题旁兜底展示已选数量 */}
               {hasRowSelection && !batchActions && selectedCount > 0 && (
@@ -176,7 +202,7 @@ export default function BizListPage<T extends Record<string, unknown>>({
               )}
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              {(onRefresh || enableColumnSetting) && (
+              {(onRefresh || enableFullscreen) && (
                 <div className="flex items-center gap-2">
                   {onRefresh && (
                     <Tooltip content="刷新">
@@ -188,13 +214,20 @@ export default function BizListPage<T extends Record<string, unknown>>({
                       />
                     </Tooltip>
                   )}
-                  {enableColumnSetting && (
-                    <Tooltip content="列设置">
+                  {enableFullscreen && (
+                    <Tooltip
+                      content={contentFullscreen ? '退出全屏' : '全屏'}
+                    >
                       <Button
                         type="secondary"
                         className="use-biz-table-icon-btn"
-                        icon={<IconSettings />}
-                        onClick={onColumnSetting}
+                        icon={
+                          contentFullscreen ? <IconShrink /> : <IconExpand />
+                        }
+                        aria-pressed={contentFullscreen}
+                        onClick={() =>
+                          pageTabsStore.toggleContentFullscreen()
+                        }
                       />
                     </Tooltip>
                   )}
@@ -224,10 +257,15 @@ export default function BizListPage<T extends Record<string, unknown>>({
                   extra={batchActions.extra}
                 />
               )}
-              {toolbar && !(batchInToolbar && selectedCount > 0) && (
-                <Space size={8}>{toolbar}</Space>
+              {/* 全屏时隐藏业务操作按钮，只留刷新/退出全屏 */}
+              {!contentFullscreen &&
+                toolbar &&
+                !(batchInToolbar && selectedCount > 0) && (
+                  <Space size={8}>{toolbar}</Space>
+                )}
+              {!contentFullscreen && toolbarAlways && (
+                <Space size={8}>{toolbarAlways}</Space>
               )}
-              {toolbarAlways && <Space size={8}>{toolbarAlways}</Space>}
             </div>
             {batchActions && !batchInToolbar && (
               <TableBatchBar
@@ -256,7 +294,12 @@ export default function BizListPage<T extends Record<string, unknown>>({
             )}
           </div>
         )}
-        <div className="relative">
+        <div
+          className={cs(
+            'relative',
+            contentFullscreen && 'min-h-0 flex-1 overflow-auto'
+          )}
+        >
           <Table
             rowKey="id"
             border={false}
@@ -274,3 +317,5 @@ export default function BizListPage<T extends Record<string, unknown>>({
     </div>
   );
 }
+
+export default observer(BizListPage);

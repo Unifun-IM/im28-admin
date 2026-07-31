@@ -4,13 +4,8 @@ import {
   Button,
   Message,
   Modal,
-  Switch,
-  Tooltip
+  Switch
 } from '@arco-design/web-react';
-import {
-  IconExpand,
-  IconShrink
-} from '@arco-design/web-react/icon';
 import { observer } from 'mobx-react-lite';
 import {
   ActionLinks,
@@ -19,7 +14,6 @@ import {
   FilterInput,
   FilterSelect
 } from '@widgets/biz-list';
-import { pageTabsStore } from '@entities/page-tabs';
 import {
   getAccounts,
   updateAccountStatus
@@ -72,7 +66,6 @@ function AccountsPage() {
   const [resetGaTarget, setResetGaTarget] = useState<ResetGaTarget | null>(
     null
   );
-  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -119,7 +112,6 @@ function AccountsPage() {
         form={form}
         title={`后台账号管理列表(${total})`}
         filterResetText="清除全部"
-        showColumnSetting={false}
         filter={
           <>
             <FilterField>
@@ -160,18 +152,6 @@ function AccountsPage() {
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
           <>
-            <Tooltip
-              content={
-                contentFullscreen ? '退出全屏' : '全屏（隐藏导航）'
-              }
-            >
-              <Button
-                type="secondary"
-                className="use-biz-table-icon-btn"
-                icon={contentFullscreen ? <IconShrink /> : <IconExpand />}
-                onClick={() => pageTabsStore.toggleContentFullscreen()}
-              />
-            </Tooltip>
             <Button
               className="use-biz-table-secondary-btn"
               onClick={() => {
@@ -233,10 +213,11 @@ function AccountsPage() {
             },
             {
               title: '操作',
-              width: 220,
+              width: 160,
               fixed: 'right' as const,
               render: (_: unknown, row: Record<string, unknown>) => (
                 <ActionLinks
+                  variant="text"
                   items={[
                     {
                       key: 'resetPwd',
@@ -257,11 +238,6 @@ function AccountsPage() {
                           account: String(row.account || ''),
                           name: row.name ? String(row.name) : undefined
                         })
-                    },
-                    {
-                      key: 'detail',
-                      label: '详情',
-                      onClick: () => Message.info('账号详情（后续接入）')
                     }
                   ]}
                 />

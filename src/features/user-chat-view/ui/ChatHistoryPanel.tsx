@@ -11,11 +11,11 @@ import {
 import {
   IconClose,
   IconFile,
-  IconPlayArrowFill,
-  IconSearch
+  IconPlayArrowFill
 } from '@arco-design/web-react/icon';
 import dayjs, { Dayjs } from 'dayjs';
 import { searchChatHistory } from '@shared/api/biz';
+import iconChatHistorySearch from '../assets/icon-chat-history-search.svg';
 import useElementHeight from './useElementHeight';
 
 export type ChatHistoryTab = 'all' | 'media' | 'file' | 'date';
@@ -143,58 +143,69 @@ export default function ChatHistoryPanel({
       (tab === 'date' && dateFiltered.length === 0 && searched));
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--color-bg-2,#fff)]">
-      <header className="relative flex h-14 shrink-0 items-center justify-center px-4">
+    <div className="flex h-full min-h-0 flex-col gap-2.5 bg-white px-4">
+      <header className="relative flex h-14 shrink-0 items-center justify-center">
         <button
           type="button"
           aria-label="关闭"
-          className="absolute left-4 inline-flex size-5 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-1"
+          className="absolute left-0 inline-flex size-5 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-1"
           onClick={onClose}
         >
           <IconClose className="text-[16px]" />
         </button>
-        <h3 className="m-0 text-[18px] font-medium leading-[1.5] text-arco-text-1">
+        <h3 className="m-0 text-[18px] font-medium leading-[1.5] text-black">
           查看聊天记录
         </h3>
       </header>
 
-      <div className="flex shrink-0 items-center gap-2 px-4 pb-2">
-        <Input
-          allowClear
-          value={keyword}
-          onChange={setKeyword}
-          placeholder="搜索"
-          prefix={<IconSearch className="text-arco-text-3" />}
-          className="use-chat-history-search min-w-0 flex-1"
-          onPressEnter={() => runSearch(keyword, tab === 'date' ? 'all' : tab)}
-        />
-        <Button
-          type="primary"
-          className="!h-10 !rounded-md !px-3 !text-[16px]"
-          onClick={() => {
-            if (tab === 'date') setTab('all');
-            runSearch(keyword, tab === 'date' ? 'all' : tab);
-          }}
+      {/* Figma 791:35482：输入 #f0f0f0 40×圆角6 + 品牌色搜索按钮 */}
+      <div className="flex shrink-0 flex-col">
+        <div className="flex items-center gap-2 pb-2">
+          <Input
+            allowClear
+            value={keyword}
+            onChange={setKeyword}
+            placeholder="搜索"
+            prefix={
+              <img
+                src={iconChatHistorySearch}
+                alt=""
+                className="size-6 shrink-0"
+              />
+            }
+            className="use-chat-history-search min-w-0 flex-1"
+            onPressEnter={() =>
+              runSearch(keyword, tab === 'date' ? 'all' : tab)
+            }
+          />
+          <Button
+            type="primary"
+            className="use-chat-history-search-btn !h-10 !min-w-0 !rounded-md !border-0 !bg-[#7b61ff] !px-3 !text-[16px] !font-normal !leading-[1.5] !text-white hover:!bg-[#6a52e6]"
+            onClick={() => {
+              if (tab === 'date') setTab('all');
+              runSearch(keyword, tab === 'date' ? 'all' : tab);
+            }}
+          >
+            搜索
+          </Button>
+        </div>
+
+        <Tabs
+          activeTab={tab}
+          onChange={(k) => setTab(k as ChatHistoryTab)}
+          className={`use-chat-history-tabs shrink-0 ${
+            tab === 'all' && searched ? 'is-all-active' : ''
+          }`}
         >
-          搜索
-        </Button>
+          <Tabs.TabPane key="all" title="全部" />
+          <Tabs.TabPane key="media" title="图片与视频" />
+          <Tabs.TabPane key="file" title="文件" />
+          <Tabs.TabPane key="date" title="日期" />
+        </Tabs>
       </div>
 
-      <Tabs
-        activeTab={tab}
-        onChange={(k) => setTab(k as ChatHistoryTab)}
-        className={`use-chat-history-tabs shrink-0 px-4 ${
-          tab === 'all' && searched ? 'is-all-active' : ''
-        }`}
-      >
-        <Tabs.TabPane key="all" title="全部" />
-        <Tabs.TabPane key="media" title="图片与视频" />
-        <Tabs.TabPane key="file" title="文件" />
-        <Tabs.TabPane key="date" title="日期" />
-      </Tabs>
-
       {tab === 'media' ? (
-        <div className="flex shrink-0 gap-2 px-4 py-2">
+        <div className="flex shrink-0 gap-2 py-2">
           {(
             [
               ['all', '全部'],
@@ -218,7 +229,7 @@ export default function ChatHistoryPanel({
         </div>
       ) : null}
 
-      <div ref={listWrapRef} className="relative min-h-0 flex-1 px-4 pb-4">
+      <div ref={listWrapRef} className="relative min-h-0 flex-1 pb-4">
         {loading ? (
           <div className="flex h-40 items-center justify-center">
             <Spin />

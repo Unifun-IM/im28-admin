@@ -92,6 +92,15 @@ export const PageLayout = observer(function PageLayout({
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
   const [headerScrolled, setHeaderScrolled] = useState(false);
 
+  useEffect(() => {
+    if (!contentFullscreen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') pageTabsStore.setContentFullscreen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [contentFullscreen]);
+
   const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
   const menuMap = useRef<Map<string, { menuItem?: boolean; subMenu?: boolean }>>(
     new Map()
@@ -107,11 +116,11 @@ export const PageLayout = observer(function PageLayout({
   const menuWidth = collapsed ? COLLAPSED_WIDTH : expandedWidth;
   /** 侧栏占位：内容全屏时为 0，带动画收起 */
   const siderOccupied = showMenu && !contentFullscreen ? menuWidth : 0;
-  const headerHeight = showNavbar
-    ? contentFullscreen
-      ? pageTabsHeight
-      : navbarHeight + headerGap + pageTabsHeight
-    : 0;
+  /** 全屏时顶栏（Navbar + PageTabs）全部隐藏 */
+  const headerHeight =
+    showNavbar && !contentFullscreen
+      ? navbarHeight + headerGap + pageTabsHeight
+      : 0;
   const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
 
   /** 按 pathname 同步取标题，避免 breadcrumb 滞后导致 tab 标题闪一下 */
@@ -328,7 +337,9 @@ export const PageLayout = observer(function PageLayout({
             onOpenUserCenter={onOpenUserCenter}
           />
         </div>
-        {showNavbar ? <PageTabs title={pageTabTitle} /> : null}
+        {showNavbar && !contentFullscreen ? (
+          <PageTabs title={pageTabTitle} />
+        ) : null}
       </div>
       <Layout>
           {showMenu && (
@@ -370,7 +381,9 @@ export const PageLayout = observer(function PageLayout({
             </Sider>
           )}
           <Layout
-            className={styles['layout-content']}
+            className={cs(styles['layout-content'], {
+              [styles['layout-content-fullscreen']]: contentFullscreen
+            })}
             style={paddingStyle}
             data-layout-content
           >
@@ -392,7 +405,7 @@ export const PageLayout = observer(function PageLayout({
                 </Routes>
               </Content>
             </div>
-            {showFooter && <Footer />}
+            {showFooter && !contentFullscreen ? <Footer /> : null}
           </Layout>
         </Layout>
     </Layout>

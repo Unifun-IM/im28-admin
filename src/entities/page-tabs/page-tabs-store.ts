@@ -41,7 +41,7 @@ function isCloseable(tab: PageTabItem) {
 
 export class PageTabsStore {
   tabs: PageTabItem[] = loadTabs();
-  /** 内容区全屏：隐藏侧栏与顶部 Navbar，保留 PageTabs */
+  /** 内容区全屏：隐藏侧栏、Navbar、PageTabs，仅保留内容区（如表格） */
   contentFullscreen = false;
   /** 固定标签上限，默认 3 */
   maxPinned = MAX_PINNED_TABS;

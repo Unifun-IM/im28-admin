@@ -541,6 +541,16 @@
     padding: 0;
   }
 
+  /* 全屏：表格卡片撑满主区 */
+  &.use-biz-table-card-fullscreen {
+    .arco-card-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+  }
+
   /* 标题工具栏 — Figma 602:34722 / 602:35686 */
   .use-biz-table-toolbar {
     box-sizing: border-box;
@@ -551,6 +561,11 @@
     height: 56px;
     padding: 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    /* 批量操作 / 新建等与筛选「查询」同为 8px 圆角 */
+    .arco-btn {
+      border-radius: 8px;
+    }
   }
 
   .use-biz-table-toolbar-title {
@@ -675,7 +690,15 @@
   }
 
   .arco-table-th.arco-table-col-fixed-right {
-    text-align: right;
+    text-align: center;
+    overflow: visible;
+
+    .arco-table-th-item,
+    .arco-table-cell-with-sorter {
+      justify-content: center;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
   }
 
   .arco-table-td {
@@ -708,18 +731,9 @@
   .arco-table-td.arco-table-col-fixed-right {
     padding-left: 12px;
     padding-right: 12px;
+    text-align: center;
     /* 勿裁切 Arco 固定列左侧 ::after 阴影 */
     overflow: visible;
-  }
-
-  .arco-table-th.arco-table-col-fixed-right {
-    overflow: visible;
-
-    .arco-table-th-item,
-    .arco-table-cell-with-sorter {
-      padding-left: 12px;
-      padding-right: 12px;
-    }
   }
 
   .arco-table-cell {
@@ -781,11 +795,29 @@
     width: 40px;
   }
 
-  .arco-table-th.arco-table-checkbox,
-  .arco-table-td.arco-table-checkbox,
+  /* 选择框列表头 / 单元格水平居中（与操作列一致） */
+  .arco-table-th.arco-table-checkbox {
+    text-align: center;
+
+    .arco-table-th-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .arco-table-td.arco-table-checkbox {
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .arco-table-checkbox .arco-table-cell-wrap-value {
-    padding-left: 13px;
-    padding-right: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   /* 右侧固定列背景跟随 Stripe / hover / 选中；投影由 Arco scroll-position 控制 */

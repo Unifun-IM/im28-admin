@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Button, Tooltip } from '@arco-design/web-react';
-import { IconExpand, IconShrink } from '@arco-design/web-react/icon';
+import { Form } from '@arco-design/web-react';
 import { observer } from 'mobx-react-lite';
 import {
   BizListPage,
@@ -9,7 +8,6 @@ import {
   FilterInput,
   FilterSelect
 } from '@widgets/biz-list';
-import { pageTabsStore } from '@entities/page-tabs';
 import { getOpLogs } from '@shared/api/biz';
 
 const FormItem = Form.Item;
@@ -45,7 +43,6 @@ function OpLogsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const contentFullscreen = pageTabsStore.contentFullscreen;
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -73,7 +70,6 @@ function OpLogsPage() {
       form={form}
       title="操作日志"
       filterResetText="清除全部"
-      showColumnSetting={false}
       filter={
         <>
           <FilterField>
@@ -125,18 +121,6 @@ function OpLogsPage() {
         fetchData(1, pageSize);
       }}
       onRefresh={() => fetchData(page, pageSize)}
-      toolbar={
-        <Tooltip
-          content={contentFullscreen ? '退出全屏' : '全屏（隐藏导航）'}
-        >
-          <Button
-            type="secondary"
-            className="use-biz-table-icon-btn"
-            icon={contentFullscreen ? <IconShrink /> : <IconExpand />}
-            onClick={() => pageTabsStore.toggleContentFullscreen()}
-          />
-        </Tooltip>
-      }
       tableProps={{
         loading,
         data,

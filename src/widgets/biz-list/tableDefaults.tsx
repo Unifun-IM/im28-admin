@@ -22,7 +22,7 @@ export function isActionColumn<T>(col: TableColumnProps<T>): boolean {
 /**
  * 业务表列规范化：
  * - 文本列默认单行省略 + 溢出时 Tooltip
- * - 操作列默认 fixed: right，关闭省略；投影由 Arco Table fixed + 横向滚动标准机制提供
+ * - 操作列默认 fixed: right、align: center，关闭省略；投影由 Arco Table fixed + 横向滚动标准机制提供
  */
 export function normalizeBizColumns<T>(
   columns: TableColumnProps<T>[] = []
@@ -34,7 +34,7 @@ export function normalizeBizColumns<T>(
         fixed: col.fixed ?? 'right',
         ellipsis: false,
         width: col.width ?? 108,
-        align: col.align ?? 'right'
+        align: col.align ?? 'center'
       };
     }
 
