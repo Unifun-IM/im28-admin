@@ -92,10 +92,10 @@ export default function SlideCaptcha({
     <div
       ref={trackRef}
       className={cs(
-        'use-login-slide relative box-border flex h-[32px] w-full select-none items-center overflow-hidden rounded-[8px] border border-solid',
+        'use-login-slide relative box-border flex h-[32px] w-full select-none items-center overflow-hidden rounded-[8px] border border-solid border-[rgba(0,0,0,0.08)]',
         verified
-          ? 'border-[rgba(0,0,0,0.08)] bg-[rgb(var(--success-1))]'
-          : 'border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-2,#f2f3f5)]',
+          ? 'is-verified bg-[rgb(var(--success-1,#f7fff9))]'
+          : 'bg-[var(--color-fill-2,#f2f3f5)]',
         className
       )}
       onPointerMove={onPointerMove}
@@ -115,7 +115,7 @@ export default function SlideCaptcha({
         tabIndex={0}
         className={cs(
           'relative z-[1] flex h-[32px] cursor-grab items-center justify-center rounded-[8px] px-[16px] active:cursor-grabbing',
-          verified ? 'ml-auto bg-[rgb(var(--success-6))]' : 'bg-[rgb(var(--primary-6))]'
+          verified ? 'ml-auto bg-[rgb(var(--success-6,#4db582))]' : 'bg-[rgb(var(--primary-6))]'
         )}
         style={verified ? undefined : { transform: `translateX(${offset}px)` }}
         onPointerDown={onPointerDown}

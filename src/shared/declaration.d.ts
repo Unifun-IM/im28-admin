@@ -32,6 +32,4 @@ declare module '*.png' {
   export default value;
 }
 
-declare module 'mockjs';
-
 declare module '@arco-design/color';

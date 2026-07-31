@@ -10,8 +10,9 @@ IM 管理后台。基于 **Arco Design Pro（Vite 精简版）** 能力，按 **
 - Arco Design + `@arco-themes/react-arco-pro`
 - React Router v6
 - MobX / mobx-react-lite
-- `@umijs/openapi` 生成 Admin 网关接口至 `src/shared/api/admin`；未进文档的业务仍用手写 `@shared/api/biz` + Mock
-- Less Modules、MockJS、i18n（内置 zh-CN / en-US）
+- `@umijs/openapi` 生成 Admin 网关接口至 `src/shared/api/admin`；业务页直接引用生成函数与 `AdminAPI` 类型（无字段映射）
+- 无 OpenAPI 覆盖的菜单页保留路由，统一展示「接口未就绪」
+- Less Modules、i18n（内置 zh-CN / en-US）
 
 ## 快速开始
 
@@ -24,7 +25,7 @@ npm run build
 npm test
 ```
 
-默认账号（Mock）：`admin` / `admin`。登录后默认进入 **用户查询** `/user/query`。
+联调账号以网关环境为准。登录后默认进入 **用户查询** `/user/query`。
 
 ## 业务菜单（Figma 业务1.0）
 
@@ -48,15 +49,15 @@ src/
   widgets/       # 布局与复合 UI：admin-shell、navbar、biz-list（筛选/汇总/列表）…
   features/      # 用户交互特性：user-blacklist-action / user-whitelist-action / user-detail / group-detail …
   entities/      # 业务实体；global-state 为 MobX 全局状态
-  shared/        # api、lib、locale、mock、config、assets
+  shared/        # api（含 admin 生成物）、lib、locale、config、assets
 ```
 
-## 业务 Mock 约定
+## 业务 API 约定
 
-- 全局注册：`shared/mock/biz.ts`（由 `shared/mock/index.ts` 引入）
-- 路径前缀：`/api/biz/...`
-- 页面调用：`import { getUserList } from '@shared/api/biz'`
-- 后期 OpenAPI 就绪后，用生成客户端替换 `shared/api/biz.ts` 即可，页面尽量不用改
+- 只引用 `@shared/api/admin/*` 生成函数与全局 `AdminAPI` 类型
+- 页面 Form `field` / Table `dataIndex` / state **不做字段映射**，列表用 `res.data?.list` / `res.data?.total`
+- **禁止手改** `src/shared/api/admin/**`；文档更新后执行 `npm run openapi`
+- 无文档模块：保留菜单，页面展示「接口未就绪」（`ApiNotReady`）
 
 通用列表积木：`widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage`）。
 
@@ -81,8 +82,7 @@ const res = await postV1AdminAuthLogin({ username: 'admin', password: '***' });
 | `npm run openapi` | 拉取远程 yaml→json + 生成 `src/shared/api/admin/*` |
 | `shared/api/request.ts` | axios 单例（Bearer / `X-Request-ID` / `X-Language`，勿删） |
 | `shared/api/admin/*` | **Admin OpenAPI 生成物**，不要手改 |
-| `shared/api/biz.ts` | 尚未进 OpenAPI 的业务手写 API（mock） |
-| `shared/api/user.ts` 等 | 旧演示接口，仍可给登录 mock 用 |
+| `shared/ui/api-not-ready` | 无 OpenAPI 页面空态「接口未就绪」 |
 
 联调时复制 `cp .env.example .env`，按需改 `VITE_API_BASE_URL`。
 

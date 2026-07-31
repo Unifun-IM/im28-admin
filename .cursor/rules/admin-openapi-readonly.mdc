@@ -11,7 +11,7 @@ alwaysApply: true
 
 1. **禁止**对该目录下任何文件做编辑、格式化「顺手改」、重命名、删减注释或改函数签名。
 2. 需要新接口 / 改契约：更新远端 OpenAPI 文档后执行 `npm run openapi` 重新生成。
-3. 业务适配（字段映射、默认参数、组合调用）写在 `features` / `pages` / 手写 `@shared/api/biz` 或新建非 `admin/` 封装层，**不要**改生成文件。
+3. 业务直接使用生成函数与 `AdminAPI` 字段（页面 Form/Table/state **不做字段映射**）；组合调用写在 `features` / `pages`，**不要**改生成文件。无 OpenAPI 的页用 `ApiNotReady`。
 4. 手写请求基础设施仅限：`src/shared/api/request.ts`（及测试）；勿把业务逻辑塞进 `admin/`。
 
 ## 反例 / 正例

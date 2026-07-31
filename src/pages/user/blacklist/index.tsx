@@ -1,49 +1,39 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Button, Message } from '@arco-design/web-react';
+import { Form, Button } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
-  DoubleLineCell,
-  FilterDateRange,
   FilterField,
   FilterKeywordInput,
-  FilterSelect
+  FilterSelect,
+  StatusBadge
 } from '@widgets/biz-list';
-import { getBlacklist } from '@shared/api/biz';
+import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
-import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
 
 const FormItem = Form.Item;
 
-const USER_KEYWORD_OPTIONS = [
-  { label: '用户ID', value: 'userId' },
-  { label: '昵称', value: 'nickname' },
-  { label: '手机号', value: 'phone' },
-  { label: '邮箱', value: 'email' },
-  { label: '账号', value: 'account' }
+const KEYWORD_TYPE_OPTIONS = [
+  { label: 'user_id', value: 'user_id' },
+  { label: 'nickname', value: 'nickname' },
+  { label: 'phone', value: 'phone' },
+  { label: 'email', value: 'email' },
+  { label: 'account', value: 'account' }
 ];
 
-const OPERATE_TYPE_OPTIONS = [
-  { label: '全部', value: '' },
-  { label: '正常', value: '正常' },
-  { label: '黑名单', value: '黑名单' },
-  { label: '注销', value: '注销' }
-];
-
-/**
- * 黑名单列表 — Figma 796:19067
- * 批量操作 — Figma 804:20186
- */
+/** 黑名单 — 用户列表 status=disabled */
 export default function Page() {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<AdminAPI.AdminListUserRequest>();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<AdminAPI.AdminUserWrap[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
+    []
+  );
   const [removeModal, setRemoveModal] = useState<{
     userIds: string[];
     variant: 'single' | 'batch';
@@ -55,9 +45,15 @@ export default function Page() {
       setLoading(true);
       try {
         const values = form.getFieldsValue();
-        const res = await getBlacklist({ page: p, pageSize: size, ...values });
-        setData((res.list || []) as Record<string, unknown>[]);
-        setTotal(res.total || 0);
+        const res = await postV1AdminUsersList({
+          page: p,
+          page_size: size,
+          status: 'disabled',
+          keyword: values.keyword || undefined,
+          keyword_type: values.keyword_type || undefined
+        });
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
       } finally {
         setLoading(false);
       }
@@ -71,45 +67,22 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const openRemove = (ids: string[], variant: 'single' | 'batch') => {
-    if (!ids.length) return;
-    setRemoveModal({ userIds: ids, variant });
-  };
-
   return (
     <>
       <BizListPage
         form={form}
-        title="用户列表"
-        filterCollapsible
-        filterDefaultCollapsed={false}
-        filterResetText="重置"
+        title="黑名单列表"
         filter={
-          <>
-            <FilterField>
-              <FormItem field="keyword" label="关键词搜索">
-                <FilterKeywordInput
-                  typeField="keywordType"
-                  typeOptions={USER_KEYWORD_OPTIONS}
-                  typeInitialValue="userId"
-                  typeWidth={96}
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="operateType" label="操作类型" initialValue="">
-                <FilterSelect
-                  placeholder="全部"
-                  options={OPERATE_TYPE_OPTIONS}
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="operateTime" label="操作时间">
-                <FilterDateRange />
-              </FormItem>
-            </FilterField>
-          </>
+          <FilterField>
+            <FormItem field="keyword" label="keyword">
+              <FilterKeywordInput
+                typeField="keyword_type"
+                typeOptions={KEYWORD_TYPE_OPTIONS}
+                typeInitialValue="user_id"
+                typeWidth={100}
+              />
+            </FormItem>
+          </FilterField>
         }
         onSearch={() => {
           setPage(1);
@@ -123,112 +96,48 @@ export default function Page() {
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
           <Button
-            className="!bg-[var(--color-fill-2,#f2f3f5)] !text-arco-text-2"
-            onClick={() => {
-              if (!selectedRowKeys.length) {
-                Message.info('请先勾选用户');
-                return;
-              }
-              openRemove(selectedRowKeys.map(String), 'batch');
-            }}
+            type="primary"
+            disabled={!selectedRowKeys.length}
+            onClick={() =>
+              setRemoveModal({
+                userIds: selectedRowKeys.map(String),
+                variant: 'batch'
+              })
+            }
           >
-            批量操作
+            批量解禁
           </Button>
         }
-        batchActions={{
-          theme: 'light',
-          extra: (
-            <button
-              type="button"
-              className="inline-flex h-8 items-center gap-2 border-0 border-l border-solid border-[rgba(0,0,0,0.08)] bg-transparent px-3 text-[14px] leading-[21px] text-[rgb(var(--success-6))] hover:bg-[rgba(0,0,0,0.04)]"
-              onClick={() => openRemove(selectedRowKeys.map(String), 'batch')}
-            >
-              <span className="relative inline-block size-[16px] shrink-0">
-                <img
-                  alt=""
-                  src={iconSuccess}
-                  className="absolute left-[1.33px] top-[1.33px] block size-[13.34px] max-w-none"
-                />
-              </span>
-              批量解禁
-            </button>
-          )
-        }}
         tableProps={{
           loading,
           data,
-          rowSelection: {
-            selectedRowKeys,
-            onChange: setSelectedRowKeys
-          },
+          rowKey: (row: AdminAPI.AdminUserWrap) =>
+            row.user?.user_id || String(Math.random()),
           columns: [
             {
-              title: '用户信息',
-              dataIndex: 'nickname',
-              width: 160,
-              ellipsis: false,
-              render: (_: unknown, row: Record<string, unknown>) => (
+              title: 'user',
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <AvatarNameCell
-                  name={row.nickname as string}
-                  sub={`ID：${row.userId}`}
-                  copyText={String(row.userId || '')}
-                  avatar={row.avatar as string | undefined}
-                  nameClassName="!text-[rgb(var(--link-6))]"
-                  onNameClick={() =>
-                    setDetailUserId(String(row.id || row.userId || ''))
-                  }
+                  name={row.user?.nickname}
+                  sub={`user_id：${row.user?.user_id || ''}`}
+                  copyText={row.user?.user_id || ''}
+                  avatar={row.user?.avatar_url}
                 />
               )
             },
             {
-              title: '联系方式',
-              dataIndex: 'phone',
-              width: 167,
-              ellipsis: false,
-              render: (_: unknown, row: Record<string, unknown>) => (
-                <DoubleLineCell
-                  primary={`手机：${(row.phone as string) || '--'}`}
-                  secondary={`邮箱：${(row.email as string) || '--'}`}
+              title: 'status',
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+                <StatusBadge
+                  status="error"
+                  text={row.user?.status || 'disabled'}
                 />
               )
-            },
-            {
-              title: '账号',
-              dataIndex: 'account',
-              width: 120,
-              render: (v: string) => v || '--'
-            },
-            {
-              title: '操作人',
-              dataIndex: 'operator',
-              width: 120
-            },
-            {
-              title: '操作时间',
-              dataIndex: 'operateTime',
-              width: 168
-            },
-            {
-              title: '操作类型',
-              dataIndex: 'operateType',
-              width: 120,
-              render: (v: string) => v || '--'
-            },
-            {
-              // 列表稿 796:19067 为「备注」；批量稿 804:20186 同列位为「原因」
-              title: '备注',
-              dataIndex: 'reason',
-              width: 160,
-              ellipsis: true,
-              render: (v: string, row: Record<string, unknown>) =>
-                v || (row.remark as string) || '--'
             },
             {
               title: '操作',
-              dataIndex: 'op',
-              width: 100,
-              fixed: 'right',
-              render: (_: unknown, row: Record<string, unknown>) => (
+              width: 120,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <ActionLinks
                   variant="text"
                   items={[
@@ -236,22 +145,26 @@ export default function Page() {
                       key: 'unban',
                       label: '解禁',
                       onClick: () =>
-                        openRemove(
-                          [String(row.id || row.userId || '')],
-                          'single'
-                        )
+                        setRemoveModal({
+                          userIds: [row.user?.user_id || ''],
+                          variant: 'single'
+                        })
                     },
                     {
                       key: 'detail',
                       label: '详情',
                       onClick: () =>
-                        setDetailUserId(String(row.id || row.userId || ''))
+                        setDetailUserId(row.user?.user_id || null)
                     }
                   ]}
                 />
               )
             }
           ],
+          rowSelection: {
+            selectedRowKeys,
+            onChange: setSelectedRowKeys
+          },
           pagination: {
             current: page,
             pageSize,
@@ -264,6 +177,11 @@ export default function Page() {
           }
         }}
       />
+      <UserDetailDrawer
+        visible={!!detailUserId}
+        userId={detailUserId}
+        onClose={() => setDetailUserId(null)}
+      />
       <BlacklistActionModal
         visible={!!removeModal}
         mode="remove"
@@ -274,11 +192,6 @@ export default function Page() {
           setSelectedRowKeys([]);
           fetchData(page, pageSize);
         }}
-      />
-      <UserDetailDrawer
-        visible={!!detailUserId}
-        userId={detailUserId}
-        onClose={() => setDetailUserId(null)}
       />
     </>
   );

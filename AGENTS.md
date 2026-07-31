@@ -21,7 +21,7 @@
 
 实现 / 对照问题时优先参考上游：
 
-- 布局壳层（Navbar / Menu / Settings 抽屉）、主题切换、Mock、i18n、权限包装等 Pro 惯例
+- 布局壳层（Navbar / Menu / Settings 抽屉）、主题切换、i18n、权限包装等 Pro 惯例
 - 组件用法与主题变量以 [Arco Design React](https://arco.design/react/docs/start) + Pro 主题包为准
 
 本仓库相对上游的刻意差异（不要「还原成官方脚手架」）：
@@ -92,12 +92,12 @@ src/app | pages | widgets | features | entities | shared
 - 页面打开记录快捷导航复用 `@widgets/page-tabs`（Figma `609:47633`），由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
 - 文案默认中文；需要 i18n 时走现有 `locale` 模式
 
-## API / Mock
+## API
 
-- Admin 网关生成物：`src/shared/api/admin/**`（`npm run openapi`），**禁止任何手改**；适配写在页面 / feature / `biz`
-- 尚未进 OpenAPI 的业务：`@shared/api/biz` + `shared/mock/biz.ts`（前缀 `/api/biz/...`）
-- 手写 axios 单例 `shared/api/request.ts` 勿删
-- 页面优先 `import` `@shared/api/admin/*` 生成函数；无文档能力再用 `biz`
+- Admin 网关生成物：`src/shared/api/admin/**`（`npm run openapi`），**禁止任何手改**
+- 业务页 / feature **直接**使用生成函数与 `AdminAPI` 字段名（Form/Table/state 不做映射）；列表信封用 `res.data?.list` / `res.data?.total`
+- 无 OpenAPI 的菜单页：保留路由，统一 `ApiNotReady`（文案「接口未就绪」），不要再引入 mock / `/api/biz`
+- 手写 axios 单例 `shared/api/request.ts` 勿删；鉴权 token 走 `setAccessToken` / `getAccessToken`
 
 ## 改动边界
 

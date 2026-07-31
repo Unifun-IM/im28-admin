@@ -5,16 +5,15 @@ import applyThemeColor from '@shared/lib/applyThemeColor';
 
 export type AppSettings = typeof defaultSettings;
 
-export interface UserInfo {
-  name?: string;
-  avatar?: string;
-  job?: string;
-  organization?: string;
-  location?: string;
-  email?: string;
+/** 登录后全局用户信息，直接对应 AdminAPI.SysUserEnvelope.data */
+export type UserInfo = {
+  sys_user?: AdminAPI.SysUser;
+  rbac?: AdminAPI.SysUserRBAC;
+  /**
+   * 侧栏路由过滤仍用旧结构；路由未配置 requiredPermissions 时传空对象即可全显。
+   */
   permissions: Record<string, string[]>;
-  [key: string]: unknown;
-}
+};
 
 export interface GlobalState {
   settings: AppSettings;

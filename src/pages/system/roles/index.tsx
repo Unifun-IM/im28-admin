@@ -9,25 +9,24 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { getRoles } from '@shared/api/biz';
+import {
+  postV1AdminRolesList,
+  postV1AdminRolesDelete
+} from '@shared/api/admin/rbac';
 import { CreateRoleModal } from '@features/admin-role-create';
 
 const FormItem = Form.Item;
 
-const STATUS_OPTIONS = [
-  { label: '全部', value: '' },
-  { label: '启用', value: '启用' },
-  { label: '禁用', value: '禁用' }
-];
-
-/**
- * 角色管理 — Figma 741:19446
- * 新建角色 — Figma 666:21515
- */
 function RolesPage() {
-  const [form] = Form.useForm();
+  type RoleListForm = {
+    keyword?: string;
+    /** Select 用字符串，请求时再转 boolean */
+    is_enable?: '' | 'true' | 'false';
+  };
+
+  const [form] = Form.useForm<RoleListForm>();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<AdminAPI.SysRoleWrap[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
@@ -38,9 +37,17 @@ function RolesPage() {
       setLoading(true);
       try {
         const values = form.getFieldsValue();
-        const res = await getRoles({ page: p, pageSize: size, ...values });
-        setData((res.list || []) as Record<string, unknown>[]);
-        setTotal(res.total || 0);
+        const res = await postV1AdminRolesList({
+          page: p,
+          page_size: size,
+          keyword: values.keyword || undefined,
+          is_enable:
+            values.is_enable === undefined || values.is_enable === ''
+              ? undefined
+              : values.is_enable === 'true'
+        });
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
       } finally {
         setLoading(false);
       }
@@ -63,18 +70,21 @@ function RolesPage() {
         filter={
           <>
             <FilterField>
-              <FormItem field="name" label="角色名称">
-                <FilterInput placeholder="请输入角色名" showSearchIcon />
+              <FormItem field="keyword" label="keyword">
+                <FilterInput placeholder="keyword" />
               </FormItem>
             </FilterField>
             <FilterField>
-              <FormItem field="desc" label="角色描述">
-                <FilterInput placeholder="请输入角色描述" showSearchIcon />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="status" label="状态" initialValue="">
-                <FilterSelect placeholder="请选择" options={STATUS_OPTIONS} />
+              <FormItem field="is_enable" label="is_enable">
+                <FilterSelect
+                  placeholder="is_enable"
+                  options={[
+                    { label: '全部', value: '' },
+                    { label: 'true', value: 'true' },
+                    { label: 'false', value: 'false' }
+                  ]}
+                  allowClear
+                />
               </FormItem>
             </FilterField>
           </>
@@ -97,64 +107,60 @@ function RolesPage() {
         tableProps={{
           loading,
           data,
-          rowKey: 'id',
+          rowKey: (row: AdminAPI.SysRoleWrap) =>
+            String(row.role?.id ?? Math.random()),
           columns: [
-            { title: '角色名称', dataIndex: 'name' },
             {
-              title: '角色描述',
-              dataIndex: 'desc',
-              render: (v?: string) => v || '—'
+              title: 'code',
+              dataIndex: 'role.code',
+              render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
+                row.role?.code || '--'
             },
             {
-              title: '创建时间',
-              dataIndex: 'createdAt',
-              width: 180
+              title: 'name',
+              dataIndex: 'role.name',
+              render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
+                row.role?.name || '--'
             },
             {
-              title: '修改时间',
-              dataIndex: 'updatedAt',
-              width: 180
+              title: 'description',
+              dataIndex: 'role.description',
+              render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
+                row.role?.description || '--'
             },
             {
-              title: '状态',
-              dataIndex: 'status',
-              width: 100,
-              render: (v?: string) => (
+              title: 'is_enable',
+              dataIndex: 'role.is_enable',
+              render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
                 <StatusBadge
-                  status={v === '禁用' || v === '停用' ? 'default' : 'success'}
-                  text={v === '停用' ? '禁用' : v || '启用'}
+                  status={row.role?.is_enable ? 'success' : 'error'}
+                  text={String(row.role?.is_enable)}
                 />
               )
             },
             {
               title: '操作',
+              dataIndex: 'op',
               width: 120,
-              fixed: 'right' as const,
-              render: (_: unknown, row: Record<string, unknown>) => (
+              render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
                 <ActionLinks
                   variant="text"
                   items={[
                     {
-                      key: 'detail',
-                      label: '详情',
-                      onClick: () =>
-                        Message.info(
-                          `角色详情：${String(row.name)}（后续接入）`
-                        )
-                    },
-                    {
                       key: 'delete',
                       label: '删除',
-                      danger: true,
-                      onClick: () =>
+                      onClick: () => {
+                        const id = row.role?.id;
+                        if (id == null) return;
                         Modal.confirm({
-                          title: '删除角色',
-                          content: `确认删除角色「${String(row.name)}」？`,
-                          okButtonProps: { status: 'danger' },
-                          onOk: () => {
-                            Message.success('已删除（mock）');
+                          title: '删除角色？',
+                          onOk: async () => {
+                            await postV1AdminRolesDelete({ id });
+                            Message.success('ok');
+                            fetchData(page, pageSize);
                           }
-                        })
+                        });
+                      }
                     }
                   ]}
                 />
@@ -175,7 +181,7 @@ function RolesPage() {
       />
       <CreateRoleModal
         visible={createVisible}
-        onClose={() => setCreateVisible(false)}
+        onCancel={() => setCreateVisible(false)}
         onSuccess={() => fetchData(page, pageSize)}
       />
     </>

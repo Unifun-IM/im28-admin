@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Input,
   Avatar,
@@ -25,7 +25,6 @@ import {
 } from '@arco-design/web-react/icon';
 import {
   useGlobalSelector,
-  useGlobalDispatch,
   type GlobalState
 } from '@entities/global-state';
 import { GlobalContext } from '@shared/lib/global-context';
@@ -35,8 +34,8 @@ import MessageBox from '@widgets/message-box';
 import Settings from '@widgets/settings';
 import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
-import { generatePermission } from '@shared/config/routes';
-import { setAccessToken } from '@shared/api/request';
+import { postV1AdminAuthLogout } from '@shared/api/admin/auth';
+import { getAccessToken, setAccessToken } from '@shared/api/request';
 import cs from 'classnames';
 import './navbar.less';
 
@@ -50,40 +49,39 @@ export type NavbarBreadcrumbItem =
 export type NavbarProps = {
   show: boolean;
   breadcrumb?: NavbarBreadcrumbItem[];
-  /** 打开用户中心（由 app 挂载 Modal） */
   onOpenUserCenter?: () => void;
 };
 
 function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
   const t = useLocale();
   const locale = useLocale();
-  const { userInfo, userLoading } = useGlobalSelector((state: GlobalState) => state);
-  const dispatch = useGlobalDispatch();
+  const { userInfo, userLoading } = useGlobalSelector(
+    (state: GlobalState) => state
+  );
 
-  const [_, setUserStatus] = useStorage('userStatus');
-  const [role] = useStorage('userRole', 'admin');
+  const [, setUserStatus] = useStorage('userStatus');
   const [messageVisible, setMessageVisible] = useState(false);
   const [userMenuVisible, setUserMenuVisible] = useState(false);
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
 
-  function logout() {
+  const displayName =
+    userInfo?.sys_user?.display_name ||
+    userInfo?.sys_user?.username ||
+    'Admin';
+
+  async function logout() {
+    try {
+      await postV1AdminAuthLogout({
+        access_token: getAccessToken() || undefined
+      });
+    } catch {
+      // ignore
+    }
     setUserStatus('logout');
     setAccessToken(null);
     window.location.href = '/login';
   }
-
-  useEffect(() => {
-    dispatch({
-      type: 'update-userInfo',
-      payload: {
-        userInfo: {
-          ...userInfo,
-          permissions: generatePermission(role)
-        }
-      }
-    });
-  }, [role]);
 
   if (!show) {
     return (
@@ -112,14 +110,14 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
       <Menu.Item key="profile" className="use-profile-menu-item">
         <div className="flex items-center gap-2 p-0">
           <Avatar size={40} className="shrink-0">
-            {userInfo?.avatar ? <img alt="avatar" src={userInfo.avatar} /> : null}
+            {(displayName || '?').slice(0, 1)}
           </Avatar>
           <div className="min-w-0">
             <div className="text-sm font-medium leading-[14px] text-arco-text-1">
-              {userInfo?.name || 'Admin-sp'}
+              {displayName}
             </div>
             <div className="mt-1 text-xs leading-3 text-arco-text-3">
-              {userInfo?.email || 'Admin-sp@gmail.com'}
+              {userInfo?.sys_user?.username || ''}
             </div>
           </div>
         </div>
@@ -208,7 +206,7 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
             }}
           />
           <MessageBox onVisibleChange={setMessageVisible}>
-            <Badge count={11} maxCount={99} className="use-navbar-badge">
+            <Badge count={0} className="use-navbar-badge">
               <IconButton
                 active={messageVisible}
                 icon={<IconNotification />}
@@ -240,11 +238,11 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
                 {userLoading ? (
                   <IconLoading />
                 ) : (
-                  <img alt="avatar" src={userInfo.avatar} />
+                  (displayName || '?').slice(0, 1)
                 )}
               </Avatar>
               <span className="max-w-24 overflow-hidden text-ellipsis whitespace-nowrap pr-1 text-sm font-medium leading-[22px] text-arco-text-1 max-[900px]:hidden">
-                {userInfo.name || 'Admin-sp'}
+                {displayName}
               </span>
             </div>
           </Dropdown>

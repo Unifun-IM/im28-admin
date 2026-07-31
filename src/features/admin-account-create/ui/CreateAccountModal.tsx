@@ -11,18 +11,11 @@ import {
 import { IconCheckCircleFill, IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import cs from 'classnames';
-import { createAccount } from '@shared/api/biz';
+import { postV1AdminSystemUsersCreate } from '@shared/api/admin/systemUsers';
+import { postV1AdminRolesList } from '@shared/api/admin/rbac';
 import './create-account-modal.less';
 
 const FormItem = Form.Item;
-
-const ROLE_OPTIONS = [
-  { label: '超级管理员', value: '超级管理员' },
-  { label: '管理员', value: '管理员' },
-  { label: '客服', value: '客服' },
-  { label: '财务', value: '财务' },
-  { label: 'AAA', value: 'AAA' }
-];
 
 function genPassword(len = 14) {
   const chars =
@@ -42,20 +35,19 @@ export type CreateAccountModalProps = {
 
 type Step = 'form' | 'success';
 
-/**
- * 新建账号 — Figma 666:21799
- * 创建成功 — Figma 921:44334
- */
 export default function CreateAccountModal({
   visible,
   onCancel,
   onSuccess
 }: CreateAccountModalProps) {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<AdminAPI.CreateSysUserRequest>();
   const [step, setStep] = useState<Step>('form');
   const [submitting, setSubmitting] = useState(false);
+  const [roleOptions, setRoleOptions] = useState<
+    { label: string; value: number }[]
+  >([]);
   const [created, setCreated] = useState<{
-    account: string;
+    username: string;
     password: string;
   } | null>(null);
 
@@ -64,10 +56,18 @@ export default function CreateAccountModal({
     setStep('form');
     setCreated(null);
     form.resetFields();
-    form.setFieldsValue({ password: genPassword() });
+    form.setFieldsValue({ password: genPassword(), status: 'active' });
+    postV1AdminRolesList({ page: 1, page_size: 100 }).then((res) => {
+      setRoleOptions(
+        (res.data?.list || [])
+          .map((item) => ({
+            label: item.role?.name || item.role?.code || String(item.role?.id),
+            value: Number(item.role?.id)
+          }))
+          .filter((o) => Number.isFinite(o.value))
+      );
+    });
   }, [visible, form]);
-
-  const title = step === 'form' ? '新建账号' : undefined;
 
   const footer = useMemo(() => {
     if (step === 'success') return null;
@@ -84,18 +84,15 @@ export default function CreateAccountModal({
             try {
               const values = await form.validate();
               setSubmitting(true);
-              const res = (await createAccount(values)) as {
-                account?: string;
-                password?: string;
-              };
+              await postV1AdminSystemUsersCreate(values);
               setCreated({
-                account: String(res.account || values.account),
-                password: String(res.password || values.password)
+                username: values.username,
+                password: values.password
               });
               setStep('success');
               onSuccess?.();
             } catch {
-              // validate fail
+              // validate
             } finally {
               setSubmitting(false);
             }
@@ -114,7 +111,7 @@ export default function CreateAccountModal({
 
   return (
     <Modal
-      title={title}
+      title={step === 'form' ? '新建账号' : undefined}
       visible={visible}
       onCancel={onCancel}
       footer={footer}
@@ -124,47 +121,45 @@ export default function CreateAccountModal({
       className={cs('use-create-account-modal', {
         'is-success': step === 'success'
       })}
-      wrapClassName="use-create-account-modal-wrap"
       style={{ width: 780 }}
     >
       {step === 'form' ? (
         <Form form={form} layout="vertical" requiredSymbol={{ position: 'end' }}>
           <FormItem
-            field="account"
-            label="账号"
-            rules={[{ required: true, message: '请输入账号' }]}
+            field="username"
+            label="username"
+            rules={[{ required: true }]}
           >
-            <Input placeholder="输入账号" allowClear />
+            <Input placeholder="username" allowClear />
+          </FormItem>
+          <FormItem field="display_name" label="display_name">
+            <Input placeholder="display_name" allowClear />
           </FormItem>
           <FormItem
             field="password"
-            label="密码"
-            rules={[{ required: true, message: '请输入密码' }]}
+            label="password"
+            rules={[{ required: true }]}
           >
-            <Input
-              placeholder="请输入密码"
+            <Input placeholder="password" allowClear />
+          </FormItem>
+          <FormItem field="role_ids" label="role_ids">
+            <Select
+              mode="multiple"
+              placeholder="role_ids"
+              options={roleOptions}
               allowClear
-              suffix={
-                <button
-                  type="button"
-                  aria-label="复制密码"
-                  className="inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-3 hover:text-arco-text-1"
-                  onClick={() => {
-                    const pwd = form.getFieldValue('password');
-                    if (pwd) copyText(String(pwd), '密码已复制');
-                  }}
-                >
-                  <IconCopy />
-                </button>
-              }
             />
           </FormItem>
-          <FormItem
-            field="role"
-            label="关联角色"
-            rules={[{ required: true, message: '请选择角色' }]}
-          >
-            <Select placeholder="请选择角色" options={ROLE_OPTIONS} allowClear />
+          <FormItem field="description" label="description">
+            <Input placeholder="description" allowClear />
+          </FormItem>
+          <FormItem field="status" label="status">
+            <Select
+              options={[
+                { label: 'active', value: 'active' },
+                { label: 'disabled', value: 'disabled' }
+              ]}
+            />
           </FormItem>
         </Form>
       ) : (
@@ -175,71 +170,25 @@ export default function CreateAccountModal({
               <IconCheckCircleFill className="text-[48px] text-[rgb(var(--success-6))]" />
             }
             title="账号创建成功"
-            subTitle="请妥善保存初始密码。关闭弹窗后将无法再次查看，用户首次登录时需修改密码。"
+            subTitle="请妥善保存初始密码。"
           />
-          <div className="mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)] p-3">
-            <div className="flex items-center gap-6">
-              <span className="w-[120px] shrink-0 text-[12px] leading-[18px] text-arco-text-1">
-                登录账号
-              </span>
-              <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
-                <span className="truncate text-[12px] leading-[18px] text-arco-text-1">
-                  {created?.account}
-                </span>
-                <button
-                  type="button"
-                  aria-label="复制账号"
-                  className="inline-flex size-[14px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
-                  onClick={() =>
-                    created?.account &&
-                    copyText(created.account, '账号已复制')
-                  }
-                >
-                  <IconCopy className="text-[14px]" />
-                </button>
-              </div>
-            </div>
-            <div className="my-3 h-px bg-[rgba(0,0,0,0.08)]" />
-            <div className="flex items-center gap-6">
-              <span className="w-[120px] shrink-0 text-[12px] leading-[18px] text-arco-text-1">
-                初始密码
-              </span>
-              <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
-                <span className="truncate text-[12px] leading-[18px] text-arco-text-1">
-                  {created?.password}
-                </span>
-                <button
-                  type="button"
-                  aria-label="复制密码"
-                  className="inline-flex size-[14px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
-                  onClick={() =>
-                    created?.password &&
-                    copyText(created.password, '密码已复制')
-                  }
-                >
-                  <IconCopy className="text-[14px]" />
-                </button>
-              </div>
+          <div className="mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px]">
+            <div>username：{created?.username}</div>
+            <div className="mt-2 flex items-center gap-2">
+              password：{created?.password}
+              <button
+                type="button"
+                className="border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
+                onClick={() =>
+                  created?.password && copyText(created.password)
+                }
+              >
+                <IconCopy />
+              </button>
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <Button
-              className="!rounded-lg !bg-[var(--color-fill-2,#f2f3f5)] !text-arco-text-2"
-              onClick={() => {
-                if (!created) return;
-                copyText(
-                  `登录账号：${created.account}\n初始密码：${created.password}`,
-                  '账号和密码已复制'
-                );
-              }}
-            >
-              复制账号和密码
-            </Button>
-            <Button
-              type="primary"
-              className="!w-[100px] !rounded-lg"
-              onClick={onCancel}
-            >
+          <div className="mt-4 flex justify-center">
+            <Button type="primary" onClick={onCancel}>
               完成
             </Button>
           </div>

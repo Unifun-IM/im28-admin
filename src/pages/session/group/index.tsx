@@ -1,73 +1,66 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form } from '@arco-design/web-react';
+import { Form, Button, Message, Modal } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
   FilterField,
   FilterInput,
-  FilterKeywordInput,
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
+import {
+  postV1AdminGroupsList,
+  postV1AdminGroupsUpdateStatus,
+  postV1AdminGroupsUpgrade
+} from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
 import { UserChatModal } from '@features/user-chat-view';
-import { getGroupSessions } from '@shared/api/biz';
 
 const FormItem = Form.Item;
 
-const GROUP_KEYWORD_OPTIONS = [
-  { label: '群ID', value: 'groupId' },
-  { label: '名称', value: 'name' }
-];
-
-const GROUP_STATUS_OPTIONS = [
-  { label: '全部', value: '' },
-  { label: '正常', value: '正常' },
-  { label: '已解散', value: '已解散' },
-  { label: '封禁', value: '封禁' }
-];
-
-function statusToBadge(v: string): 'success' | 'error' | 'warning' | 'default' {
-  if (v === '正常') return 'success';
-  if (v === '封禁') return 'error';
-  if (v === '已解散') return 'warning';
+function groupStatusBadge(
+  status?: AdminAPI.GroupStatus
+): 'success' | 'error' | 'warning' | 'default' {
+  if (status === 1) return 'success';
+  if (status === 2) return 'error';
+  if (status === 3) return 'warning';
   return 'default';
 }
 
-/**
- * 群聊会话查询 — Figma 741:30572
- * 详情 Drawer — Figma 666:22243 / 755:13957 / 666:22310 / 666:22396
- */
+/** 群列表 — AdminAPI.AdminListGroupRequest / { group?: Group } */
 export default function GroupQueryPage() {
-  const [form] = Form.useForm();
+  type GroupListForm = {
+    keyword?: string;
+    /** Select 用字符串，请求时再转 GroupStatus */
+    status?: '' | '0' | '1' | '2' | '3';
+  };
+
+  const [form] = Form.useForm<GroupListForm>();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<{ group?: AdminAPI.Group }[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const [chatUserId, setChatUserId] = useState<string>('');
-  const [chatTarget, setChatTarget] = useState<{
-    type: 'group';
-    id: string;
-    name: string;
-    memberCount?: number;
-  } | null>(null);
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
       setLoading(true);
       try {
         const values = form.getFieldsValue();
-        const res = await getGroupSessions({
+        const res = await postV1AdminGroupsList({
           page: p,
-          pageSize: size,
-          ...values
+          page_size: size,
+          keyword: values.keyword || undefined,
+          status:
+            values.status === '' || values.status === undefined
+              ? undefined
+              : (Number(values.status) as AdminAPI.GroupStatus)
         });
-        setData((res.list || []) as Record<string, unknown>[]);
-        setTotal(res.total || 0);
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
       } finally {
         setLoading(false);
       }
@@ -81,10 +74,6 @@ export default function GroupQueryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const openDetail = (row: Record<string, unknown>) => {
-    setDetailGroupId(String(row.id || row.groupId || ''));
-  };
-
   return (
     <>
       <BizListPage
@@ -96,29 +85,22 @@ export default function GroupQueryPage() {
         filter={
           <>
             <FilterField>
-              <FormItem field="keyword" label="群关键词搜索">
-                <FilterKeywordInput
-                  typeField="keywordType"
-                  typeOptions={GROUP_KEYWORD_OPTIONS}
-                  typeInitialValue="groupId"
-                  typeWidth={80}
-                  placeholder="请输入"
-                />
+              <FormItem field="keyword" label="keyword">
+                <FilterInput placeholder="keyword" />
               </FormItem>
             </FilterField>
             <FilterField>
-              <FormItem field="ownerId" label="群主ID">
-                <FilterInput
-                  showSearchIcon
-                  placeholder="请输入9位用户ID"
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="status" label="群状态" initialValue="">
+              <FormItem field="status" label="status">
                 <FilterSelect
-                  placeholder="全部"
-                  options={GROUP_STATUS_OPTIONS}
+                  placeholder="status"
+                  options={[
+                    { label: '全部', value: '' },
+                    { label: '0', value: '0' },
+                    { label: '1', value: '1' },
+                    { label: '2', value: '2' },
+                    { label: '3', value: '3' }
+                  ]}
+                  allowClear
                 />
               </FormItem>
             </FilterField>
@@ -137,76 +119,98 @@ export default function GroupQueryPage() {
         tableProps={{
           loading,
           data,
+          rowKey: (row: { group?: AdminAPI.Group }) =>
+            row.group?.group_id || String(Math.random()),
           columns: [
             {
-              title: '群信息',
-              dataIndex: 'name',
-              width: 223,
-              ellipsis: false,
-              render: (_: unknown, row: Record<string, unknown>) => (
+              title: 'group',
+              dataIndex: 'group.title',
+              render: (_: unknown, row: { group?: AdminAPI.Group }) => (
                 <AvatarNameCell
-                  name={row.name as string}
-                  sub={`群ID：${row.groupId}`}
-                  copyText={String(row.groupId || '')}
-                  avatar={row.avatar as string | undefined}
-                  nameClassName="!text-[rgb(var(--link-6))]"
-                  onNameClick={() => openDetail(row)}
+                  name={row.group?.title}
+                  sub={`group_id：${row.group?.group_id || ''}`}
+                  copyText={row.group?.group_id || ''}
+                  avatar={row.group?.avatar_url}
                 />
               )
             },
             {
-              title: '群主',
-              dataIndex: 'ownerName',
-              width: 223,
-              ellipsis: false,
-              render: (_: unknown, row: Record<string, unknown>) => (
-                <AvatarNameCell
-                  name={row.ownerName as string}
-                  sub={`ID：${row.ownerId}`}
-                  copyText={String(row.ownerId || '')}
-                  avatar={row.ownerAvatar as string | undefined}
+              title: 'owner_user_id',
+              dataIndex: 'group.owner_user_id',
+              render: (_: unknown, row: { group?: AdminAPI.Group }) =>
+                row.group?.owner_user_id || '--'
+            },
+            {
+              title: 'member_count',
+              dataIndex: 'group.member_count',
+              render: (_: unknown, row: { group?: AdminAPI.Group }) =>
+                row.group?.member_count ?? '--'
+            },
+            {
+              title: 'status',
+              dataIndex: 'group.status',
+              render: (_: unknown, row: { group?: AdminAPI.Group }) => (
+                <StatusBadge
+                  status={groupStatusBadge(row.group?.status)}
+                  text={String(row.group?.status ?? '--')}
                 />
               )
-            },
-            {
-              title: '群成员数',
-              dataIndex: 'memberCount',
-              width: 140,
-              sorter: (a, b) =>
-                Number(a.memberCount || 0) - Number(b.memberCount || 0)
-            },
-            {
-              title: '群状态',
-              dataIndex: 'status',
-              width: 120,
-              render: (v: string) => (
-                <StatusBadge status={statusToBadge(v)} text={v} />
-              )
-            },
-            {
-              title: '群创建时间',
-              dataIndex: 'createdAt',
-              width: 180,
-              sorter: (a, b) =>
-                String(a.createdAt || '').localeCompare(
-                  String(b.createdAt || '')
-                )
             },
             {
               title: '操作',
-              width: 80,
-              render: (_: unknown, row: Record<string, unknown>) => (
-                <ActionLinks
-                  variant="text"
-                  items={[
-                    {
-                      key: 'detail',
-                      label: '详情',
-                      onClick: () => openDetail(row)
-                    }
-                  ]}
-                />
-              )
+              dataIndex: 'op',
+              width: 220,
+              render: (_: unknown, row: { group?: AdminAPI.Group }) => {
+                const group_id = row.group?.group_id || '';
+                return (
+                  <ActionLinks
+                    variant="text"
+                    items={[
+                      {
+                        key: 'detail',
+                        label: '详情',
+                        onClick: () => setDetailGroupId(group_id)
+                      },
+                      {
+                        key: 'chat',
+                        label: '聊天',
+                        onClick: () => setChatOpen(true)
+                      },
+                      {
+                        key: 'status',
+                        label: '改状态',
+                        onClick: () => {
+                          Modal.confirm({
+                            title: 'update-status status=1?',
+                            onOk: async () => {
+                              await postV1AdminGroupsUpdateStatus({
+                                group_id,
+                                status: 1
+                              });
+                              Message.success('ok');
+                              fetchData(page, pageSize);
+                            }
+                          });
+                        }
+                      },
+                      {
+                        key: 'upgrade',
+                        label: '升级',
+                        onClick: () => {
+                          Modal.confirm({
+                            title: 'upgrade group?',
+                            onOk: async () => {
+                              await postV1AdminGroupsUpgrade({ group_id });
+                              Message.success('ok');
+                              fetchData(page, pageSize);
+                            }
+                          });
+                        }
+                      }
+                    ]}
+                  />
+                );
+              }
             }
           ],
           pagination: {
@@ -225,26 +229,12 @@ export default function GroupQueryPage() {
         visible={!!detailGroupId}
         groupId={detailGroupId}
         onClose={() => setDetailGroupId(null)}
-        onViewChat={(payload) => {
-          setChatUserId(payload.ownerId || payload.groupId);
-          setChatTarget({
-            type: 'group',
-            id: payload.groupId,
-            name: payload.groupName,
-            memberCount: payload.memberCount
-          });
-          setChatOpen(true);
-        }}
       />
       <UserChatModal
         visible={chatOpen}
+        onClose={() => setChatOpen(false)}
         scene="group"
-        userId={chatUserId || null}
-        target={chatTarget}
-        onClose={() => {
-          setChatOpen(false);
-          setChatTarget(null);
-        }}
+        userId={null}
       />
     </>
   );

@@ -8,14 +8,11 @@ import {
   setAccessToken,
   setUnauthorizedHandler
 } from '@shared/api/request';
-import { getApiUserUserInfo } from '@shared/api/user';
-import { generatePermission } from '@shared/config/routes';
+import { postV1AdminAuthMe } from '@shared/api/admin/auth';
 import { GlobalContext } from '@shared/lib/global-context';
 import changeTheme from '@shared/lib/changeTheme';
 import checkLogin from '@shared/lib/checkLogin';
 import useStorage from '@shared/lib/useStorage';
-
-import '@shared/mock';
 
 function getArcoLocale(lang: string) {
   switch (lang) {
@@ -28,15 +25,13 @@ function getArcoLocale(lang: string) {
   }
 }
 
-/** 登录态下首屏即注入权限，避免等 userInfo 才渲染侧栏菜单 */
 function bootstrapLoggedInShell() {
   if (typeof window === 'undefined' || !checkLogin()) return;
-  const role = window.localStorage.getItem('userRole') || 'admin';
   globalStore.updateUserInfo({
     userLoading: true,
     userInfo: {
       ...globalStore.userInfo,
-      permissions: generatePermission(role)
+      permissions: {}
     }
   });
 }
@@ -69,18 +64,13 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (checkLogin()) {
-      getApiUserUserInfo()
-        .then((userInfo) => {
-          const role = window.localStorage.getItem('userRole') || 'admin';
-          const apiPerms = userInfo?.permissions;
-          const permissions =
-            apiPerms && Object.keys(apiPerms).length
-              ? apiPerms
-              : generatePermission(role);
+      postV1AdminAuthMe()
+        .then((res) => {
           globalStore.updateUserInfo({
             userInfo: {
-              ...userInfo,
-              permissions
+              sys_user: res.data?.sys_user,
+              rbac: res.data?.rbac,
+              permissions: {}
             },
             userLoading: false
           });
@@ -98,15 +88,10 @@ export function AppProviders({ children }: PropsWithChildren) {
   }, [theme]);
 
   return (
-    <ConfigProvider
-      componentConfig={{
-        Card: { bordered: false },
-        List: { bordered: false },
-        Table: { border: false }
-      }}
-      locale={getArcoLocale(lang || 'zh-CN')}
-    >
+    <ConfigProvider locale={getArcoLocale(lang)}>
       <GlobalContext.Provider value={contextValue}>{children}</GlobalContext.Provider>
     </ConfigProvider>
   );
 }
+
+export default AppProviders;

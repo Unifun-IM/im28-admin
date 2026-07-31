@@ -1,91 +1,99 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Form,
-  Input,
-  Button,
-  Tag,
-  Dropdown,
-  Menu
-} from '@arco-design/web-react';
+import { Form, Input, Button, Tag, Dropdown, Menu } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
   DoubleLineCell,
-  FilterDateRange,
   FilterField,
   FilterKeywordInput,
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { getUserList } from '@shared/api/biz';
+import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
 
 const FormItem = Form.Item;
 
-const USER_KEYWORD_OPTIONS = [
-  { label: '用户ID', value: 'userId' },
-  { label: '昵称', value: 'nickname' },
-  { label: '手机号', value: 'phone' },
-  { label: '邮箱', value: 'email' },
-  { label: '账号', value: 'account' }
+const KEYWORD_TYPE_OPTIONS: {
+  label: string;
+  value: NonNullable<AdminAPI.AdminListUserRequest['keyword_type']>;
+}[] = [
+  { label: 'user_id', value: 'user_id' },
+  { label: 'nickname', value: 'nickname' },
+  { label: 'phone', value: 'phone' },
+  { label: 'email', value: 'email' },
+  { label: 'account', value: 'account' }
 ];
 
-const INVITER_KEYWORD_OPTIONS = [
-  { label: '邀请码', value: 'inviteCode' },
-  { label: '邀请人昵称', value: 'inviterNickname' }
-];
-
-function statusToBadge(v: string): 'success' | 'error' | 'warning' | 'default' {
-  if (v === '正常') return 'success';
-  if (v === '黑名单') return 'error';
-  if (v === '注销') return 'warning';
+function statusBadge(
+  status?: AdminAPI.AccountStatus
+): 'success' | 'error' | 'default' {
+  if (status === 'active') return 'success';
+  if (status === 'disabled') return 'error';
   return 'default';
 }
 
-/**
- * 用户查询 — Figma 741:24735
- * 批量搜索 — Figma 811:22055
- */
+/** 用户查询 — AdminAPI.AdminListUserRequest / AdminUserWrap */
 export default function UserQueryPage() {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<AdminAPI.AdminListUserRequest & { batchUserIds?: string }>();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<AdminAPI.AdminUserWrap[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
+    []
+  );
   const [batchMode, setBatchMode] = useState(false);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
   const [blacklistModal, setBlacklistModal] = useState<{
     mode: 'add' | 'remove';
-    userIds: string[];
     variant: 'single' | 'batch';
+    userIds: string[];
   } | null>(null);
 
-  const openBlacklistModal = (
-    mode: 'add' | 'remove',
-    userIds: string[],
-    variant: 'single' | 'batch' = 'single'
-  ) => {
-    if (!userIds.length) return;
-    setBlacklistModal({ mode, userIds, variant });
-  };
+  const buildBody = useCallback(
+    (p: number, size: number): AdminAPI.AdminListUserRequest => {
+      const values = form.getFieldsValue();
+      const body: AdminAPI.AdminListUserRequest = {
+        page: p,
+        page_size: size,
+        keyword: values.keyword || undefined,
+        keyword_type: values.keyword_type || undefined,
+        status: values.status || undefined,
+        online_status: values.online_status || undefined,
+        registered_start_at: values.registered_start_at,
+        registered_end_at: values.registered_end_at,
+        last_operated_start_at: values.last_operated_start_at,
+        last_operated_end_at: values.last_operated_end_at,
+        sort_by: values.sort_by,
+        sort_order: values.sort_order
+      };
+      if (batchMode && values.batchUserIds) {
+        body.user_ids = String(values.batchUserIds)
+          .split(/[\s,，]+/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      return body;
+    },
+    [form, batchMode]
+  );
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
       setLoading(true);
       try {
-        const values = form.getFieldsValue();
-        const res = await getUserList({ page: p, pageSize: size, ...values });
-        setData((res.list || []) as Record<string, unknown>[]);
-        setTotal(res.total || 0);
+        const res = await postV1AdminUsersList(buildBody(p, size));
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
       } finally {
         setLoading(false);
       }
     },
-    [form, page, pageSize]
+    [buildBody, page, pageSize]
   );
 
   useEffect(() => {
@@ -94,54 +102,41 @@ export default function UserQueryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const openBlacklistModal = (
+    mode: 'add' | 'remove',
+    userIds: string[],
+    variant: 'single' | 'batch'
+  ) => {
+    if (!userIds.length) return;
+    setBlacklistModal({ mode, userIds, variant });
+  };
+
   const sharedFilters = (
     <>
       <FilterField>
-        <FormItem field="status" label="账号状态" initialValue="">
+        <FormItem field="status" label="status" initialValue={undefined}>
           <FilterSelect
-            placeholder="全部"
+            placeholder="status"
             options={[
               { label: '全部', value: '' },
-              { label: '正常', value: '正常' },
-              { label: '黑名单', value: '黑名单' },
-              { label: '注销', value: '注销' }
+              { label: 'active', value: 'active' },
+              { label: 'disabled', value: 'disabled' }
             ]}
+            allowClear
           />
         </FormItem>
       </FilterField>
       <FilterField>
-        <FormItem field="online" label="在线状态" initialValue="">
+        <FormItem field="online_status" label="online_status">
           <FilterSelect
-            placeholder="全部"
+            placeholder="online_status"
             options={[
               { label: '全部', value: '' },
-              { label: '在线', value: '在线' },
-              { label: '离线', value: '离线' }
+              { label: 'online', value: 'online' },
+              { label: 'offline', value: 'offline' },
+              { label: 'unknown', value: 'unknown' }
             ]}
-          />
-        </FormItem>
-      </FilterField>
-      <FilterField>
-        <FormItem field="registerTime" label="注册时间">
-          <FilterDateRange />
-        </FormItem>
-      </FilterField>
-      <FilterField>
-        <FormItem field="lastActiveTime" label="最后操作时间">
-          <FilterDateRange />
-        </FormItem>
-      </FilterField>
-      <FilterField>
-        <FormItem
-          field="inviterKeyword"
-          label="邀请人关键词搜索"
-          triggerPropName="value"
-        >
-          <FilterKeywordInput
-            typeField="inviterKeywordType"
-            typeOptions={INVITER_KEYWORD_OPTIONS}
-            typeInitialValue="inviteCode"
-            typeWidth={108}
+            allowClear
           />
         </FormItem>
       </FilterField>
@@ -150,281 +145,237 @@ export default function UserQueryPage() {
 
   return (
     <>
-    <BizListPage
-      form={form}
-      title="用户列表"
-      filterCollapsible={false}
-      filterDefaultCollapsed={false}
-      filterResetText="重置"
-      filterExtraActions={
-        batchMode ? (
-          <Button
-            type="text"
-            className="use-biz-filter-action-text is-danger"
-            onClick={() => {
-              setBatchMode(false);
-              form.setFieldValue('batchUserIds', undefined);
-            }}
-          >
-            取消批量搜索
-          </Button>
-        ) : (
-          <Button
-            type="text"
-            className="use-biz-filter-action-text"
-            onClick={() => setBatchMode(true)}
-          >
-            批量搜索
-          </Button>
-        )
-      }
-      filter={
-        batchMode ? (
-          <>
-            <FilterField span="full">
-              <FormItem
-                field="batchUserIds"
-                label={
-                  <span className="inline-flex items-center gap-[4px]">
-                    <span>批量用户ID</span>
-                    <span className="use-biz-filter-label-hint">
-                      可输入用户ID，支持逗号、空格或从Excel复制一列
-                    </span>
-                  </span>
-                }
-              >
-                <Input.TextArea placeholder="请输入" style={{ minHeight: 56 }} />
-              </FormItem>
-            </FilterField>
-            {sharedFilters}
-          </>
-        ) : (
-          <>
-            <FilterField>
-              <FormItem field="keyword" label="关键词搜索">
-                <FilterKeywordInput
-                  typeField="keywordType"
-                  typeOptions={USER_KEYWORD_OPTIONS}
-                  typeInitialValue="userId"
-                  typeWidth={80}
-                />
-              </FormItem>
-            </FilterField>
-            {sharedFilters}
-          </>
-        )
-      }
-      onSearch={() => {
-        setPage(1);
-        fetchData(1, pageSize);
-      }}
-      onReset={() => {
-        form.resetFields();
-        setPage(1);
-        fetchData(1, pageSize);
-      }}
-      onRefresh={() => fetchData(page, pageSize)}
-      toolbar={
-        <Dropdown
-          disabled={!selectedRowKeys.length}
-          droplist={
-            <Menu
-              onClickMenuItem={(key) => {
-                openBlacklistModal(
-                  key as 'add' | 'remove',
-                  selectedRowKeys.map(String),
-                  'batch'
-                );
+      <BizListPage
+        form={form}
+        title="用户列表"
+        filterCollapsible={false}
+        filterDefaultCollapsed={false}
+        filterResetText="重置"
+        filterExtraActions={
+          batchMode ? (
+            <Button
+              type="text"
+              className="use-biz-filter-action-text is-danger"
+              onClick={() => {
+                setBatchMode(false);
+                form.setFieldValue('batchUserIds', undefined);
               }}
             >
-              <Menu.Item key="add">批量加入黑名单</Menu.Item>
-              <Menu.Item key="remove">批量解除黑名单</Menu.Item>
-            </Menu>
-          }
-        >
-          <Button type="primary" disabled={!selectedRowKeys.length}>
-            批量操作
-          </Button>
-        </Dropdown>
-      }
-      batchActions={{
-        extra: (
-          <>
-            <button
-              type="button"
-              className="inline-flex h-8 items-center gap-2 border-0 border-l border-solid border-[#262828] bg-transparent px-3 text-sm leading-[21px] text-[rgba(255,255,255,0.9)] hover:bg-[rgba(255,255,255,0.08)]"
-              onClick={() =>
-                openBlacklistModal(
-                  'add',
-                  selectedRowKeys.map(String),
-                  'batch'
-                )
-              }
+              取消批量搜索
+            </Button>
+          ) : (
+            <Button
+              type="text"
+              className="use-biz-filter-action-text"
+              onClick={() => setBatchMode(true)}
             >
-              拉黑
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-8 items-center gap-2 border-0 border-l border-solid border-[#262828] bg-transparent px-3 text-sm leading-[21px] text-[rgba(255,255,255,0.9)] hover:bg-[rgba(255,255,255,0.08)]"
-              onClick={() =>
-                openBlacklistModal(
-                  'remove',
-                  selectedRowKeys.map(String),
-                  'batch'
-                )
-              }
-            >
-              解禁
-            </button>
-          </>
-        )
-      }}
-      tableProps={{
-        loading,
-        data,
-        columns: [
-          {
-            title: '用户',
-            dataIndex: 'nickname',
-            width: 160,
-            ellipsis: false,
-            render: (_: unknown, row: Record<string, unknown>) => (
-              <AvatarNameCell
-                name={row.nickname as string}
-                sub={`ID：${row.userId}`}
-                copyText={String(row.userId || '')}
-                avatar={row.avatar as string | undefined}
-              />
-            )
-          },
-          {
-            title: '联系方式',
-            dataIndex: 'phone',
-            width: 167,
-            ellipsis: false,
-            render: (_: unknown, row: Record<string, unknown>) => (
-              <DoubleLineCell
-                primary={`手机：${(row.phone as string) || '--'}`}
-                secondary={`邮箱：${(row.email as string) || '--'}`}
-              />
-            )
-          },
-          {
-            title: '账号',
-            dataIndex: 'account',
-            width: 120
-          },
-          {
-            title: '邀请人',
-            dataIndex: 'inviteCode',
-            width: 160,
-            ellipsis: false,
-            render: (_: unknown, row: Record<string, unknown>) => (
-              <AvatarNameCell
-                hideAvatar
-                name={(row.inviterName as string) || '—'}
-                sub={`邀请码：${row.inviteCode || '--'}`}
-                copyText={String(row.inviteCode || '')}
-              />
-            )
-          },
-          {
-            title: '状态',
-            dataIndex: 'status',
-            width: 89,
-            render: (v: string) => (
-              <StatusBadge status={statusToBadge(v)} text={v} />
-            )
-          },
-          {
-            title: '注册时间',
-            dataIndex: 'registerTime',
-            width: 154
-          },
-          {
-            title: '最后操作时间',
-            dataIndex: 'lastActiveTime',
-            width: 154
-          },
-          {
-            title: '在线',
-            dataIndex: 'online',
-            width: 120,
-            render: (v: string) => (
-              <Tag
-                color={v === '在线' ? 'green' : 'gray'}
-                size="small"
-                className="!m-0"
+              批量搜索
+            </Button>
+          )
+        }
+        filter={
+          batchMode ? (
+            <>
+              <FilterField span="full">
+                <FormItem field="batchUserIds" label="user_ids">
+                  <Input.TextArea
+                    placeholder="user_ids"
+                    style={{ minHeight: 56 }}
+                  />
+                </FormItem>
+              </FilterField>
+              {sharedFilters}
+            </>
+          ) : (
+            <>
+              <FilterField>
+                <FormItem field="keyword" label="keyword">
+                  <FilterKeywordInput
+                    typeField="keyword_type"
+                    typeOptions={KEYWORD_TYPE_OPTIONS}
+                    typeInitialValue="user_id"
+                    typeWidth={100}
+                  />
+                </FormItem>
+              </FilterField>
+              {sharedFilters}
+            </>
+          )
+        }
+        onSearch={() => {
+          setPage(1);
+          fetchData(1, pageSize);
+        }}
+        onReset={() => {
+          form.resetFields();
+          setPage(1);
+          fetchData(1, pageSize);
+        }}
+        onRefresh={() => fetchData(page, pageSize)}
+        toolbar={
+          <Dropdown
+            disabled={!selectedRowKeys.length}
+            droplist={
+              <Menu
+                onClickMenuItem={(key) => {
+                  openBlacklistModal(
+                    key as 'add' | 'remove',
+                    selectedRowKeys.map(String),
+                    'batch'
+                  );
+                }}
               >
-                {v}
-              </Tag>
-            )
-          },
-          {
-            title: '操作',
-            dataIndex: 'op',
-            width: 80,
-            fixed: 'right',
-            render: (_: unknown, row: Record<string, unknown>) => {
-              const blacklisted = row.status === '黑名单';
-              return (
-                <ActionLinks
-                  variant="text"
-                  items={[
-                    {
-                      key: 'blacklist',
-                      label: blacklisted ? '解禁' : '拉黑',
-                      onClick: () =>
-                        openBlacklistModal(
-                          blacklisted ? 'remove' : 'add',
-                          [String(row.id || row.userId || '')],
-                          'single'
-                        )
-                    },
-                    {
-                      key: 'detail',
-                      label: '详情',
-                      onClick: () =>
-                        setDetailUserId(String(row.id || row.userId || ''))
-                    }
-                  ]}
+                <Menu.Item key="add">批量加入黑名单</Menu.Item>
+                <Menu.Item key="remove">批量解除黑名单</Menu.Item>
+              </Menu>
+            }
+          >
+            <Button type="primary" disabled={!selectedRowKeys.length}>
+              批量操作
+            </Button>
+          </Dropdown>
+        }
+        tableProps={{
+          loading,
+          data,
+          rowKey: (row: AdminAPI.AdminUserWrap) =>
+            row.user?.user_id || String(Math.random()),
+          columns: [
+            {
+              title: 'user',
+              dataIndex: 'user.nickname',
+              width: 180,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+                <AvatarNameCell
+                  name={row.user?.nickname}
+                  sub={`user_id：${row.user?.user_id || ''}`}
+                  copyText={row.user?.user_id || ''}
+                  avatar={row.user?.avatar_url}
                 />
-              );
+              )
+            },
+            {
+              title: 'contact',
+              dataIndex: 'user.phone',
+              width: 180,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+                <DoubleLineCell
+                  primary={`phone：${row.user?.phone || '--'}`}
+                  secondary={`email：${row.user?.email || '--'}`}
+                />
+              )
+            },
+            {
+              title: 'account',
+              dataIndex: 'user.account',
+              width: 120,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
+                row.user?.account || '--'
+            },
+            {
+              title: 'status',
+              dataIndex: 'user.status',
+              width: 100,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+                <StatusBadge
+                  status={statusBadge(row.user?.status)}
+                  text={row.user?.status || '--'}
+                />
+              )
+            },
+            {
+              title: 'created_at',
+              dataIndex: 'user.created_at',
+              width: 180,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
+                row.user?.created_at || '--'
+            },
+            {
+              title: 'last_login_at',
+              dataIndex: 'user.last_login_at',
+              width: 180,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
+                row.user?.last_login_at || '--'
+            },
+            {
+              title: 'online_status',
+              dataIndex: 'online_status',
+              width: 120,
+              render: (v: AdminAPI.OnlineStatus) => (
+                <Tag
+                  color={v === 'online' ? 'green' : 'gray'}
+                  size="small"
+                  className="!m-0"
+                >
+                  {v || '--'}
+                </Tag>
+              )
+            },
+            {
+              title: '操作',
+              dataIndex: 'op',
+              width: 100,
+              fixed: 'right' as const,
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => {
+                const disabled = row.user?.status === 'disabled';
+                const uid = row.user?.user_id || '';
+                return (
+                  <ActionLinks
+                    variant="text"
+                    items={[
+                      {
+                        key: 'blacklist',
+                        label: disabled ? '解禁' : '拉黑',
+                        onClick: () =>
+                          openBlacklistModal(
+                            disabled ? 'remove' : 'add',
+                            [uid],
+                            'single'
+                          )
+                      },
+                      {
+                        key: 'detail',
+                        label: '详情',
+                        onClick: () => setDetailUserId(uid)
+                      }
+                    ]}
+                  />
+                );
+              }
+            }
+          ],
+          rowSelection: {
+            selectedRowKeys,
+            onChange: (keys) => setSelectedRowKeys(keys)
+          },
+          pagination: {
+            current: page,
+            pageSize,
+            total,
+            onChange: (p, s) => {
+              setPage(p);
+              setPageSize(s);
+              fetchData(p, s);
             }
           }
-        ],
-        rowSelection: {
-          selectedRowKeys,
-          onChange: (keys) => setSelectedRowKeys(keys)
-        },
-        pagination: {
-          current: page,
-          pageSize,
-          total,
-          onChange: (p, s) => {
-            setPage(p);
-            setPageSize(s);
-            fetchData(p, s);
-          }
-        }
-      }}
-    />
-    <UserDetailDrawer
-      visible={!!detailUserId}
-      userId={detailUserId}
-      onClose={() => setDetailUserId(null)}
-    />
-    <BlacklistActionModal
-      visible={!!blacklistModal}
-      mode={blacklistModal?.mode || 'add'}
-      variant={blacklistModal?.variant || 'single'}
-      userIds={blacklistModal?.userIds || []}
-      onCancel={() => setBlacklistModal(null)}
-      onSuccess={() => {
-        setSelectedRowKeys([]);
-        fetchData(page, pageSize);
-      }}
-    />
+        }}
+      />
+      <UserDetailDrawer
+        visible={!!detailUserId}
+        userId={detailUserId}
+        onClose={() => setDetailUserId(null)}
+      />
+      <BlacklistActionModal
+        visible={!!blacklistModal}
+        mode={blacklistModal?.mode || 'add'}
+        variant={blacklistModal?.variant || 'single'}
+        userIds={blacklistModal?.userIds || []}
+        onCancel={() => setBlacklistModal(null)}
+        onSuccess={() => {
+          setSelectedRowKeys([]);
+          fetchData(page, pageSize);
+        }}
+      />
     </>
   );
 }

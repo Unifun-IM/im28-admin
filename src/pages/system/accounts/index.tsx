@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Form,
-  Button,
-  Message,
-  Modal,
-  Switch
-} from '@arco-design/web-react';
+import { Form, Button, Message, Modal, Switch } from '@arco-design/web-react';
 import { observer } from 'mobx-react-lite';
 import {
   ActionLinks,
@@ -15,9 +9,10 @@ import {
   FilterSelect
 } from '@widgets/biz-list';
 import {
-  getAccounts,
-  updateAccountStatus
-} from '@shared/api/biz';
+  postV1AdminSystemUsersList,
+  postV1AdminSystemUsersUpdate,
+  postV1AdminSystemUsersDelete
+} from '@shared/api/admin/systemUsers';
 import { CreateAccountModal } from '@features/admin-account-create';
 import {
   ResetPasswordModal,
@@ -30,35 +25,13 @@ import {
 
 const FormItem = Form.Item;
 
-const ROLE_OPTIONS = [
-  { label: '全部', value: '' },
-  { label: '超级管理员', value: '超级管理员' },
-  { label: '管理员', value: '管理员' },
-  { label: '客服', value: '客服' },
-  { label: '财务', value: '财务' },
-  { label: 'AAA', value: 'AAA' }
-];
-
-const STATUS_OPTIONS = [
-  { label: '全部', value: '' },
-  { label: '启用', value: '启用' },
-  { label: '停用', value: '停用' }
-];
-
-/**
- * 后台账号管理 — Figma 741:21002
- * 新增账号 666:21799 / 成功 921:44334
- */
 function AccountsPage() {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<AdminAPI.ListSysUserRequest>();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Record<string, unknown>[]>([]);
+  const [data, setData] = useState<AdminAPI.SysUserWrap[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
-    []
-  );
   const [createVisible, setCreateVisible] = useState(false);
   const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(
     null
@@ -72,9 +45,16 @@ function AccountsPage() {
       setLoading(true);
       try {
         const values = form.getFieldsValue();
-        const res = await getAccounts({ page: p, pageSize: size, ...values });
-        setData((res.list || []) as Record<string, unknown>[]);
-        setTotal(res.total || 0);
+        const body: AdminAPI.ListSysUserRequest = {
+          page: p,
+          page_size: size,
+          keyword: values.keyword || undefined,
+          status: values.status || undefined,
+          role_id: values.role_id
+        };
+        const res = await postV1AdminSystemUsersList(body);
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
       } finally {
         setLoading(false);
       }
@@ -88,21 +68,21 @@ function AccountsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onToggleStatus = async (row: Record<string, unknown>, checked: boolean) => {
-    const next = checked ? '启用' : '停用';
+  const onToggleStatus = async (
+    row: AdminAPI.SysUserWrap,
+    checked: boolean
+  ) => {
+    const id = row.sys_user?.id;
+    if (id == null) return;
     try {
-      await updateAccountStatus({
-        id: String(row.id),
-        status: next
+      await postV1AdminSystemUsersUpdate({
+        id,
+        status: checked ? 'active' : 'disabled'
       });
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === row.id ? { ...item, status: next } : item
-        )
-      );
-      Message.success(checked ? '已启用' : '已停用');
+      fetchData(page, pageSize);
+      Message.success('ok');
     } catch {
-      Message.error('状态更新失败');
+      // request toast
     }
   };
 
@@ -115,26 +95,20 @@ function AccountsPage() {
         filter={
           <>
             <FilterField>
-              <FormItem field="account" label="账号">
-                <FilterInput
-                  placeholder="请输入账号"
-                  showSearchIcon
-                />
+              <FormItem field="keyword" label="keyword">
+                <FilterInput placeholder="keyword" />
               </FormItem>
             </FilterField>
             <FilterField>
-              <FormItem field="role" label="角色" initialValue="">
+              <FormItem field="status" label="status">
                 <FilterSelect
-                  placeholder="请选择"
-                  options={ROLE_OPTIONS}
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="status" label="状态" initialValue="">
-                <FilterSelect
-                  placeholder="请选择"
-                  options={STATUS_OPTIONS}
+                  placeholder="status"
+                  options={[
+                    { label: '全部', value: '' },
+                    { label: 'active', value: 'active' },
+                    { label: 'disabled', value: 'disabled' }
+                  ]}
+                  allowClear
                 />
               </FormItem>
             </FilterField>
@@ -151,93 +125,90 @@ function AccountsPage() {
         }}
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
-          <>
-            <Button
-              className="use-biz-table-secondary-btn"
-              onClick={() => {
-                if (!selectedRowKeys.length) {
-                  Message.info('请先勾选账号');
-                  return;
-                }
-                Modal.confirm({
-                  title: '批量操作',
-                  content: `已选 ${selectedRowKeys.length} 个账号，确认执行批量操作？`,
-                  onOk: () => {
-                    Message.success('批量操作已提交（mock）');
-                    setSelectedRowKeys([]);
-                  }
-                });
-              }}
-            >
-              批量操作
-            </Button>
-            <Button type="primary" onClick={() => setCreateVisible(true)}>
-              新增账号
-            </Button>
-          </>
+          <Button type="primary" onClick={() => setCreateVisible(true)}>
+            新增账号
+          </Button>
         }
         tableProps={{
           loading,
           data,
-          rowKey: 'id',
-          rowSelection: {
-            selectedRowKeys,
-            onChange: setSelectedRowKeys
-          },
+          rowKey: (row: AdminAPI.SysUserWrap) =>
+            String(row.sys_user?.id ?? Math.random()),
           columns: [
-            { title: '账号', dataIndex: 'account' },
-            { title: '角色', dataIndex: 'role' },
             {
-              title: '创建时间',
-              dataIndex: 'createdAt',
-              width: 180
+              title: 'username',
+              dataIndex: 'sys_user.username',
+              render: (_: unknown, row: AdminAPI.SysUserWrap) =>
+                row.sys_user?.username || '--'
             },
             {
-              title: '最后登录',
-              dataIndex: 'lastLogin',
-              width: 180
+              title: 'display_name',
+              dataIndex: 'sys_user.display_name',
+              render: (_: unknown, row: AdminAPI.SysUserWrap) =>
+                row.sys_user?.display_name || '--'
             },
             {
-              title: '状态',
-              dataIndex: 'status',
-              width: 100,
-              render: (v: string, row: Record<string, unknown>) => (
+              title: 'roles',
+              dataIndex: 'rbac.roles',
+              render: (_: unknown, row: AdminAPI.SysUserWrap) =>
+                (row.rbac?.roles || []).join(', ') || '--'
+            },
+            {
+              title: 'status',
+              dataIndex: 'sys_user.status',
+              render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <Switch
-                  checked={v === '启用'}
-                  checkedText=""
-                  uncheckedText=""
-                  className="use-switch-success"
-                  onChange={(checked) => onToggleStatus(row, checked)}
+                  checked={row.sys_user?.status === 'active'}
+                  onChange={(v) => onToggleStatus(row, v)}
                 />
               )
             },
             {
+              title: 'last_login_at',
+              dataIndex: 'sys_user.last_login_at',
+              render: (_: unknown, row: AdminAPI.SysUserWrap) =>
+                row.sys_user?.last_login_at || '--'
+            },
+            {
               title: '操作',
-              width: 160,
-              fixed: 'right' as const,
-              render: (_: unknown, row: Record<string, unknown>) => (
+              dataIndex: 'op',
+              width: 200,
+              render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <ActionLinks
                   variant="text"
                   items={[
                     {
-                      key: 'resetPwd',
+                      key: 'reset',
                       label: '重置密码',
                       onClick: () =>
                         setResetTarget({
-                          id: String(row.id),
-                          account: String(row.account || ''),
-                          name: row.name ? String(row.name) : undefined
+                          id: Number(row.sys_user?.id),
+                          username: row.sys_user?.username || ''
                         })
                     },
                     {
-                      key: 'resetGa',
+                      key: 'ga',
                       label: '重置谷歌',
                       onClick: () =>
                         setResetGaTarget({
-                          id: String(row.id),
-                          account: String(row.account || ''),
-                          name: row.name ? String(row.name) : undefined
+                          id: String(row.sys_user?.id || ''),
+                          account: row.sys_user?.username || ''
                         })
+                    },
+                    {
+                      key: 'delete',
+                      label: '删除',
+                      onClick: () => {
+                        Modal.confirm({
+                          title: '删除用户？',
+                          onOk: async () => {
+                            const id = row.sys_user?.id;
+                            if (id == null) return;
+                            await postV1AdminSystemUsersDelete({ id });
+                            fetchData(page, pageSize);
+                          }
+                        });
+                      }
                     }
                   ]}
                 />
@@ -262,12 +233,13 @@ function AccountsPage() {
         onSuccess={() => fetchData(page, pageSize)}
       />
       <ResetPasswordModal
-        visible={Boolean(resetTarget)}
+        visible={!!resetTarget}
         target={resetTarget}
         onCancel={() => setResetTarget(null)}
+        onSuccess={() => fetchData(page, pageSize)}
       />
       <ResetGaModal
-        visible={Boolean(resetGaTarget)}
+        visible={!!resetGaTarget}
         target={resetGaTarget}
         onCancel={() => setResetGaTarget(null)}
       />

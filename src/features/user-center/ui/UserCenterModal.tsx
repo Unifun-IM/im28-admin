@@ -19,6 +19,7 @@ export type UserCenterModalProps = {
 
 /**
  * 用户中心 — Figma 743:24050（未设置安全）/ 743:24341（已设置）
+ * 展示 AdminAPI.SysUser；改名/头像/重置等尚无 OpenAPI，仅本地态。
  */
 export default function UserCenterModal({
   visible,
@@ -27,25 +28,28 @@ export default function UserCenterModal({
   const { userInfo } = useGlobalSelector((s: GlobalState) => s);
   const dispatch = useGlobalDispatch();
 
+  const displayFromStore =
+    userInfo?.sys_user?.display_name ||
+    userInfo?.sys_user?.username ||
+    'Admin';
+
   const [name, setName] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
-  /** 是否已设置密码 / 谷歌验证 — 对齐两稿态 */
   const [passwordSet, setPasswordSet] = useState(true);
   const [gaSet, setGaSet] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!visible) return;
-    const n = userInfo?.name || 'Super admin';
-    setName(n);
-    setDraftName(n);
+    setName(displayFromStore);
+    setDraftName(displayFromStore);
     setEditingName(false);
-    setAvatarUrl(userInfo?.avatar);
+    setAvatarUrl(undefined);
     setPasswordSet(true);
     setGaSet(true);
-  }, [visible, userInfo?.name, userInfo?.avatar]);
+  }, [visible, displayFromStore]);
 
   const persistName = (next: string) => {
     const trimmed = next.trim();
@@ -60,11 +64,15 @@ export default function UserCenterModal({
       payload: {
         userInfo: {
           ...userInfo,
-          name: trimmed
+          sys_user: {
+            ...userInfo?.sys_user,
+            display_name: trimmed
+          },
+          permissions: userInfo?.permissions ?? {}
         }
       }
     });
-    Message.success('名称已更新');
+    Message.success('名称已更新（仅本地，接口未就绪）');
   };
 
   const onPickAvatar = (file?: File | null) => {
@@ -75,29 +83,18 @@ export default function UserCenterModal({
     }
     const url = URL.createObjectURL(file);
     setAvatarUrl(url);
-    dispatch({
-      type: 'update-userInfo',
-      payload: {
-        userInfo: {
-          ...userInfo,
-          avatar: url
-        }
-      }
-    });
-    Message.success('头像已更新');
+    Message.success('头像已更新（仅本地，接口未就绪）');
   };
 
   const resetPassword = () => {
     Modal.confirm({
       title: '重置密码',
-      content: passwordSet
-        ? '确认重置当前账号密码？重置后需使用新密码登录。'
-        : '确认为当前账号设置密码？',
+      content: '接口未就绪',
       okText: '确认',
       cancelText: '取消',
       onOk: () => {
         setPasswordSet(true);
-        Message.success(passwordSet ? '密码已重置（mock）' : '密码已设置（mock）');
+        Message.warning('接口未就绪');
       }
     });
   };
@@ -105,15 +102,13 @@ export default function UserCenterModal({
   const resetGa = () => {
     Modal.confirm({
       title: '重置谷歌验证',
-      content: gaSet
-        ? '确认重置谷歌验证？重置后需重新绑定。'
-        : '确认为当前账号绑定谷歌验证？',
+      content: '接口未就绪',
       okText: '确认',
       cancelText: '取消',
       okButtonProps: gaSet ? { status: 'danger' } : undefined,
       onOk: () => {
         setGaSet(true);
-        Message.success(gaSet ? '谷歌验证已重置（mock）' : '谷歌验证已绑定（mock）');
+        Message.warning('接口未就绪');
       }
     });
   };
@@ -182,7 +177,6 @@ export default function UserCenterModal({
         </div>
 
         <div className="min-w-0 flex-1 pr-8">
-          {/* 名称 — 743:24050 / 743:24341 */}
           <div className="mb-6">
             <div className="border-0 border-b border-solid border-[rgba(0,0,0,0.08)] py-3">
               <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
@@ -238,7 +232,6 @@ export default function UserCenterModal({
             </div>
           </div>
 
-          {/* 帐号安全 */}
           <div className="border-0 border-b border-solid border-[rgba(0,0,0,0.08)] py-3">
             <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
               帐号安全
@@ -277,7 +270,7 @@ export default function UserCenterModal({
               className={actionClass(gaSet)}
               onClick={resetGa}
             >
-              重置密码
+              重置谷歌验证
             </button>
           </div>
         </div>

@@ -5,7 +5,7 @@
  *   npm run openapi
  *   OPENAPI_YAML_URL=https://... npm run openapi
  *
- * 生成目录：src/shared/api/admin（不覆盖手写 biz.ts / 旧 mock 接口）
+ * 生成目录：src/shared/api/admin（禁止手改；业务直接引用生成函数）
  *
  * 文档来源：OPENAPI_YAML_URL 或
  *   https://im-api-gateway.djftech.app/docs/admin/openapi.yaml
