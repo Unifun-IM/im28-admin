@@ -17,16 +17,28 @@ import {
   IconFile,
   IconMute,
   IconPhone,
-  IconPlayArrowFill,
   IconPlus,
   IconRight,
   IconSearch,
-  IconSound,
   IconVideoCamera
 } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import { getChatMessages, getUserChatBook } from '@shared/api/biz';
 import emptyLogo from '../assets/chat-empty-logo.svg';
+import iconChatBubbleTailPeer from '../assets/icon-chat-bubble-tail-peer.svg';
+import iconChatBubbleTailSelf from '../assets/icon-chat-bubble-tail-self.svg';
+import iconChatPhoneDisabledPeer from '../assets/icon-chat-phone-disabled-peer.svg';
+import iconChatPhoneDisabledSelf from '../assets/icon-chat-phone-disabled-self.svg';
+import iconChatPhonePeer from '../assets/icon-chat-phone-peer.svg';
+import iconChatPhoneSelf from '../assets/icon-chat-phone-self.svg';
+import iconChatPlay from '../assets/icon-chat-play.svg';
+import iconChatRead from '../assets/icon-chat-read.svg';
+import iconChatVideoOffPeer from '../assets/icon-chat-video-off-peer.svg';
+import iconChatVideoOffSelf from '../assets/icon-chat-video-off-self.svg';
+import iconChatVideoPeer from '../assets/icon-chat-video-peer.svg';
+import iconChatVideoSelf from '../assets/icon-chat-video-self.svg';
+import iconChatVoicePeer from '../assets/icon-chat-voice-peer.svg';
+import iconChatVoiceSelf from '../assets/icon-chat-voice-self.svg';
 import iconClose from '../assets/icon-close.svg';
 import iconContacts from '../assets/icon-contacts.svg';
 import iconPhone from '../assets/icon-phone.svg';
@@ -37,6 +49,41 @@ import useElementHeight from './useElementHeight';
 import './user-chat-modal.less';
 
 const { Text } = Typography;
+
+/** 气泡内时间 + 已读（Figma 791:31980） */
+function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
+  if (!time) return null;
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-0.5 text-[10px] leading-[1.3] ${
+        isSelf ? 'text-white/40' : 'text-[rgba(0,0,0,0.4)]'
+      }`}
+    >
+      {time}
+      {isSelf ? (
+        <img src={iconChatRead} alt="" className="size-3" />
+      ) : null}
+    </span>
+  );
+}
+
+function bubbleShell(isSelf: boolean) {
+  return isSelf
+    ? 'relative inline-flex max-w-full items-end gap-2 rounded-xl bg-[#7b61ff] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
+    : 'relative inline-flex max-w-full items-end gap-2 rounded-xl border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] leading-[1.3] text-arco-text-1';
+}
+
+function BubbleTail({ isSelf }: { isSelf: boolean }) {
+  return (
+    <img
+      src={isSelf ? iconChatBubbleTailSelf : iconChatBubbleTailPeer}
+      alt=""
+      className={`pointer-events-none absolute bottom-0 h-[15px] w-3 ${
+        isSelf ? '-right-1.5' : '-left-1.5'
+      }`}
+    />
+  );
+}
 
 type NavTab = 'sessions' | 'contacts' | 'calls';
 
@@ -565,9 +612,10 @@ function SessionList({
         const selected = item.id === activeId;
         return (
           <li key={item.id}>
+            {/* Cell 选中：Figma 791:33254 — 整行 rgba(0,0,0,0.06)，无圆角 */}
             <button
               type="button"
-              className={`flex w-full cursor-pointer items-center gap-4 border-0 px-4 py-3 text-left ${
+              className={`flex w-full cursor-pointer items-center gap-4 border-0 pl-4 text-left ${
                 selected
                   ? 'bg-[rgba(0,0,0,0.06)]'
                   : 'bg-transparent hover:bg-[rgba(0,0,0,0.03)]'
@@ -579,23 +627,25 @@ function SessionList({
               ) : (
                 <OnlineAvatar name={item.name} size={40} online={item.online} />
               )}
-              <div className="min-w-0 flex-1 border-b border-solid border-[rgba(120,120,128,0.12)] pb-3 pt-1">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-1">
-                    <Text className="!m-0 truncate text-[16px] !text-arco-text-1">
+              <div className="flex min-w-0 flex-1 items-center border-b border-solid border-[rgba(120,120,128,0.12)] py-4 pr-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Text className="!m-0 min-w-0 flex-1 truncate text-[16px] leading-[1.5] !text-arco-text-1">
                       {item.name}
                     </Text>
-                    {item.muted ? (
-                      <IconMute className="shrink-0 text-[14px] text-arco-text-3" />
-                    ) : null}
+                    <div className="flex shrink-0 items-center gap-1">
+                      {item.muted ? (
+                        <IconMute className="text-[12px] text-arco-text-3" />
+                      ) : null}
+                      <span className="text-[10px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+                        {item.time}
+                      </span>
+                    </div>
                   </div>
-                  <span className="shrink-0 text-[12px] text-arco-text-3">
-                    {item.time}
-                  </span>
+                  <p className="m-0 truncate text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+                    {item.lastMessage}
+                  </p>
                 </div>
-                <p className="m-0 truncate text-[12px] leading-[1.3] text-arco-text-3">
-                  {item.lastMessage}
-                </p>
               </div>
             </button>
           </li>
@@ -1047,18 +1097,26 @@ function ChatPane({
 
 function MessageRow({ msg }: { msg: ChatMsg }) {
   if (msg.msgType === 'date') {
+    const label = msg.dateLabel || msg.content || '';
+    const relative = /昨天|今天|星期|更早/.test(label);
     return (
-      <div className="flex justify-center px-4 py-2">
-        <span className="rounded-full bg-[rgba(0,0,0,0.45)] px-3 py-0.5 text-[12px] text-white">
-          {msg.dateLabel || msg.content}
-        </span>
+      <div className="flex justify-center px-4 py-1">
+        {relative ? (
+          <span className="px-1 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+            {label}
+          </span>
+        ) : (
+          <span className="rounded-full bg-black px-1.5 py-1 text-[12px] leading-none text-white">
+            {label}
+          </span>
+        )}
       </div>
     );
   }
 
   if (msg.msgType === 'system') {
     return (
-      <div className="px-10 py-2 text-center text-[12px] leading-4 text-arco-text-3">
+      <div className="px-4 py-1 text-center text-[12px] leading-4 text-[rgba(0,0,0,0.4)]">
         {msg.content}
       </div>
     );
@@ -1068,43 +1126,46 @@ function MessageRow({ msg }: { msg: ChatMsg }) {
 
   return (
     <div
-      className={`flex gap-2 px-4 py-1 ${
-        isSelf ? 'justify-end' : 'items-end justify-start'
+      className={`flex items-end gap-1 px-4 py-1 ${
+        isSelf ? 'justify-end' : 'justify-start'
       }`}
     >
-      {!isSelf ? (
-        <Avatar size={24} className="shrink-0">
-          {(msg.senderName || '?').slice(0, 1)}
+      {!isSelf && msg.senderName ? (
+        <Avatar size={24} className="mb-0.5 shrink-0">
+          {msg.senderName.slice(0, 1)}
         </Avatar>
       ) : null}
       <div
-        className={`flex max-w-[70%] flex-col gap-1 ${
+        className={`flex min-w-0 max-w-[min(100%,520px)] flex-col gap-1 ${
           isSelf ? 'items-end' : 'items-start'
         }`}
       >
         {!isSelf && msg.senderName ? (
-          <span className="text-[12px] text-arco-text-3">{msg.senderName}</span>
+          <span className="text-[10px] leading-none text-[rgba(0,0,0,0.6)]">
+            {msg.senderName}
+          </span>
         ) : null}
         <Bubble msg={msg} isSelf={isSelf} />
-        {msg.time ? (
-          <span className="text-[11px] text-arco-text-3">{msg.time}</span>
-        ) : null}
       </div>
     </div>
   );
 }
 
 function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
-  const base = isSelf
-    ? 'rounded-xl bg-[rgb(var(--primary-6))] px-2 py-1.5 text-[14px] text-white'
-    : 'rounded-xl border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] text-arco-text-1';
+  const shell = bubbleShell(isSelf);
+  const rejected = Boolean(msg.callStatus?.includes('拒绝'));
+  const isVideo =
+    msg.content?.includes('视频') || msg.callStatus?.includes('视频');
 
   if (msg.msgType === 'image') {
     return (
-      <div className="flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[var(--color-fill-2,#eee)] text-center text-[12px] leading-[1.4] text-arco-text-3">
+      <div className="relative flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[#eee] text-center text-[12px] leading-[1.4] text-arco-text-3">
         图片
         <br />
         最大宽 180px
+        <span className="absolute bottom-2 right-2">
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </span>
       </div>
     );
   }
@@ -1112,54 +1173,93 @@ function Bubble({ msg, isSelf }: { msg: ChatMsg; isSelf: boolean }) {
   if (msg.msgType === 'video') {
     return (
       <div className="relative flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[rgba(0,0,0,0.45)] text-center text-[12px] leading-[1.4] text-white">
-        <IconPlayArrowFill className="absolute text-[40px] text-white/90" />
+        <img src={iconChatPlay} alt="" className="absolute size-10" />
         <span className="mt-16">视频</span>
+        <span className="absolute bottom-2 right-2">
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </span>
       </div>
     );
   }
 
   if (msg.msgType === 'voice') {
     return (
-      <div className={`inline-flex items-center gap-2 ${base}`}>
-        <IconSound />
-        <span>{msg.duration || msg.content || "1\""}</span>
+      <div className={shell}>
+        <span className="inline-flex items-center gap-2">
+          <img
+            src={isSelf ? iconChatVoiceSelf : iconChatVoicePeer}
+            alt=""
+            className="h-4 w-auto"
+          />
+          <span>{msg.duration || msg.content || "1\""}</span>
+        </span>
+        <BubbleMeta time={msg.time} isSelf={isSelf} />
+        <BubbleTail isSelf={isSelf} />
       </div>
     );
   }
 
   if (msg.msgType === 'file') {
     return (
-      <div className={`inline-flex min-w-[140px] items-center gap-2 ${base}`}>
-        <IconFile className="text-[20px]" />
-        <div className="min-w-0">
-          <div className="truncate">{msg.fileName || msg.content}</div>
-          <div
-            className={`text-[12px] ${
-              isSelf ? 'text-white/50' : 'text-arco-text-3'
-            }`}
-          >
-            {msg.fileSize || ''}
+      <div className={`${shell} min-w-[100px] flex-col items-stretch gap-1`}>
+        <div className="flex items-center gap-2">
+          <IconFile className="text-[20px]" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[14px] leading-[1.3]">
+              {msg.fileName || msg.content}
+            </div>
+            <div
+              className={`text-[12px] ${
+                isSelf ? 'text-white/40' : 'text-[rgba(0,0,0,0.4)]'
+              }`}
+            >
+              {msg.fileSize || ''}
+            </div>
           </div>
         </div>
+        <div className={`flex ${isSelf ? 'justify-end' : 'justify-start'}`}>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </div>
+        <BubbleTail isSelf={isSelf} />
       </div>
     );
   }
 
   if (msg.msgType === 'call') {
+    const label = rejected
+      ? msg.callStatus || '已拒绝'
+      : msg.content || '通话';
+    let iconSrc = isSelf ? iconChatPhoneSelf : iconChatPhonePeer;
+    if (rejected) {
+      iconSrc = isVideo
+        ? isSelf
+          ? iconChatVideoOffSelf
+          : iconChatVideoOffPeer
+        : isSelf
+          ? iconChatPhoneDisabledSelf
+          : iconChatPhoneDisabledPeer;
+    } else if (isVideo) {
+      iconSrc = isSelf ? iconChatVideoSelf : iconChatVideoPeer;
+    }
     return (
-      <div className={`inline-flex items-center gap-2 ${base}`}>
-        {msg.content?.includes('视频') ? <IconVideoCamera /> : <IconPhone />}
-        <span>{msg.content}</span>
-        {msg.callStatus ? (
-          <span className={isSelf ? 'text-white/60' : 'text-arco-text-3'}>
-            {msg.callStatus}
-          </span>
-        ) : null}
+      <div className={shell}>
+        <span className="inline-flex items-center gap-2">
+          <span>{label}</span>
+          <img src={iconSrc} alt="" className="size-4" />
+        </span>
+        <BubbleMeta time={msg.time} isSelf={isSelf} />
+        <BubbleTail isSelf={isSelf} />
       </div>
     );
   }
 
   return (
-    <div className={`whitespace-pre-wrap break-words ${base}`}>{msg.content}</div>
+    <div className={shell}>
+      <p className="m-0 min-w-0 whitespace-pre-wrap break-words">
+        {msg.content}
+      </p>
+      <BubbleMeta time={msg.time} isSelf={isSelf} />
+      <BubbleTail isSelf={isSelf} />
+    </div>
   );
 }
