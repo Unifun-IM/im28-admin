@@ -10,14 +10,15 @@ IM 管理后台。基于 **Arco Design Pro（Vite 精简版）** 能力，按 **
 - Arco Design + `@arco-themes/react-arco-pro`
 - React Router v6
 - MobX / mobx-react-lite
-- `@umijs/openapi` 生成登录等基础接口；业务接口暂用手写 `@shared/api/biz` + Mock
+- `@umijs/openapi` 生成 Admin 网关接口至 `src/shared/api/admin`；未进文档的业务仍用手写 `@shared/api/biz` + Mock
 - Less Modules、MockJS、i18n（内置 zh-CN / en-US）
 
 ## 快速开始
 
 ```bash
 npm install
-# OPENAPI_YAML_URL=https://... npm run openapi   # 有远程文档后再生成
+cp .env.example .env   # 本机环境，勿提交
+npm run openapi          # 从远程 OpenAPI 生成 Admin API
 npm run dev
 npm run build
 npm test
@@ -63,20 +64,27 @@ src/
 
 ## 接口引入方式（OpenAPI 生成）
 
+Admin 网关文档：[docs/admin/openapi.yaml](https://im-api-gateway.djftech.app/docs/admin/openapi.yaml)。
+
 ```ts
-import { postApiUserLogin } from '@shared/api/user'
-import { setAccessToken } from '@shared/api/request'
+import { postV1AdminAuthLogin } from '@shared/api/admin/auth';
+import { postV1AdminUsersList } from '@shared/api/admin/users';
+import { setAccessToken } from '@shared/api/request';
+
+const res = await postV1AdminAuthLogin({ username: 'admin', password: '***' });
+// res: AdminAPI.SysUserLoginEnvelope（code === 0 时带 data）
 ```
 
 | 路径 | 职责 |
 | --- | --- |
-| `OPENAPI_YAML_URL` | 远程 OpenAPI YAML 地址 |
-| `npm run openapi` | 拉取远程 YAML→JSON + 生成 `src/shared/api/*` |
-| `shared/api/request.ts` | 手写 axios 单例（生成代码依赖它，勿删） |
-| `shared/api/biz.ts` | **业务手写 API**（mock 阶段） |
-| `src/shared/api/user.ts` 等 | OpenAPI **生成物**，不要手改 |
+| `OPENAPI_YAML_URL` | 远程 OpenAPI 地址（见 `.env.example`） |
+| `npm run openapi` | 拉取远程 yaml→json + 生成 `src/shared/api/admin/*` |
+| `shared/api/request.ts` | axios 单例（Bearer / `X-Request-ID` / `X-Language`，勿删） |
+| `shared/api/admin/*` | **Admin OpenAPI 生成物**，不要手改 |
+| `shared/api/biz.ts` | 尚未进 OpenAPI 的业务手写 API（mock） |
+| `shared/api/user.ts` 等 | 旧演示接口，仍可给登录 mock 用 |
 
-环境变量见 `.env.example`（`VITE_API_BASE_URL`）。
+联调时复制 `cp .env.example .env`，按需改 `VITE_API_BASE_URL`。
 
 ## 脚本
 
@@ -88,4 +96,4 @@ import { setAccessToken } from '@shared/api/request'
 | `npm run lint` | ESLint |
 | `npm run typecheck` | 仅类型检查 |
 | `npm test` | Vitest |
-| `npm run openapi` | 从远程 OpenAPI 生成 `src/shared/api` |
+| `npm run openapi` | 从远程 OpenAPI 生成 `src/shared/api/admin` |

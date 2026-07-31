@@ -104,10 +104,24 @@ const instance = axios.create({
   timeout: 15000
 });
 
+function createRequestId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`);
+  }
+  // Admin OpenAPI：除健康检查外业务接口要求透传 X-Request-ID
+  if (!config.headers.get('X-Request-ID')) {
+    config.headers.set('X-Request-ID', createRequestId());
+  }
+  if (!config.headers.get('X-Language')) {
+    config.headers.set('X-Language', 'zh-CN');
   }
   return config;
 });
