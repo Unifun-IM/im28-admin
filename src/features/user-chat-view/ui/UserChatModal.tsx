@@ -174,16 +174,23 @@ export default function UserChatModal({
       .then((res) => {
         const data = res as unknown as ChatBook;
         setBook(data);
-        if (!target) return;
-        if (target.type === 'group') {
-          const g = data.groups.find((x) => x.id === target.id);
-          if (g) setChat(g);
+        if (target) {
+          if (target.type === 'group') {
+            const g = data.groups.find((x) => x.id === target.id);
+            if (g) setChat(g);
+            else setChat(targetToPeer(target));
+            return;
+          }
+          const s = data.sessions.find((x) => x.id === target.id);
+          if (s) setChat(s);
           else setChat(targetToPeer(target));
           return;
         }
-        const s = data.sessions.find((x) => x.id === target.id);
-        if (s) setChat(s);
-        else setChat(targetToPeer(target));
+        // 用户入口：默认打开会话列表第一项，避免右侧空白
+        if (scene === 'user' && data.sessions?.length) {
+          setNav('sessions');
+          setChat(data.sessions[0]);
+        }
       })
       .finally(() => setBookLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -331,15 +338,15 @@ export default function UserChatModal({
       maskClosable
       className="use-user-chat-modal"
       wrapClassName="use-user-chat-modal-wrap"
-      style={{ width: 1024 }}
+      style={{ width: 'min(1024px, 90vw)' }}
     >
-      <div className="flex h-[768px] w-full overflow-hidden rounded-[24px]">
-        <aside className="flex w-16 shrink-0 flex-col items-center justify-between border-r border-solid border-[rgba(120,120,128,0.12)] bg-[var(--color-fill-1,#f3f3f3)] px-2 py-3">
+      <div className="flex h-[min(768px,90vh)] max-h-[90vh] w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
+        <aside className="flex w-16 shrink-0 flex-col items-center justify-between border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
               aria-label="关闭"
-              className="inline-flex size-10 cursor-pointer items-center justify-center rounded-lg border-0 bg-[var(--color-fill-2,#e5e6eb)] p-0"
+              className="inline-flex size-10 cursor-pointer items-center justify-center rounded-lg border-0 bg-[#e5e6eb] p-0"
               onClick={onClose}
             >
               <img src={iconClose} alt="" className="size-5" />
@@ -374,7 +381,7 @@ export default function UserChatModal({
           </div>
         </aside>
 
-        <section className="flex w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[var(--color-bg-1,#fafafa)]">
+        <section className="flex w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#fafafa]">
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-2">
             <Input
               allowClear
@@ -388,7 +395,7 @@ export default function UserChatModal({
               <button
                 type="button"
                 aria-label="添加"
-                className="inline-flex size-8 shrink-0 cursor-default items-center justify-center rounded-md border-0 bg-[var(--color-fill-2,#f0f0f0)] p-0 text-arco-text-2"
+                className="inline-flex size-8 shrink-0 cursor-default items-center justify-center rounded-md border-0 bg-[#f0f0f0] p-0 text-arco-text-2"
               >
                 <IconPlus className="text-[16px]" />
               </button>
@@ -427,7 +434,7 @@ export default function UserChatModal({
           </div>
         </section>
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-fill-1,#f3f3f3)]">
+        <section className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f3f3f3]">
           {chat ? (
             <ChatPane
               peer={chat}
@@ -494,7 +501,7 @@ function GroupAvatar({
   if (tiles.length >= 4) {
     return (
       <div
-        className="grid shrink-0 grid-cols-2 grid-rows-2 overflow-hidden rounded-full bg-[var(--color-fill-2,#eee)]"
+        className="grid shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-hidden rounded-full bg-[var(--color-fill-2,#eee)]"
         style={{ width: size, height: size }}
       >
         {tiles.map((src, i) => (
@@ -506,7 +513,7 @@ function GroupAvatar({
   // 无头像时用色块拼贴，贴近稿里的群头像观感
   return (
     <div
-      className="grid shrink-0 grid-cols-2 grid-rows-2 overflow-hidden rounded-full"
+      className="grid shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-hidden rounded-full bg-[var(--color-fill-2,#eee)]"
       style={{ width: size, height: size }}
       title={name}
     >
@@ -772,7 +779,7 @@ function FriendDetail({
   onSendMessage: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-fill-1,#f3f3f3)]">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[#f3f3f3]">
       <div className="flex flex-col items-center gap-4 px-4 pb-4 pt-6">
         <Avatar size={80}>{peer.name.slice(0, 1)}</Avatar>
         <div className="flex flex-col items-center gap-2">
@@ -781,7 +788,7 @@ function FriendDetail({
           </p>
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[var(--color-fill-2,#eee)] px-2 py-1"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[#eee] px-2 py-1"
             onClick={() => {
               copy(peer.id);
               Message.success('已复制');
@@ -834,7 +841,7 @@ function FriendDetail({
   );
 }
 
-/** 通讯录群详情 — Figma 791:30959 */
+/** 通讯录群详情 — Figma 791:31168 */
 function GroupProfile({
   peer,
   onEnterChat
@@ -843,34 +850,37 @@ function GroupProfile({
   onEnterChat: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-fill-1,#f3f3f3)]">
-      <div className="flex flex-col items-center gap-4 px-4 pb-4 pt-10">
-        <GroupAvatar avatars={peer.avatars} name={peer.name} size={80} />
-        <div className="flex flex-col items-center gap-2">
-          <p className="m-0 text-center text-[18px] font-medium leading-[1.5] text-arco-text-1">
-            {peer.name}
-          </p>
-          <button
-            type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[var(--color-fill-2,#eee)] px-2 py-1"
-            onClick={() => {
-              copy(peer.id);
-              Message.success('已复制');
-            }}
-          >
-            <span className="text-[12px] leading-none text-[rgb(var(--link-6))]">
-              ID：{peer.id}
-            </span>
-            <IconCopy className="text-[12px] text-[rgb(var(--link-6))]" />
-          </button>
+    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[#f3f3f3] px-20">
+      {/* NavBar 占位 56px */}
+      <div className="h-14 w-full shrink-0" />
+      <div className="flex w-full flex-col items-center pb-4 pl-4">
+        <div className="flex flex-col items-center gap-4">
+          <GroupAvatar avatars={peer.avatars} name={peer.name} size={80} />
+          <div className="flex flex-col items-center gap-2">
+            <p className="m-0 text-center text-[18px] font-medium leading-[1.5] text-arco-text-1">
+              {peer.name}
+            </p>
+            <button
+              type="button"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[#eee] px-2 py-1"
+              onClick={() => {
+                copy(peer.id);
+                Message.success('已复制');
+              }}
+            >
+              <span className="text-[12px] leading-none text-[rgb(var(--link-6))]">
+                ID：{peer.id}
+              </span>
+              <IconCopy className="text-[16px] text-[rgb(var(--link-6))]" />
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className="mt-auto px-4 pb-10 pt-6">
+      <div className="w-full p-4">
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !text-[14px]"
+          className="!h-12 !rounded-xl !text-[14px] !font-medium"
           onClick={() => onEnterChat(peer)}
         >
           进入群聊
@@ -936,8 +946,8 @@ function ChatPane({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-solid border-[rgba(120,120,128,0.12)] bg-[var(--color-bg-2,#fff)] px-4">
+    <div className="flex h-full min-h-0 flex-col bg-[#f3f3f3]">
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-4">
         <button
           type="button"
           aria-label="返回"

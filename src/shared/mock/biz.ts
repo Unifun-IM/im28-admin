@@ -503,7 +503,7 @@ setupMock({
     }));
     Mock.mock(new RegExp('/api/biz/trade/redpacket-config'), 'post', () => ({ ok: true }));
 
-    Mock.mock(new RegExp('/api/biz/session/user'), (options: { url: string }) => {
+    Mock.mock(new RegExp('/api/biz/session/user(\\?|$)'), (options: { url: string }) => {
       const q = parseQuery(options.url);
       return pageList(50, Number(q.page), Number(q.pageSize), () =>
         Mock.mock({

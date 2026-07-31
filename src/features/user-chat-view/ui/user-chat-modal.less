@@ -1,7 +1,8 @@
-/* —— 用户查聊天 Modal（Figma 791:30433，1024×768 / 圆角 24） —— */
+/* —— 用户查聊天 Modal（Figma 791:30433，1024×768 / 圆角 24，上限 90vw×90vh） —— */
 .arco-modal.use-user-chat-modal {
-  width: 1024px;
-  max-width: calc(100vw - 48px);
+  width: min(1024px, 90vw);
+  max-width: 90vw;
+  max-height: 90vh;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
@@ -19,7 +20,7 @@
 
   .use-user-chat-search.arco-input-inner-wrapper {
     height: 32px;
-    background: var(--color-fill-2, #f0f0f0);
+    background: #f0f0f0;
     border: none;
     border-radius: 6px;
     padding: 0 12px;
@@ -58,33 +59,64 @@
   }
 
   .use-chat-history-tabs.arco-tabs {
-    .arco-tabs-header-nav::before {
-      display: none;
+    .arco-tabs-header-nav {
+      &::before {
+        display: none;
+      }
+    }
+
+    .arco-tabs-header {
+      height: 48px;
     }
 
     .arco-tabs-header-title {
-      font-size: 16px;
-      line-height: 24px;
-      color: var(--color-text-3);
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
       margin: 0;
-      padding: 12px 16px;
+      padding: 0 16px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+      color: rgba(0, 0, 0, 0.4);
+
+      /* Figma：选中下划线 16×3 居中圆角条，不用 Arco ink（强制宽度会左偏） */
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 16px;
+        height: 3px;
+        border-radius: 999px;
+        background: transparent;
+        transform: translateX(-50%);
+        transition: background-color 0.15s ease;
+      }
+    }
+
+    .arco-tabs-header-title:hover {
+      color: var(--color-text-1, #1d2129);
     }
 
     .arco-tabs-header-title-active,
     .arco-tabs-header-title-active:hover {
-      color: var(--color-text-1);
-      font-weight: 500;
+      color: var(--color-text-1, #1d2129);
+      font-weight: 400;
+
+      &::after {
+        background: var(--color-text-1, #1d2129);
+      }
     }
 
     .arco-tabs-header-ink {
-      height: 3px;
-      border-radius: 999px;
-      background: var(--color-text-1);
-      width: 16px !important;
+      display: none !important;
     }
 
-    /* 「全部」Tab 有搜索结果时用品牌色下划线（全局搜索态） */
-    &.is-all-active .arco-tabs-header-ink {
+    /* 「全部」Tab 有搜索结果时用品牌色下划线 */
+    &.is-all-active .arco-tabs-header-title-active::after {
       background: rgb(var(--primary-6));
     }
 

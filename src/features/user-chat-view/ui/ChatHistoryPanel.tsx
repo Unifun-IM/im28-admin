@@ -183,7 +183,7 @@ export default function ChatHistoryPanel({
       <Tabs
         activeTab={tab}
         onChange={(k) => setTab(k as ChatHistoryTab)}
-        className={`use-chat-history-tabs shrink-0 px-2 ${
+        className={`use-chat-history-tabs shrink-0 px-4 ${
           tab === 'all' && searched ? 'is-all-active' : ''
         }`}
       >
@@ -321,10 +321,10 @@ export default function ChatHistoryPanel({
                     >
                       <div className="flex items-center gap-2">
                         <Avatar size={28}>{item.senderName.slice(0, 1)}</Avatar>
-                        <span className="flex-1 text-[14px] text-arco-text-1">
+                        <span className="min-w-0 flex-1 truncate text-[14px] text-arco-text-1">
                           {item.senderName}
                         </span>
-                        <span className="text-[12px] text-arco-text-3">
+                        <span className="shrink-0 whitespace-nowrap text-[12px] text-arco-text-3">
                           {item.time}
                         </span>
                       </div>
