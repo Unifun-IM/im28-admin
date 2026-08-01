@@ -37,7 +37,6 @@ export const routes: IRoute[] = [
           { name: 'menu.user.whitelist', key: 'user/whitelist' }
         ]
       },
-      { name: 'menu.user.inviteCode', key: 'user/invite-code' },
       { name: 'menu.user.logs', key: 'user/logs' }
     ]
   },
@@ -80,6 +79,8 @@ export const routes: IRoute[] = [
   {
     name: 'menu.trade',
     key: 'trade',
+    /** 交易模块暂未对接，侧栏先隐藏 */
+    ignore: true,
     children: [
       { name: 'menu.trade.redpacketRecords', key: 'trade/redpacket-records' },
       { name: 'menu.trade.redpacketConfig', key: 'trade/redpacket-config' },
@@ -107,6 +108,8 @@ export const routes: IRoute[] = [
   {
     name: 'menu.risk',
     key: 'risk',
+    /** 风控模块暂未对接，侧栏先隐藏 */
+    ignore: true,
     children: [
       { name: 'menu.risk.ipBlacklist', key: 'risk/ip-blacklist' }
     ]
