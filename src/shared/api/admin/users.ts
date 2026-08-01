@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from "@shared/api/request";
 
-/** 拉黑用户 需要 `admin.users.write` 权限；拉黑成功后立即撤销该用户全部登录态。支持限时和永久拉黑。 POST /v1/admin/users/ban */
+/** 拉黑用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；拉黑成功后立即撤销该用户全部登录态。支持限时和永久拉黑。 POST /v1/admin/users/ban */
 export async function postV1AdminUsersBan(
   body: AdminAPI.AdminBanUserRequest,
   options?: { [key: string]: any }
@@ -17,7 +17,7 @@ export async function postV1AdminUsersBan(
   });
 }
 
-/** 批量拉黑用户 需要 `admin.users.write` 权限；单次最多操作 100 个用户。全部用户在同一事务中处理，任一用户不存在或处理失败时整批回滚；成功后撤销全部目标用户的登录态。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-ban */
+/** 批量拉黑用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；单次最多操作 100 个用户。全部用户在同一事务中处理，任一用户不存在或处理失败时整批回滚；成功后撤销全部目标用户的登录态。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-ban */
 export async function postV1AdminUsersBatchBan(
   body: AdminAPI.AdminBatchBanUserRequest,
   options?: { [key: string]: any }
@@ -32,7 +32,7 @@ export async function postV1AdminUsersBatchBan(
   });
 }
 
-/** 批量解禁用户 需要 `admin.users.write` 权限；单次最多操作 100 个用户，且全部用户都必须处于拉黑状态。全部用户在同一事务中处理，任一用户不存在、状态不满足或处理失败时整批回滚。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-unban */
+/** 批量解禁用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；单次最多操作 100 个用户，且全部用户都必须处于拉黑状态。全部用户在同一事务中处理，任一用户不存在、状态不满足或处理失败时整批回滚。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-unban */
 export async function postV1AdminUsersBatchUnban(
   body: AdminAPI.AdminBatchUnbanUserRequest,
   options?: { [key: string]: any }
@@ -95,7 +95,7 @@ export async function postV1AdminUsersList(
   });
 }
 
-/** 查询用户操作日志 需要 `admin.users.read` 权限；当前仅固定返回空列表，操作日志采集与查询逻辑尚未接入。 POST /v1/admin/users/operation-logs/list */
+/** 查询用户操作日志 需要 `admin.users.read` 权限；支持按用户、行为类型、客户端类型和操作时间筛选，并按操作时间排序及分页。当前用户行为采集与数据库查询尚未接入，因此固定返回空列表和总数 0。 POST /v1/admin/users/operation-logs/list */
 export async function postV1AdminUsersOperationLogsList(
   body: AdminAPI.AdminListUserOperationLogRequest,
   options?: { [key: string]: any }
@@ -113,7 +113,22 @@ export async function postV1AdminUsersOperationLogsList(
   );
 }
 
-/** 解禁用户 需要 `admin.users.write` 权限；仅拉黑状态的用户可以人工解禁。 POST /v1/admin/users/unban */
+/** 搜索用户 需要 `admin.users.read` 权限。根据指定字段搜索 C 端用户，固定最多返回 20 条；用户 ID、手机号、邮箱和用户账号精确匹配，用户昵称包含匹配。 POST /v1/admin/users/search */
+export async function postV1AdminUsersSearch(
+  body: AdminAPI.AdminSearchUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminSearchUserEnvelope>("/v1/admin/users/search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 解禁用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；仅拉黑状态的用户可以人工解禁。 POST /v1/admin/users/unban */
 export async function postV1AdminUsersUnban(
   body: AdminAPI.AdminUnbanUserRequest,
   options?: { [key: string]: any }
@@ -128,7 +143,7 @@ export async function postV1AdminUsersUnban(
   });
 }
 
-/** 添加平台白名单用户 需要 `admin.users.write` 权限；只支持已注册用户。重复添加按成功处理并保留原加入记录；加入白名单不会解除账号封禁。 POST /v1/admin/users/whitelist/add */
+/** 添加平台白名单用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；只支持已注册用户。重复添加按成功处理并保留原加入记录；加入白名单不会解除账号封禁。 POST /v1/admin/users/whitelist/add */
 export async function postV1AdminUsersWhitelistAdd(
   body: AdminAPI.AdminAddWhitelistUserRequest,
   options?: { [key: string]: any }
@@ -143,7 +158,7 @@ export async function postV1AdminUsersWhitelistAdd(
   });
 }
 
-/** 批量移除平台白名单用户 需要 `admin.users.write` 权限；单次最多 100 个用户，不在白名单中的用户不会导致整批失败。 POST /v1/admin/users/whitelist/batch-remove */
+/** 批量移除平台白名单用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；单次最多 100 个用户，不在白名单中的用户不会导致整批失败。 POST /v1/admin/users/whitelist/batch-remove */
 export async function postV1AdminUsersWhitelistBatchRemove(
   body: AdminAPI.AdminBatchRemoveWhitelistUserRequest,
   options?: { [key: string]: any }
@@ -179,7 +194,7 @@ export async function postV1AdminUsersWhitelistList(
   );
 }
 
-/** 移除平台白名单用户 需要 `admin.users.write` 权限；用户不在白名单时仍按成功处理。 POST /v1/admin/users/whitelist/remove */
+/** 移除平台白名单用户 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码；用户不在白名单时仍按成功处理。 POST /v1/admin/users/whitelist/remove */
 export async function postV1AdminUsersWhitelistRemove(
   body: AdminAPI.AdminRemoveWhitelistUserRequest,
   options?: { [key: string]: any }

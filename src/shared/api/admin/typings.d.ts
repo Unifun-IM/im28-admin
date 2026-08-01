@@ -21,6 +21,8 @@ declare namespace AdminAPI {
     user_id: string;
     /** 可选的加入白名单原因；传入时不能仅包含空白字符。 */
     reason?: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminBannedUserWrap = {
@@ -49,6 +51,8 @@ declare namespace AdminAPI {
     banned_until?: string;
     /** 原因说明，不能仅包含空白字符。 */
     reason_description: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminBatchBanUserRequest = {
@@ -62,11 +66,15 @@ declare namespace AdminAPI {
     banned_until?: string;
     /** 原因说明，应用于本批全部用户，不能仅包含空白字符。 */
     reason_description: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；整批操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminBatchRemoveWhitelistUserRequest = {
     /** 需要移出白名单的用户 ID，单次最多 100 个。 */
     user_ids: string[];
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；整批操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminBatchUnbanUserRequest = {
@@ -76,6 +84,8 @@ declare namespace AdminAPI {
     reason: string;
     /** 原因说明，应用于本批全部用户，不能仅包含空白字符。 */
     reason_description: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；整批操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminDetailUserEnvelope =
@@ -138,12 +148,25 @@ declare namespace AdminAPI {
   type AdminListUserOperationLogEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
-      data?: { list?: AdminUserOperationLog[] };
+      data?: { list?: AdminUserOperationLogWrap[]; total?: number };
     };
 
   type AdminListUserOperationLogRequest = {
-    /** 需要查询操作日志的 C 端用户 ID。 */
-    user_id: string;
+    /** 用户搜索内容，不能仅包含空白字符；传入时必须同时传 keyword_type。 */
+    keyword?: string;
+    /** 用户搜索字段；传入时必须同时传 keyword。 */
+    keyword_type?: "user_id" | "phone" | "email" | "account" | "nickname";
+    /** 行为类型机器标识，例如 register、login、login_failed、logout、update_avatar、update_profile、send_message；为空时查询全部类型。 */
+    behavior_type?: string;
+    /** 客户端类型；server 表示服务端任务或无用户设备的系统行为。 */
+    client_type?: "ios" | "android" | "web" | "server";
+    /** 操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
+    operated_start_at?: RFC3339Time;
+    operated_end_at?: RFC3339Time;
+    /** 按操作时间排序。 */
+    sort_order?: "asc" | "desc";
+    page?: number;
+    page_size?: number;
   };
 
   type AdminListUserRequest = {
@@ -209,6 +232,21 @@ declare namespace AdminAPI {
 
   type AdminRemoveWhitelistUserRequest = {
     user_id: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
+    two_factor_code: string;
+  };
+
+  type AdminSearchUserEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: User[] };
+    };
+
+  type AdminSearchUserRequest = {
+    /** 搜索字段类型。用户 ID、手机号、邮箱和用户账号使用精确匹配，用户昵称使用不区分大小写的包含匹配。 */
+    type: "user_id" | "phone" | "email" | "account" | "nickname";
+    /** 搜索内容，不能仅包含空白字符。 */
+    keyword: string;
   };
 
   type AdminTraceMessageEnvelope =
@@ -233,6 +271,8 @@ declare namespace AdminAPI {
     reason: string;
     /** 原因说明，不能仅包含空白字符。 */
     reason_description: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminUpdateGroupStatusRequest = {
@@ -246,13 +286,43 @@ declare namespace AdminAPI {
     remark?: string;
   };
 
+  type AdminUserOperationClient = {
+    type?: "ios" | "android" | "web" | "server";
+    /** 客户端版本号。 */
+    version?: string;
+    /** 操作系统及版本；服务端任务时为空。 */
+    os_version?: string;
+    /** 设备型号；服务端任务时为空。 */
+    device_model?: string;
+  };
+
+  type AdminUserOperationLocation = {
+    /** 操作来源 IP。 */
+    ip?: string;
+    /** 根据 IP 解析的地区。 */
+    region?: string;
+  };
+
   type AdminUserOperationLog = {
+    /** 用户行为日志 ID。 */
+    log_id?: string;
     /** 操作时间，使用 RFC3339。 */
     operated_at?: string;
-    /** 操作类型。 */
-    operation_type?: string;
-    /** 操作描述。 */
-    description?: string;
+    /** 行为类型机器标识，例如 register、update_avatar、send_message。 */
+    behavior_type?: string;
+    /** 行为分类机器标识，例如 account_security、profile、notification、friend、message。 */
+    behavior_category?: string;
+    /** 行为执行状态。 */
+    status?: "success" | "failed";
+    client?: AdminUserOperationClient;
+    location?: AdminUserOperationLocation;
+    /** 日志备注或失败原因补充。 */
+    remark?: string;
+  };
+
+  type AdminUserOperationLogWrap = {
+    log?: AdminUserOperationLog;
+    user?: User;
   };
 
   type AdminUserWrap = {
@@ -756,6 +826,8 @@ declare namespace AdminAPI {
     user_id?: string;
     /** 来源用户展示昵称。 */
     name?: string;
+    /** 来源用户头像 URL。 */
+    avatar_url?: string;
   };
 
   type Friend = {
@@ -1503,6 +1575,16 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminSystemUsersResetTwoFactorParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminSystemUsersUpdateIPWhitelistParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminSystemUsersUpdateParams = {
     ""?: any;
     ""?: any;
@@ -1559,6 +1641,11 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminUsersOperationLogsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersSearchParams = {
     ""?: any;
     ""?: any;
   };
@@ -1676,10 +1763,28 @@ declare namespace AdminAPI {
     password: string;
   };
 
+  type ResetSysUserPasswordEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { username: string; temporary_password: string };
+    };
+
   type ResetSysUserPasswordRequest = {
+    /** 需要重置密码的后台用户 ID。 */
     id: number;
-    /** 重置后的临时密码；现有登录态立即失效，账号下次登录后必须修改。 */
-    password: string;
+    /** 可选的重置原因或操作备注；传入时不能仅包含空白字符。 */
+    remark?: string;
+    /** 当前登录管理员的 Google Authenticator 6 位动态验证码；验证码只能成功使用一次。 */
+    two_factor_code: string;
+  };
+
+  type ResetSysUserTwoFactorRequest = {
+    /** 需要重置 Google 验证码绑定的后台用户 ID。 */
+    id: number;
+    /** 可选的操作备注；传入时不能仅包含空白字符。 */
+    remark?: string;
+    /** 当前登录管理员的 Google Authenticator 6 位动态验证码；验证码只能成功使用一次。 */
+    two_factor_code: string;
   };
 
   type ResponseBase = {
@@ -1795,7 +1900,10 @@ declare namespace AdminAPI {
     status?: AccountStatus;
     description?: string;
     last_login_at?: RFC3339Time;
+    /** 最后登录 IP。 */
     last_login_ip?: string;
+    /** 允许访问后台的精确 IPv4 地址列表；空数组表示不限制来源 IP。 */
+    ip_whitelist?: string[];
     created_at?: RFC3339Time;
     updated_at?: RFC3339Time;
   };
@@ -2003,6 +2111,15 @@ declare namespace AdminAPI {
     CreateSysRoleRequest & {
       id: number;
     };
+
+  type UpdateSysUserIPWhitelistRequest = {
+    /** 需要调整后台访问白名单的系统用户 ID。 */
+    id: number;
+    /** 精确 IPv4 地址列表；传空数组表示取消 IP 限制，不支持 IPv6 或 CIDR。 */
+    ip_whitelist: string[];
+    /** 当前登录管理员的 Google Authenticator 6 位动态验证码；验证码只能成功使用一次。 */
+    two_factor_code: string;
+  };
 
   type UpdateSysUserRequest = {
     id: number;

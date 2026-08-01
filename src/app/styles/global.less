@@ -63,35 +63,9 @@
   z-index: -1;
 }
 
-/* 默认主题色 #635CFF → --arcoblue-*（运行时由 applyThemeColor 覆盖；此处作 SSR/首屏兜底）
- * Figma：浅/暗 primary/6 均为 #635CFF
+/* --arcoblue-* / 语义色见 theme-tokens.less（Figma Light|Dark.tokens.json）
+ * 运行时 applyThemeColor 会覆盖 --arcoblue-*（默认品牌色走 Figma 色板）
  */
-body {
-  --arcoblue-1: 237, 232, 255;
-  --arcoblue-2: 213, 204, 255;
-  --arcoblue-3: 188, 176, 255;
-  --arcoblue-4: 161, 148, 255;
-  --arcoblue-5: 131, 120, 255;
-  --arcoblue-6: 99, 92, 255;
-  --arcoblue-7: 59, 57, 210;
-  --arcoblue-8: 30, 32, 166;
-  --arcoblue-9: 11, 16, 121;
-  --arcoblue-10: 0, 6, 77;
-}
-
-/* 暗色阶梯（1 深 → 10 浅），但 --arcoblue-6 仍钉品牌色 */
-body[arco-theme='dark'] {
-  --arcoblue-1: 0, 6, 77;
-  --arcoblue-2: 9, 14, 121;
-  --arcoblue-3: 30, 32, 166;
-  --arcoblue-4: 63, 61, 210;
-  --arcoblue-5: 109, 102, 255;
-  --arcoblue-6: 99, 92, 255;
-  --arcoblue-7: 168, 156, 255;
-  --arcoblue-8: 192, 181, 255;
-  --arcoblue-9: 215, 207, 255;
-  --arcoblue-10: 237, 232, 255;
-}
 
 html,
 body {

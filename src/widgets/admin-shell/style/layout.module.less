@@ -198,11 +198,11 @@
   }
 
   /*
-   * Figma 796:20719
+   * Figma 1032:23679
    * L1：text-2 / 透明底 / 圆角 2 / px12 py5 / gap16
-   * 选中叶子：fill-3 + text-1 Medium / 圆角 8（与二三级一致）
-   * L2 叶子：text-1 / pl42 / 选中 fill-3 圆角 8
-   * L2 分组（嵌套 SubMenu）：fill-1 圆角 8 p4；组头 text-3；组内 pl56
+   * 选中叶子：primary-1 底 + primary-6 字 / Medium / 圆角 8
+   * L2：左侧竖线指引；叶子/分组头 text-3；无灰底分组块
+   * L3：选中同 primary-1 / primary-6
    */
   :global(.arco-menu-item),
   :global(.arco-menu-inline-header) {
@@ -213,7 +213,7 @@
     min-height: 32px;
     margin-bottom: 4px;
     padding: 5px 12px !important;
-    line-height: 22px;
+    line-height: 21px;
     border-radius: 2px;
     color: var(--color-text-2, #4e5969) !important;
     font-size: 14px;
@@ -269,12 +269,12 @@
     }
   }
 
-  /* 选中叶子：fill-3 + text-1 圆角 8，与二三级一致；去掉 Arco primary 紫 */
+  /* 选中叶子：primary-1 + primary-6，圆角 8 */
   :global(.arco-menu-item.arco-menu-selected),
   :global(.arco-menu-item.arco-menu-selected:hover) {
     border-radius: 8px;
-    background-color: var(--color-fill-3, #e5e6eb) !important;
-    color: var(--color-text-1, #1d2129) !important;
+    background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+    color: rgb(var(--primary-6)) !important;
     font-weight: 500;
 
     > :global(.arco-icon),
@@ -282,7 +282,7 @@
     :global(.arco-menu-item-inner),
     :global(.arco-menu-item-inner) > :global(.arco-icon),
     :global(.arco-menu-item-inner) > :global(svg) {
-      color: var(--color-text-1, #1d2129) !important;
+      color: rgb(var(--primary-6)) !important;
     }
 
     &::before,
@@ -310,57 +310,59 @@
     font-size: 12px;
   }
 
+  /* L1 展开区：左侧竖线 + 12px 内边距，避免二级项背景贴线 */
+  > :global(.arco-menu-inner) > :global(.arco-menu-inline) > :global(.arco-menu-inline-content) {
+    box-sizing: border-box;
+    margin: 0 0 0 20px;
+    padding-left: 12px;
+    border-left: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+  }
+
   /* L2：直接挂在一级下的叶子（如用户日志） */
   :global(.arco-menu-inline-content) {
     > :global(.arco-menu-item) {
-      padding-left: 42px !important;
+      padding-left: 12px !important;
       padding-right: 12px !important;
       gap: 0;
-      border-radius: 2px;
-      color: var(--color-text-1, #1d2129) !important;
+      border-radius: 8px;
+      color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
 
       &:hover {
         background-color: var(--color-fill-1, #f7f8fa) !important;
-        color: var(--color-text-1, #1d2129) !important;
+        color: var(--color-text-2, #4e5969) !important;
       }
     }
 
     > :global(.arco-menu-item.arco-menu-selected),
     > :global(.arco-menu-item.arco-menu-selected:hover) {
       border-radius: 8px;
-      background-color: var(--color-fill-3, #e5e6eb) !important;
-      color: var(--color-text-1, #1d2129) !important;
+      background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+      color: rgb(var(--primary-6)) !important;
       font-weight: 500;
     }
   }
 
-  /* L2 分组：嵌套 SubMenu（用户管理）
-   * 尺寸（padding / 表头缩进）始终固定，避免展开时与高度动画叠加产生晃动；
-   * 仅在三级展开时切换 fill-1 背景与组头字色。
-   */
+  /* L2 分组：嵌套 SubMenu（用户管理）— 无灰底，组头 text-3 */
   :global(.arco-menu-inline .arco-menu-inline) {
     box-sizing: border-box;
     margin-bottom: 4px;
-    padding: 4px;
-    border-radius: 8px;
+    padding: 0;
+    border-radius: 0;
     background-color: transparent;
-    transition: background-color 0.2s ease;
 
     > :global(.arco-menu-inline-header) {
       gap: 0;
       margin-bottom: 4px;
-      /* 容器已有 4px padding，左侧 38 对齐 L2 叶子的 42 */
-      padding: 5px 8px 5px 38px !important;
+      padding: 5px 12px 5px 12px !important;
       border-radius: 8px;
-      color: var(--color-text-1, #1d2129) !important;
+      color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
       font-weight: 400;
-      transition: color 0.15s ease, background-color 0.15s ease;
 
       &:hover {
-        color: var(--color-text-1, #1d2129) !important;
-        background-color: var(--color-fill-2, #f2f3f5) !important;
+        color: var(--color-text-2, #4e5969) !important;
+        background-color: var(--color-fill-1, #f7f8fa) !important;
       }
 
       > :global(svg),
@@ -371,23 +373,30 @@
 
     > :global(.arco-menu-inline-header.arco-menu-selected),
     > :global(.arco-menu-inline-header.arco-menu-selected:hover) {
-      color: var(--color-text-1, #1d2129) !important;
+      color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
       font-weight: 400;
     }
 
-    /* L3：组内项 pl56 / text-1 / 选中 fill-3 Medium 圆角 8 */
+    /* L3：竖线与项之间留 12px，选中背景不贴线 */
+    > :global(.arco-menu-inline-content) {
+      box-sizing: border-box;
+      margin: 0 0 0 12px;
+      padding: 0 0 0 12px;
+      border-left: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+    }
+
     :global(.arco-menu-inline-content) > :global(.arco-menu-item) {
-      padding-left: 52px !important;
-      padding-right: 8px !important;
+      padding-left: 12px !important;
+      padding-right: 16px !important;
       margin-bottom: 4px;
       border-radius: 8px;
-      color: var(--color-text-1, #1d2129) !important;
+      color: var(--color-text-2, #4e5969) !important;
       background: transparent !important;
       font-weight: 400;
 
       &:hover {
-        background-color: var(--color-fill-2, #f2f3f5) !important;
+        background-color: var(--color-fill-1, #f7f8fa) !important;
         color: var(--color-text-1, #1d2129) !important;
       }
 
@@ -400,32 +409,9 @@
       > :global(.arco-menu-item.arco-menu-selected),
     :global(.arco-menu-inline-content)
       > :global(.arco-menu-item.arco-menu-selected:hover) {
-      background-color: var(--color-fill-3, #e5e6eb) !important;
-      color: var(--color-text-1, #1d2129) !important;
+      background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+      color: rgb(var(--primary-6)) !important;
       font-weight: 500;
-    }
-  }
-
-  /* 三级展开：只变色，不改盒模型 */
-  :global(
-    .arco-menu-inline
-      .arco-menu-inline:has(> .arco-menu-inline-header .arco-menu-icon-suffix.is-open)
-  ) {
-    background-color: var(--color-fill-1, #f7f8fa);
-
-    > :global(.arco-menu-inline-header) {
-      color: var(--color-text-3, #86909c) !important;
-
-      &:hover {
-        color: var(--color-text-2, #4e5969) !important;
-        background-color: var(--color-fill-2, #f2f3f5) !important;
-      }
-    }
-
-    > :global(.arco-menu-inline-header.arco-menu-selected),
-    > :global(.arco-menu-inline-header.arco-menu-selected:hover) {
-      color: var(--color-text-3, #86909c) !important;
-      background: transparent !important;
     }
   }
 
@@ -433,9 +419,7 @@
     border-radius: 8px;
   }
 
-  /* 折叠：仅图标（Figma 602:35590 menu最小展示）
-   * 默认 40×32 / 圆角 2；选中·悬停 40×40 / 圆角 12 / fill-2
-   */
+  /* 折叠：仅图标；选中 primary-light / primary-6 */
   &:global(.arco-menu-collapse) {
     width: 40px !important;
     margin: 0 auto;
@@ -486,8 +470,8 @@
       height: 40px !important;
       min-height: 40px;
       border-radius: 12px;
-      background-color: var(--color-fill-2, #f2f3f5) !important;
-      color: var(--color-text-1, #1d2129) !important;
+      background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+      color: rgb(var(--primary-6)) !important;
       font-weight: 400;
 
       &::before,

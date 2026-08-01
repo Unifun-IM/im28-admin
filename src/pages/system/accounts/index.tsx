@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Button, Message, Modal, Switch } from '@arco-design/web-react';
+import { Form, Button, Message, Switch } from '@arco-design/web-react';
 import { observer } from 'mobx-react-lite';
 import {
   ActionLinks,
@@ -10,8 +10,7 @@ import {
 } from '@widgets/biz-list';
 import {
   postV1AdminSystemUsersList,
-  postV1AdminSystemUsersUpdate,
-  postV1AdminSystemUsersDelete
+  postV1AdminSystemUsersUpdate
 } from '@shared/api/admin/systemUsers';
 import { CreateAccountModal } from '@features/admin-account-create';
 import {
@@ -22,9 +21,12 @@ import {
   ResetGaModal,
   type ResetGaTarget
 } from '@features/admin-account-reset-ga';
+import {
+  UpdateIpWhitelistModal,
+  type IpWhitelistTarget
+} from '@features/admin-account-ip-whitelist';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
-
 
 const FormItem = Form.Item;
 
@@ -44,6 +46,7 @@ function AccountsPage() {
   const [resetGaTarget, setResetGaTarget] = useState<ResetGaTarget | null>(
     null
   );
+  const [ipTarget, setIpTarget] = useState<IpWhitelistTarget | null>(null);
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -175,9 +178,20 @@ function AccountsPage() {
                 formatDateTime(row.sys_user?.last_login_at)
             },
             {
+              title: t['accounts.col.ipWhitelist'],
+              width: 140,
+              render: (_: unknown, row: AdminAPI.SysUserWrap) => {
+                const list = row.sys_user?.ip_whitelist || [];
+                if (!list.length) return t['accounts.ipWhitelist.empty'];
+                return list.length > 2
+                  ? `${list.slice(0, 2).join(', ')}…`
+                  : list.join(', ');
+              }
+            },
+            {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 200,
+              width: 240,
               render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <ActionLinks
                   variant="text"
@@ -196,24 +210,19 @@ function AccountsPage() {
                       label: t['accounts.resetGa'],
                       onClick: () =>
                         setResetGaTarget({
-                          id: String(row.sys_user?.id || ''),
-                          account: row.sys_user?.username || ''
+                          id: Number(row.sys_user?.id),
+                          username: row.sys_user?.username || ''
                         })
                     },
                     {
-                      key: 'delete',
-                      label: common['common.delete'],
-                      onClick: () => {
-                        Modal.confirm({
-                          title: t['accounts.deleteConfirm'],
-                          onOk: async () => {
-                            const id = row.sys_user?.id;
-                            if (id == null) return;
-                            await postV1AdminSystemUsersDelete({ id });
-                            fetchData(page, pageSize);
-                          }
-                        });
-                      }
+                      key: 'ip',
+                      label: t['accounts.ipWhitelist'],
+                      onClick: () =>
+                        setIpTarget({
+                          id: Number(row.sys_user?.id),
+                          username: row.sys_user?.username || '',
+                          ip_whitelist: row.sys_user?.ip_whitelist
+                        })
                     }
                   ]}
                 />
@@ -247,6 +256,13 @@ function AccountsPage() {
         visible={!!resetGaTarget}
         target={resetGaTarget}
         onCancel={() => setResetGaTarget(null)}
+        onSuccess={() => fetchData(page, pageSize)}
+      />
+      <UpdateIpWhitelistModal
+        visible={!!ipTarget}
+        target={ipTarget}
+        onCancel={() => setIpTarget(null)}
+        onSuccess={() => fetchData(page, pageSize)}
       />
     </>
   );

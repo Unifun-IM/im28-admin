@@ -38,7 +38,11 @@ export default function WhitelistActionModal({
 }: WhitelistActionModalProps) {
   const t = useLocale();
   const common = t;
-  const [form] = Form.useForm<{ user_id?: string; reason?: string }>();
+  const [form] = Form.useForm<{
+    user_id?: string;
+    reason?: string;
+    two_factor_code?: string;
+  }>();
   const [submitting, setSubmitting] = useState(false);
   const isAdd = mode === 'add';
   const ids = userIds.filter(Boolean);
@@ -56,14 +60,17 @@ export default function WhitelistActionModal({
 
   const handleOk = async () => {
     try {
+      const values = await form.validate();
+      const two_factor_code = String(values.two_factor_code || '').trim();
+
       if (isAdd) {
-        const values = await form.validate();
         const userId = (ids[0] || values.user_id || '').trim();
         if (!userId) return;
         setSubmitting(true);
         const body: AdminAPI.AdminAddWhitelistUserRequest = {
           user_id: userId,
-          reason: values.reason?.trim() || undefined
+          reason: values.reason?.trim() || undefined,
+          two_factor_code
         };
         await postV1AdminUsersWhitelistAdd(body);
         Message.success(t['whitelistAction.msg.addSuccess']);
@@ -73,12 +80,14 @@ export default function WhitelistActionModal({
         setSubmitting(true);
         if (isBatch) {
           const body: AdminAPI.AdminBatchRemoveWhitelistUserRequest = {
-            user_ids: removeIds
+            user_ids: removeIds,
+            two_factor_code
           };
           await postV1AdminUsersWhitelistBatchRemove(body);
         } else {
           const body: AdminAPI.AdminRemoveWhitelistUserRequest = {
-            user_id: removeIds[0]
+            user_id: removeIds[0],
+            two_factor_code
           };
           await postV1AdminUsersWhitelistRemove(body);
         }
@@ -93,6 +102,26 @@ export default function WhitelistActionModal({
       setSubmitting(false);
     }
   };
+
+  const twoFactorField = (
+    <FormItem
+      field="two_factor_code"
+      label={t['accounts.field.twoFactorCode']}
+      rules={[
+        { required: true, message: t['accounts.msg.twoFactorRequired'] },
+        {
+          match: /^\d{6}$/,
+          message: t['accounts.msg.twoFactorFormat']
+        }
+      ]}
+    >
+      <Input
+        maxLength={6}
+        placeholder={t['accounts.placeholder.twoFactorCode']}
+        allowClear
+      />
+    </FormItem>
+  );
 
   return (
     <Modal
@@ -134,42 +163,50 @@ export default function WhitelistActionModal({
         </div>
       }
     >
-      {isAdd ? (
-        <Form form={form} layout="vertical" className="use-whitelist-action-form">
-          {needUserIdInput ? (
-            <FormItem
-              field="user_id"
-              label={t['whitelistAction.field.userId']}
-              rules={[{ required: true, message: t['whitelistAction.placeholder.userId'] }]}
-            >
-              <Input placeholder={t['whitelistAction.placeholder.userId']} />
+      <Form form={form} layout="vertical" className="use-whitelist-action-form">
+        {isAdd ? (
+          <>
+            {needUserIdInput ? (
+              <FormItem
+                field="user_id"
+                label={t['whitelistAction.field.userId']}
+                rules={[
+                  {
+                    required: true,
+                    message: t['whitelistAction.placeholder.userId']
+                  }
+                ]}
+              >
+                <Input placeholder={t['whitelistAction.placeholder.userId']} />
+              </FormItem>
+            ) : (
+              <div className="mb-4 text-sm leading-[22px] text-arco-text-2">
+                {t['whitelistAction.hint.userId'].replace('{id}', ids[0] || '')}
+              </div>
+            )}
+            <FormItem field="reason" label={t['whitelistAction.field.reason']}>
+              <TextArea
+                placeholder={t['whitelistAction.placeholder.reason']}
+                maxLength={200}
+                showWordLimit
+              />
             </FormItem>
-          ) : (
-            <div className="mb-4 text-sm leading-[22px] text-arco-text-2">
-              {t['whitelistAction.hint.userId'].replace('{id}', ids[0] || '')}
-            </div>
-          )}
-          <FormItem field="reason" label={t['whitelistAction.field.reason']}>
-            <TextArea
-              placeholder={t['whitelistAction.placeholder.reason']}
-              maxLength={200}
-              showWordLimit
-            />
-          </FormItem>
-        </Form>
-      ) : (
-        <div className="text-sm leading-[22px] text-arco-text-2">
-          {isBatch
-            ? t['whitelistAction.hint.removeBatch'].replace(
-                '{count}',
-                String(count)
-              )
-            : t['whitelistAction.hint.removeSingle'].replace(
-                '{id}',
-                ids[0] || ''
-              )}
-        </div>
-      )}
+          </>
+        ) : (
+          <div className="mb-4 text-sm leading-[22px] text-arco-text-2">
+            {isBatch
+              ? t['whitelistAction.hint.removeBatch'].replace(
+                  '{count}',
+                  String(count)
+                )
+              : t['whitelistAction.hint.removeSingle'].replace(
+                  '{id}',
+                  ids[0] || ''
+                )}
+          </div>
+        )}
+        {twoFactorField}
+      </Form>
     </Modal>
   );
 }

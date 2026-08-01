@@ -708,9 +708,16 @@
     border-right: none;
   }
 
+  /* 左右固定列勿裁切 ::after 投影（与操作列一致） */
+  .arco-table-th.arco-table-col-fixed-left,
+  .arco-table-th.arco-table-col-fixed-right,
+  .arco-table-td.arco-table-col-fixed-left,
+  .arco-table-td.arco-table-col-fixed-right {
+    overflow: visible;
+  }
+
   .arco-table-th.arco-table-col-fixed-right {
     text-align: center;
-    overflow: visible;
 
     .arco-table-th-item,
     .arco-table-cell-with-sorter {
@@ -778,13 +785,11 @@
     border-right: none;
   }
 
-  /* 操作列 padding；投影交给 Arco fixed 标准（scroll-position + col-fixed-right-first::after） */
+  /* 操作列 padding；投影交给 Arco fixed（left-last / right-first ::after） */
   .arco-table-td.arco-table-col-fixed-right {
     padding-left: 12px;
     padding-right: 12px;
     text-align: center;
-    /* 勿裁切 Arco 固定列左侧 ::after 阴影 */
-    overflow: visible;
   }
 
   .arco-table-cell {
@@ -855,6 +860,11 @@
       padding-left: 0;
       padding-right: 0;
     }
+  }
+
+  .arco-table-th.arco-table-checkbox.arco-table-col-fixed-left,
+  .arco-table-td.arco-table-checkbox.arco-table-col-fixed-left {
+    overflow: visible;
   }
 
   .arco-table-td.arco-table-checkbox {

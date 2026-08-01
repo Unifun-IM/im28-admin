@@ -48,7 +48,7 @@ function CopyValue({ value }: { value: string }) {
   );
 }
 
-/** 用户详情 — AdminAPI.AdminDetailUserEnvelope / AdminUserOperationLog */
+/** 用户详情 — AdminAPI.AdminDetailUserEnvelope / AdminUserOperationLogWrap */
 export default function UserDetailDrawer({
   visible,
   userId,
@@ -60,14 +60,20 @@ export default function UserDetailDrawer({
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] =
     useState<AdminAPI.AdminDetailUserEnvelope['data']>();
-  const [logs, setLogs] = useState<AdminAPI.AdminUserOperationLog[]>([]);
+  const [logs, setLogs] = useState<AdminAPI.AdminUserOperationLogWrap[]>([]);
 
   useEffect(() => {
     if (!visible || !userId) return;
     setLoading(true);
     Promise.all([
       postV1AdminUsersDetail({ user_id: userId }),
-      postV1AdminUsersOperationLogsList({ user_id: userId })
+      postV1AdminUsersOperationLogsList({
+        keyword: userId,
+        keyword_type: 'user_id',
+        sort_order: 'desc',
+        page: 1,
+        page_size: 50
+      })
     ])
       .then(([detailRes, logsRes]) => {
         setDetail(detailRes.data);
@@ -160,23 +166,64 @@ export default function UserDetailDrawer({
           <Tabs.TabPane key="logs" title={t['userDetail.tab.logs']}>
             <div className="flex flex-col gap-3">
               {logs.length ? (
-                logs.map((item, idx) => (
-                  <div
-                    key={`${item.operated_at}-${idx}`}
-                    className="rounded border border-solid border-[var(--color-border-2)] p-3 text-[12px]"
-                  >
-                    <div>
-                      {t['userDetail.log.operatedAt']}：
-                      {formatDateTime(item.operated_at)}
+                logs.map((item, idx) => {
+                  const log = item.log;
+                  const client = log?.client;
+                  const location = log?.location;
+                  const behavior =
+                    (log?.behavior_type &&
+                      t[`userLogs.behavior.${log.behavior_type}`]) ||
+                    log?.behavior_type ||
+                    '--';
+                  const status =
+                    log?.status === 'success'
+                      ? t['userLogs.status.success']
+                      : log?.status === 'failed'
+                        ? t['userLogs.status.failed']
+                        : log?.status || '--';
+                  const clientText = client?.type
+                    ? [
+                        t[`userLogs.client.${client.type}`] || client.type,
+                        client.version
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                    : '--';
+                  const locationText =
+                    [location?.region, location?.ip]
+                      .filter(Boolean)
+                      .join(' / ') || '--';
+                  return (
+                    <div
+                      key={log?.log_id || `${log?.operated_at}-${idx}`}
+                      className="rounded border border-solid border-[var(--color-border-2)] p-3 text-[12px]"
+                    >
+                      <div>
+                        {t['userDetail.log.operatedAt']}：
+                        {formatDateTime(log?.operated_at)}
+                      </div>
+                      <div>
+                        {t['userDetail.log.behaviorType']}：{behavior}
+                      </div>
+                      <div>
+                        {t['userDetail.log.behaviorCategory']}：
+                        {log?.behavior_category || '--'}
+                      </div>
+                      <div>
+                        {t['userDetail.log.status']}：{status}
+                      </div>
+                      <div>
+                        {t['userDetail.log.client']}：{clientText}
+                      </div>
+                      <div>
+                        {t['userDetail.log.location']}：{locationText}
+                      </div>
+                      <div>
+                        {t['userDetail.log.remark']}：{log?.remark || '--'}
+                      </div>
                     </div>
-                    <div>
-                      {t['userDetail.log.operationType']}：{item.operation_type || '--'}
-                    </div>
-                    <div>
-                      {t['userDetail.log.description']}：{item.description || '--'}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-arco-text-3">{common['common.empty']}</div>
               )}

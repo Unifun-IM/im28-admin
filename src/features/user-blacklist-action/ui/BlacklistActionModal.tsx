@@ -66,6 +66,10 @@ export default function BlacklistActionModal({
 
       setSubmitting(true);
 
+      const twoFactor = {
+        two_factor_code: String(values.two_factor_code || '').trim()
+      };
+
       if (isAdd) {
         const common = {
           reason: values.reason,
@@ -74,7 +78,8 @@ export default function BlacklistActionModal({
             values.ban_period === 'temporary'
               ? values.banned_until
               : undefined,
-          reason_description: values.reason_description
+          reason_description: values.reason_description,
+          ...twoFactor
         };
         if (isBatch) {
           const body: AdminAPI.AdminBatchBanUserRequest = {
@@ -92,7 +97,8 @@ export default function BlacklistActionModal({
       } else {
         const common = {
           reason: values.reason,
-          reason_description: values.reason_description
+          reason_description: values.reason_description,
+          ...twoFactor
         };
         if (isBatch) {
           const body: AdminAPI.AdminBatchUnbanUserRequest = {
@@ -211,6 +217,23 @@ export default function BlacklistActionModal({
           rules={[{ required: true }]}
         >
           <TextArea placeholder={t['blacklistAction.placeholder.reasonDescription']} />
+        </FormItem>
+        <FormItem
+          field="two_factor_code"
+          label={t['accounts.field.twoFactorCode']}
+          rules={[
+            { required: true, message: t['accounts.msg.twoFactorRequired'] },
+            {
+              match: /^\d{6}$/,
+              message: t['accounts.msg.twoFactorFormat']
+            }
+          ]}
+        >
+          <Input
+            maxLength={6}
+            placeholder={t['accounts.placeholder.twoFactorCode']}
+            allowClear
+          />
         </FormItem>
       </Form>
     </Modal>

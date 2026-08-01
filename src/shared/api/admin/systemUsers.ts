@@ -62,13 +62,31 @@ export async function postV1AdminSystemUsersList(
   });
 }
 
-/** 重置密码 重置后立即撤销该系统用户的现有登录态；用户下次登录必须先修改临时密码，再绑定或验证二步认证。 POST /v1/admin/system-users/reset-password */
+/** 重置密码 需要 `admin.system_users.write` 权限。服务端校验并消费当前管理员的 GA 动态码，随机生成临时密码并记录备注；重置后立即撤销目标账号所有登录态，目标账号下次登录必须先修改临时密码。临时密码只在成功响应中展示一次。 POST /v1/admin/system-users/reset-password */
 export async function postV1AdminSystemUsersResetPassword(
   body: AdminAPI.ResetSysUserPasswordRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.ResponseBase>(
+  return request<AdminAPI.ResetSysUserPasswordEnvelope>(
     "/v1/admin/system-users/reset-password",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 重置 Google 验证码 需要 `admin.system_users.write` 权限。服务端校验并消费当前管理员的 GA 动态码，清除目标账号当前 Google 验证码绑定并记录备注；目标账号所有登录态立即失效，下次登录必须重新绑定。 POST /v1/admin/system-users/reset-two-factor */
+export async function postV1AdminSystemUsersResetTwoFactor(
+  body: AdminAPI.ResetSysUserTwoFactorRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>(
+    "/v1/admin/system-users/reset-two-factor",
     {
       method: "POST",
       headers: {
@@ -93,4 +111,22 @@ export async function postV1AdminSystemUsersUpdate(
     data: body,
     ...(options || {}),
   });
+}
+
+/** 调整后台 IPv4 白名单 需要 `admin.system_users.write` 权限，并验证当前管理员的 GA 动态码。更新成功后验证码立即失效，目标账号所有登录态立即失效；空数组表示不限制来源 IP。限制会应用于登录、预认证、二步验证、刷新 token 和每次后台接口鉴权。 POST /v1/admin/system-users/update-ip-whitelist */
+export async function postV1AdminSystemUsersUpdateIpWhitelist(
+  body: AdminAPI.UpdateSysUserIPWhitelistRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>(
+    "/v1/admin/system-users/update-ip-whitelist",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
 }
