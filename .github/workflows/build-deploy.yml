@@ -1,0 +1,607 @@
+name: Build and deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Select build or deployment mode
+        required: true
+        default: build
+        type: choice
+        options:
+          # 仅构建并推送镜像
+          - build
+          # 构建镜像并同步部署到 Kubernetes
+          - deploy
+          # 不构建镜像，仅同步 Kubernetes YAML 并部署指定镜像版本
+          - sync
+
+      image_version:
+        description: Image tag or digest used by sync mode, for example commit SHA, v1.2.3, or sha256:...
+        required: false
+        type: string
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# 自动按仓库、工作流、分支隔离并发任务
+# 生产部署过程中不会被新任务中途取消
+concurrency:
+  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # 可通过 Repository Variables 覆盖
+  ARGOCD_VERSION: ${{ vars.ARGOCD_VERSION || 'v3.1.7' }}
+  ARGOCD_PROJECT: ${{ vars.ARGOCD_PROJECT || 'default' }}
+  K8S_NAMESPACE: ${{ vars.K8S_NAMESPACE || 'im28' }}
+  K8S_MANIFEST_PATH: ${{ vars.K8S_MANIFEST_PATH || 'deploy/k8s' }}
+
+jobs:
+  prepare:
+    name: Prepare workflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    outputs:
+      mode: ${{ steps.classify.outputs.mode }}
+      project_name: ${{ steps.metadata.outputs.project_name }}
+      repository_owner: ${{ steps.metadata.outputs.repository_owner }}
+      repository_url: ${{ steps.metadata.outputs.repository_url }}
+      image_name: ${{ steps.metadata.outputs.image_name }}
+      image_version: ${{ steps.classify.outputs.image_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - id: metadata
+        name: Generate project metadata
+        env:
+          GH_REPOSITORY: ${{ github.repository }}
+          GH_SERVER_URL: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+
+          # GH_REPOSITORY 示例：
+          # Unifun-IM/im28-account
+
+          repository_owner="${GH_REPOSITORY%%/*}"
+          repository_name="${GH_REPOSITORY#*/}"
+
+          # 转换为 Kubernetes / Argo CD 可使用的名称：
+          # 1. 转小写
+          # 2. 非字母数字字符转换为 -
+          # 3. 删除开头和结尾的 -
+          project_name="$(
+            printf '%s' "$repository_name" |
+              tr '[:upper:]' '[:lower:]' |
+              sed -E \
+                -e 's/[^a-z0-9]+/-/g' \
+                -e 's/^-+//' \
+                -e 's/-+$//'
+          )"
+
+          # GHCR 镜像名称必须使用小写
+          image_path="$(
+            printf '%s' "$GH_REPOSITORY" |
+              tr '[:upper:]' '[:lower:]'
+          )"
+
+          repository_url="${GH_SERVER_URL}/${GH_REPOSITORY}.git"
+          image_name="ghcr.io/${image_path}"
+
+          if [[ -z "$project_name" ]]; then
+            echo '::error::Unable to generate project name'
+            exit 1
+          fi
+
+          {
+            printf 'project_name=%s\n' "$project_name"
+            printf 'repository_owner=%s\n' "$repository_owner"
+            printf 'repository_url=%s\n' "$repository_url"
+            printf 'image_name=%s\n' "$image_name"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo '### Project metadata'
+            echo
+            echo "- Project: \`$project_name\`"
+            echo "- Repository owner: \`$repository_owner\`"
+            echo "- Repository: \`$repository_url\`"
+            echo "- Image: \`$image_name\`"
+            echo "- Namespace: \`$K8S_NAMESPACE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - id: classify
+        name: Classify workflow mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_MODE: ${{ inputs.mode }}
+          MANUAL_IMAGE_VERSION: ${{ inputs.image_version }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          GIT_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            mode="$MANUAL_MODE"
+          else
+            mode="$(bash .github/scripts/commit-mode.sh "$COMMIT_MESSAGE")"
+          fi
+
+          # 清理手动输入两端空格。push 事件时该值为空。
+          image_version="$(
+            printf '%s' "${MANUAL_IMAGE_VERSION:-}" |
+              sed -E -e 's/^[[:space:]]+//' -e 's/[[:space:]]+$//'
+          )"
+
+          case "$mode" in
+            build|deploy|sync|skip)
+              ;;
+            *)
+              printf '::error::Invalid workflow mode: %s\n' "$mode"
+              exit 1
+              ;;
+          esac
+
+          # 生产环境只允许 main 分支部署
+          if [[ ( "$mode" == "deploy" || "$mode" == "sync" ) && "$GIT_REF" != "refs/heads/main" ]]; then
+            printf \
+              '::error::Production deployment is only allowed from main. Current ref: %s\n' \
+              "$GIT_REF"
+            exit 1
+          fi
+
+          if [[ "$mode" == "sync" ]]; then
+            if [[ "$EVENT_NAME" != "workflow_dispatch" ]]; then
+              echo '::error::sync mode is only available through workflow_dispatch'
+              exit 1
+            fi
+
+            if [[ -z "$image_version" ]]; then
+              echo '::error::image_version is required when mode=sync'
+              exit 1
+            fi
+
+            # 在写入 GITHUB_OUTPUT 前完成校验，防止非法 Tag、Digest 或换行输入。
+            if [[ "$image_version" == sha256:* ]]; then
+              if [[ ! "$image_version" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+                printf '::error::Invalid image digest: %s\n' "$image_version"
+                exit 1
+              fi
+            elif [[ ! "$image_version" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+              printf '::error::Invalid image tag: %s\n' "$image_version"
+              exit 1
+            fi
+          fi
+
+          {
+            printf 'mode=%s\n' "$mode"
+            printf 'image_version=%s\n' "$image_version"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            printf '### Workflow mode: `%s`\n' "$mode"
+            if [[ "$mode" == "sync" ]]; then
+              printf -- '- Selected image version: `%s`\n' "$image_version"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build image
+
+    needs:
+      - prepare
+
+    if: >-
+      ${{
+        needs.prepare.outputs.mode == 'build' ||
+        needs.prepare.outputs.mode == 'deploy'
+      }}
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      PROJECT_NAME: ${{ needs.prepare.outputs.project_name }}
+      REPOSITORY_OWNER: ${{ needs.prepare.outputs.repository_owner }}
+      IMAGE_NAME: ${{ needs.prepare.outputs.image_name }}
+
+    outputs:
+      image_digest: ${{ steps.build-image.outputs.digest }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: build-image
+        name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          pull: true
+
+          # 自动生成：
+          # ghcr.io/<owner>/<repository>:<commit-sha>
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+          cache-from: type=gha,scope=${{ env.PROJECT_NAME }}
+          cache-to: type=gha,mode=max,scope=${{ env.PROJECT_NAME }}
+
+      - name: Write build summary
+        env:
+          IMAGE_DIGEST: ${{ steps.build-image.outputs.digest }}
+        run: |
+          {
+            echo '### Image published'
+            echo
+            echo "- Project: \`$PROJECT_NAME\`"
+            echo "- Tag: \`$IMAGE_NAME:$GITHUB_SHA\`"
+            echo "- Digest: \`$IMAGE_DIGEST\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy production
+
+    needs:
+      - prepare
+      - build
+
+    # deploy: build 成功后部署刚构建的镜像
+    # sync:   跳过 build，仅同步 YAML 并部署手动指定的镜像版本
+    if: >-
+      ${{
+        always() &&
+        needs.prepare.result == 'success' &&
+        (
+          needs.prepare.outputs.mode == 'deploy' ||
+          needs.prepare.outputs.mode == 'sync'
+        ) &&
+        (
+          needs.prepare.outputs.mode == 'sync' ||
+          needs.build.result == 'success'
+        )
+      }}
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    environment:
+      name: production
+
+    permissions:
+      contents: read
+      packages: read
+
+    env:
+      PROJECT_NAME: ${{ needs.prepare.outputs.project_name }}
+
+      # Argo CD 应用名自动使用项目名称
+      ARGOCD_APP: ${{ needs.prepare.outputs.project_name }}
+
+      # 当前 GitHub 项目地址
+      REPOSITORY_URL: ${{ needs.prepare.outputs.repository_url }}
+
+      # 当前项目对应的 GHCR 镜像地址
+      IMAGE_NAME: ${{ needs.prepare.outputs.image_name }}
+
+      # deploy 使用 build 输出；sync 使用手动输入版本
+      DEPLOY_MODE: ${{ needs.prepare.outputs.mode }}
+      IMAGE_VERSION: ${{ needs.prepare.outputs.image_version }}
+      IMAGE_DIGEST: ${{ needs.build.outputs.image_digest }}
+
+      ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+      ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+
+      # Argo CD 经过 Nginx / Ingress 时设置为 true
+      ARGOCD_GRPC_WEB: ${{ vars.ARGOCD_GRPC_WEB }}
+
+    steps:
+      - name: Validate deployment inputs
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          GH_REPO_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          for name in \
+            KUBE_CONFIG \
+            GH_REPO_TOKEN \
+            ARGOCD_SERVER \
+            ARGOCD_AUTH_TOKEN
+          do
+            if [[ -z "${!name:-}" ]]; then
+              printf '::error::Missing required secret: %s\n' "$name"
+              exit 1
+            fi
+          done
+
+          if [[ -z "$PROJECT_NAME" ]]; then
+            echo '::error::Project name is empty'
+            exit 1
+          fi
+
+          if [[ -z "$REPOSITORY_URL" ]]; then
+            echo '::error::Repository URL is empty'
+            exit 1
+          fi
+
+          if [[ -z "$IMAGE_NAME" ]]; then
+            echo '::error::Image name is empty'
+            exit 1
+          fi
+
+          case "$DEPLOY_MODE" in
+            deploy)
+              if [[ ! "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+                printf '::error::Invalid image digest from build job: %s\n' "$IMAGE_DIGEST"
+                exit 1
+              fi
+              ;;
+            sync)
+              if [[ -z "$IMAGE_VERSION" ]]; then
+                echo '::error::image_version is required when mode=sync'
+                exit 1
+              fi
+              ;;
+            *)
+              printf '::error::Unsupported deployment mode: %s\n' "$DEPLOY_MODE"
+              exit 1
+              ;;
+          esac
+
+      - id: resolve-image
+        name: Resolve deployment image
+        run: |
+          set -euo pipefail
+
+          case "$DEPLOY_MODE" in
+            deploy)
+              # build + deploy 使用本次构建产生的不可变 Digest。
+              image_ref="$IMAGE_NAME@$IMAGE_DIGEST"
+              image_version="$IMAGE_DIGEST"
+              ;;
+
+            sync)
+              image_version="$IMAGE_VERSION"
+
+              # 支持两种输入：
+              # 1. Tag，例如 main、v1.2.3、Git commit SHA
+              # 2. Digest，例如 sha256:abc...
+              if [[ "$image_version" == sha256:* ]]; then
+                if [[ ! "$image_version" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+                  printf '::error::Invalid image digest: %s\n' "$image_version"
+                  exit 1
+                fi
+                image_ref="$IMAGE_NAME@$image_version"
+              else
+                if [[ ! "$image_version" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+                  printf '::error::Invalid image tag: %s\n' "$image_version"
+                  exit 1
+                fi
+                image_ref="$IMAGE_NAME:$image_version"
+              fi
+              ;;
+          esac
+
+          {
+            printf 'image_ref=%s\n' "$image_ref"
+            printf 'image_version=%s\n' "$image_version"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            printf 'DEPLOY_IMAGE_REF=%s\n' "$image_ref"
+            printf 'DEPLOY_IMAGE_VERSION=%s\n' "$image_version"
+          } >> "$GITHUB_ENV"
+
+          {
+            echo '### Deployment image'
+            echo
+            echo "- Mode: \`$DEPLOY_MODE\`"
+            echo "- Image: \`$image_ref\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure kubectl
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          set -euo pipefail
+
+          umask 077
+
+          kubeconfig="$RUNNER_TEMP/kubeconfig"
+          printf '%s\n' "$KUBE_CONFIG" > "$kubeconfig"
+
+          printf 'KUBECONFIG=%s\n' "$kubeconfig" >> "$GITHUB_ENV"
+
+          KUBECONFIG="$kubeconfig" kubectl cluster-info
+
+      - name: Apply namespace and registry secret
+        env:
+          GH_REPO_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          kubectl create namespace "$K8S_NAMESPACE" \
+            --dry-run=client \
+            -o yaml |
+            kubectl apply -f -
+
+          kubectl create secret docker-registry ghcr-pull \
+            --namespace "$K8S_NAMESPACE" \
+            --docker-server=ghcr.io \
+            --docker-username=USERNAME \
+            --docker-password="$GH_REPO_TOKEN" \
+            --dry-run=client \
+            -o yaml |
+            kubectl apply -f -
+
+      - name: Install Argo CD CLI
+        run: |
+          set -euo pipefail
+
+          binary="argocd-linux-amd64"
+          base_url="https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}"
+
+          cd "$RUNNER_TEMP"
+
+          curl \
+            --proto '=https' \
+            --tlsv1.2 \
+            --retry 3 \
+            --retry-all-errors \
+            -fsSLO \
+            "$base_url/$binary"
+
+          curl \
+            --proto '=https' \
+            --tlsv1.2 \
+            --retry 3 \
+            --retry-all-errors \
+            -fsSLO \
+            "$base_url/cli_checksums.txt"
+
+          grep "  ${binary}$" cli_checksums.txt |
+            sha256sum --check --status
+
+          mkdir -p "$RUNNER_TEMP/bin"
+
+          install \
+            -m 0755 \
+            "$binary" \
+            "$RUNNER_TEMP/bin/argocd"
+
+          printf '%s\n' "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Deploy through Argo CD
+        env:
+          GH_REPO_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          argo=(
+            argocd
+            --server "$ARGOCD_SERVER"
+            --auth-token "$ARGOCD_AUTH_TOKEN"
+          )
+
+          if [[ "${ARGOCD_GRPC_WEB:-false}" == "true" ]]; then
+            argo+=(--grpc-web)
+          fi
+
+          image_ref="$DEPLOY_IMAGE_REF"
+
+          echo "Deployment mode: $DEPLOY_MODE"
+          echo "Project: $PROJECT_NAME"
+          echo "Repository: $REPOSITORY_URL"
+          echo "Argo CD application: $ARGOCD_APP"
+          echo "Image: $image_ref"
+          echo "Namespace: $K8S_NAMESPACE"
+
+          "${argo[@]}" repo add "$REPOSITORY_URL" \
+            --username x-access-token \
+            --password "$GH_REPO_TOKEN" \
+            --upsert
+
+          "${argo[@]}" app create "$ARGOCD_APP" \
+            --upsert \
+            --project "$ARGOCD_PROJECT" \
+            --repo "$REPOSITORY_URL" \
+            --revision "$GITHUB_SHA" \
+            --path "$K8S_MANIFEST_PATH" \
+            --dest-server https://kubernetes.default.svc \
+            --dest-namespace "$K8S_NAMESPACE" \
+            --sync-option CreateNamespace=true \
+            --sync-option PruneLast=true
+
+          "${argo[@]}" app set "$ARGOCD_APP" \
+            --kustomize-image "$IMAGE_NAME=$image_ref"
+
+          "${argo[@]}" app sync "$ARGOCD_APP" \
+            --revision "$GITHUB_SHA" \
+            --prune \
+            --timeout 300
+
+          "${argo[@]}" app wait "$ARGOCD_APP" \
+            --sync \
+            --health \
+            --timeout 300
+
+      - name: Deployment diagnostics
+        if: ${{ failure() }}
+        continue-on-error: true
+        run: |
+          argo=(
+            argocd
+            --server "$ARGOCD_SERVER"
+            --auth-token "$ARGOCD_AUTH_TOKEN"
+          )
+
+          if [[ "${ARGOCD_GRPC_WEB:-false}" == "true" ]]; then
+            argo+=(--grpc-web)
+          fi
+
+          echo '===== Argo CD Application ====='
+          "${argo[@]}" app get "$ARGOCD_APP" || true
+
+          echo '===== Kubernetes Resources ====='
+          kubectl \
+            --namespace "$K8S_NAMESPACE" \
+            get deploy,sts,ds,pod,svc,ingress \
+            -o wide ||
+            true
+
+          echo '===== Kubernetes Events ====='
+          kubectl \
+            --namespace "$K8S_NAMESPACE" \
+            get events \
+            --sort-by=.lastTimestamp |
+            tail -n 100 ||
+            true
+
+      - name: Write deployment summary
+        if: ${{ success() }}
+        run: |
+          {
+            echo '### Production deployed'
+            echo
+            echo "- Project: \`$PROJECT_NAME\`"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Repository: \`$REPOSITORY_URL\`"
+            echo "- Mode: \`$DEPLOY_MODE\`"
+            echo "- Image: \`$DEPLOY_IMAGE_REF\`"
+            echo "- Argo CD application: \`$ARGOCD_APP\`"
+            echo "- Namespace: \`$K8S_NAMESPACE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
