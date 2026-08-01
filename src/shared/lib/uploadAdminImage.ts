@@ -34,7 +34,7 @@ export function validateAdminImage(
 }
 
 /**
- * 获取后台上传凭证并直传 OSS，返回可访问 URL。
+ * 获取后台上传凭证，直接使用返回的访问 url。
  * @see POST /v1/admin/common/upload-credential
  */
 export async function uploadAdminImage(file: File): Promise<string> {
@@ -49,33 +49,10 @@ export async function uploadAdminImage(file: File): Promise<string> {
   const res = await postV1AdminCommonUploadCredential({
     ext: getAdminImageExt(file)
   });
-  const cred = res.data;
-  if (
-    !cred?.host ||
-    !cred.object_key ||
-    !cred.access_key_id ||
-    !cred.policy ||
-    !cred.signature ||
-    !cred.url
-  ) {
+  const url = res.data?.url?.trim();
+  if (!url) {
     throw new Error('UPLOAD_CREDENTIAL_EMPTY');
   }
 
-  const form = new FormData();
-  form.append('key', cred.object_key);
-  form.append('OSSAccessKeyId', cred.access_key_id);
-  form.append('policy', cred.policy);
-  form.append('signature', cred.signature);
-  form.append('success_action_status', '200');
-  form.append('file', file);
-
-  const ossRes = await fetch(cred.host, {
-    method: 'POST',
-    body: form
-  });
-  if (!ossRes.ok) {
-    throw new Error(`OSS_UPLOAD_FAILED:${ossRes.status}`);
-  }
-
-  return cred.url;
+  return url;
 }
