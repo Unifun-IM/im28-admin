@@ -45,12 +45,13 @@ export default function Page() {
       setLoading(true);
       try {
         const values = form.getFieldsValue();
+        const keyword = values.keyword || undefined;
         const res = await postV1AdminUsersList({
           page: p,
           page_size: size,
           status: 'disabled',
-          keyword: values.keyword || undefined,
-          keyword_type: values.keyword_type || undefined
+          keyword,
+          keyword_type: keyword ? values.keyword_type || undefined : undefined
         });
         setData(res.data?.list || []);
         setTotal(res.data?.total || 0);

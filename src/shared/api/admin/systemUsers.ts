@@ -7,7 +7,7 @@ export async function postV1AdminSystemUsersCreate(
   body: AdminAPI.CreateSysUserRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.SysUserEnvelope>("/v1/admin/system-users/create", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/system-users/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -85,7 +85,7 @@ export async function postV1AdminSystemUsersUpdate(
   body: AdminAPI.UpdateSysUserRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.SysUserEnvelope>("/v1/admin/system-users/update", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/system-users/update", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

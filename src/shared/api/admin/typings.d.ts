@@ -18,16 +18,36 @@ declare namespace AdminAPI {
 
   type AdminBanUserRequest = {
     user_id: string;
-    /** 拉黑原因。 */
+    /** 拉黑原因，不能仅包含空白字符。 */
     reason: string;
     /** temporary=限时，permanent=永久。 */
     ban_period: "temporary" | "permanent";
     /** 限时拉黑截止时间，使用 RFC3339；ban_period=temporary 时必填且必须晚于当前时间，permanent 时必须不传。 */
     banned_until?: string;
-    /** 原因说明。 */
+    /** 原因说明，不能仅包含空白字符。 */
     reason_description: string;
-    /** 备注。 */
-    remark: string;
+  };
+
+  type AdminBatchBanUserRequest = {
+    /** 需要拉黑的用户 ID，单次最多 100 个。 */
+    user_ids: string[];
+    /** 拉黑原因，应用于本批全部用户，不能仅包含空白字符。 */
+    reason: string;
+    /** temporary=限时，permanent=永久。 */
+    ban_period: "temporary" | "permanent";
+    /** 限时拉黑截止时间，使用 RFC3339；ban_period=temporary 时必填且必须晚于当前时间，permanent 时必须不传。 */
+    banned_until?: string;
+    /** 原因说明，应用于本批全部用户，不能仅包含空白字符。 */
+    reason_description: string;
+  };
+
+  type AdminBatchUnbanUserRequest = {
+    /** 需要解禁的用户 ID，单次最多 100 个。 */
+    user_ids: string[];
+    /** 解禁原因，应用于本批全部用户，不能仅包含空白字符。 */
+    reason: string;
+    /** 原因说明，应用于本批全部用户，不能仅包含空白字符。 */
+    reason_description: string;
   };
 
   type AdminDetailUserEnvelope =
@@ -79,17 +99,20 @@ declare namespace AdminAPI {
   type AdminListUserRequest = {
     /** 查询内容。keyword_type 为空时同时匹配用户 ID、账号、手机号、邮箱和昵称。 */
     keyword?: string;
-    /** 字段化查询类型；除 nickname 为包含匹配外，其余类型均为精确匹配。 */
+    /** 字段化查询类型；只能在同时传入 keyword 时使用。除 nickname 为包含匹配外，其余类型均为精确匹配。 */
     keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
     /** 批量搜索用户 ID；与其他查询条件同时传入时按 AND 组合。 */
     user_ids?: string[];
     status?: AccountStatus;
     online_status?: OnlineStatus;
+    /** 注册时间范围起点；与 registered_end_at 同时传入时不得晚于结束时间。 */
     registered_start_at?: RFC3339Time;
     registered_end_at?: RFC3339Time;
+    /** 最后操作时间范围起点；与 last_operated_end_at 同时传入时不得晚于结束时间。 */
     last_operated_start_at?: RFC3339Time;
     last_operated_end_at?: RFC3339Time;
     sort_by?: "registered_at" | "last_operated_at";
+    /** 只能在同时传入 sort_by 时使用。 */
     sort_order?: "asc" | "desc";
     page?: number;
     page_size?: number;
@@ -132,12 +155,10 @@ declare namespace AdminAPI {
 
   type AdminUnbanUserRequest = {
     user_id: string;
-    /** 解禁原因。 */
+    /** 解禁原因，不能仅包含空白字符。 */
     reason: string;
-    /** 原因说明。 */
+    /** 原因说明，不能仅包含空白字符。 */
     reason_description: string;
-    /** 备注。 */
-    remark: string;
   };
 
   type AdminUpdateGroupStatusRequest = {
@@ -147,27 +168,8 @@ declare namespace AdminAPI {
 
   type AdminUpgradeGroupRequest = {
     group_id: string;
-    /** 后台升级备注。 */
+    /** 后台升级备注，可不传。 */
     remark?: string;
-  };
-
-  type AdminUserBanEnvelope =
-    // #/components/schemas/ResponseBase
-    ResponseBase & {
-      data?: { user?: User; record?: AdminUserBanRecord };
-    };
-
-  type AdminUserBanRecord = {
-    /** ban=拉黑，unban=人工解禁，expired=限时拉黑到期自动解禁。 */
-    action?: "ban" | "unban" | "expired";
-    ban_period?: "temporary" | "permanent";
-    banned_until?: string;
-    reason?: string;
-    reason_description?: string;
-    remark?: string;
-    /** 后台操作人 ID；系统自动解禁时为空。 */
-    operator_id?: string;
-    operated_at?: string;
   };
 
   type AdminUserOperationLog = {
@@ -318,7 +320,7 @@ declare namespace AdminAPI {
     pre_auth_token: string;
     /** 本次登录使用的当前密码。 */
     current_password: string;
-    /** 需同时包含大写字母、小写字母、数字和特殊字符，不能与当前密码相同，不能包含用户名，也不能包含连续或倒序的 3 位字母或数字。 */
+    /** 网关校验必须同时包含大写字母、小写字母、数字和特殊字符，且不能包含连续或倒序的 3 位字母或数字；服务端还会校验不能与当前密码相同、不能包含用户名。 */
     new_password: string;
   };
 
@@ -437,10 +439,14 @@ declare namespace AdminAPI {
   };
 
   type CreateClientVersionRequest = {
+    /** 客户端平台标识，不能仅包含空白字符，例如 ios、android、windows、macos、web。 */
     platform: string;
+    /** 面向用户展示的版本号，不能仅包含空白字符。 */
     version: string;
-    build_number: Uint64String;
+    /** 平台构建号，必须大于 0。 */
+    build_number: PositiveUint64String;
     force_update?: boolean;
+    /** 可选下载地址；传入时必须是合法的 HTTP 或 HTTPS URL。 */
     download_url?: string;
     title?: string;
     description?: string;
@@ -460,24 +466,33 @@ declare namespace AdminAPI {
   };
 
   type CreatePlatformTermRequest = {
+    /** 条款业务键，不能仅包含空白字符。 */
     key: string;
+    /** 条款标题，不能仅包含空白字符。 */
     title: string;
+    /** 条款正文，不能仅包含空白字符。 */
     content: string;
+    /** 条款版本号，不能仅包含空白字符。 */
     version: string;
     /** 不传默认启用。 */
     is_enable?: boolean;
   };
 
   type CreateSysPermissionRequest = {
+    /** 权限唯一键，不能仅包含空白字符。 */
     key: string;
+    /** 权限名称，不能仅包含空白字符。 */
     name: string;
     description?: string;
+    /** 权限分类；不传表示不设置，传入时不能仅包含空白字符。 */
     type?: string;
     is_enable?: boolean;
   };
 
   type CreateSysRoleRequest = {
+    /** 角色唯一编码，不能仅包含空白字符。 */
     code: string;
+    /** 角色名称，不能仅包含空白字符。 */
     name: string;
     description?: string;
     is_enable?: boolean;
@@ -485,6 +500,7 @@ declare namespace AdminAPI {
   };
 
   type CreateSysUserRequest = {
+    /** 后台用户名，不能仅包含空白字符。 */
     username: string;
     display_name?: string;
     /** 初始密码；账号首次登录后必须修改。 */
@@ -531,7 +547,7 @@ declare namespace AdminAPI {
   };
 
   type DetailClientVersionRequest = {
-    id: Uint64String;
+    id: PositiveUint64String;
   };
 
   type DetailConversationEnvelope =
@@ -566,7 +582,7 @@ declare namespace AdminAPI {
   };
 
   type DetailPlatformTermRequest = {
-    id: Uint64String;
+    id: PositiveUint64String;
   };
 
   type DetailSysPermissionRequest = {
@@ -649,6 +665,14 @@ declare namespace AdminAPI {
 
   type FileMessageBody = {
     file: FileMessage;
+  };
+
+  type ForwardOrigin = {
+    type?: "user";
+    /** 最初来源消息的发送者用户 ID。 */
+    user_id?: string;
+    /** 来源用户展示昵称。 */
+    name?: string;
   };
 
   type Friend = {
@@ -933,6 +957,7 @@ declare namespace AdminAPI {
     };
 
   type ListClientVersionRequest = {
+    /** 可选平台筛选；传入时不能仅包含空白字符。 */
     platform?: string;
     page?: number;
     page_size?: number;
@@ -1002,6 +1027,7 @@ declare namespace AdminAPI {
     };
 
   type ListPlatformTermRequest = {
+    /** 可选业务键筛选；传入时不能仅包含空白字符。 */
     key?: string;
     is_enable?: boolean;
     page?: number;
@@ -1132,6 +1158,7 @@ declare namespace AdminAPI {
     updated_at?: RFC3339Time;
     /** 消息自动删除时间；空字符串表示不会自动删除。 */
     expire_at?: RFC3339Time;
+    forward_origin?: ForwardOrigin;
   };
 
   type MessageBody = Record<string, any>;
@@ -1225,6 +1252,8 @@ declare namespace AdminAPI {
     ResponseBase & {
       data?: { term?: PlatformTerm };
     };
+
+  type PositiveUint64String = string;
 
   type postV1AdminAuthCheckTokenParams = {
     ""?: any;
@@ -1421,6 +1450,16 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminUsersBatchBanParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersBatchUnbanParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminUsersDetailParams = {
     ""?: any;
     ""?: any;
@@ -1500,7 +1539,7 @@ declare namespace AdminAPI {
 
   type RefreshTokenRequest = {
     refresh_token: string;
-    /** 刷新后新会话使用的设备标识。 */
+    /** 刷新后新会话使用的设备标识，不能仅包含空白字符。 */
     device_id: string;
   };
 
@@ -1670,7 +1709,9 @@ declare namespace AdminAPI {
     };
 
   type SysUserLoginRequest = {
+    /** 后台用户名，不能仅包含空白字符。 */
     username: string;
+    /** 当前登录密码，不能仅包含空白字符。 */
     password: string;
   };
 
@@ -1719,11 +1760,13 @@ declare namespace AdminAPI {
   type Uint64String = string;
 
   type UpdateClientVersionRequest = {
-    id: Uint64String;
+    id: PositiveUint64String;
     platform?: string;
     version?: string;
-    build_number?: Uint64String;
+    /** 传入时必须大于 0。 */
+    build_number?: PositiveUint64String;
     force_update?: boolean;
+    /** 传空字符串表示清空下载地址；非空时必须是合法的 HTTP 或 HTTPS URL。 */
     download_url?: string;
     title?: string;
     description?: string;
@@ -1831,9 +1874,12 @@ declare namespace AdminAPI {
   };
 
   type UpdatePlatformTermRequest = {
-    id: Uint64String;
+    id: PositiveUint64String;
+    /** 传入时不能仅包含空白字符。 */
     title?: string;
+    /** 传入时不能仅包含空白字符。 */
     content?: string;
+    /** 传入时不能仅包含空白字符。 */
     version?: string;
     is_enable?: boolean;
   };

@@ -7,7 +7,37 @@ export async function postV1AdminUsersBan(
   body: AdminAPI.AdminBanUserRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.AdminUserBanEnvelope>("/v1/admin/users/ban", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/ban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 批量拉黑用户 需要 `admin.users.write` 权限；单次最多操作 100 个用户。全部用户在同一事务中处理，任一用户不存在或处理失败时整批回滚；成功后撤销全部目标用户的登录态。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-ban */
+export async function postV1AdminUsersBatchBan(
+  body: AdminAPI.AdminBatchBanUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/batch-ban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 批量解禁用户 需要 `admin.users.write` 权限；单次最多操作 100 个用户，且全部用户都必须处于拉黑状态。全部用户在同一事务中处理，任一用户不存在、状态不满足或处理失败时整批回滚。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-unban */
+export async function postV1AdminUsersBatchUnban(
+  body: AdminAPI.AdminBatchUnbanUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/batch-unban", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -70,7 +100,7 @@ export async function postV1AdminUsersUnban(
   body: AdminAPI.AdminUnbanUserRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.AdminUserBanEnvelope>("/v1/admin/users/unban", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/unban", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Form, Input, Button, Tag, Dropdown, Menu } from '@arco-design/web-react';
 import {
   ActionLinks,
@@ -13,19 +13,12 @@ import {
 import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
+import useLocale from '@shared/lib/useLocale';
+import defaultLocale from '@shared/locale';
+
+import locale from './locale';
 
 const FormItem = Form.Item;
-
-const KEYWORD_TYPE_OPTIONS: {
-  label: string;
-  value: NonNullable<AdminAPI.AdminListUserRequest['keyword_type']>;
-}[] = [
-  { label: 'user_id', value: 'user_id' },
-  { label: 'nickname', value: 'nickname' },
-  { label: 'phone', value: 'phone' },
-  { label: 'email', value: 'email' },
-  { label: 'account', value: 'account' }
-];
 
 function statusBadge(
   status?: AdminAPI.AccountStatus
@@ -37,7 +30,11 @@ function statusBadge(
 
 /** 用户查询 — AdminAPI.AdminListUserRequest / AdminUserWrap */
 export default function UserQueryPage() {
-  const [form] = Form.useForm<AdminAPI.AdminListUserRequest & { batchUserIds?: string }>();
+  const t = useLocale(locale);
+  const common = useLocale(defaultLocale);
+  const [form] = Form.useForm<
+    AdminAPI.AdminListUserRequest & { batchUserIds?: string }
+  >();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AdminAPI.AdminUserWrap[]>([]);
   const [total, setTotal] = useState(0);
@@ -54,14 +51,32 @@ export default function UserQueryPage() {
     userIds: string[];
   } | null>(null);
 
+  const keywordTypeOptions = useMemo(
+    () =>
+      (
+        [
+          'user_id',
+          'nickname',
+          'phone',
+          'email',
+          'account'
+        ] as const
+      ).map((value) => ({
+        label: t[`userQuery.keywordType.${value}`],
+        value
+      })),
+    [t]
+  );
+
   const buildBody = useCallback(
     (p: number, size: number): AdminAPI.AdminListUserRequest => {
       const values = form.getFieldsValue();
+      const keyword = values.keyword || undefined;
       const body: AdminAPI.AdminListUserRequest = {
         page: p,
         page_size: size,
-        keyword: values.keyword || undefined,
-        keyword_type: values.keyword_type || undefined,
+        keyword,
+        keyword_type: keyword ? values.keyword_type || undefined : undefined,
         status: values.status || undefined,
         online_status: values.online_status || undefined,
         registered_start_at: values.registered_start_at,
@@ -69,7 +84,7 @@ export default function UserQueryPage() {
         last_operated_start_at: values.last_operated_start_at,
         last_operated_end_at: values.last_operated_end_at,
         sort_by: values.sort_by,
-        sort_order: values.sort_order
+        sort_order: values.sort_by ? values.sort_order : undefined
       };
       if (batchMode && values.batchUserIds) {
         body.user_ids = String(values.batchUserIds)
@@ -111,30 +126,50 @@ export default function UserQueryPage() {
     setBlacklistModal({ mode, userIds, variant });
   };
 
+  const statusLabel = (status?: AdminAPI.AccountStatus) => {
+    if (status === 'active') return t['userQuery.status.active'];
+    if (status === 'disabled') return t['userQuery.status.disabled'];
+    return status || '--';
+  };
+
+  const onlineLabel = (v?: AdminAPI.OnlineStatus) => {
+    if (v === 'online') return t['userQuery.online.online'];
+    if (v === 'offline') return t['userQuery.online.offline'];
+    if (v === 'unknown') return t['userQuery.online.unknown'];
+    return v || '--';
+  };
+
   const sharedFilters = (
     <>
       <FilterField>
-        <FormItem field="status" label="status" initialValue={undefined}>
+        <FormItem
+          field="status"
+          label={t['userQuery.filter.status']}
+          initialValue={undefined}
+        >
           <FilterSelect
-            placeholder="status"
+            placeholder={t['userQuery.filter.status']}
             options={[
-              { label: '全部', value: '' },
-              { label: 'active', value: 'active' },
-              { label: 'disabled', value: 'disabled' }
+              { label: t['userQuery.filter.all'], value: '' },
+              { label: t['userQuery.status.active'], value: 'active' },
+              { label: t['userQuery.status.disabled'], value: 'disabled' }
             ]}
             allowClear
           />
         </FormItem>
       </FilterField>
       <FilterField>
-        <FormItem field="online_status" label="online_status">
+        <FormItem
+          field="online_status"
+          label={t['userQuery.filter.onlineStatus']}
+        >
           <FilterSelect
-            placeholder="online_status"
+            placeholder={t['userQuery.filter.onlineStatus']}
             options={[
-              { label: '全部', value: '' },
-              { label: 'online', value: 'online' },
-              { label: 'offline', value: 'offline' },
-              { label: 'unknown', value: 'unknown' }
+              { label: t['userQuery.filter.all'], value: '' },
+              { label: t['userQuery.online.online'], value: 'online' },
+              { label: t['userQuery.online.offline'], value: 'offline' },
+              { label: t['userQuery.online.unknown'], value: 'unknown' }
             ]}
             allowClear
           />
@@ -147,10 +182,10 @@ export default function UserQueryPage() {
     <>
       <BizListPage
         form={form}
-        title="用户列表"
+        title={t['userQuery.title']}
         filterCollapsible={false}
         filterDefaultCollapsed={false}
-        filterResetText="重置"
+        filterResetText={common['common.reset']}
         filterExtraActions={
           batchMode ? (
             <Button
@@ -161,7 +196,7 @@ export default function UserQueryPage() {
                 form.setFieldValue('batchUserIds', undefined);
               }}
             >
-              取消批量搜索
+              {t['userQuery.action.cancelBatchSearch']}
             </Button>
           ) : (
             <Button
@@ -169,7 +204,7 @@ export default function UserQueryPage() {
               className="use-biz-filter-action-text"
               onClick={() => setBatchMode(true)}
             >
-              批量搜索
+              {t['userQuery.action.batchSearch']}
             </Button>
           )
         }
@@ -177,9 +212,12 @@ export default function UserQueryPage() {
           batchMode ? (
             <>
               <FilterField span="full">
-                <FormItem field="batchUserIds" label="user_ids">
+                <FormItem
+                  field="batchUserIds"
+                  label={t['userQuery.filter.userIds']}
+                >
                   <Input.TextArea
-                    placeholder="user_ids"
+                    placeholder={t['userQuery.filter.userIds']}
                     style={{ minHeight: 56 }}
                   />
                 </FormItem>
@@ -189,12 +227,16 @@ export default function UserQueryPage() {
           ) : (
             <>
               <FilterField>
-                <FormItem field="keyword" label="keyword">
+                <FormItem
+                  field="keyword"
+                  label={t['userQuery.filter.keyword']}
+                >
                   <FilterKeywordInput
                     typeField="keyword_type"
-                    typeOptions={KEYWORD_TYPE_OPTIONS}
+                    typeOptions={keywordTypeOptions}
                     typeInitialValue="user_id"
-                    typeWidth={100}
+                    typeWidth={96}
+                    placeholder={t['userQuery.filter.placeholder']}
                   />
                 </FormItem>
               </FilterField>
@@ -225,13 +267,15 @@ export default function UserQueryPage() {
                   );
                 }}
               >
-                <Menu.Item key="add">批量加入黑名单</Menu.Item>
-                <Menu.Item key="remove">批量解除黑名单</Menu.Item>
+                <Menu.Item key="add">{t['userQuery.action.batchBan']}</Menu.Item>
+                <Menu.Item key="remove">
+                  {t['userQuery.action.batchUnban']}
+                </Menu.Item>
               </Menu>
             }
           >
             <Button type="primary" disabled={!selectedRowKeys.length}>
-              批量操作
+              {t['userQuery.action.batch']}
             </Button>
           </Dropdown>
         }
@@ -242,63 +286,63 @@ export default function UserQueryPage() {
             row.user?.user_id || String(Math.random()),
           columns: [
             {
-              title: 'user',
+              title: t['userQuery.col.user'],
               dataIndex: 'user.nickname',
               width: 180,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <AvatarNameCell
                   name={row.user?.nickname}
-                  sub={`user_id：${row.user?.user_id || ''}`}
+                  sub={`${t['userQuery.cell.userId']}：${row.user?.user_id || ''}`}
                   copyText={row.user?.user_id || ''}
                   avatar={row.user?.avatar_url}
                 />
               )
             },
             {
-              title: 'contact',
+              title: t['userQuery.col.contact'],
               dataIndex: 'user.phone',
               width: 180,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <DoubleLineCell
-                  primary={`phone：${row.user?.phone || '--'}`}
-                  secondary={`email：${row.user?.email || '--'}`}
+                  primary={`${t['userQuery.cell.phone']}：${row.user?.phone || '--'}`}
+                  secondary={`${t['userQuery.cell.email']}：${row.user?.email || '--'}`}
                 />
               )
             },
             {
-              title: 'account',
+              title: t['userQuery.col.account'],
               dataIndex: 'user.account',
               width: 120,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
                 row.user?.account || '--'
             },
             {
-              title: 'status',
+              title: t['userQuery.col.status'],
               dataIndex: 'user.status',
               width: 100,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <StatusBadge
                   status={statusBadge(row.user?.status)}
-                  text={row.user?.status || '--'}
+                  text={statusLabel(row.user?.status)}
                 />
               )
             },
             {
-              title: 'created_at',
+              title: t['userQuery.col.createdAt'],
               dataIndex: 'user.created_at',
               width: 180,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
                 row.user?.created_at || '--'
             },
             {
-              title: 'last_login_at',
+              title: t['userQuery.col.lastLoginAt'],
               dataIndex: 'user.last_login_at',
               width: 180,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
                 row.user?.last_login_at || '--'
             },
             {
-              title: 'online_status',
+              title: t['userQuery.col.onlineStatus'],
               dataIndex: 'online_status',
               width: 120,
               render: (v: AdminAPI.OnlineStatus) => (
@@ -307,12 +351,12 @@ export default function UserQueryPage() {
                   size="small"
                   className="!m-0"
                 >
-                  {v || '--'}
+                  {onlineLabel(v)}
                 </Tag>
               )
             },
             {
-              title: '操作',
+              title: common['common.action'],
               dataIndex: 'op',
               width: 100,
               fixed: 'right' as const,
@@ -325,7 +369,9 @@ export default function UserQueryPage() {
                     items={[
                       {
                         key: 'blacklist',
-                        label: disabled ? '解禁' : '拉黑',
+                        label: disabled
+                          ? t['userQuery.action.unban']
+                          : t['userQuery.action.ban'],
                         onClick: () =>
                           openBlacklistModal(
                             disabled ? 'remove' : 'add',
@@ -335,7 +381,7 @@ export default function UserQueryPage() {
                       },
                       {
                         key: 'detail',
-                        label: '详情',
+                        label: common['common.detail'],
                         onClick: () => setDetailUserId(uid)
                       }
                     ]}

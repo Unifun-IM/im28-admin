@@ -22,7 +22,7 @@ export async function postV1AdminGroupsUpdateStatus(
   body: AdminAPI.AdminUpdateGroupStatusRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.GroupEnvelope>("/v1/admin/groups/update-status", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/groups/update-status", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export async function postV1AdminGroupsUpgrade(
   body: AdminAPI.AdminUpgradeGroupRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.GroupEnvelope>("/v1/admin/groups/upgrade", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/groups/upgrade", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

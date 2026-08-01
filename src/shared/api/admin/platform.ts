@@ -7,17 +7,14 @@ export async function postV1AdminClientVersionsCreate(
   body: AdminAPI.CreateClientVersionRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.ClientVersionEnvelope>(
-    "/v1/admin/client-versions/create",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: body,
-      ...(options || {}),
-    }
-  );
+  return request<AdminAPI.ResponseBase>("/v1/admin/client-versions/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
 }
 
 /** 客户端版本详情 POST /v1/admin/client-versions/detail */
@@ -61,17 +58,14 @@ export async function postV1AdminClientVersionsUpdate(
   body: AdminAPI.UpdateClientVersionRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.ClientVersionEnvelope>(
-    "/v1/admin/client-versions/update",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: body,
-      ...(options || {}),
-    }
-  );
+  return request<AdminAPI.ResponseBase>("/v1/admin/client-versions/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
 }
 
 /** 创建平台条款 POST /v1/admin/terms/create */
@@ -79,7 +73,7 @@ export async function postV1AdminTermsCreate(
   body: AdminAPI.CreatePlatformTermRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.PlatformTermEnvelope>("/v1/admin/terms/create", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/terms/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -124,7 +118,7 @@ export async function postV1AdminTermsUpdate(
   body: AdminAPI.UpdatePlatformTermRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.PlatformTermEnvelope>("/v1/admin/terms/update", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/terms/update", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

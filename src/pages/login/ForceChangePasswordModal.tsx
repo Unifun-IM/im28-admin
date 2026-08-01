@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Button, Form, Input, Modal } from '@arco-design/web-react';
 
 export type ForceChangePasswordForm = {
-  pre_auth_token: string;
   current_password: string;
   new_password: string;
   confirm_password: string;
@@ -48,18 +47,17 @@ export default function ForceChangePasswordModal({
   useEffect(() => {
     if (!visible) return;
     form.setFieldsValue({
-      pre_auth_token: initialToken,
       current_password: '',
       new_password: '',
       confirm_password: ''
     });
-  }, [visible, initialToken, form]);
+  }, [visible, form]);
 
   const handleOk = async () => {
     try {
       const values = await form.validate();
       onSubmit({
-        pre_auth_token: values.pre_auth_token,
+        pre_auth_token: initialToken,
         current_password: values.current_password,
         new_password: values.new_password
       });
@@ -98,9 +96,6 @@ export default function ForceChangePasswordModal({
           requiredSymbol={{ position: 'end' }}
           className="use-login-force-pwd-form"
         >
-          <Form.Item field="pre_auth_token" hidden>
-            <Input />
-          </Form.Item>
           <Form.Item
             field="current_password"
             label="默认密码"
@@ -129,7 +124,8 @@ export default function ForceChangePasswordModal({
                     return;
                   }
                   if (
-                    !/[A-Za-z]/.test(value) ||
+                    !/[A-Z]/.test(value) ||
+                    !/[a-z]/.test(value) ||
                     !/\d/.test(value) ||
                     !/[^A-Za-z0-9]/.test(value)
                   ) {

@@ -9,6 +9,8 @@ import {
 } from '@arco-design/web-react';
 import {
   postV1AdminUsersBan,
+  postV1AdminUsersBatchBan,
+  postV1AdminUsersBatchUnban,
   postV1AdminUsersUnban
 } from '@shared/api/admin/users';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
@@ -28,8 +30,8 @@ export type BlacklistActionModalProps = {
 };
 
 /**
- * 拉黑 / 解禁 — 请求体直接使用 AdminBanUserRequest / AdminUnbanUserRequest
- * 批量时对每个 user_id 顺序调用接口（OpenAPI 单用户）
+ * 拉黑 / 解禁 — AdminBanUserRequest / AdminUnbanUserRequest
+ * 批量走 batch-ban / batch-unban（单次最多 100）
  */
 export default function BlacklistActionModal({
   visible,
@@ -42,7 +44,7 @@ export default function BlacklistActionModal({
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const isAdd = mode === 'add';
-  const isBatch = variant === 'batch';
+  const isBatch = variant === 'batch' || userIds.length > 1;
   const count = userIds.length || 1;
 
   useEffect(() => {
@@ -56,31 +58,54 @@ export default function BlacklistActionModal({
   const handleOk = async () => {
     try {
       const values = await form.validate();
+      const ids = userIds.filter(Boolean).slice(0, 100);
+      if (!ids.length) return;
+
       setSubmitting(true);
-      for (const user_id of userIds) {
-        if (isAdd) {
+
+      if (isAdd) {
+        const common = {
+          reason: values.reason,
+          ban_period: values.ban_period as 'temporary' | 'permanent',
+          banned_until:
+            values.ban_period === 'temporary'
+              ? values.banned_until
+              : undefined,
+          reason_description: values.reason_description
+        };
+        if (isBatch) {
+          const body: AdminAPI.AdminBatchBanUserRequest = {
+            user_ids: ids,
+            ...common
+          };
+          await postV1AdminUsersBatchBan(body);
+        } else {
           const body: AdminAPI.AdminBanUserRequest = {
-            user_id,
-            reason: values.reason,
-            ban_period: values.ban_period,
-            banned_until:
-              values.ban_period === 'temporary'
-                ? values.banned_until
-                : undefined,
-            reason_description: values.reason_description,
-            remark: values.remark
+            user_id: ids[0],
+            ...common
           };
           await postV1AdminUsersBan(body);
+        }
+      } else {
+        const common = {
+          reason: values.reason,
+          reason_description: values.reason_description
+        };
+        if (isBatch) {
+          const body: AdminAPI.AdminBatchUnbanUserRequest = {
+            user_ids: ids,
+            ...common
+          };
+          await postV1AdminUsersBatchUnban(body);
         } else {
           const body: AdminAPI.AdminUnbanUserRequest = {
-            user_id,
-            reason: values.reason,
-            reason_description: values.reason_description,
-            remark: values.remark
+            user_id: ids[0],
+            ...common
           };
           await postV1AdminUsersUnban(body);
         }
       }
+
       Message.success(isAdd ? '拉黑成功' : '解禁成功');
       onSuccess?.();
       onCancel();
@@ -167,9 +192,6 @@ export default function BlacklistActionModal({
           rules={[{ required: true }]}
         >
           <TextArea placeholder="reason_description" />
-        </FormItem>
-        <FormItem field="remark" label="remark" rules={[{ required: true }]}>
-          <TextArea placeholder="remark" />
         </FormItem>
       </Form>
     </Modal>

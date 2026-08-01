@@ -25,17 +25,14 @@ export async function postV1AdminPermissionsCreate(
   body: AdminAPI.CreateSysPermissionRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.SysPermissionEnvelope>(
-    "/v1/admin/permissions/create",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: body,
-      ...(options || {}),
-    }
-  );
+  return request<AdminAPI.ResponseBase>("/v1/admin/permissions/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
 }
 
 /** 删除权限 POST /v1/admin/permissions/delete */
@@ -94,17 +91,14 @@ export async function postV1AdminPermissionsUpdate(
   body: AdminAPI.UpdateSysPermissionRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.SysPermissionEnvelope>(
-    "/v1/admin/permissions/update",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: body,
-      ...(options || {}),
-    }
-  );
+  return request<AdminAPI.ResponseBase>("/v1/admin/permissions/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
 }
 
 /** 创建角色 POST /v1/admin/roles/create */
@@ -112,7 +106,7 @@ export async function postV1AdminRolesCreate(
   body: AdminAPI.CreateSysRoleRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.SysRoleEnvelope>("/v1/admin/roles/create", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/roles/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -172,7 +166,7 @@ export async function postV1AdminRolesUpdate(
   body: AdminAPI.UpdateSysRoleRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.SysRoleEnvelope>("/v1/admin/roles/update", {
+  return request<AdminAPI.ResponseBase>("/v1/admin/roles/update", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

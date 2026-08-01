@@ -32,7 +32,7 @@ export default function ForcePasswordNoticeModal({
           新建账号
         </span>
       </div>
-      <div className="box-border px-[24px] pb-[60px] pt-[12px] text-[14px] leading-[21px] text-black">
+      <div className="box-border p-[24px] text-[14px] leading-[21px] text-black">
         <p className="m-0">首次登录，请修改密码</p>
         <p className="m-0">
           为了保障账号安全，首次登录必须修改默认密码。完成修改后才能进入后台。
