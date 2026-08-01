@@ -119,6 +119,15 @@ function BizListPage<T extends Record<string, unknown>>({
   );
 
   const hasFixedRight = columns.some((col) => col.fixed === 'right');
+  /** 有选择列时默认左侧固定；页面可显式 `fixed: false` 关闭 */
+  const rowSelection = useMemo(() => {
+    if (!tableProps.rowSelection) return undefined;
+    return {
+      fixed: true,
+      ...tableProps.rowSelection
+    };
+  }, [tableProps.rowSelection]);
+  const hasFixedSelection = Boolean(rowSelection?.fixed);
 
   const pagination = resolveBizPagination(
     tableProps.pagination as false | undefined | Record<string, unknown>,
@@ -127,12 +136,12 @@ function BizListPage<T extends Record<string, unknown>>({
 
   const scroll = useMemo(() => {
     const incoming = tableProps.scroll || {};
-    if (!hasFixedRight) return incoming;
+    if (!hasFixedRight && !hasFixedSelection) return incoming;
     return {
       x: true as const,
       ...incoming
     };
-  }, [hasFixedRight, tableProps.scroll]);
+  }, [hasFixedRight, hasFixedSelection, tableProps.scroll]);
 
   const batchTheme = batchActions?.theme || 'dark';
   const batchInToolbar = batchTheme === 'light';
@@ -283,6 +292,7 @@ function BizListPage<T extends Record<string, unknown>>({
             )}
             columns={columns}
             data={displayData}
+            rowSelection={rowSelection}
             scroll={scroll}
             pagination={pagination as TableProps<T>['pagination']}
             noDataElement={tableProps.noDataElement ?? <EmptyState />}

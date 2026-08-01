@@ -871,7 +871,12 @@
     padding-right: 0;
   }
 
-  /* 右侧固定列背景跟随 Stripe / hover / 选中；投影由 Arco scroll-position 控制 */
+  /* 左右固定列背景跟随 Stripe / hover / 选中；投影由 Arco scroll-position 控制 */
+  &.arco-table-stripe
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:nth-child(even)
+    > .arco-table-td.arco-table-col-fixed-left,
   &.arco-table-stripe
     .arco-table-content-inner
     tbody
@@ -884,10 +889,19 @@
     .arco-table-content-inner
     tbody
     > .arco-table-tr:nth-child(odd)
+    > .arco-table-td.arco-table-col-fixed-left,
+  &.arco-table-stripe
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:nth-child(odd)
     > .arco-table-td.arco-table-col-fixed-right {
     background-color: var(--color-bg-2, #fff);
   }
 
+  .arco-table-content-inner
+    tbody
+    > .arco-table-tr:hover
+    > .arco-table-td.arco-table-col-fixed-left,
   .arco-table-content-inner
     tbody
     > .arco-table-tr:hover
@@ -898,10 +912,15 @@
   .arco-table-content-inner
     tbody
     > .arco-table-tr-checked
+    > .arco-table-td.arco-table-col-fixed-left,
+  .arco-table-content-inner
+    tbody
+    > .arco-table-tr-checked
     > .arco-table-td.arco-table-col-fixed-right {
     background-color: rgba(var(--primary-6), 0.06) !important;
   }
 
+  .arco-table-th.arco-table-col-fixed-left,
   .arco-table-th.arco-table-col-fixed-right {
     background-color: var(--color-fill-1, #f7f8fa);
   }

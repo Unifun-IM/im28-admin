@@ -16,6 +16,29 @@ declare namespace AdminAPI {
     device_id?: string;
   };
 
+  type AdminAddWhitelistUserRequest = {
+    /** 已注册的 C 端用户 ID。 */
+    user_id: string;
+    /** 可选的加入白名单原因；传入时不能仅包含空白字符。 */
+    reason?: string;
+  };
+
+  type AdminBannedUserWrap = {
+    user?: User;
+    operator?: SysUser;
+    /** 操作类型；当前黑名单列表固定为 ban。 */
+    action?: "ban";
+    /** 封禁周期。temporary=限时，permanent=永久。 */
+    ban_period?: "temporary" | "permanent";
+    /** 限时封禁截止时间，使用 RFC3339；永久封禁时为空字符串。 */
+    banned_until?: string;
+    /** 封禁原因。 */
+    reason?: string;
+    /** 封禁原因说明。 */
+    reason_description?: string;
+    operated_at?: RFC3339Time;
+  };
+
   type AdminBanUserRequest = {
     user_id: string;
     /** 拉黑原因，不能仅包含空白字符。 */
@@ -41,6 +64,11 @@ declare namespace AdminAPI {
     reason_description: string;
   };
 
+  type AdminBatchRemoveWhitelistUserRequest = {
+    /** 需要移出白名单的用户 ID，单次最多 100 个。 */
+    user_ids: string[];
+  };
+
   type AdminBatchUnbanUserRequest = {
     /** 需要解禁的用户 ID，单次最多 100 个。 */
     user_ids: string[];
@@ -63,6 +91,28 @@ declare namespace AdminAPI {
 
   type AdminDetailUserRequest = {
     user_id: string;
+  };
+
+  type AdminListBannedUserEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminBannedUserWrap[]; total?: number };
+    };
+
+  type AdminListBannedUserRequest = {
+    /** 查询内容，不能仅包含空白字符。keyword_type 为空时同时匹配用户 ID、账号、手机号、邮箱和昵称。 */
+    keyword?: string;
+    /** 字段化查询类型，只能在同时传入 keyword 时使用；除 nickname 为包含匹配外，其余类型均为精确匹配。 */
+    keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
+    /** 封禁周期。temporary=限时，permanent=永久。 */
+    ban_period?: "temporary" | "permanent";
+    /** 执行最近一次封禁操作的后台用户 ID。 */
+    operator_id?: string;
+    /** 最近一次封禁操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
+    operated_start_at?: RFC3339Time;
+    operated_end_at?: RFC3339Time;
+    page?: number;
+    page_size?: number;
   };
 
   type AdminListGroupEnvelope =
@@ -118,6 +168,26 @@ declare namespace AdminAPI {
     page_size?: number;
   };
 
+  type AdminListWhitelistedUserEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminWhitelistedUserWrap[]; total?: number };
+    };
+
+  type AdminListWhitelistedUserRequest = {
+    /** 查询内容，不能仅包含空白字符。keyword_type 为空时同时匹配用户 ID、账号、手机号、邮箱和昵称。 */
+    keyword?: string;
+    /** 字段化查询类型，只能在同时传入 keyword 时使用；除 nickname 为包含匹配外，其余类型均为精确匹配。 */
+    keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
+    /** 将用户加入白名单的后台用户 ID。 */
+    operator_id?: string;
+    /** 加入白名单时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
+    operated_start_at?: RFC3339Time;
+    operated_end_at?: RFC3339Time;
+    page?: number;
+    page_size?: number;
+  };
+
   type AdminMessage = {
     msg_id?: string;
     conversation_id?: string;
@@ -135,6 +205,10 @@ declare namespace AdminAPI {
     sent_at?: string;
     updated_at?: string;
     expire_at?: string;
+  };
+
+  type AdminRemoveWhitelistUserRequest = {
+    user_id: string;
   };
 
   type AdminTraceMessageEnvelope =
@@ -184,6 +258,15 @@ declare namespace AdminAPI {
   type AdminUserWrap = {
     user?: User;
     online_status?: OnlineStatus;
+  };
+
+  type AdminWhitelistedUserWrap = {
+    user?: User;
+    operator?: SysUser;
+    /** 加入白名单原因。 */
+    reason?: string;
+    /** 加入白名单时间。 */
+    operated_at?: RFC3339Time;
   };
 
   type AdminWritableGroupStatus = 0 | 1;
@@ -1460,6 +1543,11 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminUsersBlacklistListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminUsersDetailParams = {
     ""?: any;
     ""?: any;
@@ -1476,6 +1564,26 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminUsersUnbanParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersWhitelistAddParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersWhitelistBatchRemoveParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersWhitelistListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersWhitelistRemoveParams = {
     ""?: any;
     ""?: any;
   };
