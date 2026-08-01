@@ -4,7 +4,6 @@ import { Button, Input, Message, Modal, VerificationCode } from '@arco-design/we
 import useLocale from '@shared/lib/useLocale';
 
 import copyIcon from './assets/icon-copy.svg';
-import locale from './locale';
 
 export type GaBindModalProps = {
   visible: boolean;
@@ -35,7 +34,7 @@ export default function GaBindModal({
   onCancel,
   onOk
 }: GaBindModalProps) {
-  const t = useLocale(locale);
+  const t = useLocale();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'error' | undefined>();
   const [qrFailed, setQrFailed] = useState(false);
@@ -102,10 +101,10 @@ export default function GaBindModal({
     >
       <div className="box-border px-[24px] pb-[12px] pt-[24px]">
         <div className="text-[20px] font-medium leading-[28px] text-[var(--color-text-1,#1d2129)]">
-          绑定GA验证码
+          {t['login.gaBind.title']}
         </div>
         <div className="text-[12px] leading-[20px] text-[var(--color-text-3,#86909c)]">
-          使用 Google Authenticator 或 Authy 扫描下面的二维码。
+          {t['login.gaBind.desc']}
         </div>
       </div>
 
@@ -124,7 +123,9 @@ export default function GaBindModal({
               />
             ) : (
               <div className="flex h-[112px] w-full items-center justify-center border border-dashed border-[#99a1af] bg-[#e5e7eb] text-[10.5px] leading-[14px] text-[#6b7280]">
-                {qrFailed ? '二维码加载失败' : '二维码加载中'}
+                {qrFailed
+                  ? t['login.gaBind.qrFail']
+                  : t['login.gaBind.qrLoading']}
               </div>
             )}
           </div>
@@ -132,7 +133,7 @@ export default function GaBindModal({
 
         <div className="flex flex-col gap-[8px]">
           <div className="text-[12px] font-medium leading-[18px] text-[var(--color-text-1,#1d2129)]">
-            手动输入密钥绑定
+            {t['login.gaBind.manual']}
           </div>
           <Input
             className="use-login-secret"
@@ -143,7 +144,7 @@ export default function GaBindModal({
                 type="button"
                 className="inline-flex size-[14px] cursor-pointer border-0 bg-transparent p-0"
                 onClick={copySecret}
-                aria-label="复制密钥"
+                aria-label={t['login.gaBind.copySecret']}
               >
                 <img src={copyIcon} alt="" className="block size-[14px]" />
               </button>
@@ -153,7 +154,7 @@ export default function GaBindModal({
 
         <div className="flex flex-col gap-[8px]">
           <div className="text-[12px] font-medium leading-[18px] text-[var(--color-text-1,#1d2129)]">
-            绑定后输入验证码
+            {t['login.gaBind.codeAfter']}
           </div>
           <VerificationCode
             className="use-login-otp"
@@ -173,7 +174,7 @@ export default function GaBindModal({
 
       <div className="box-border flex justify-end gap-[8px] px-[24px] pb-[24px] pt-[12px]">
         <Button className="min-w-[80px]" disabled={loading} onClick={onCancel}>
-          {mandatory ? '退出登录' : '取消'}
+          {mandatory ? t['navbar.logout'] : t['common.cancel']}
         </Button>
         <Button
           className="min-w-[80px]"
@@ -181,7 +182,7 @@ export default function GaBindModal({
           loading={loading}
           onClick={() => submit(code)}
         >
-          确定
+          {t['common.confirm']}
         </Button>
       </div>
     </Modal>

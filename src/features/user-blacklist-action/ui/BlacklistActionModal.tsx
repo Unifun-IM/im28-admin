@@ -15,6 +15,7 @@ import {
 } from '@shared/api/admin/users';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
+import useLocale from '@shared/lib/useLocale';
 import './blacklist-action-modal.less';
 
 const FormItem = Form.Item;
@@ -41,6 +42,8 @@ export default function BlacklistActionModal({
   onCancel,
   onSuccess
 }: BlacklistActionModalProps) {
+  const t = useLocale();
+  const common = t;
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const isAdd = mode === 'add';
@@ -106,7 +109,9 @@ export default function BlacklistActionModal({
         }
       }
 
-      Message.success(isAdd ? '拉黑成功' : '解禁成功');
+      Message.success(
+        isAdd ? t['blacklistAction.msg.banSuccess'] : t['blacklistAction.msg.unbanSuccess']
+      );
       onSuccess?.();
       onCancel();
     } catch {
@@ -133,24 +138,30 @@ export default function BlacklistActionModal({
           <span>
             {isAdd
               ? isBatch
-                ? `拉黑 ${count} 位用户？`
-                : '拉黑用户？'
+                ? t['blacklistAction.title.banBatch'].replace(
+                    '{count}',
+                    String(count)
+                  )
+                : t['blacklistAction.title.banSingle']
               : isBatch
-                ? `解禁 ${count} 位用户？`
-                : '解禁用户？'}
+                ? t['blacklistAction.title.unbanBatch'].replace(
+                    '{count}',
+                    String(count)
+                  )
+                : t['blacklistAction.title.unbanSingle']}
           </span>
         </div>
       }
       footer={
         <div className="flex justify-end gap-2">
-          <Button onClick={onCancel}>取消</Button>
+          <Button onClick={onCancel}>{common['common.cancel']}</Button>
           <Button
             type="primary"
             status={isAdd ? 'danger' : undefined}
             loading={submitting}
             onClick={handleOk}
           >
-            确定
+            {common['common.confirm']}
           </Button>
         </div>
       }
@@ -159,12 +170,16 @@ export default function BlacklistActionModal({
         {isAdd ? (
           <FormItem
             field="ban_period"
-            label="ban_period"
+            label={t['blacklistAction.field.banPeriod']}
             rules={[{ required: true }]}
           >
             <Radio.Group>
-              <Radio value="temporary">temporary</Radio>
-              <Radio value="permanent">permanent</Radio>
+              <Radio value="temporary">
+                {t['blacklistAction.field.temporary']}
+              </Radio>
+              <Radio value="permanent">
+                {t['blacklistAction.field.permanent']}
+              </Radio>
             </Radio.Group>
           </FormItem>
         ) : null}
@@ -174,24 +189,28 @@ export default function BlacklistActionModal({
               values.ban_period === 'temporary' ? (
                 <FormItem
                   field="banned_until"
-                  label="banned_until"
+                  label={t['blacklistAction.field.bannedUntil']}
                   rules={[{ required: true }]}
                 >
-                  <Input placeholder="RFC3339" />
+                  <Input placeholder={t['blacklistAction.placeholder.bannedUntil']} />
                 </FormItem>
               ) : null
             }
           </FormItem>
         ) : null}
-        <FormItem field="reason" label="reason" rules={[{ required: true }]}>
-          <Input placeholder="reason" />
+        <FormItem
+          field="reason"
+          label={t['blacklistAction.field.reason']}
+          rules={[{ required: true }]}
+        >
+          <Input placeholder={t['blacklistAction.placeholder.reason']} />
         </FormItem>
         <FormItem
           field="reason_description"
-          label="reason_description"
+          label={t['blacklistAction.field.reasonDescription']}
           rules={[{ required: true }]}
         >
-          <TextArea placeholder="reason_description" />
+          <TextArea placeholder={t['blacklistAction.placeholder.reasonDescription']} />
         </FormItem>
       </Form>
     </Modal>

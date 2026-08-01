@@ -7,6 +7,7 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import useLocale from '@shared/lib/useLocale';
 
 function getOptionValues(
   options: SelectProps['options']
@@ -48,6 +49,7 @@ export default function FilterSelect(props: SelectProps) {
     ...rest
   } = props;
 
+  const t = useLocale();
   const isMultiple = mode === 'multiple' || mode === 'tags';
   const [keyword, setKeyword] = useState('');
 
@@ -107,7 +109,7 @@ export default function FilterSelect(props: SelectProps) {
             allowClear
             size="small"
             value={keyword}
-            placeholder="搜索"
+            placeholder={t['common.search']}
             prefix={<IconSearch />}
             onChange={setKeyword}
             onMouseDown={(e) => e.stopPropagation()}
@@ -121,7 +123,7 @@ export default function FilterSelect(props: SelectProps) {
             onClick={handleSelectAll}
           >
             <Checkbox checked={allSelected} indeterminate={someSelected} />
-            <span>全选</span>
+            <span>{t['common.selectAll']}</span>
           </div>
         )}
         {menu}
@@ -134,7 +136,7 @@ export default function FilterSelect(props: SelectProps) {
             onMouseDown={(e) => e.preventDefault()}
             onClick={handleClear}
           >
-            清除
+            {t['common.clear']}
           </div>
         )}
       </div>

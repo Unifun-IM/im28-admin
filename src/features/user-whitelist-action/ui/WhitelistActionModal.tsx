@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '@arco-design/web-react';
 import { ApiNotReady } from '@shared/ui';
+import useLocale from '@shared/lib/useLocale';
 
 export type WhitelistActionModalProps = {
   visible: boolean;
@@ -17,12 +18,13 @@ export default function WhitelistActionModal({
   visible,
   onCancel
 }: WhitelistActionModalProps) {
+  const t = useLocale();
   return (
     <Modal
       visible={visible}
       onCancel={onCancel}
       footer={null}
-      title="白名单"
+      title={t['menu.user.whitelist']}
       style={{ width: 520 }}
     >
       <ApiNotReady className="min-h-[200px]" />

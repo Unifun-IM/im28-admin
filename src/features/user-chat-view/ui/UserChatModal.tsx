@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '@arco-design/web-react';
 import { ApiNotReady } from '@shared/ui';
+import useLocale from '@shared/lib/useLocale';
 
 export type ChatModalScene = 'user' | 'group';
 
@@ -27,12 +28,14 @@ export default function UserChatModal({
   visible,
   onClose
 }: UserChatModalProps) {
+  const t = useLocale();
+
   return (
     <Modal
       visible={visible}
       onCancel={onClose}
       footer={null}
-      title="查聊天"
+      title={t['userChat.title']}
       style={{ width: 960 }}
     >
       <ApiNotReady className="min-h-[480px]" />

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cs from 'classnames';
+import useLocale from '@shared/lib/useLocale';
 import arrowIcon from './assets/icon-arrow.svg';
 import checkIcon from './assets/icon-check.svg';
 
@@ -18,6 +19,7 @@ export default function SlideCaptcha({
   onChange,
   className
 }: SlideCaptchaProps) {
+  const t = useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const offsetRef = useRef(0);
@@ -103,12 +105,12 @@ export default function SlideCaptcha({
       onPointerCancel={onPointerUp}
     >
       <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[14px] leading-[21px] text-arco-text-2">
-        {verified ? '验证成功' : '按住滑块拖动'}
+        {verified ? t['login.slider.success'] : t['login.slider.tip']}
       </span>
       <div
         data-handle
         role="slider"
-        aria-label="滑块验证"
+        aria-label={t['login.slider.aria']}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={verified ? 100 : Math.round((offset / Math.max(maxOffset(), 1)) * 100)}

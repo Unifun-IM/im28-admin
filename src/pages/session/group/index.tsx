@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Form, Button, Message, Modal } from '@arco-design/web-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Form, Message, Modal } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
@@ -16,20 +16,26 @@ import {
 } from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
 import { UserChatModal } from '@features/user-chat-view';
+import useLocale from '@shared/lib/useLocale';
+import { openimLabel } from '@shared/lib/openimLabels';
 
 const FormItem = Form.Item;
 
+/** OpenIM GroupStatus：0 正常 / 1 封禁 / 2 解散 / 3 禁言 */
 function groupStatusBadge(
   status?: AdminAPI.GroupStatus
 ): 'success' | 'error' | 'warning' | 'default' {
-  if (status === 1) return 'success';
-  if (status === 2) return 'error';
-  if (status === 3) return 'warning';
+  if (status === 0) return 'success';
+  if (status === 1) return 'error';
+  if (status === 2 || status === 3) return 'warning';
   return 'default';
 }
 
 /** 群列表 — AdminAPI.AdminListGroupRequest / { group?: Group } */
 export default function GroupQueryPage() {
+  const t = useLocale();
+  const common = t;
+
   type GroupListForm = {
     keyword?: string;
     /** Select 用字符串，请求时再转 GroupStatus */
@@ -44,6 +50,15 @@ export default function GroupQueryPage() {
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+
+  const statusOptions = useMemo(
+    () =>
+      (['0', '1', '2', '3'] as const).map((value) => ({
+        label: openimLabel(t, 'groupStatus', value),
+        value
+      })),
+    [t]
+  );
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -78,27 +93,24 @@ export default function GroupQueryPage() {
     <>
       <BizListPage
         form={form}
-        title="群组列表"
+        title={t['groupQuery.title']}
         filterCollapsible={false}
         filterDefaultCollapsed={false}
-        filterResetText="清除全部"
+        filterResetText={common['common.clearAll']}
         filter={
           <>
             <FilterField>
-              <FormItem field="keyword" label="keyword">
-                <FilterInput placeholder="keyword" />
+              <FormItem field="keyword" label={common['common.keyword']}>
+                <FilterInput placeholder={common['common.placeholder']} />
               </FormItem>
             </FilterField>
             <FilterField>
-              <FormItem field="status" label="status">
+              <FormItem field="status" label={common['common.status']}>
                 <FilterSelect
-                  placeholder="status"
+                  placeholder={common['common.status']}
                   options={[
-                    { label: '全部', value: '' },
-                    { label: '0', value: '0' },
-                    { label: '1', value: '1' },
-                    { label: '2', value: '2' },
-                    { label: '3', value: '3' }
+                    { label: common['common.all'], value: '' },
+                    ...statusOptions
                   ]}
                   allowClear
                 />
@@ -123,41 +135,41 @@ export default function GroupQueryPage() {
             row.group?.group_id || String(Math.random()),
           columns: [
             {
-              title: 'group',
+              title: t['groupQuery.col.group'],
               dataIndex: 'group.title',
               render: (_: unknown, row: { group?: AdminAPI.Group }) => (
                 <AvatarNameCell
                   name={row.group?.title}
-                  sub={`group_id：${row.group?.group_id || ''}`}
+                  sub={`${t['groupQuery.cell.groupId']}：${row.group?.group_id || ''}`}
                   copyText={row.group?.group_id || ''}
                   avatar={row.group?.avatar_url}
                 />
               )
             },
             {
-              title: 'owner_user_id',
+              title: t['groupQuery.col.ownerUserId'],
               dataIndex: 'group.owner_user_id',
               render: (_: unknown, row: { group?: AdminAPI.Group }) =>
                 row.group?.owner_user_id || '--'
             },
             {
-              title: 'member_count',
+              title: t['groupQuery.col.memberCount'],
               dataIndex: 'group.member_count',
               render: (_: unknown, row: { group?: AdminAPI.Group }) =>
                 row.group?.member_count ?? '--'
             },
             {
-              title: 'status',
+              title: common['common.status'],
               dataIndex: 'group.status',
               render: (_: unknown, row: { group?: AdminAPI.Group }) => (
                 <StatusBadge
                   status={groupStatusBadge(row.group?.status)}
-                  text={String(row.group?.status ?? '--')}
+                  text={openimLabel(t, 'groupStatus', row.group?.status)}
                 />
               )
             },
             {
-              title: '操作',
+              title: common['common.action'],
               dataIndex: 'op',
               width: 220,
               render: (_: unknown, row: { group?: AdminAPI.Group }) => {
@@ -168,26 +180,26 @@ export default function GroupQueryPage() {
                     items={[
                       {
                         key: 'detail',
-                        label: '详情',
+                        label: common['common.detail'],
                         onClick: () => setDetailGroupId(group_id)
                       },
                       {
                         key: 'chat',
-                        label: '聊天',
+                        label: t['groupQuery.action.chat'],
                         onClick: () => setChatOpen(true)
                       },
                       {
                         key: 'status',
-                        label: '改状态',
+                        label: t['groupQuery.action.changeStatus'],
                         onClick: () => {
                           Modal.confirm({
-                            title: 'update-status status=1?',
+                            title: t['groupQuery.confirm.updateStatus'],
                             onOk: async () => {
                               await postV1AdminGroupsUpdateStatus({
                                 group_id,
-                                status: 1
+                                status: 0
                               });
-                              Message.success('ok');
+                              Message.success(common['common.success']);
                               fetchData(page, pageSize);
                             }
                           });
@@ -195,13 +207,13 @@ export default function GroupQueryPage() {
                       },
                       {
                         key: 'upgrade',
-                        label: '升级',
+                        label: t['groupQuery.action.upgrade'],
                         onClick: () => {
                           Modal.confirm({
-                            title: 'upgrade group?',
+                            title: t['groupQuery.confirm.upgrade'],
                             onOk: async () => {
                               await postV1AdminGroupsUpgrade({ group_id });
-                              Message.success('ok');
+                              Message.success(common['common.success']);
                               fetchData(page, pageSize);
                             }
                           });

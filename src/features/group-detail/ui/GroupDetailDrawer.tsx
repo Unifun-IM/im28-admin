@@ -1,6 +1,7 @@
 import React from 'react';
 import { Drawer } from '@arco-design/web-react';
 import { ApiNotReady } from '@shared/ui';
+import useLocale from '@shared/lib/useLocale';
 
 export type GroupDetailDrawerProps = {
   visible: boolean;
@@ -19,12 +20,14 @@ export default function GroupDetailDrawer({
   visible,
   onClose
 }: GroupDetailDrawerProps) {
+  const t = useLocale();
+
   return (
     <Drawer
       visible={visible}
       onCancel={onClose}
       width={720}
-      title="群组详情"
+      title={t['groupDetail.title']}
       footer={null}
     >
       <ApiNotReady className="min-h-[320px]" />

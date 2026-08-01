@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Card,
@@ -19,6 +19,9 @@ import cs from 'classnames';
 import './biz-list.less';
 
 import { pageTabsStore } from '@entities/page-tabs';
+import { GlobalContext } from '@shared/lib/global-context';
+import useLocale from '@shared/lib/useLocale';
+import { EmptyState } from '@shared/ui';
 import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';
 import TableBatchBar from './TableBatchBar';
@@ -26,7 +29,6 @@ import {
   normalizeBizColumns,
   resolveBizPagination
 } from './tableDefaults';
-import { EmptyState } from '@shared/ui';
 
 export type BizListPageProps<T = Record<string, unknown>> = {
   form?: FormInstance;
@@ -81,6 +83,8 @@ function BizListPage<T extends Record<string, unknown>>({
   tableProps,
   className
 }: BizListPageProps<T>) {
+  const { lang } = useContext(GlobalContext);
+  const t = useLocale();
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const contentFullscreen = pageTabsStore.contentFullscreen;
   const enableFullscreen =
@@ -120,12 +124,14 @@ function BizListPage<T extends Record<string, unknown>>({
     selectedRowKeys
   ]);
 
+  // 依赖 lang：切换语言后强制按新表头文案规范化列
   const columns = useMemo(
     () =>
       normalizeBizColumns(
         (tableProps.columns || []) as TableColumnProps<T>[]
       ),
-    [tableProps.columns]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- lang 变化时需重算 i18n 表头
+    [tableProps.columns, lang]
   );
 
   const hasFixedRight = columns.some((col) => col.fixed === 'right');
@@ -174,7 +180,9 @@ function BizListPage<T extends Record<string, unknown>>({
       ) : null}
       <Card
         className={cs(
-          'use-biz-table-card relative overflow-visible !p-0',
+          'use-biz-table-card relative !p-0',
+          // 无分页时裁切底角，避免末行方角顶出卡片圆角；有分页保留 visible 以便固定列阴影
+          pagination === false ? 'overflow-hidden' : 'overflow-visible',
           contentFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
         )}
         bordered={false}
@@ -193,11 +201,10 @@ function BizListPage<T extends Record<string, unknown>>({
               {/* 无批量条时，标题旁兜底展示已选数量 */}
               {hasRowSelection && !batchActions && selectedCount > 0 && (
                 <div className="text-sm leading-[21px] text-arco-text-3">
-                  已选{' '}
-                  <span className="font-medium text-primary-6">
-                    {selectedCount}
-                  </span>{' '}
-                  项
+                  {t['common.selectedCount'].replace(
+                    '{n}',
+                    String(selectedCount)
+                  )}
                 </div>
               )}
             </div>
@@ -205,7 +212,7 @@ function BizListPage<T extends Record<string, unknown>>({
               {(onRefresh || enableFullscreen) && (
                 <div className="flex items-center gap-2">
                   {onRefresh && (
-                    <Tooltip content="刷新">
+                    <Tooltip content={t['common.refresh']}>
                       <Button
                         type="secondary"
                         className="use-biz-table-icon-btn"
@@ -216,7 +223,11 @@ function BizListPage<T extends Record<string, unknown>>({
                   )}
                   {enableFullscreen && (
                     <Tooltip
-                      content={contentFullscreen ? '退出全屏' : '全屏'}
+                      content={
+                        contentFullscreen
+                          ? t['pageTabs.exitFullscreen']
+                          : t['pageTabs.fullscreen']
+                      }
                     >
                       <Button
                         type="secondary"
@@ -301,11 +312,16 @@ function BizListPage<T extends Record<string, unknown>>({
           )}
         >
           <Table
+            key={lang || 'zh-CN'}
             rowKey="id"
             border={false}
             {...tableProps}
             stripe={tableProps.stripe ?? true}
-            className={cs('use-biz-table', tableProps.className)}
+            className={cs(
+              'use-biz-table',
+              pagination === false && 'is-no-pagination',
+              tableProps.className
+            )}
             columns={columns}
             data={displayData}
             scroll={scroll}

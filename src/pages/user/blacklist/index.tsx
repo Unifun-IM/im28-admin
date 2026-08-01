@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Form, Button } from '@arco-design/web-react';
 import {
   ActionLinks,
@@ -6,25 +6,38 @@ import {
   BizListPage,
   FilterField,
   FilterKeywordInput,
-  FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
 import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
+import useLocale from '@shared/lib/useLocale';
+
 
 const FormItem = Form.Item;
 
-const KEYWORD_TYPE_OPTIONS = [
-  { label: 'user_id', value: 'user_id' },
-  { label: 'nickname', value: 'nickname' },
-  { label: 'phone', value: 'phone' },
-  { label: 'email', value: 'email' },
-  { label: 'account', value: 'account' }
-];
-
 /** 黑名单 — 用户列表 status=disabled */
 export default function Page() {
+  const t = useLocale();
+  const common = t;
+
+  const keywordTypeOptions = useMemo(
+    () =>
+      (
+        [
+          'user_id',
+          'nickname',
+          'phone',
+          'email',
+          'account'
+        ] as const
+      ).map((value) => ({
+        label: t[`blacklist.keywordType.${value}`],
+        value
+      })),
+    [t]
+  );
+
   const [form] = Form.useForm<AdminAPI.AdminListUserRequest>();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AdminAPI.AdminUserWrap[]>([]);
@@ -72,15 +85,16 @@ export default function Page() {
     <>
       <BizListPage
         form={form}
-        title="黑名单列表"
+        title={t['blacklist.title']}
         filter={
           <FilterField>
-            <FormItem field="keyword" label="keyword">
+            <FormItem field="keyword" label={common['common.keyword']}>
               <FilterKeywordInput
                 typeField="keyword_type"
-                typeOptions={KEYWORD_TYPE_OPTIONS}
+                typeOptions={keywordTypeOptions}
                 typeInitialValue="user_id"
                 typeWidth={100}
+                placeholder={common['common.placeholder']}
               />
             </FormItem>
           </FilterField>
@@ -106,7 +120,7 @@ export default function Page() {
               })
             }
           >
-            批量解禁
+            {t['blacklist.action.batchUnban']}
           </Button>
         }
         tableProps={{
@@ -116,27 +130,27 @@ export default function Page() {
             row.user?.user_id || String(Math.random()),
           columns: [
             {
-              title: 'user',
+              title: t['blacklist.col.user'],
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <AvatarNameCell
                   name={row.user?.nickname}
-                  sub={`user_id：${row.user?.user_id || ''}`}
+                  sub={`${t['blacklist.cell.userId']}：${row.user?.user_id || ''}`}
                   copyText={row.user?.user_id || ''}
                   avatar={row.user?.avatar_url}
                 />
               )
             },
             {
-              title: 'status',
+              title: common['common.status'],
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <StatusBadge
                   status="error"
-                  text={row.user?.status || 'disabled'}
+                  text={t['blacklist.status.disabled']}
                 />
               )
             },
             {
-              title: '操作',
+              title: common['common.action'],
               width: 120,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <ActionLinks
@@ -144,7 +158,7 @@ export default function Page() {
                   items={[
                     {
                       key: 'unban',
-                      label: '解禁',
+                      label: t['blacklist.action.unban'],
                       onClick: () =>
                         setRemoveModal({
                           userIds: [row.user?.user_id || ''],
@@ -153,7 +167,7 @@ export default function Page() {
                     },
                     {
                       key: 'detail',
-                      label: '详情',
+                      label: common['common.detail'],
                       onClick: () =>
                         setDetailUserId(row.user?.user_id || null)
                     }

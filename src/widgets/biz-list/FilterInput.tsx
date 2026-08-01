@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input, type InputProps } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
+import useLocale from '@shared/lib/useLocale';
 
 export type FilterInputProps = InputProps & {
   /** 右侧搜索图标，默认展示 */
@@ -12,15 +13,16 @@ export type FilterInputProps = InputProps & {
  */
 export default function FilterInput({
   allowClear = true,
-  placeholder = '请输入',
+  placeholder,
   showSearchIcon = false,
   suffix,
   ...rest
 }: FilterInputProps) {
+  const t = useLocale();
   return (
     <Input
       allowClear={allowClear}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t['common.placeholder']}
       suffix={
         suffix ??
         (showSearchIcon ? (

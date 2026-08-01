@@ -35,7 +35,7 @@ import Settings from '@widgets/settings';
 import defaultLocale from '@shared/locale';
 import useStorage from '@shared/lib/useStorage';
 import { postV1AdminAuthLogout } from '@shared/api/admin/auth';
-import { getAccessToken, setAccessToken } from '@shared/api/request';
+import { clearAuthSession, getAccessToken } from '@shared/api/request';
 import cs from 'classnames';
 import './navbar.less';
 
@@ -79,7 +79,7 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
       // ignore
     }
     setUserStatus('logout');
-    setAccessToken(null);
+    clearAuthSession();
     window.location.href = '/login';
   }
 
@@ -189,8 +189,8 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
               <IconButton icon={<IconLanguage />} tip={t['message.lang.tips']} />
             }
             options={[
-              { label: '中文', value: 'zh-CN' },
-              { label: 'English', value: 'en-US' }
+              { label: t['common.lang.zh'], value: 'zh-CN' },
+              { label: t['common.lang.en'], value: 'en-US' }
             ]}
             value={lang}
             triggerProps={{

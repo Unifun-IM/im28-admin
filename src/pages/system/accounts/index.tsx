@@ -22,10 +22,15 @@ import {
   ResetGaModal,
   type ResetGaTarget
 } from '@features/admin-account-reset-ga';
+import useLocale from '@shared/lib/useLocale';
+import { formatDateTime } from '@shared/lib/formatTime';
+
 
 const FormItem = Form.Item;
 
 function AccountsPage() {
+  const t = useLocale();
+  const common = t;
   const [form] = Form.useForm<AdminAPI.ListSysUserRequest>();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AdminAPI.SysUserWrap[]>([]);
@@ -80,7 +85,7 @@ function AccountsPage() {
         status: checked ? 'active' : 'disabled'
       });
       fetchData(page, pageSize);
-      Message.success('ok');
+      Message.success(common['common.success']);
     } catch {
       // request toast
     }
@@ -90,23 +95,23 @@ function AccountsPage() {
     <>
       <BizListPage
         form={form}
-        title={`后台账号管理列表(${total})`}
-        filterResetText="清除全部"
+        title={`${t['accounts.title']}(${total})`}
+        filterResetText={common['common.clearAll']}
         filter={
           <>
             <FilterField>
-              <FormItem field="keyword" label="keyword">
-                <FilterInput placeholder="keyword" />
+              <FormItem field="keyword" label={common['common.keyword']}>
+                <FilterInput placeholder={common['common.keyword']} />
               </FormItem>
             </FilterField>
             <FilterField>
-              <FormItem field="status" label="status">
+              <FormItem field="status" label={common['common.status']}>
                 <FilterSelect
-                  placeholder="status"
+                  placeholder={common['common.status']}
                   options={[
-                    { label: '全部', value: '' },
-                    { label: 'active', value: 'active' },
-                    { label: 'disabled', value: 'disabled' }
+                    { label: common['common.all'], value: '' },
+                    { label: common['common.active'], value: 'active' },
+                    { label: common['common.disabled'], value: 'disabled' }
                   ]}
                   allowClear
                 />
@@ -126,7 +131,7 @@ function AccountsPage() {
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
           <Button type="primary" onClick={() => setCreateVisible(true)}>
-            新增账号
+            {t['accounts.create']}
           </Button>
         }
         tableProps={{
@@ -136,25 +141,25 @@ function AccountsPage() {
             String(row.sys_user?.id ?? Math.random()),
           columns: [
             {
-              title: 'username',
+              title: common['common.username'],
               dataIndex: 'sys_user.username',
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 row.sys_user?.username || '--'
             },
             {
-              title: 'display_name',
+              title: t['accounts.col.displayName'],
               dataIndex: 'sys_user.display_name',
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 row.sys_user?.display_name || '--'
             },
             {
-              title: 'roles',
+              title: t['accounts.col.roles'],
               dataIndex: 'rbac.roles',
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 (row.rbac?.roles || []).join(', ') || '--'
             },
             {
-              title: 'status',
+              title: common['common.status'],
               dataIndex: 'sys_user.status',
               render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <Switch
@@ -164,13 +169,13 @@ function AccountsPage() {
               )
             },
             {
-              title: 'last_login_at',
+              title: t['accounts.col.lastLoginAt'],
               dataIndex: 'sys_user.last_login_at',
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
-                row.sys_user?.last_login_at || '--'
+                formatDateTime(row.sys_user?.last_login_at)
             },
             {
-              title: '操作',
+              title: common['common.action'],
               dataIndex: 'op',
               width: 200,
               render: (_: unknown, row: AdminAPI.SysUserWrap) => (
@@ -179,7 +184,7 @@ function AccountsPage() {
                   items={[
                     {
                       key: 'reset',
-                      label: '重置密码',
+                      label: t['accounts.resetPassword'],
                       onClick: () =>
                         setResetTarget({
                           id: Number(row.sys_user?.id),
@@ -188,7 +193,7 @@ function AccountsPage() {
                     },
                     {
                       key: 'ga',
-                      label: '重置谷歌',
+                      label: t['accounts.resetGa'],
                       onClick: () =>
                         setResetGaTarget({
                           id: String(row.sys_user?.id || ''),
@@ -197,10 +202,10 @@ function AccountsPage() {
                     },
                     {
                       key: 'delete',
-                      label: '删除',
+                      label: common['common.delete'],
                       onClick: () => {
                         Modal.confirm({
-                          title: '删除用户？',
+                          title: t['accounts.deleteConfirm'],
                           onOk: async () => {
                             const id = row.sys_user?.id;
                             if (id == null) return;

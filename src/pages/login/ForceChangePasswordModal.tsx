@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button, Form, Input, Modal } from '@arco-design/web-react';
+import useLocale from '@shared/lib/useLocale';
 
 export type ForceChangePasswordForm = {
   current_password: string;
@@ -42,6 +43,7 @@ export default function ForceChangePasswordModal({
   onExit,
   onSubmit
 }: ForceChangePasswordModalProps) {
+  const t = useLocale();
   const [form] = Form.useForm<ForceChangePasswordForm>();
 
   useEffect(() => {
@@ -81,13 +83,13 @@ export default function ForceChangePasswordModal({
     >
       <div className="box-border flex h-[48px] items-center border-0 border-b border-solid border-[rgba(0,0,0,0.08)] px-[24px]">
         <span className="text-[16px] font-medium leading-6 text-[var(--color-text-1,#1d2129)]">
-          设置新密码
+          {t['login.forcePwd.title']}
         </span>
       </div>
 
       <div className="box-border flex max-h-[680px] flex-col gap-[24px] overflow-auto px-[24px] pb-[60px] pt-[12px]">
         <p className="m-0 text-[14px] leading-[21px] text-black">
-          你正在使用默认密码登录。请设置一个仅你本人知晓的新密码。
+          {t['login.forcePwd.desc']}
         </p>
 
         <Form
@@ -98,16 +100,21 @@ export default function ForceChangePasswordModal({
         >
           <Form.Item
             field="current_password"
-            label="默认密码"
-            rules={[{ required: true, message: '请输入默认密码' }]}
+            label={t['login.forcePwd.current']}
+            rules={[
+              { required: true, message: t['login.msg.pwdCurrentEmpty'] }
+            ]}
           >
-            <Input.Password placeholder="请输入默认密码" autoComplete="current-password" />
+            <Input.Password
+              placeholder={t['login.msg.pwdCurrentEmpty']}
+              autoComplete="current-password"
+            />
           </Form.Item>
           <Form.Item
             field="new_password"
-            label="新密码"
+            label={t['login.forcePwd.new']}
             rules={[
-              { required: true, message: '请输入新密码' },
+              { required: true, message: t['login.msg.pwdNewEmpty'] },
               {
                 validator: (value, callback) => {
                   const current = form.getFieldValue('current_password') || '';
@@ -116,11 +123,11 @@ export default function ForceChangePasswordModal({
                     return;
                   }
                   if (/\s/.test(value)) {
-                    callback('密码不能包含空格');
+                    callback(t['login.msg.pwdHasSpace']);
                     return;
                   }
                   if (value.length < 8 || value.length > 20) {
-                    callback('密码长度需为8-20位');
+                    callback(t['login.msg.pwdLength']);
                     return;
                   }
                   if (
@@ -129,22 +136,22 @@ export default function ForceChangePasswordModal({
                     !/\d/.test(value) ||
                     !/[^A-Za-z0-9]/.test(value)
                   ) {
-                    callback('密码需包含数字、字母及特殊字符');
+                    callback(t['login.msg.pwdComplexity']);
                     return;
                   }
                   if (value === current) {
-                    callback('新密码不能与初始密码相同');
+                    callback(t['login.msg.pwdSameAsInitial']);
                     return;
                   }
                   if (
                     username &&
                     value.toLowerCase().includes(String(username).toLowerCase())
                   ) {
-                    callback('密码不能包含登录账号');
+                    callback(t['login.msg.pwdNoAccount']);
                     return;
                   }
                   if (hasConsecutiveChars(value)) {
-                    callback('密码不能包含连续字符');
+                    callback(t['login.msg.pwdConsecutive']);
                     return;
                   }
                   callback();
@@ -152,17 +159,20 @@ export default function ForceChangePasswordModal({
               }
             ]}
           >
-            <Input.Password placeholder="请输入新密码" autoComplete="new-password" />
+            <Input.Password
+              placeholder={t['login.msg.pwdNewEmpty']}
+              autoComplete="new-password"
+            />
           </Form.Item>
           <Form.Item
             field="confirm_password"
-            label="确认新密码"
+            label={t['login.forcePwd.confirm']}
             rules={[
-              { required: true, message: '请再次输入密码' },
+              { required: true, message: t['login.msg.pwdConfirmEmpty'] },
               {
                 validator: (value, callback) => {
                   if (value && value !== form.getFieldValue('new_password')) {
-                    callback('两次输入密码不一致');
+                    callback(t['login.msg.pwdMismatch']);
                     return;
                   }
                   callback();
@@ -170,24 +180,27 @@ export default function ForceChangePasswordModal({
               }
             ]}
           >
-            <Input.Password placeholder="请再次输入密码" autoComplete="new-password" />
+            <Input.Password
+              placeholder={t['login.msg.pwdConfirmEmpty']}
+              autoComplete="new-password"
+            />
           </Form.Item>
         </Form>
 
         <div className="text-[14px] leading-[21px] text-black">
-          <p className="m-0">密码须满足：</p>
+          <p className="m-0">{t['login.forcePwd.rulesTitle']}</p>
           <ul className="m-0 list-disc pl-[21px]">
-            <li>8–20 个字符</li>
-            <li>包含大写字母、小写字母、数字和特殊字符</li>
-            <li>不能与默认密码相同</li>
-            <li>不能包含登录账号或连续字符</li>
+            <li>{t['login.forcePwd.rule.len']}</li>
+            <li>{t['login.forcePwd.rule.charset']}</li>
+            <li>{t['login.forcePwd.rule.notDefault']}</li>
+            <li>{t['login.forcePwd.rule.noAccount']}</li>
           </ul>
         </div>
       </div>
 
       <div className="box-border flex h-[48px] items-center justify-end gap-[8px] border-0 border-t border-solid border-[var(--color-border-1,#f2f3f5)] px-[24px]">
         <Button className="min-w-[80px]" disabled={loading} onClick={onExit}>
-          退出登录
+          {t['navbar.logout']}
         </Button>
         <Button
           type="primary"
@@ -195,7 +208,7 @@ export default function ForceChangePasswordModal({
           loading={loading}
           onClick={handleOk}
         >
-          确认修改
+          {t['login.forcePwd.submit']}
         </Button>
       </div>
     </Modal>

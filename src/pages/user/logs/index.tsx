@@ -7,11 +7,17 @@ import {
 } from '@widgets/biz-list';
 import { postV1AdminUsersOperationLogsList } from '@shared/api/admin/users';
 import { UserDetailDrawer } from '@features/user-detail';
+import useLocale from '@shared/lib/useLocale';
+import { formatDateTime } from '@shared/lib/formatTime';
+
 
 const FormItem = Form.Item;
 
 /** 用户操作日志 — AdminAPI.AdminListUserOperationLogRequest（user_id 必填） */
 export default function Page() {
+  const t = useLocale();
+  const common = t;
+
   const [form] = Form.useForm<AdminAPI.AdminListUserOperationLogRequest>();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AdminAPI.AdminUserOperationLog[]>([]);
@@ -20,7 +26,7 @@ export default function Page() {
   const fetchData = useCallback(async () => {
     const values = form.getFieldsValue();
     if (!values.user_id) {
-      Message.warning('user_id required');
+      Message.warning(t['userLogs.warning.userIdRequired']);
       return;
     }
     setLoading(true);
@@ -32,7 +38,7 @@ export default function Page() {
     } finally {
       setLoading(false);
     }
-  }, [form]);
+  }, [form, t]);
 
   useEffect(() => {
     // 需先填 user_id
@@ -42,15 +48,15 @@ export default function Page() {
     <>
       <BizListPage
         form={form}
-        title="用户操作日志"
+        title={t['userLogs.title']}
         filter={
           <FilterField>
             <FormItem
               field="user_id"
-              label="user_id"
+              label={common['common.userId']}
               rules={[{ required: true }]}
             >
-              <FilterInput placeholder="user_id" />
+              <FilterInput placeholder={common['common.placeholder']} />
             </FormItem>
           </FilterField>
         }
@@ -68,7 +74,7 @@ export default function Page() {
               if (uid) setDetailUserId(String(uid));
             }}
           >
-            打开用户详情
+            {t['userLogs.action.openUserDetail']}
           </Button>
         }
         tableProps={{
@@ -78,15 +84,16 @@ export default function Page() {
             String(index),
           columns: [
             {
-              title: 'operated_at',
-              dataIndex: 'operated_at'
+              title: t['userLogs.col.operatedAt'],
+              dataIndex: 'operated_at',
+              render: (v: string) => formatDateTime(v)
             },
             {
-              title: 'operation_type',
+              title: t['userLogs.col.operationType'],
               dataIndex: 'operation_type'
             },
             {
-              title: 'description',
+              title: t['userLogs.col.description'],
               dataIndex: 'description'
             }
           ],

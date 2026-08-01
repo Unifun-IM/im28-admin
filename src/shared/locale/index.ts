@@ -1,166 +1,36 @@
-const i18n = {
-  'en-US': {
-    'menu.user': 'Users',
-    'menu.user.manage': 'User Management',
-    'menu.user.query': 'User Query',
-    'menu.user.blacklist': 'Blacklist',
-    'menu.user.whitelist': 'Whitelist',
-    'menu.user.inviteCode': 'User Hierarchy',
-    'menu.user.logs': 'User Logs',
-    'menu.user.info': 'User Info',
-    'menu.user.setting': 'User Setting',
-    'menu.user.switchRoles': 'Switch Roles',
-    'menu.user.role.admin': 'Admin',
-    'menu.user.role.user': 'General User',
-    'menu.dashboard': 'Dashboard',
-    'menu.system': 'System',
-    'menu.system.accounts': 'Admin Accounts',
-    'menu.system.roles': 'Roles',
-    'menu.system.paramsSettings': 'System Param Settings',
-    'menu.system.opLogs': 'Operation Logs',
-    'menu.trade': 'Trade',
-    'menu.trade.redpacketRecords': 'Red Packet Records',
-    'menu.trade.redpacketConfig': 'Red Packet Config',
-    'menu.trade.redpacketDetail': 'Red Packet Detail',
-    'menu.session': 'Sessions',
-    'menu.session.query': 'Session Query',
-    'menu.session.group': 'Group Session Query',
-    'menu.session.user': 'User Session Query',
-    'menu.session.settings': 'Session Settings',
-    'menu.session.settings.group': 'Group Settings',
-    'menu.session.settings.user': 'User Session Settings',
-    'menu.session.chat': 'Chat History',
-    'navbar.logout': 'Logout',
-    'settings.title': 'Settings',
-    'settings.themeColor': 'Theme Color',
-    'settings.content': 'Content Setting',
-    'settings.navbar': 'Navbar',
-    'settings.menuWidth': 'Menu Width (px)',
-    'settings.navbar.theme.toLight': 'Click to use light mode',
-    'settings.navbar.theme.toDark': 'Click to use dark mode',
-    'settings.menu': 'Menu',
-    'settings.footer': 'Footer',
-    'settings.otherSettings': 'Other Settings',
-    'settings.colorWeek': 'Color Week',
-    'settings.alertContent':
-      'After the configuration is only temporarily effective, if you want to really affect the project, click the "Copy Settings" button below and replace the configuration in settings.json.',
-    'settings.copySettings': 'Copy Settings',
-    'settings.copySettings.message':
-      'Copy succeeded, please paste to file src/settings.json.',
-    'settings.close': 'Close',
-    'settings.color.tooltip':
-      '10 gradient colors generated according to the theme color',
-    'message.tab.title.message': 'Message',
-    'message.tab.title.notice': 'Notice',
-    'message.tab.title.todo': 'ToDo',
-    'message.box.title': 'Notifications',
-    'message.allRead': 'All Read',
-    'message.seeMore': 'See more',
-    'message.empty': 'Empty',
-    'message.empty.tips': 'No data',
-    'message.onlyUnread': 'Alert sound',
-    'message.lang.tips': 'Language switch to ',
-    'navbar.search.placeholder': 'Search',
-    'pageTabs.close': 'Close',
-    'pageTabs.closeOthers': 'Close others',
-    'pageTabs.closeLeft': 'Close to the left',
-    'pageTabs.closeRight': 'Close to the right',
-    'pageTabs.closeAll': 'Close all',
-    'pageTabs.pin': 'Pin',
-    'pageTabs.unpin': 'Unpin',
-    'pageTabs.pinMax': 'You can pin up to {n} tabs',
-    'pageTabs.fullscreen': 'Hide chrome',
-    'pageTabs.exitFullscreen': 'Show chrome',
-    'message.tab.all': 'All',
-    'message.tab.unread': 'Unread',
-    'message.tab.category1': 'Category 1',
-    'message.tab.category2': 'Category 2',
-    'common.search': 'Search',
-    'common.reset': 'Reset',
-    'common.detail': 'Detail',
-    'common.action': 'Action'
-  },
-  'zh-CN': {
-    'menu.user': '用户',
-    'menu.user.manage': '用户管理',
-    'menu.user.query': '用户查询',
-    'menu.user.blacklist': '黑名单',
-    'menu.user.whitelist': '白名单',
-    'menu.user.inviteCode': '用户层级查询',
-    'menu.user.logs': '用户日志',
-    'menu.user.info': '用户信息',
-    'menu.user.setting': '用户设置',
-    'menu.user.switchRoles': '切换角色',
-    'menu.user.role.admin': '管理员',
-    'menu.user.role.user': '普通用户',
-    'menu.dashboard': '首页看板',
-    'menu.system': '系统',
-    'menu.system.accounts': '后台账号管理',
-    'menu.system.roles': '角色管理',
-    'menu.system.paramsSettings': '系统参数设置',
-    'menu.system.opLogs': '系统操作日志',
-    'menu.trade': '交易',
-    'menu.trade.redpacketRecords': '红包记录',
-    'menu.trade.redpacketConfig': '红包基础配置',
-    'menu.trade.redpacketDetail': '红包详情',
-    'menu.session': '会话',
-    'menu.session.query': '会话查询',
-    'menu.session.group': '群组会话查询',
-    'menu.session.user': '用户会话查询',
-    'menu.session.settings': '会话设置',
-    'menu.session.settings.group': '群组设置',
-    'menu.session.settings.user': '用户会话设置',
-    'menu.session.chat': '查看聊天记录',
-    'navbar.logout': '退出登录',
-    'settings.title': '页面配置',
-    'settings.themeColor': '主题色',
-    'settings.content': '内容区域',
-    'settings.navbar': '导航栏',
-    'settings.menuWidth': '菜单宽度 (px)',
-    'settings.navbar.theme.toLight': '点击切换为亮色模式',
-    'settings.navbar.theme.toDark': '点击切换为暗黑模式',
-    'settings.menu': '菜单栏',
-    'settings.footer': '底部',
-    'settings.otherSettings': '其他设置',
-    'settings.colorWeek': '色弱模式',
-    'settings.alertContent':
-      '配置之后仅是临时生效，要想真正作用于项目，点击下方的 "复制配置" 按钮，将配置替换到 settings.json 中即可。',
-    'settings.copySettings': '复制配置',
-    'settings.copySettings.message':
-      '复制成功，请粘贴到 src/settings.json 文件中',
-    'settings.close': '关闭',
-    'settings.color.tooltip':
-      '根据主题颜色生成的 10 个梯度色（将配置复制到项目中，主题色才能对亮色 / 暗黑模式同时生效）',
-    'message.tab.title.message': '消息',
-    'message.tab.title.notice': '通知',
-    'message.tab.title.todo': '待办',
-    'message.box.title': '全部通知',
-    'message.allRead': '全部已读',
-    'message.seeMore': '查看更多',
-    'message.empty': '清空',
-    'message.empty.tips': '暂无数据',
-    'message.onlyUnread': '提醒铃声',
-    'message.lang.tips': '语言切换至 ',
-    'navbar.search.placeholder': '搜索',
-    'pageTabs.close': '关闭',
-    'pageTabs.closeOthers': '关闭其它',
-    'pageTabs.closeLeft': '关闭左侧',
-    'pageTabs.closeRight': '关闭右侧',
-    'pageTabs.closeAll': '关闭全部',
-    'pageTabs.pin': '固定',
-    'pageTabs.unpin': '取消固定',
-    'pageTabs.pinMax': '最多固定 {n} 个标签',
-    'pageTabs.fullscreen': '全屏',
-    'pageTabs.exitFullscreen': '退出全屏',
-    'message.tab.all': '全部',
-    'message.tab.unread': '未读',
-    'message.tab.category1': '分类1',
-    'message.tab.category2': '分类2',
-    'common.search': '查询',
-    'common.reset': '重置',
-    'common.detail': '详情',
-    'common.action': '操作'
+import common from "./common";
+import login from "./login";
+import exception from "./exception";
+import user from "./user";
+import session from "./session";
+import system from "./system";
+import openim from "./openim";
+
+type LocalePack = Record<string, Record<string, string>>;
+
+function mergeLocale(...packs: LocalePack[]): LocalePack {
+  const out: LocalePack = { "en-US": {}, "zh-CN": {} };
+  for (const pack of packs) {
+    Object.assign(out["en-US"]!, pack["en-US"] || {});
+    Object.assign(out["zh-CN"]!, pack["zh-CN"] || {});
   }
-};
+  return out;
+}
+
+/**
+ * i18n 统一入口
+ * - common：菜单 / 壳层 / 通用文案
+ * - 业务：login / user / session / system / exception
+ * - openim：与 OpenIM SDK 对齐的枚举文案
+ */
+const i18n = mergeLocale(
+  common,
+  login,
+  exception,
+  user,
+  session,
+  system,
+  openim
+);
 
 export default i18n;

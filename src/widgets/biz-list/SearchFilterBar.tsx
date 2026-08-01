@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { IconDown, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import useLocale from '@shared/lib/useLocale';
 
 const { Row, Col } = Grid;
 
@@ -133,12 +134,17 @@ export default function SearchFilterBar({
   collapsible = true,
   collapsedCount = FILTER_COLS_PER_ROW,
   defaultCollapsed = true,
-  searchText = '查询',
-  resetText = '重置',
-  expandText = '展开',
-  collapseText = '收起',
+  searchText,
+  resetText,
+  expandText,
+  collapseText,
   className
 }: SearchFilterBarProps) {
+  const t = useLocale();
+  const resolvedSearchText = searchText ?? t['common.search'];
+  const resolvedResetText = resetText ?? t['common.reset'];
+  const resolvedExpandText = expandText ?? t['common.expand'];
+  const resolvedCollapseText = collapseText ?? t['common.collapse'];
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const childArray = flattenFilterChildren(children);
   const showToggle = collapsible && childArray.length > collapsedCount;
@@ -179,7 +185,7 @@ export default function SearchFilterBar({
                   icon={collapsed ? <IconDown /> : <IconUp />}
                   onClick={() => setCollapsed((v) => !v)}
                 >
-                  {collapsed ? expandText : collapseText}
+                  {collapsed ? resolvedExpandText : resolvedCollapseText}
                 </Button>
               )}
               {extraActions}
@@ -188,14 +194,14 @@ export default function SearchFilterBar({
                 className="use-biz-filter-action-text"
                 onClick={onReset}
               >
-                {resetText}
+                {resolvedResetText}
               </Button>
               <Button
                 type="primary"
                 className="use-biz-filter-action-search"
                 onClick={onSearch}
               >
-                {searchText}
+                {resolvedSearchText}
               </Button>
             </Space>
           </Col>

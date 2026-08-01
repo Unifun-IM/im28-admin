@@ -8,6 +8,7 @@ import {
   Switch
 } from '@arco-design/web-react';
 import { postV1AdminRolesCreate } from '@shared/api/admin/rbac';
+import useLocale from '@shared/lib/useLocale';
 import './create-role-modal.less';
 
 const FormItem = Form.Item;
@@ -24,6 +25,8 @@ export default function CreateRoleModal({
   onCancel,
   onSuccess
 }: CreateRoleModalProps) {
+  const t = useLocale();
+  const common = t;
   const [form] = Form.useForm<
     AdminAPI.CreateSysRoleRequest & { permission_ids_text?: string }
   >();
@@ -51,7 +54,7 @@ export default function CreateRoleModal({
         is_enable: values.is_enable !== false,
         permission_ids: permission_ids.length ? permission_ids : undefined
       });
-      Message.success('ok');
+      Message.success(common['common.success']);
       onSuccess?.();
       onCancel();
     } catch {
@@ -63,7 +66,7 @@ export default function CreateRoleModal({
 
   return (
     <Modal
-      title="新建角色"
+      title={t['createRole.title']}
       visible={visible}
       onCancel={onCancel}
       unmountOnExit
@@ -72,33 +75,33 @@ export default function CreateRoleModal({
       footer={
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-2">
-            <span>is_enable</span>
+            <span>{t['createRole.field.isEnable']}</span>
             <Switch
               checked={isEnable !== false}
               onChange={(v) => form.setFieldValue('is_enable', v)}
             />
           </div>
           <div className="flex gap-2">
-            <Button onClick={onCancel}>取消</Button>
+            <Button onClick={onCancel}>{common['common.cancel']}</Button>
             <Button type="primary" loading={submitting} onClick={submit}>
-              确认创建
+              {common['common.create']}
             </Button>
           </div>
         </div>
       }
     >
       <Form form={form} layout="vertical">
-        <FormItem field="code" label="code" rules={[{ required: true }]}>
-          <Input placeholder="code" />
+        <FormItem field="code" label={t['createRole.field.code']} rules={[{ required: true }]}>
+          <Input placeholder={t['createRole.placeholder.code']} />
         </FormItem>
-        <FormItem field="name" label="name" rules={[{ required: true }]}>
-          <Input placeholder="name" />
+        <FormItem field="name" label={t['createRole.field.name']} rules={[{ required: true }]}>
+          <Input placeholder={t['createRole.placeholder.name']} />
         </FormItem>
-        <FormItem field="description" label="description">
-          <Input placeholder="description" />
+        <FormItem field="description" label={common['common.description']}>
+          <Input placeholder={common['common.placeholder']} />
         </FormItem>
-        <FormItem field="permission_ids_text" label="permission_ids">
-          <Input.TextArea placeholder="permission_ids，逗号分隔" />
+        <FormItem field="permission_ids_text" label={t['createRole.field.permissionIds']}>
+          <Input.TextArea placeholder={t['createRole.placeholder.permissionIds']} />
         </FormItem>
       </Form>
     </Modal>

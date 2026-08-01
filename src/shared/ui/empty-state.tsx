@@ -2,6 +2,7 @@ import React from 'react';
 import cs from 'classnames';
 
 import emptyStateSvg from '@shared/assets/empty-state.svg';
+import useLocale from '@shared/lib/useLocale';
 
 export type EmptyStateProps = {
   /** 主文案，默认「暂无数据」 */
@@ -16,12 +17,15 @@ export type EmptyStateProps = {
 
 /** 列表 / 页面空状态 — 统一 empty-state.svg */
 export function EmptyState({
-  description = '暂无数据',
+  description,
   secondary,
   className,
   imageWidth = 133,
   imageHeight = 100
 }: EmptyStateProps) {
+  const t = useLocale();
+  const resolvedDescription = description ?? t['common.empty'];
+
   return (
     <div
       className={cs(
@@ -37,9 +41,9 @@ export function EmptyState({
         className="mb-0 block max-w-none"
         style={{ width: imageWidth, height: imageHeight }}
       />
-      {description ? (
+      {resolvedDescription ? (
         <div className="text-[14px] leading-[21px] text-arco-text-1">
-          {description}
+          {resolvedDescription}
         </div>
       ) : null}
       {secondary ? (

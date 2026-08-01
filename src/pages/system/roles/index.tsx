@@ -14,10 +14,15 @@ import {
   postV1AdminRolesDelete
 } from '@shared/api/admin/rbac';
 import { CreateRoleModal } from '@features/admin-role-create';
+import useLocale from '@shared/lib/useLocale';
+
 
 const FormItem = Form.Item;
 
 function RolesPage() {
+  const t = useLocale();
+  const common = t;
+
   type RoleListForm = {
     keyword?: string;
     /** Select 用字符串，请求时再转 boolean */
@@ -65,23 +70,23 @@ function RolesPage() {
     <>
       <BizListPage
         form={form}
-        title="角色列表"
-        filterResetText="清除全部"
+        title={t['roles.title']}
+        filterResetText={common['common.clearAll']}
         filter={
           <>
             <FilterField>
-              <FormItem field="keyword" label="keyword">
-                <FilterInput placeholder="keyword" />
+              <FormItem field="keyword" label={common['common.keyword']}>
+                <FilterInput placeholder={common['common.keyword']} />
               </FormItem>
             </FilterField>
             <FilterField>
-              <FormItem field="is_enable" label="is_enable">
+              <FormItem field="is_enable" label={t['roles.filter.isEnable']}>
                 <FilterSelect
-                  placeholder="is_enable"
+                  placeholder={t['roles.filter.isEnable']}
                   options={[
-                    { label: '全部', value: '' },
-                    { label: 'true', value: 'true' },
-                    { label: 'false', value: 'false' }
+                    { label: common['common.all'], value: '' },
+                    { label: common['common.enabled'], value: 'true' },
+                    { label: common['common.disabled'], value: 'false' }
                   ]}
                   allowClear
                 />
@@ -101,7 +106,7 @@ function RolesPage() {
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
           <Button type="primary" onClick={() => setCreateVisible(true)}>
-            新增角色
+            {t['roles.create']}
           </Button>
         }
         tableProps={{
@@ -111,35 +116,39 @@ function RolesPage() {
             String(row.role?.id ?? Math.random()),
           columns: [
             {
-              title: 'code',
+              title: t['roles.col.code'],
               dataIndex: 'role.code',
               render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
                 row.role?.code || '--'
             },
             {
-              title: 'name',
+              title: t['roles.col.name'],
               dataIndex: 'role.name',
               render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
                 row.role?.name || '--'
             },
             {
-              title: 'description',
+              title: common['common.description'],
               dataIndex: 'role.description',
               render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
                 row.role?.description || '--'
             },
             {
-              title: 'is_enable',
+              title: t['roles.col.isEnable'],
               dataIndex: 'role.is_enable',
               render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
                 <StatusBadge
                   status={row.role?.is_enable ? 'success' : 'error'}
-                  text={String(row.role?.is_enable)}
+                  text={
+                    row.role?.is_enable
+                      ? common['common.enabled']
+                      : common['common.disabled']
+                  }
                 />
               )
             },
             {
-              title: '操作',
+              title: common['common.action'],
               dataIndex: 'op',
               width: 120,
               render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
@@ -148,15 +157,15 @@ function RolesPage() {
                   items={[
                     {
                       key: 'delete',
-                      label: '删除',
+                      label: common['common.delete'],
                       onClick: () => {
                         const id = row.role?.id;
                         if (id == null) return;
                         Modal.confirm({
-                          title: '删除角色？',
+                          title: t['roles.deleteConfirm'],
                           onOk: async () => {
                             await postV1AdminRolesDelete({ id });
-                            Message.success('ok');
+                            Message.success(common['common.success']);
                             fetchData(page, pageSize);
                           }
                         });

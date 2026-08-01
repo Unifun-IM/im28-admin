@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Anchor, Button, Card, Space } from '@arco-design/web-react';
+import useLocale from '@shared/lib/useLocale';
 import './session-settings.less';
 
 export type SettingsAnchorItem = {
@@ -32,6 +33,7 @@ export default function SettingsPageShell({
   onSave,
   children
 }: SettingsPageShellProps) {
+  const t = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -51,7 +53,7 @@ export default function SettingsPageShell({
             disabled={!dirty}
             onClick={onCancel}
           >
-            取消
+            {t['common.cancel']}
           </Button>
           <Button
             type="primary"
@@ -60,7 +62,7 @@ export default function SettingsPageShell({
             disabled={!dirty}
             onClick={onSave}
           >
-            保存
+            {t['common.save']}
           </Button>
         </Space>
       </div>

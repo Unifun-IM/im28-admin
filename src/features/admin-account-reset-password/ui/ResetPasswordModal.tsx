@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { postV1AdminSystemUsersResetPassword } from '@shared/api/admin/systemUsers';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import useLocale from '@shared/lib/useLocale';
 import './reset-password-modal.less';
 
 const FormItem = Form.Item;
@@ -25,6 +26,8 @@ export default function ResetPasswordModal({
   onCancel,
   onSuccess
 }: ResetPasswordModalProps) {
+  const t = useLocale();
+  const common = t;
   const [form] = Form.useForm<AdminAPI.ResetSysUserPasswordRequest>();
   const [submitting, setSubmitting] = useState(false);
 
@@ -39,7 +42,7 @@ export default function ResetPasswordModal({
       const values = await form.validate();
       setSubmitting(true);
       await postV1AdminSystemUsersResetPassword(values);
-      Message.success('ok');
+      Message.success(common['common.success']);
       onSuccess?.();
       onCancel();
     } catch {
@@ -58,25 +61,27 @@ export default function ResetPasswordModal({
       title={
         <div className="flex items-center gap-2">
           <img alt="" src={iconWarning} className="size-5" />
-          <span>重置密码？</span>
+          <span>{t['resetPassword.title']}</span>
         </div>
       }
       footer={
         <div className="flex justify-end gap-2">
-          <Button onClick={onCancel}>取消</Button>
+          <Button onClick={onCancel}>{common['common.cancel']}</Button>
           <Button
             type="primary"
             status="danger"
             loading={submitting}
             onClick={submit}
           >
-            确定
+            {common['common.confirm']}
           </Button>
         </div>
       }
     >
       <p className="m-0 mb-3 text-[14px]">
-        username：{target?.username}（id：{target?.id}）
+        {t['resetPassword.target']
+          .replace('{username}', target?.username || '')
+          .replace('{id}', String(target?.id ?? ''))}
       </p>
       <Form form={form} layout="vertical">
         <FormItem field="id" hidden>
@@ -84,10 +89,10 @@ export default function ResetPasswordModal({
         </FormItem>
         <FormItem
           field="password"
-          label="password"
+          label={common['common.password']}
           rules={[{ required: true }]}
         >
-          <Input.Password placeholder="临时密码" />
+          <Input.Password placeholder={t['resetPassword.placeholder.password']} />
         </FormItem>
       </Form>
     </Modal>

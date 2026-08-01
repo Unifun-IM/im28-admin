@@ -14,9 +14,9 @@ import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
 import useLocale from '@shared/lib/useLocale';
-import defaultLocale from '@shared/locale';
+import { openimLabel } from '@shared/lib/openimLabels';
+import { formatDateTime } from '@shared/lib/formatTime';
 
-import locale from './locale';
 
 const FormItem = Form.Item;
 
@@ -30,8 +30,8 @@ function statusBadge(
 
 /** 用户查询 — AdminAPI.AdminListUserRequest / AdminUserWrap */
 export default function UserQueryPage() {
-  const t = useLocale(locale);
-  const common = useLocale(defaultLocale);
+  const t = useLocale();
+  const common = t;
   const [form] = Form.useForm<
     AdminAPI.AdminListUserRequest & { batchUserIds?: string }
   >();
@@ -132,13 +132,6 @@ export default function UserQueryPage() {
     return status || '--';
   };
 
-  const onlineLabel = (v?: AdminAPI.OnlineStatus) => {
-    if (v === 'online') return t['userQuery.online.online'];
-    if (v === 'offline') return t['userQuery.online.offline'];
-    if (v === 'unknown') return t['userQuery.online.unknown'];
-    return v || '--';
-  };
-
   const sharedFilters = (
     <>
       <FilterField>
@@ -167,9 +160,9 @@ export default function UserQueryPage() {
             placeholder={t['userQuery.filter.onlineStatus']}
             options={[
               { label: t['userQuery.filter.all'], value: '' },
-              { label: t['userQuery.online.online'], value: 'online' },
-              { label: t['userQuery.online.offline'], value: 'offline' },
-              { label: t['userQuery.online.unknown'], value: 'unknown' }
+              { label: openimLabel(t, 'online', 'online'), value: 'online' },
+              { label: openimLabel(t, 'online', 'offline'), value: 'offline' },
+              { label: openimLabel(t, 'online', 'unknown'), value: 'unknown' }
             ]}
             allowClear
           />
@@ -332,14 +325,14 @@ export default function UserQueryPage() {
               dataIndex: 'user.created_at',
               width: 180,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
-                row.user?.created_at || '--'
+                formatDateTime(row.user?.created_at)
             },
             {
               title: t['userQuery.col.lastLoginAt'],
               dataIndex: 'user.last_login_at',
               width: 180,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
-                row.user?.last_login_at || '--'
+                formatDateTime(row.user?.last_login_at)
             },
             {
               title: t['userQuery.col.onlineStatus'],
@@ -351,7 +344,7 @@ export default function UserQueryPage() {
                   size="small"
                   className="!m-0"
                 >
-                  {onlineLabel(v)}
+                  {openimLabel(t, 'online', v)}
                 </Tag>
               )
             },

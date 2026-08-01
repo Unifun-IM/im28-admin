@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Modal } from '@arco-design/web-react';
+import useLocale from '@shared/lib/useLocale';
 
 export type ForcePasswordNoticeModalProps = {
   visible: boolean;
@@ -14,6 +15,8 @@ export default function ForcePasswordNoticeModal({
   visible,
   onContinue
 }: ForcePasswordNoticeModalProps) {
+  const t = useLocale();
+
   return (
     <Modal
       className="use-login-force-modal"
@@ -29,18 +32,16 @@ export default function ForcePasswordNoticeModal({
     >
       <div className="box-border flex h-[48px] items-center border-0 border-b border-solid border-[rgba(0,0,0,0.08)] px-[24px]">
         <span className="text-[16px] font-medium leading-6 text-[var(--color-text-1,#1d2129)]">
-          新建账号
+          {t['login.forceNotice.title']}
         </span>
       </div>
       <div className="box-border p-[24px] text-[14px] leading-[21px] text-black">
-        <p className="m-0">首次登录，请修改密码</p>
-        <p className="m-0">
-          为了保障账号安全，首次登录必须修改默认密码。完成修改后才能进入后台。
-        </p>
+        <p className="m-0">{t['login.forceNotice.line1']}</p>
+        <p className="m-0">{t['login.forceNotice.line2']}</p>
       </div>
       <div className="box-border flex h-[48px] items-center justify-end border-0 border-t border-solid border-[var(--color-border-1,#f2f3f5)] px-[24px]">
         <Button type="primary" className="min-w-[80px]" onClick={onContinue}>
-          立即修改
+          {t['login.forceNotice.action']}
         </Button>
       </div>
     </Modal>

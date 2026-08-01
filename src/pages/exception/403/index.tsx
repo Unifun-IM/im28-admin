@@ -1,10 +1,9 @@
 import React from 'react';
 import { Result, Button } from '@arco-design/web-react';
-import locale from './locale';
 import useLocale from '@shared/lib/useLocale';
 
 function Exception403() {
-  const t = useLocale(locale);
+  const t = useLocale();
 
   return (
     <div className="relative h-[calc(100vh-168px)] bg-arco-bg-1">

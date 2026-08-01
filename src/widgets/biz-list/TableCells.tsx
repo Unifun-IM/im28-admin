@@ -10,6 +10,7 @@ import {
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import copy from 'copy-to-clipboard';
+import useLocale from '@shared/lib/useLocale';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
@@ -38,6 +39,7 @@ export function AvatarNameCell({
   nameClassName,
   onNameClick
 }: AvatarNameCellProps) {
+  const t = useLocale();
   return (
     <div className="flex min-w-0 items-center gap-[8px]">
       {!hideAvatar && (
@@ -82,11 +84,11 @@ export function AvatarNameCell({
               <button
                 type="button"
                 className="inline-flex size-[10px] shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-4 hover:text-arco-text-2"
-                aria-label="复制"
+                aria-label={t['common.copy']}
                 onClick={(e) => {
                   e.stopPropagation();
                   copy(copyText);
-                  Message.success('已复制');
+                  Message.success(t['common.copied']);
                 }}
               >
                 <IconCopy className="text-[10px]" />
@@ -170,6 +172,7 @@ export function ActionLinks({
   variant = 'icon',
   className
 }: ActionLinksProps) {
+  const t = useLocale();
   if (variant === 'text') {
     return (
       <div className={cs('inline-flex items-center gap-[8px]', className)}>
@@ -241,11 +244,11 @@ export function ActionLinks({
       ))}
       {moreMenu && (
         <Dropdown droplist={moreMenu} position="br" trigger="click">
-          <Tooltip content="更多">
+          <Tooltip content={t['common.more']}>
             <button
               type="button"
               className={ICON_BTN}
-              aria-label="更多"
+              aria-label={t['common.more']}
               onClick={(e) => e.stopPropagation()}
             >
               <IconMore />

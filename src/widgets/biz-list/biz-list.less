@@ -717,9 +717,41 @@
     overflow: hidden;
   }
 
-  /* 最后一行保留底边框，与分页区分 */
-  .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td {
+  /* 有分页时：末行底边框与分页区分；无分页时去掉，避免卡片底部多一条「空行」线 */
+  &:not(.is-no-pagination)
+    .arco-table-content-inner
+    tbody
+    > .arco-table-tr:last-child
+    > .arco-table-td {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  &.is-no-pagination {
+    .arco-table-pagination {
+      display: none;
+      margin: 0;
+      padding: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .arco-table-container,
+    .arco-table-content-scroll,
+    .arco-table-content-inner,
+    .arco-table-body {
+      border-bottom: none;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+
+    /* 末行贴卡片底边时补齐圆角，避免方角露白 */
+    .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td:first-child {
+      border-bottom-left-radius: 8px;
+    }
+
+    .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td:last-child {
+      border-bottom-right-radius: 8px;
+    }
   }
 
   .arco-table-td:last-child,

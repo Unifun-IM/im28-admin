@@ -1,10 +1,9 @@
 import React from 'react';
 import { Carousel } from '@arco-design/web-react';
 import useLocale from '@shared/lib/useLocale';
-import locale from './locale';
 
 export default function LoginBanner() {
-  const t = useLocale(locale);
+  const t = useLocale();
   const data = [
     {
       slogan: t['login.banner.slogan1'],

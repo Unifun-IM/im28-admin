@@ -6,6 +6,7 @@ import {
   type SelectProps
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
+import useLocale from '@shared/lib/useLocale';
 import FilterSelect from './FilterSelect';
 
 function firstOptionValue(
@@ -38,14 +39,15 @@ export default function FilterKeywordInput({
   typeInitialValue,
   typeWidth = 80,
   allowClear = true,
-  placeholder = '请输入',
+  placeholder,
   suffix,
   ...rest
 }: FilterKeywordInputProps) {
+  const t = useLocale();
   return (
     <Input
       allowClear={allowClear}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t['common.placeholder']}
       addBefore={
         <Form.Item
           field={typeField}

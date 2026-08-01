@@ -48,10 +48,10 @@ function MessageList(props: MessageListProps) {
       else earlier.push(item);
     });
     return [
-      { key: 'today', label: '今天', items: today },
-      { key: 'earlier', label: '更早之前', items: earlier }
+      { key: 'today', label: t['message.group.today'], items: today },
+      { key: 'earlier', label: t['message.group.earlier'], items: earlier }
     ].filter((g) => g.items.length);
-  }, [data]);
+  }, [data, t]);
 
   function onItemClick(item: MessageItemData, index: number) {
     if (item.status) return;

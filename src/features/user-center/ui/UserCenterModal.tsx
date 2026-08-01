@@ -9,6 +9,7 @@ import { IconClose } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { useGlobalDispatch, useGlobalSelector } from '@entities/global-state';
 import type { GlobalState } from '@entities/global-state';
+import useLocale from '@shared/lib/useLocale';
 import defaultAvatar from '../assets/default-avatar.svg';
 import './user-center-modal.less';
 
@@ -25,13 +26,14 @@ export default function UserCenterModal({
   visible,
   onCancel
 }: UserCenterModalProps) {
+  const t = useLocale();
   const { userInfo } = useGlobalSelector((s: GlobalState) => s);
   const dispatch = useGlobalDispatch();
 
   const displayFromStore =
     userInfo?.sys_user?.display_name ||
     userInfo?.sys_user?.username ||
-    'Admin';
+    t['userCenter.fallbackName'];
 
   const [name, setName] = useState('');
   const [editingName, setEditingName] = useState(false);
@@ -54,7 +56,7 @@ export default function UserCenterModal({
   const persistName = (next: string) => {
     const trimmed = next.trim();
     if (!trimmed) {
-      Message.warning('名称不能为空');
+      Message.warning(t['userCenter.msg.nameEmpty']);
       return;
     }
     setName(trimmed);
@@ -72,43 +74,43 @@ export default function UserCenterModal({
         }
       }
     });
-    Message.success('名称已更新（仅本地，接口未就绪）');
+    Message.success(t['userCenter.msg.nameUpdatedLocal']);
   };
 
   const onPickAvatar = (file?: File | null) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      Message.warning('请选择图片文件');
+      Message.warning(t['userCenter.msg.pickImage']);
       return;
     }
     const url = URL.createObjectURL(file);
     setAvatarUrl(url);
-    Message.success('头像已更新（仅本地，接口未就绪）');
+    Message.success(t['userCenter.msg.avatarUpdatedLocal']);
   };
 
   const resetPassword = () => {
     Modal.confirm({
-      title: '重置密码',
-      content: '接口未就绪',
-      okText: '确认',
-      cancelText: '取消',
+      title: t['userCenter.resetPassword'],
+      content: t['common.apiNotReady'],
+      okText: t['common.confirm'],
+      cancelText: t['common.cancel'],
       onOk: () => {
         setPasswordSet(true);
-        Message.warning('接口未就绪');
+        Message.warning(t['common.apiNotReady']);
       }
     });
   };
 
   const resetGa = () => {
     Modal.confirm({
-      title: '重置谷歌验证',
-      content: '接口未就绪',
-      okText: '确认',
-      cancelText: '取消',
+      title: t['userCenter.resetGa'],
+      content: t['common.apiNotReady'],
+      okText: t['common.confirm'],
+      cancelText: t['common.cancel'],
       okButtonProps: gaSet ? { status: 'danger' } : undefined,
       onOk: () => {
         setGaSet(true);
-        Message.warning('接口未就绪');
+        Message.warning(t['common.apiNotReady']);
       }
     });
   };
@@ -134,7 +136,7 @@ export default function UserCenterModal({
     >
       <button
         type="button"
-        aria-label="关闭"
+        aria-label={t['common.close']}
         className="absolute right-6 top-6 z-10 inline-flex size-8 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-2 hover:text-arco-text-1"
         onClick={onCancel}
       >
@@ -162,7 +164,7 @@ export default function UserCenterModal({
             className="cursor-pointer border-0 bg-transparent p-0 text-center text-[14px] leading-[21px] text-arco-text-1"
             onClick={() => fileRef.current?.click()}
           >
-            编辑
+            {t['userCenter.edit']}
           </button>
           <input
             ref={fileRef}
@@ -180,7 +182,7 @@ export default function UserCenterModal({
           <div className="mb-6">
             <div className="border-0 border-b border-solid border-[rgba(0,0,0,0.08)] py-3">
               <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
-                名称
+                {t['userCenter.name']}
               </span>
             </div>
             <div className="mt-3">
@@ -199,7 +201,7 @@ export default function UserCenterModal({
                     className={actionClass(false)}
                     onClick={() => persistName(draftName)}
                   >
-                    保存
+                    {t['common.save']}
                   </button>
                   <button
                     type="button"
@@ -209,7 +211,7 @@ export default function UserCenterModal({
                       setEditingName(false);
                     }}
                   >
-                    取消
+                    {t['common.cancel']}
                   </button>
                 </div>
               ) : (
@@ -225,7 +227,7 @@ export default function UserCenterModal({
                       setEditingName(true);
                     }}
                   >
-                    修改名称
+                    {t['userCenter.editName']}
                   </button>
                 </div>
               )}
@@ -234,17 +236,17 @@ export default function UserCenterModal({
 
           <div className="border-0 border-b border-solid border-[rgba(0,0,0,0.08)] py-3">
             <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
-              帐号安全
+              {t['userCenter.security']}
             </span>
           </div>
 
           <div className="mt-6 flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-[14px] leading-[21px] text-arco-text-1">
-                密码
+                {t['userCenter.password']}
               </div>
               <div className="text-[12px] leading-5 text-arco-text-3">
-                {passwordSet ? '******' : '为你的帐号设置密码'}
+                {passwordSet ? '******' : t['userCenter.passwordHint']}
               </div>
             </div>
             <button
@@ -252,17 +254,17 @@ export default function UserCenterModal({
               className={actionClass(passwordSet)}
               onClick={resetPassword}
             >
-              重置密码
+              {t['userCenter.resetPassword']}
             </button>
           </div>
 
           <div className="mt-6 flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="text-[14px] leading-[21px] text-arco-text-1">
-                谷歌验证
+                {t['userCenter.ga']}
               </div>
               <div className="text-[12px] leading-5 text-arco-text-3">
-                {gaSet ? '******' : '为你的帐号多加一层安全保障'}
+                {gaSet ? '******' : t['userCenter.gaHint']}
               </div>
             </div>
             <button
@@ -270,7 +272,7 @@ export default function UserCenterModal({
               className={actionClass(gaSet)}
               onClick={resetGa}
             >
-              重置谷歌验证
+              {t['userCenter.resetGa']}
             </button>
           </div>
         </div>

@@ -3,7 +3,6 @@ import { Button, Message, Modal, VerificationCode } from '@arco-design/web-react
 
 import useLocale from '@shared/lib/useLocale';
 
-import locale from './locale';
 
 export type GaVerifyModalProps = {
   visible: boolean;
@@ -25,7 +24,7 @@ export default function GaVerifyModal({
   onCancel,
   onOk
 }: GaVerifyModalProps) {
-  const t = useLocale(locale);
+  const t = useLocale();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'error' | undefined>();
 
@@ -75,10 +74,10 @@ export default function GaVerifyModal({
     >
       <div className="box-border px-[24px] pb-[12px] pt-[24px]">
         <div className="text-[20px] font-medium leading-[28px] text-[var(--color-text-1,#1d2129)]">
-          GA验证码
+          {t['login.gaVerify.title']}
         </div>
         <div className="text-[12px] leading-[20px] text-[var(--color-text-3,#86909c)]">
-          请输入由您的身份验证器应用生成的6位验证码
+          {t['login.gaVerify.desc']}
         </div>
       </div>
       <div className="box-border px-[24px] py-[12px]">
@@ -98,7 +97,7 @@ export default function GaVerifyModal({
       </div>
       <div className="box-border flex justify-end gap-[8px] px-[24px] pb-[24px] pt-[12px]">
         <Button className="min-w-[80px]" disabled={loading} onClick={onCancel}>
-          取消
+          {t['common.cancel']}
         </Button>
         <Button
           className="min-w-[80px]"
@@ -106,7 +105,7 @@ export default function GaVerifyModal({
           loading={loading}
           onClick={() => submit(code)}
         >
-          确定
+          {t['common.confirm']}
         </Button>
       </div>
     </Modal>

@@ -361,7 +361,7 @@ export const PageLayout = observer(function PageLayout({
                 })}
               >
                 <Logo />
-                {!collapsed && <span>后台管理系统</span>}
+                {!collapsed && <span>{locale['common.appName']}</span>}
               </div>
               <div className={styles['menu-wrapper']}>
                 <Menu

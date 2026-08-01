@@ -14,7 +14,7 @@ import {
   postV1AdminAuthTwoFactorSetup,
   postV1AdminAuthTwoFactorVerify
 } from '@shared/api/admin/auth';
-import { setAccessToken } from '@shared/api/request';
+import { setAuthTokens } from '@shared/api/request';
 import useLocale from '@shared/lib/useLocale';
 
 import ForceChangePasswordModal from './ForceChangePasswordModal';
@@ -25,7 +25,6 @@ import iconUnlock from './assets/icon-unlock.svg';
 import iconUser from './assets/icon-user.svg';
 import { mapLoginToast } from './mapLoginToast';
 import SlideCaptcha from './SlideCaptcha';
-import locale from './locale';
 
 type PendingAuth = {
   next_step: NonNullable<
@@ -53,7 +52,7 @@ export default function LoginForm() {
   const [loginUsername, setLoginUsername] = useState('');
   const [gaErrorTick, setGaErrorTick] = useState(0);
 
-  const t = useLocale(locale);
+  const t = useLocale();
 
   function finishLogin(token?: AdminAPI.Token) {
     const access = token?.access_token;
@@ -62,7 +61,7 @@ export default function LoginForm() {
       return;
     }
     localStorage.setItem('userStatus', 'login');
-    setAccessToken(access);
+    setAuthTokens(token);
     Message.success(t['login.msg.loginSuccess']);
     window.setTimeout(() => {
       window.location.href = '/user/query';

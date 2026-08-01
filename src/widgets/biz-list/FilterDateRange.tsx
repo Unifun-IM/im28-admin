@@ -3,6 +3,7 @@ import {
   DatePicker,
   type RangePickerProps
 } from '@arco-design/web-react';
+import useLocale from '@shared/lib/useLocale';
 
 export type FilterDateRangeProps = RangePickerProps;
 
@@ -11,14 +12,17 @@ export type FilterDateRangeProps = RangePickerProps;
  */
 export default function FilterDateRange({
   style,
-  placeholder = ['开始时间', '结束时间'],
+  placeholder,
   allowClear = true,
   ...rest
 }: FilterDateRangeProps) {
+  const t = useLocale();
   return (
     <DatePicker.RangePicker
       allowClear={allowClear}
-      placeholder={placeholder}
+      placeholder={
+        placeholder ?? [t['common.dateStart'], t['common.dateEnd']]
+      }
       style={{ width: '100%', ...style }}
       {...rest}
     />

@@ -81,7 +81,7 @@ function PageTabs({
         const ok = pageTabsStore.pin(path);
         if (!ok) {
           Message.warning(
-            (t['pageTabs.pinMax'] || '最多固定 {n} 个标签').replace(
+            t['pageTabs.pinMax'].replace(
               '{n}',
               String(pageTabsStore.maxPinned)
             )
@@ -122,22 +122,18 @@ function PageTabs({
         onClickMenuItem={(key) => runContextAction(key as ContextAction, path)}
       >
         {tab?.pinned ? (
-          <MenuItem key="unpin">{t['pageTabs.unpin'] || '取消固定'}</MenuItem>
+          <MenuItem key="unpin">{t['pageTabs.unpin']}</MenuItem>
         ) : (
-          <MenuItem key="pin">{t['pageTabs.pin'] || '固定'}</MenuItem>
+          <MenuItem key="pin">{t['pageTabs.pin']}</MenuItem>
         )}
-        <MenuItem key="closeOthers">
-          {t['pageTabs.closeOthers'] || '关闭其它'}
-        </MenuItem>
+        <MenuItem key="closeOthers">{t['pageTabs.closeOthers']}</MenuItem>
         <MenuItem key="closeLeft" disabled={index <= 0}>
-          {t['pageTabs.closeLeft'] || '关闭左侧'}
+          {t['pageTabs.closeLeft']}
         </MenuItem>
         <MenuItem key="closeRight" disabled={index >= tabs.length - 1}>
-          {t['pageTabs.closeRight'] || '关闭右侧'}
+          {t['pageTabs.closeRight']}
         </MenuItem>
-        <MenuItem key="closeAll">
-          {t['pageTabs.closeAll'] || '关闭全部'}
-        </MenuItem>
+        <MenuItem key="closeAll">{t['pageTabs.closeAll']}</MenuItem>
       </Menu>
     );
   }

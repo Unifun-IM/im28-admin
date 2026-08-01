@@ -14,6 +14,9 @@ import {
   postV1AdminUsersOperationLogsList
 } from '@shared/api/admin/users';
 import { StatusBadge } from '@shared/ui';
+import useLocale from '@shared/lib/useLocale';
+import { openimLabel } from '@shared/lib/openimLabels';
+import { formatDateTime } from '@shared/lib/formatTime';
 import './user-detail-drawer.less';
 import '@shared/ui/biz-detail-table.less';
 
@@ -25,16 +28,18 @@ export type UserDetailDrawerProps = {
 };
 
 function CopyValue({ value }: { value: string }) {
+  const common = useLocale();
+
   return (
     <span className="inline-flex items-center gap-[8px]">
       <span className="text-[12px] leading-[22px] text-arco-text-1">{value}</span>
       <button
         type="button"
         className="inline-flex size-[10px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-3"
-        aria-label="copy"
+        aria-label={common['common.copy']}
         onClick={() => {
           copy(value);
-          Message.success('已复制');
+          Message.success(common['common.copied']);
         }}
       >
         <IconCopy className="text-[10px]" />
@@ -50,6 +55,8 @@ export default function UserDetailDrawer({
   defaultTab = 'basic',
   onClose
 }: UserDetailDrawerProps) {
+  const t = useLocale();
+  const common = t;
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] =
     useState<AdminAPI.AdminDetailUserEnvelope['data']>();
@@ -71,10 +78,17 @@ export default function UserDetailDrawer({
 
   const user = detail?.user;
 
+  const statusText =
+    user?.status === 'active'
+      ? t['userDetail.status.active']
+      : user?.status === 'disabled'
+        ? t['userDetail.status.disabled']
+        : user?.status;
+
   return (
     <Drawer
       width={720}
-      title="用户详情"
+      title={t['userDetail.title']}
       visible={visible}
       onCancel={onClose}
       footer={null}
@@ -93,50 +107,57 @@ export default function UserDetailDrawer({
           <div>
             <div className="text-[16px] font-medium">{user?.nickname || '--'}</div>
             <div className="text-[12px] text-arco-text-3">
-              user_id：
+              {t['userDetail.field.userId']}：
               {user?.user_id ? <CopyValue value={user.user_id} /> : '--'}
             </div>
           </div>
           {user?.status ? (
             <StatusBadge
               status={user.status === 'active' ? 'success' : 'error'}
-              text={user.status}
+              text={statusText}
             />
           ) : null}
         </div>
         <Tabs defaultActiveTab={defaultTab}>
-          <Tabs.TabPane key="basic" title="basic">
+          <Tabs.TabPane key="basic" title={t['userDetail.tab.basic']}>
             <Descriptions
               column={2}
               size="small"
               data={[
-                { label: 'account', value: user?.account || '--' },
-                { label: 'phone', value: user?.phone || '--' },
-                { label: 'email', value: user?.email || '--' },
+                { label: t['userDetail.field.account'], value: user?.account || '--' },
+                { label: t['userDetail.field.phone'], value: user?.phone || '--' },
+                { label: t['userDetail.field.email'], value: user?.email || '--' },
                 {
-                  label: 'online_status',
-                  value: detail?.online_status || '--'
+                  label: t['userDetail.field.onlineStatus'],
+                  value: openimLabel(t, 'online', detail?.online_status)
                 },
                 {
-                  label: 'friend_count',
+                  label: t['userDetail.field.gender'],
+                  value: openimLabel(t, 'gender', user?.gender)
+                },
+                {
+                  label: t['userDetail.field.friendCount'],
                   value: detail?.friend_count ?? '--'
                 },
                 {
-                  label: 'group_count',
+                  label: t['userDetail.field.groupCount'],
                   value: detail?.group_count ?? '--'
                 },
-                { label: 'created_at', value: user?.created_at || '--' },
                 {
-                  label: 'last_login_at',
-                  value: user?.last_login_at || '--'
+                  label: t['userDetail.field.createdAt'],
+                  value: formatDateTime(user?.created_at)
                 },
-                { label: 'register_ip', value: user?.register_ip || '--' },
-                { label: 'last_login_ip', value: user?.last_login_ip || '--' },
-                { label: 'bio', value: user?.bio || '--' }
+                {
+                  label: t['userDetail.field.lastLoginAt'],
+                  value: formatDateTime(user?.last_login_at)
+                },
+                { label: t['userDetail.field.registerIp'], value: user?.register_ip || '--' },
+                { label: t['userDetail.field.lastLoginIp'], value: user?.last_login_ip || '--' },
+                { label: t['userDetail.field.bio'], value: user?.bio || '--' }
               ]}
             />
           </Tabs.TabPane>
-          <Tabs.TabPane key="logs" title="operation_logs">
+          <Tabs.TabPane key="logs" title={t['userDetail.tab.logs']}>
             <div className="flex flex-col gap-3">
               {logs.length ? (
                 logs.map((item, idx) => (
@@ -144,13 +165,20 @@ export default function UserDetailDrawer({
                     key={`${item.operated_at}-${idx}`}
                     className="rounded border border-solid border-[var(--color-border-2)] p-3 text-[12px]"
                   >
-                    <div>operated_at：{item.operated_at || '--'}</div>
-                    <div>operation_type：{item.operation_type || '--'}</div>
-                    <div>description：{item.description || '--'}</div>
+                    <div>
+                      {t['userDetail.log.operatedAt']}：
+                      {formatDateTime(item.operated_at)}
+                    </div>
+                    <div>
+                      {t['userDetail.log.operationType']}：{item.operation_type || '--'}
+                    </div>
+                    <div>
+                      {t['userDetail.log.description']}：{item.description || '--'}
+                    </div>
                   </div>
                 ))
               ) : (
-                <div className="text-arco-text-3">暂无数据</div>
+                <div className="text-arco-text-3">{common['common.empty']}</div>
               )}
             </div>
           </Tabs.TabPane>

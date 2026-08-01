@@ -6,6 +6,7 @@ import {
   IconEdit
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import useLocale from '@shared/lib/useLocale';
 
 export type TableBatchBarProps = {
   count: number;
@@ -44,6 +45,7 @@ export default function TableBatchBar({
   className,
   theme = 'dark'
 }: TableBatchBarProps) {
+  const t = useLocale();
   if (count <= 0) return null;
 
   const isLight = theme === 'light';
@@ -59,7 +61,7 @@ export default function TableBatchBar({
         className
       )}
       role="toolbar"
-      aria-label="批量操作"
+      aria-label={t['common.batchActions']}
     >
       <div
         className={cs(
@@ -67,7 +69,9 @@ export default function TableBatchBar({
           isLight ? 'text-arco-text-1' : 'text-[rgba(255,255,255,0.9)]'
         )}
       >
-        <span className="whitespace-nowrap">只显示已选 {count}</span>
+        <span className="whitespace-nowrap">
+          {t['common.showSelectedOnly'].replace('{n}', String(count))}
+        </span>
         <Switch
           size="small"
           checked={showSelectedOnly}
@@ -78,19 +82,19 @@ export default function TableBatchBar({
         {onArchive && (
           <button type="button" className={actionBtn} onClick={onArchive}>
             <IconArchive />
-            归档
+            {t['common.archive']}
           </button>
         )}
         {onEdit && (
           <button type="button" className={actionBtn} onClick={onEdit}>
             <IconEdit />
-            编辑
+            {t['common.edit']}
           </button>
         )}
         {onDelete && (
           <button type="button" className={actionBtn} onClick={onDelete}>
             <IconDelete />
-            删除
+            {t['common.delete']}
           </button>
         )}
         {extra}

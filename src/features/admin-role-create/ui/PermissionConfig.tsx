@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Checkbox, Input } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import useLocale from '@shared/lib/useLocale';
 import {
   ROLE_PERM_MODULES,
   collectAllPermKeys,
@@ -27,6 +28,10 @@ export default function PermissionConfig({
   value = [],
   onChange
 }: PermissionConfigProps) {
+  const t = useLocale();
+  const permTitle = (key: string, fallback: string) =>
+    t[`system.perm.${key}`] || fallback;
+
   const checked = useMemo(() => new Set(value), [value]);
   const [keyword, setKeyword] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
@@ -55,31 +60,31 @@ export default function PermissionConfig({
     if (!keyword.trim()) return ROLE_PERM_MODULES;
     const kw = keyword.trim();
     return ROLE_PERM_MODULES.map((mod) => {
+      const modTitle = permTitle(mod.key, mod.title);
       if (mod.leaf) {
-        return matchKeyword(mod.title, kw) ? mod : null;
+        return matchKeyword(modTitle, kw) ? mod : null;
       }
       const resources = (mod.resources || [])
         .map((res) => {
-          const titleHit = matchKeyword(res.title, kw);
+          const resTitle = permTitle(res.key, res.title);
+          const titleHit = matchKeyword(resTitle, kw);
           const actions = (res.actions || []).filter((a) =>
-            matchKeyword(a.title, kw)
+            matchKeyword(permTitle(a.key, a.title), kw)
           );
           if (titleHit) return res;
           if (actions.length) return { ...res, actions };
           return null;
         })
         .filter(Boolean) as PermResource[];
-      if (matchKeyword(mod.title, kw) || resources.length) {
+      if (matchKeyword(modTitle, kw) || resources.length) {
         return {
           ...mod,
-          resources: matchKeyword(mod.title, kw)
-            ? mod.resources
-            : resources
+          resources: matchKeyword(modTitle, kw) ? mod.resources : resources
         };
       }
       return null;
     }).filter(Boolean) as PermModule[];
-  }, [keyword]);
+  }, [keyword, t]);
 
   const renderResource = (res: PermResource) => {
     const actionKeys = (res.actions || []).map((a) => a.key);
@@ -99,7 +104,7 @@ export default function PermissionConfig({
             onChange={(v) => toggleMany(resKeys, v)}
           />
           <span className="text-[14px] leading-[21px] text-arco-text-2">
-            {res.title}
+            {permTitle(res.key, res.title)}
           </span>
         </div>
         {res.actions?.length ? (
@@ -123,7 +128,9 @@ export default function PermissionConfig({
                   setKeys(next);
                 }}
               >
-                <span className="text-[14px] text-arco-text-2">{a.title}</span>
+                <span className="text-[14px] text-arco-text-2">
+                  {permTitle(a.key, a.title)}
+                </span>
               </Checkbox>
             ))}
           </div>
@@ -138,7 +145,7 @@ export default function PermissionConfig({
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Input
             allowClear
-            placeholder="搜索"
+            placeholder={t['createRole.perm.search']}
             prefix={<IconSearch className="text-arco-text-3" />}
             value={keyword}
             onChange={setKeyword}
@@ -149,7 +156,7 @@ export default function PermissionConfig({
             indeterminate={allIndeterminate}
             onChange={(v) => toggleMany(allKeys, v)}
           >
-            全选
+            {t['createRole.perm.selectAll']}
           </Checkbox>
         </div>
         <button
@@ -162,7 +169,7 @@ export default function PermissionConfig({
             setExpanded(next);
           }}
         >
-          全部展开
+          {t['createRole.perm.expandAll']}
         </button>
       </div>
 
@@ -188,7 +195,7 @@ export default function PermissionConfig({
                     onChange={(v) => toggleMany(keys, v)}
                   />
                   <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
-                    {mod.title}
+                    {permTitle(mod.key, mod.title)}
                   </span>
                 </div>
                 {hasChildren ? (

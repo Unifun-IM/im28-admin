@@ -5,7 +5,7 @@ import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 
 import { globalStore } from '@entities/global-state';
 import {
-  setAccessToken,
+  clearAuthSession,
   setUnauthorizedHandler
 } from '@shared/api/request';
 import { postV1AdminAuthMe } from '@shared/api/admin/auth';
@@ -55,7 +55,7 @@ export function AppProviders({ children }: PropsWithChildren) {
   useEffect(() => {
     setUnauthorizedHandler(() => {
       localStorage.removeItem('userStatus');
-      setAccessToken(null);
+      clearAuthSession();
       if (window.location.pathname.replace(/\//g, '') !== 'login') {
         window.location.pathname = '/login';
       }

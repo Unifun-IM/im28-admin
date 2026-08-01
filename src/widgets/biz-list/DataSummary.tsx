@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Tooltip } from '@arco-design/web-react';
 import { IconDown, IconQuestionCircle, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
+import useLocale from '@shared/lib/useLocale';
 
 export type SummaryItem = {
   label: string;
@@ -55,9 +56,11 @@ export default function DataSummary({
   columns,
   collapsible = true,
   defaultCollapsed = false,
-  title = '数据汇总',
+  title,
   className
 }: DataSummaryProps) {
+  const t = useLocale();
+  const resolvedTitle = title ?? t['common.dataSummary'];
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const cols = resolveColumns(items.length, columns);
 
@@ -84,7 +87,7 @@ export default function DataSummary({
         )}
         onClick={() => setCollapsed(false)}
       >
-        <span>{title}</span>
+        <span>{resolvedTitle}</span>
         <IconDown className="text-[12px]" />
       </button>
     );
@@ -99,7 +102,7 @@ export default function DataSummary({
     >
       <div className="box-border flex h-[32px] items-center justify-between gap-[10px] border-b border-arco-border-2 px-[12px]">
         <span className="min-w-0 flex-1 text-[12px] font-normal leading-[20px] text-arco-text-1">
-          {title}
+          {resolvedTitle}
         </span>
         {collapsible && (
           <button
@@ -107,7 +110,7 @@ export default function DataSummary({
             className="inline-flex cursor-pointer items-center gap-[4px] border-0 bg-transparent p-0 text-[12px] leading-[20px] text-arco-text-2 hover:text-arco-text-1"
             onClick={() => setCollapsed(true)}
           >
-            收起
+            {t['common.collapse']}
             <IconUp className="text-[12px]" />
           </button>
         )}

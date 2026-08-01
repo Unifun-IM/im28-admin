@@ -13,6 +13,7 @@ import copy from 'copy-to-clipboard';
 import cs from 'classnames';
 import { postV1AdminSystemUsersCreate } from '@shared/api/admin/systemUsers';
 import { postV1AdminRolesList } from '@shared/api/admin/rbac';
+import useLocale from '@shared/lib/useLocale';
 import './create-account-modal.less';
 
 const FormItem = Form.Item;
@@ -40,6 +41,8 @@ export default function CreateAccountModal({
   onCancel,
   onSuccess
 }: CreateAccountModalProps) {
+  const t = useLocale();
+  const common = t;
   const [form] = Form.useForm<AdminAPI.CreateSysUserRequest>();
   const [step, setStep] = useState<Step>('form');
   const [submitting, setSubmitting] = useState(false);
@@ -74,7 +77,7 @@ export default function CreateAccountModal({
     return (
       <div className="flex w-full items-center justify-end gap-2">
         <Button className="!min-w-[80px]" onClick={onCancel}>
-          取消
+          {common['common.cancel']}
         </Button>
         <Button
           type="primary"
@@ -98,20 +101,20 @@ export default function CreateAccountModal({
             }
           }}
         >
-          确认创建
+          {common['common.create']}
         </Button>
       </div>
     );
-  }, [step, submitting, form, onCancel, onSuccess]);
+  }, [step, submitting, form, onCancel, onSuccess, common]);
 
-  const copyText = (text: string, tip = '已复制') => {
+  const copyText = (text: string) => {
     copy(text);
-    Message.success(tip);
+    Message.success(common['common.copied']);
   };
 
   return (
     <Modal
-      title={step === 'form' ? '新建账号' : undefined}
+      title={step === 'form' ? t['createAccount.title'] : undefined}
       visible={visible}
       onCancel={onCancel}
       footer={footer}
@@ -127,37 +130,37 @@ export default function CreateAccountModal({
         <Form form={form} layout="vertical" requiredSymbol={{ position: 'end' }}>
           <FormItem
             field="username"
-            label="username"
+            label={common['common.username']}
             rules={[{ required: true }]}
           >
-            <Input placeholder="username" allowClear />
+            <Input placeholder={common['common.placeholder']} allowClear />
           </FormItem>
-          <FormItem field="display_name" label="display_name">
-            <Input placeholder="display_name" allowClear />
+          <FormItem field="display_name" label={t['createAccount.field.displayName']}>
+            <Input placeholder={t['createAccount.placeholder.displayName']} allowClear />
           </FormItem>
           <FormItem
             field="password"
-            label="password"
+            label={common['common.password']}
             rules={[{ required: true }]}
           >
-            <Input placeholder="password" allowClear />
+            <Input placeholder={common['common.placeholder']} allowClear />
           </FormItem>
-          <FormItem field="role_ids" label="role_ids">
+          <FormItem field="role_ids" label={t['createAccount.field.roleIds']}>
             <Select
               mode="multiple"
-              placeholder="role_ids"
+              placeholder={t['createAccount.placeholder.roleIds']}
               options={roleOptions}
               allowClear
             />
           </FormItem>
-          <FormItem field="description" label="description">
-            <Input placeholder="description" allowClear />
+          <FormItem field="description" label={common['common.description']}>
+            <Input placeholder={common['common.placeholder']} allowClear />
           </FormItem>
-          <FormItem field="status" label="status">
+          <FormItem field="status" label={common['common.status']}>
             <Select
               options={[
-                { label: 'active', value: 'active' },
-                { label: 'disabled', value: 'disabled' }
+                { label: common['common.active'], value: 'active' },
+                { label: common['common.disabled'], value: 'disabled' }
               ]}
             />
           </FormItem>
@@ -169,13 +172,15 @@ export default function CreateAccountModal({
             icon={
               <IconCheckCircleFill className="text-[48px] text-[rgb(var(--success-6))]" />
             }
-            title="账号创建成功"
-            subTitle="请妥善保存初始密码。"
+            title={t['createAccount.success.title']}
+            subTitle={t['createAccount.success.subTitle']}
           />
           <div className="mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px]">
-            <div>username：{created?.username}</div>
+            <div>
+              {common['common.username']}：{created?.username}
+            </div>
             <div className="mt-2 flex items-center gap-2">
-              password：{created?.password}
+              {common['common.password']}：{created?.password}
               <button
                 type="button"
                 className="border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
@@ -189,7 +194,7 @@ export default function CreateAccountModal({
           </div>
           <div className="mt-4 flex justify-center">
             <Button type="primary" onClick={onCancel}>
-              完成
+              {common['common.done']}
             </Button>
           </div>
         </div>

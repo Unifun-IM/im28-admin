@@ -14,8 +14,12 @@ export function isActionColumn<T>(col: TableColumnProps<T>): boolean {
   return (
     col.fixed === 'right' ||
     key === 'actions' ||
+    key === 'op' ||
     dataIndex === 'actions' ||
-    title === '操作'
+    dataIndex === 'op' ||
+    // i18n 后 title 可能是「操作」或 Action，不能只认中文
+    title === '操作' ||
+    title === 'Action'
   );
 }
 
