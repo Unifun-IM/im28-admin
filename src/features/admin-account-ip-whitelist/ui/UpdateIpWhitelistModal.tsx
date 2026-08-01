@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { postV1AdminSystemUsersUpdateIpWhitelist } from '@shared/api/admin/systemUsers';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './update-ip-whitelist-modal.less';
 
 const FormItem = Form.Item;
-const TextArea = Input.TextArea;
 
 const IPV4_RE =
   /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
@@ -31,7 +30,12 @@ function parseIps(raw: string): string[] {
     .filter(Boolean);
 }
 
-/** 调整后台 IP 白名单 — AdminAPI.UpdateSysUserIPWhitelistRequest */
+type Step = 'form' | 'ga';
+
+/**
+ * 调整白名单 — Figma 1023:23052 / 921:44417
+ * AdminAPI.UpdateSysUserIPWhitelistRequest
+ */
 export default function UpdateIpWhitelistModal({
   visible,
   target,
@@ -40,114 +44,123 @@ export default function UpdateIpWhitelistModal({
 }: UpdateIpWhitelistModalProps) {
   const t = useLocale();
   const common = t;
-  const [form] = Form.useForm<{
-    id: number;
-    ip_text: string;
-    two_factor_code: string;
-  }>();
+  const [form] = Form.useForm<{ ip_text: string }>();
+  const [step, setStep] = useState<Step>('form');
   const [submitting, setSubmitting] = useState(false);
+  const [ips, setIps] = useState<string[]>([]);
+  const [gaErrorTick, setGaErrorTick] = useState(0);
 
   useEffect(() => {
     if (!visible || !target) return;
+    setStep('form');
+    setIps([]);
+    setGaErrorTick(0);
     form.resetFields();
     form.setFieldsValue({
-      id: target.id,
-      ip_text: (target.ip_whitelist || []).join('\n'),
-      two_factor_code: ''
+      ip_text: (target.ip_whitelist || []).join(', ')
     });
   }, [visible, form, target]);
 
-  const submit = async () => {
+  const goGa = async () => {
     try {
       const values = await form.validate();
-      if (target?.id == null) return;
-      const ips = parseIps(values.ip_text || '');
-      const invalid = ips.find((ip) => !IPV4_RE.test(ip));
+      const nextIps = parseIps(values.ip_text || '');
+      if (!nextIps.length) {
+        Message.error(t['ipWhitelist.msg.ipRequired']);
+        return;
+      }
+      const invalid = nextIps.find((ip) => !IPV4_RE.test(ip));
       if (invalid) {
         Message.error(
           t['ipWhitelist.msg.invalidIp'].replace('{ip}', invalid)
         );
         return;
       }
+      setIps(nextIps);
+      setGaErrorTick(0);
+      setStep('ga');
+    } catch {
+      // validate
+    }
+  };
+
+  const submitGa = async (code: string) => {
+    if (submitting || target?.id == null) return;
+    try {
       setSubmitting(true);
       const body: AdminAPI.UpdateSysUserIPWhitelistRequest = {
         id: target.id,
         ip_whitelist: ips,
-        two_factor_code: values.two_factor_code
+        two_factor_code: code
       };
       await postV1AdminSystemUsersUpdateIpWhitelist(body);
       Message.success(common['common.success']);
       onSuccess?.();
       onCancel();
     } catch {
-      // validate / request
+      setGaErrorTick((n) => n + 1);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Modal
-      visible={visible}
-      onCancel={onCancel}
-      unmountOnExit
-      className="use-update-ip-whitelist-modal"
-      style={{ width: 520 }}
-      title={
-        <div className="flex items-center gap-2">
-          <img alt="" src={iconWarning} className="size-5" />
-          <span>{t['ipWhitelist.title']}</span>
-        </div>
-      }
-      footer={
-        <div className="flex justify-end gap-2">
-          <Button onClick={onCancel}>{common['common.cancel']}</Button>
-          <Button type="primary" loading={submitting} onClick={submit}>
-            {common['common.confirm']}
-          </Button>
-        </div>
-      }
-    >
-      <p className="m-0 mb-3 text-[14px] leading-[22px] text-arco-text-2">
-        {t['ipWhitelist.target']
-          .replace('{username}', target?.username || '')
-          .replace('{id}', String(target?.id ?? ''))}
-      </p>
-      <p className="m-0 mb-4 text-[12px] leading-[18px] text-arco-text-3">
-        {t['ipWhitelist.hint']}
-      </p>
-      <Form form={form} layout="vertical">
-        <FormItem field="id" hidden>
-          <Input />
-        </FormItem>
-        <FormItem
-          field="ip_text"
-          label={t['ipWhitelist.field.ips']}
-          extra={t['ipWhitelist.field.ipsExtra']}
+    <>
+      <Modal
+        visible={visible && step === 'form'}
+        onCancel={onCancel}
+        unmountOnExit
+        maskClosable={false}
+        className="use-update-ip-whitelist-modal"
+        wrapClassName="use-update-ip-whitelist-modal-wrap"
+        style={{ width: 780 }}
+        title={t['ipWhitelist.title']}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
+              {common['common.cancel']}
+            </Button>
+            <Button
+              type="primary"
+              className="!min-w-[80px]"
+              onClick={goGa}
+            >
+              {t['ipWhitelist.action.save']}
+            </Button>
+          </div>
+        }
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          requiredSymbol={{ position: 'end' }}
         >
-          <TextArea
-            placeholder={t['ipWhitelist.placeholder.ips']}
-            autoSize={{ minRows: 4, maxRows: 8 }}
-          />
-        </FormItem>
-        <FormItem
-          field="two_factor_code"
-          label={t['accounts.field.twoFactorCode']}
-          rules={[
-            { required: true, message: t['accounts.msg.twoFactorRequired'] },
-            {
-              match: /^\d{6}$/,
-              message: t['accounts.msg.twoFactorFormat']
-            }
-          ]}
-        >
-          <Input
-            maxLength={6}
-            placeholder={t['accounts.placeholder.twoFactorCode']}
-            allowClear
-          />
-        </FormItem>
-      </Form>
-    </Modal>
+          <FormItem
+            field="ip_text"
+            label={t['ipWhitelist.field.ips']}
+            extra={t['ipWhitelist.field.ipsExtra']}
+            rules={[
+              {
+                required: true,
+                message: t['ipWhitelist.placeholder.ips']
+              }
+            ]}
+          >
+            <Input
+              allowClear
+              placeholder={t['ipWhitelist.placeholder.ips']}
+            />
+          </FormItem>
+        </Form>
+      </Modal>
+
+      <GaVerifyModal
+        visible={visible && step === 'ga'}
+        loading={submitting}
+        errorTick={gaErrorTick}
+        onCancel={onCancel}
+        onOk={submitGa}
+      />
+    </>
   );
 }

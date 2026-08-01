@@ -4,6 +4,7 @@ import enUS from '@arco-design/web-react/es/locale/en-US';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 
 import { globalStore } from '@entities/global-state';
+import { systemSettingsStore } from '@entities/system-settings';
 import {
   clearAuthSession,
   setUnauthorizedHandler
@@ -56,6 +57,7 @@ export function AppProviders({ children }: PropsWithChildren) {
     setUnauthorizedHandler(() => {
       localStorage.removeItem('userStatus');
       clearAuthSession();
+      systemSettingsStore.clear();
       if (window.location.pathname.replace(/\//g, '') !== 'login') {
         window.location.pathname = '/login';
       }
@@ -64,6 +66,15 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (checkLogin()) {
+      // 登录后并行：当前用户 + 系统参数（品牌 / 默认语言 / 时间格式）
+      void systemSettingsStore.fetch().then((setting) => {
+        if (!setting) return;
+        const nextLang = systemSettingsStore.defaultLanguage;
+        if (nextLang === 'zh-CN' || nextLang === 'en-US') {
+          setLang(nextLang);
+        }
+      });
+
       postV1AdminAuthMe()
         .then((res) => {
           globalStore.updateUserInfo({
@@ -81,7 +92,7 @@ export function AppProviders({ children }: PropsWithChildren) {
     } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
       window.location.pathname = '/login';
     }
-  }, []);
+  }, [setLang]);
 
   useEffect(() => {
     changeTheme(theme, globalStore.settings.themeColor);

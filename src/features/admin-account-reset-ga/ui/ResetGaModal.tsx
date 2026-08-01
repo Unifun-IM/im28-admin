@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Form,
-  Input,
-  Message,
-  Modal,
-  Result
-} from '@arco-design/web-react';
+import { Button, Form, Input, Modal, Result } from '@arco-design/web-react';
 import { IconCheckCircleFill } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { postV1AdminSystemUsersResetTwoFactor } from '@shared/api/admin/systemUsers';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './reset-ga-modal.less';
 
@@ -20,6 +14,7 @@ const TextArea = Input.TextArea;
 export type ResetGaTarget = {
   id: number;
   username: string;
+  display_name?: string;
 };
 
 export type ResetGaModalProps = {
@@ -29,9 +24,12 @@ export type ResetGaModalProps = {
   onSuccess?: () => void;
 };
 
-type Step = 'form' | 'success';
+type Step = 'confirm' | 'ga' | 'success';
 
-/** 重置 GA — AdminAPI.ResetSysUserTwoFactorRequest */
+/**
+ * 重置谷歌 — Figma 921:44697 / 921:44417 / 921:44748
+ * AdminAPI.ResetSysUserTwoFactorRequest
+ */
 export default function ResetGaModal({
   visible,
   target,
@@ -40,113 +38,129 @@ export default function ResetGaModal({
 }: ResetGaModalProps) {
   const t = useLocale();
   const common = t;
-  const [form] = Form.useForm<AdminAPI.ResetSysUserTwoFactorRequest>();
-  const [step, setStep] = useState<Step>('form');
+  const [form] = Form.useForm<{ remark?: string }>();
+  const [step, setStep] = useState<Step>('confirm');
   const [submitting, setSubmitting] = useState(false);
+  const [remark, setRemark] = useState<string | undefined>();
+  const [gaErrorTick, setGaErrorTick] = useState(0);
 
   useEffect(() => {
     if (!visible || !target) return;
-    setStep('form');
+    setStep('confirm');
+    setRemark(undefined);
+    setGaErrorTick(0);
     form.resetFields();
-    form.setFieldsValue({ id: target.id });
   }, [visible, form, target]);
 
-  const submit = async () => {
+  const displayLabel = (() => {
+    const name = (target?.display_name || '').trim();
+    const username = target?.username || '';
+    if (name && username) return `${name}（${username}）`;
+    return name || username || '--';
+  })();
+
+  const goGa = async () => {
     try {
       const values = await form.validate();
-      if (target?.id == null) return;
+      setRemark(values.remark?.trim() || undefined);
+      setGaErrorTick(0);
+      setStep('ga');
+    } catch {
+      // validate
+    }
+  };
+
+  const submitGa = async (code: string) => {
+    if (submitting || target?.id == null) return;
+    try {
       setSubmitting(true);
       const body: AdminAPI.ResetSysUserTwoFactorRequest = {
         id: target.id,
-        two_factor_code: values.two_factor_code,
-        remark: values.remark?.trim() || undefined
+        two_factor_code: code,
+        remark
       };
       await postV1AdminSystemUsersResetTwoFactor(body);
-      Message.success(common['common.success']);
       setStep('success');
       onSuccess?.();
     } catch {
-      // validate / request
+      setGaErrorTick((n) => n + 1);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Modal
-      visible={visible}
-      onCancel={onCancel}
-      unmountOnExit
-      closable={step === 'form'}
-      maskClosable={step === 'form'}
-      className={cs('use-reset-ga-modal', { 'is-success': step === 'success' })}
-      style={{ width: step === 'success' ? 480 : 480 }}
-      title={
-        step === 'form' ? (
+    <>
+      <Modal
+        visible={visible && step === 'confirm'}
+        onCancel={onCancel}
+        unmountOnExit
+        closable={false}
+        maskClosable={false}
+        className="use-reset-ga-modal"
+        wrapClassName="use-reset-ga-modal-wrap"
+        style={{ width: 480 }}
+        title={
           <div className="flex items-center gap-2">
             <img alt="" src={iconWarning} className="size-5" />
             <span>{t['resetGa.title']}</span>
           </div>
-        ) : undefined
-      }
-      footer={
-        step === 'form' ? (
+        }
+        footer={
           <div className="flex justify-end gap-2">
-            <Button onClick={onCancel}>{common['common.cancel']}</Button>
+            <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
+              {common['common.cancel']}
+            </Button>
             <Button
               type="primary"
               status="danger"
-              loading={submitting}
-              onClick={submit}
+              className="!min-w-[80px]"
+              onClick={goGa}
             >
-              {common['common.confirm']}
+              {t['resetGa.action.confirm']}
             </Button>
           </div>
-        ) : null
-      }
-    >
-      {step === 'form' ? (
-        <>
-          <p className="m-0 mb-3 text-[14px] leading-[22px] text-arco-text-2">
-            {t['resetGa.target']
-              .replace('{username}', target?.username || '')
-              .replace('{id}', String(target?.id ?? ''))}
-          </p>
-          <p className="m-0 mb-4 text-[12px] leading-[18px] text-arco-text-3">
-            {t['resetGa.hint']}
-          </p>
-          <Form form={form} layout="vertical">
-            <FormItem field="id" hidden>
-              <Input />
-            </FormItem>
-            <FormItem
-              field="two_factor_code"
-              label={t['accounts.field.twoFactorCode']}
-              rules={[
-                { required: true, message: t['accounts.msg.twoFactorRequired'] },
-                {
-                  match: /^\d{6}$/,
-                  message: t['accounts.msg.twoFactorFormat']
-                }
-              ]}
-            >
-              <Input
-                maxLength={6}
-                placeholder={t['accounts.placeholder.twoFactorCode']}
-                allowClear
-              />
-            </FormItem>
-            <FormItem field="remark" label={t['accounts.field.remark']}>
-              <TextArea
-                placeholder={t['accounts.placeholder.remark']}
-                maxLength={200}
-                showWordLimit
-              />
-            </FormItem>
-          </Form>
-        </>
-      ) : (
-        <div className="px-10 py-6">
+        }
+      >
+        <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+          {t['resetGa.target'].replace('{name}', displayLabel)}
+        </p>
+        <ul className="m-0 mt-3 list-disc pl-[21px] text-[14px] leading-[21px] text-arco-text-1">
+          <li>{t['resetGa.bullet.1']}</li>
+          <li>{t['resetGa.bullet.2']}</li>
+          <li>{t['resetGa.bullet.3']}</li>
+        </ul>
+        <Form form={form} layout="vertical" className="mt-3">
+          <FormItem field="remark" label={t['accounts.field.remark']}>
+            <TextArea
+              placeholder={t['resetGa.placeholder.remark']}
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              maxLength={200}
+            />
+          </FormItem>
+        </Form>
+      </Modal>
+
+      <GaVerifyModal
+        visible={visible && step === 'ga'}
+        loading={submitting}
+        errorTick={gaErrorTick}
+        onCancel={onCancel}
+        onOk={submitGa}
+      />
+
+      <Modal
+        visible={visible && step === 'success'}
+        onCancel={onCancel}
+        unmountOnExit
+        closable={false}
+        maskClosable={false}
+        footer={null}
+        className={cs('use-reset-ga-modal', 'is-success')}
+        wrapClassName="use-reset-ga-modal-wrap"
+        style={{ width: 780 }}
+      >
+        <div className="use-reset-ga-success px-20 py-6">
           <Result
             status="success"
             icon={
@@ -156,12 +170,16 @@ export default function ResetGaModal({
             subTitle={t['resetGa.success.subTitle']}
           />
           <div className="mt-4 flex justify-center">
-            <Button type="primary" onClick={onCancel}>
+            <Button
+              type="primary"
+              className="!min-w-[100px]"
+              onClick={onCancel}
+            >
               {common['common.done']}
             </Button>
           </div>
         </div>
-      )}
-    </Modal>
+      </Modal>
+    </>
   );
 }

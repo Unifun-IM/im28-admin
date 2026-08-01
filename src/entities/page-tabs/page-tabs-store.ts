@@ -41,8 +41,14 @@ function isCloseable(tab: PageTabItem) {
 
 export class PageTabsStore {
   tabs: PageTabItem[] = loadTabs();
-  /** 内容区全屏：隐藏侧栏、Navbar、PageTabs，仅保留内容区（如表格） */
-  contentFullscreen = false;
+  /**
+   * 壳层全屏（PageTabs 按钮）：隐藏侧栏与 Navbar，保留 PageTabs
+   */
+  chromeFullscreen = false;
+  /**
+   * 表格全屏（列表工具栏按钮）：隐藏侧栏、Navbar、PageTabs，列表仅保留表格
+   */
+  tableFullscreen = false;
   /** 固定标签上限，默认 3 */
   maxPinned = MAX_PINNED_TABS;
 
@@ -54,12 +60,36 @@ export class PageTabsStore {
     return this.tabs.filter((t) => t.pinned).length;
   }
 
-  setContentFullscreen(value: boolean) {
-    this.contentFullscreen = value;
+  /** 任一全屏都会收起侧栏 / Navbar */
+  get hideChrome() {
+    return this.chromeFullscreen || this.tableFullscreen;
   }
 
-  toggleContentFullscreen() {
-    this.contentFullscreen = !this.contentFullscreen;
+  setChromeFullscreen(value: boolean) {
+    this.chromeFullscreen = value;
+  }
+
+  toggleChromeFullscreen() {
+    this.chromeFullscreen = !this.chromeFullscreen;
+  }
+
+  setTableFullscreen(value: boolean) {
+    this.tableFullscreen = value;
+  }
+
+  toggleTableFullscreen() {
+    this.tableFullscreen = !this.tableFullscreen;
+  }
+
+  /** Esc：优先退出表格全屏，再退出壳层全屏 */
+  exitFullscreen() {
+    if (this.tableFullscreen) {
+      this.tableFullscreen = false;
+      return;
+    }
+    if (this.chromeFullscreen) {
+      this.chromeFullscreen = false;
+    }
   }
 
   setMaxPinned(n: number) {

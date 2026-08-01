@@ -20,7 +20,7 @@ import useLocale from '@shared/lib/useLocale';
 import ForceChangePasswordModal from './ForceChangePasswordModal';
 import ForcePasswordNoticeModal from './ForcePasswordNoticeModal';
 import GaBindModal from './GaBindModal';
-import GaVerifyModal from './GaVerifyModal';
+import { GaVerifyModal } from '@features/ga-verify';
 import iconUnlock from './assets/icon-unlock.svg';
 import iconUser from './assets/icon-user.svg';
 import { mapLoginToast } from './mapLoginToast';

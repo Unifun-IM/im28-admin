@@ -38,9 +38,6 @@ const i18n = {
     'login.forcePwd.submit': 'Confirm change',
     'login.msg.pwdNoAccount': 'Password cannot contain the login account',
     'login.msg.pwdConsecutive': 'Password cannot contain consecutive characters',
-    'login.gaVerify.title': 'Authenticator code',
-    'login.gaVerify.desc':
-      'Enter the 6-digit code from your authenticator app',
     'login.gaBind.title': 'Bind authenticator',
     'login.gaBind.desc':
       'Scan the QR code with Google Authenticator or Authy.',
@@ -124,8 +121,6 @@ const i18n = {
     'login.forcePwd.submit': '确认修改',
     'login.msg.pwdNoAccount': '密码不能包含登录账号',
     'login.msg.pwdConsecutive': '密码不能包含连续字符',
-    'login.gaVerify.title': 'GA验证码',
-    'login.gaVerify.desc': '请输入由您的身份验证器应用生成的6位验证码',
     'login.gaBind.title': '绑定GA验证码',
     'login.gaBind.desc': '使用 Google Authenticator 或 Authy 扫描下面的二维码。',
     'login.gaBind.qrFail': '二维码加载失败',

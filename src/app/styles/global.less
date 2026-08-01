@@ -184,6 +184,52 @@ body {
     text-align: left;
   }
 
+  /**
+   * Modal 内表单控件统一：白底 + border/2 描边 + 圆角 8
+   * Arco 默认是 transparent border + fill 底，叠在白色弹窗内容上会「看不见输入框」
+   * TextArea 的描边在 .arco-textarea 上，不在 wrapper
+   */
+  .arco-input-inner-wrapper,
+  .arco-textarea,
+  .arco-select-view,
+  .arco-picker {
+    background-color: var(--color-bg-2, #fff);
+    border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+    border-radius: 8px;
+    min-height: 32px;
+    box-shadow: none;
+  }
+
+  .arco-textarea-wrapper {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .arco-textarea {
+    min-height: auto;
+    padding: 5px 12px;
+  }
+
+  .arco-input-inner-wrapper:hover,
+  .arco-textarea:hover,
+  .arco-select-view:hover,
+  .arco-picker:hover {
+    background-color: var(--color-bg-2, #fff);
+    border-color: var(--color-border-3, #c9cdd4);
+  }
+
+  .arco-input-inner-wrapper:focus-within,
+  .arco-textarea:focus,
+  .arco-textarea-focus,
+  .arco-select-view-focus,
+  .arco-select-focused .arco-select-view,
+  .arco-picker-focused {
+    background-color: var(--color-bg-2, #fff);
+    border-color: rgb(var(--primary-6));
+  }
+
   .arco-modal-footer {
     .arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
       border-radius: var(--border-radius-small, 8px);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Input, Message, Modal, VerificationCode } from '@arco-design/web-react';
 
 import useLocale from '@shared/lib/useLocale';
+import '@features/ga-verify/ui/ga-verify-modal.less';
 
 import copyIcon from './assets/icon-copy.svg';
 
@@ -157,7 +158,7 @@ export default function GaBindModal({
             {t['login.gaBind.codeAfter']}
           </div>
           <VerificationCode
-            className="use-login-otp"
+            className="use-ga-otp"
             length={6}
             value={code}
             status={status}

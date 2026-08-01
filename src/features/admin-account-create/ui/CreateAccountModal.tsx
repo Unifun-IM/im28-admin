@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Form,
@@ -18,14 +18,20 @@ import './create-account-modal.less';
 
 const FormItem = Form.Item;
 
-function genPassword(len = 14) {
-  const chars =
-    'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789#@$%';
-  let out = '';
-  for (let i = 0; i < len; i += 1) {
-    out += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return out;
+const IPV4_RE =
+  /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
+
+type FormValues = {
+  username: string;
+  role_id: number;
+  ip_text: string;
+};
+
+function parseIps(raw: string): string[] {
+  return raw
+    .split(/[\s,，;；\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 export type CreateAccountModalProps = {
@@ -36,6 +42,11 @@ export type CreateAccountModalProps = {
 
 type Step = 'form' | 'success';
 
+/**
+ * 新建账号 — Figma 666:21800 / 921:44334
+ * 不传密码：服务端生成 temporary_password，成功页一次性展示
+ * IP：CreateSysUserRequest 未声明，创建时仍透传；正式调整请走 update-ip-whitelist
+ */
 export default function CreateAccountModal({
   visible,
   onCancel,
@@ -43,7 +54,7 @@ export default function CreateAccountModal({
 }: CreateAccountModalProps) {
   const t = useLocale();
   const common = t;
-  const [form] = Form.useForm<AdminAPI.CreateSysUserRequest>();
+  const [form] = Form.useForm<FormValues>();
   const [step, setStep] = useState<Step>('form');
   const [submitting, setSubmitting] = useState(false);
   const [roleOptions, setRoleOptions] = useState<
@@ -59,7 +70,6 @@ export default function CreateAccountModal({
     setStep('form');
     setCreated(null);
     form.resetFields();
-    form.setFieldsValue({ password: genPassword(), status: 'active' });
     postV1AdminRolesList({ page: 1, page_size: 100 }).then((res) => {
       setRoleOptions(
         (res.data?.list || [])
@@ -72,44 +82,57 @@ export default function CreateAccountModal({
     });
   }, [visible, form]);
 
-  const footer = useMemo(() => {
-    if (step === 'success') return null;
-    return (
-      <div className="flex w-full items-center justify-end gap-2">
-        <Button className="!min-w-[80px]" onClick={onCancel}>
-          {common['common.cancel']}
-        </Button>
-        <Button
-          type="primary"
-          className="!min-w-[80px]"
-          loading={submitting}
-          onClick={async () => {
-            try {
-              const values = await form.validate();
-              setSubmitting(true);
-              await postV1AdminSystemUsersCreate(values);
-              setCreated({
-                username: values.username,
-                password: values.password
-              });
-              setStep('success');
-              onSuccess?.();
-            } catch {
-              // validate
-            } finally {
-              setSubmitting(false);
-            }
-          }}
-        >
-          {common['common.create']}
-        </Button>
-      </div>
-    );
-  }, [step, submitting, form, onCancel, onSuccess, common]);
-
   const copyText = (text: string) => {
     copy(text);
     Message.success(common['common.copied']);
+  };
+
+  const copyAccountAndPassword = () => {
+    if (!created) return;
+    copyText(
+      `${t['createAccount.success.username']}：${created.username}\n${t['createAccount.success.password']}：${created.password}`
+    );
+  };
+
+  const submit = async () => {
+    try {
+      const values = await form.validate();
+      const ips = parseIps(values.ip_text || '');
+      if (!ips.length) {
+        Message.error(t['createAccount.msg.ipRequired']);
+        return;
+      }
+      const invalid = ips.find((ip) => !IPV4_RE.test(ip));
+      if (invalid) {
+        Message.error(
+          t['createAccount.msg.invalidIp'].replace('{ip}', invalid)
+        );
+        return;
+      }
+
+      const username = values.username.trim();
+      setSubmitting(true);
+
+      const body: AdminAPI.CreateSysUserRequest & {
+        ip_whitelist: string[];
+      } = {
+        username,
+        role_ids: [values.role_id],
+        status: 'active',
+        ip_whitelist: ips
+      };
+      const res = await postV1AdminSystemUsersCreate(body);
+      setCreated({
+        username: res.data?.username || username,
+        password: res.data?.temporary_password || ''
+      });
+      setStep('success');
+      onSuccess?.();
+    } catch {
+      // validate / request
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -117,83 +140,142 @@ export default function CreateAccountModal({
       title={step === 'form' ? t['createAccount.title'] : undefined}
       visible={visible}
       onCancel={onCancel}
-      footer={footer}
+      footer={
+        step === 'success' ? null : (
+          <div className="flex w-full items-center justify-end gap-2">
+            <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
+              {common['common.cancel']}
+            </Button>
+            <Button
+              type="primary"
+              className="!min-w-[80px]"
+              loading={submitting}
+              onClick={submit}
+            >
+              {common['common.create']}
+            </Button>
+          </div>
+        )
+      }
       unmountOnExit
-      closable={false}
-      maskClosable={step === 'form'}
+      closable={step === 'form'}
+      maskClosable={false}
       className={cs('use-create-account-modal', {
         'is-success': step === 'success'
       })}
+      wrapClassName="use-create-account-modal-wrap"
       style={{ width: 780 }}
     >
       {step === 'form' ? (
         <Form form={form} layout="vertical" requiredSymbol={{ position: 'end' }}>
           <FormItem
             field="username"
-            label={common['common.username']}
-            rules={[{ required: true }]}
+            label={t['createAccount.field.username']}
+            rules={[
+              {
+                required: true,
+                message: t['createAccount.placeholder.username']
+              }
+            ]}
           >
-            <Input placeholder={common['common.placeholder']} allowClear />
-          </FormItem>
-          <FormItem field="display_name" label={t['createAccount.field.displayName']}>
-            <Input placeholder={t['createAccount.placeholder.displayName']} allowClear />
+            <Input
+              placeholder={t['createAccount.placeholder.username']}
+              allowClear
+            />
           </FormItem>
           <FormItem
-            field="password"
-            label={common['common.password']}
-            rules={[{ required: true }]}
+            field="role_id"
+            label={t['createAccount.field.roleIds']}
+            rules={[
+              {
+                required: true,
+                message: t['createAccount.placeholder.roleIds']
+              }
+            ]}
           >
-            <Input placeholder={common['common.placeholder']} allowClear />
-          </FormItem>
-          <FormItem field="role_ids" label={t['createAccount.field.roleIds']}>
             <Select
-              mode="multiple"
               placeholder={t['createAccount.placeholder.roleIds']}
               options={roleOptions}
               allowClear
             />
           </FormItem>
-          <FormItem field="description" label={common['common.description']}>
-            <Input placeholder={common['common.placeholder']} allowClear />
-          </FormItem>
-          <FormItem field="status" label={common['common.status']}>
-            <Select
-              options={[
-                { label: common['common.active'], value: 'active' },
-                { label: common['common.disabled'], value: 'disabled' }
-              ]}
+          <FormItem
+            field="ip_text"
+            label={t['createAccount.field.ipWhitelist']}
+            rules={[
+              {
+                required: true,
+                message: t['createAccount.placeholder.ipWhitelist']
+              }
+            ]}
+            extra={t['createAccount.field.ipWhitelistExtra']}
+          >
+            <Input
+              placeholder={t['createAccount.placeholder.ipWhitelist']}
+              allowClear
             />
           </FormItem>
         </Form>
       ) : (
-        <div className="px-10 py-6">
+        <div className="use-create-account-success px-20 py-6">
           <Result
             status="success"
             icon={
               <IconCheckCircleFill className="text-[48px] text-[rgb(var(--success-6))]" />
             }
             title={t['createAccount.success.title']}
-            subTitle={t['createAccount.success.subTitle']}
+            subTitle={
+              <span className="inline-block max-w-[420px] text-center">
+                {t['createAccount.success.subTitle']}
+              </span>
+            }
           />
-          <div className="mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px]">
-            <div>
-              {common['common.username']}：{created?.username}
+          <div className="use-create-account-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px] leading-[1.5] text-arco-text-1">
+            <div className="flex items-center gap-6">
+              <span className="w-[120px] shrink-0">
+                {t['createAccount.success.username']}
+              </span>
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
+                <span className="truncate">{created?.username}</span>
+                <button
+                  type="button"
+                  className="inline-flex size-[14px] shrink-0 items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
+                  onClick={() =>
+                    created?.username && copyText(created.username)
+                  }
+                >
+                  <IconCopy />
+                </button>
+              </div>
             </div>
-            <div className="mt-2 flex items-center gap-2">
-              {common['common.password']}：{created?.password}
-              <button
-                type="button"
-                className="border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
-                onClick={() =>
-                  created?.password && copyText(created.password)
-                }
-              >
-                <IconCopy />
-              </button>
+            <div className="my-3 h-px w-full bg-[rgba(0,0,0,0.08)]" />
+            <div className="flex items-center gap-6">
+              <span className="w-[120px] shrink-0">
+                {t['createAccount.success.password']}
+              </span>
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
+                <span className="truncate">{created?.password}</span>
+                <button
+                  type="button"
+                  className="inline-flex size-[14px] shrink-0 items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
+                  onClick={() =>
+                    created?.password && copyText(created.password)
+                  }
+                >
+                  <IconCopy />
+                </button>
+              </div>
             </div>
           </div>
-          <div className="mt-4 flex justify-center">
-            <Button type="primary" onClick={onCancel}>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <Button type="secondary" onClick={copyAccountAndPassword}>
+              {t['createAccount.success.copyBoth']}
+            </Button>
+            <Button
+              type="primary"
+              className="!min-w-[100px]"
+              onClick={onCancel}
+            >
               {common['common.done']}
             </Button>
           </div>

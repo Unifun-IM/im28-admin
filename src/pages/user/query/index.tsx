@@ -1,8 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Form, Input, Button, Tag, Dropdown, Menu } from '@arco-design/web-react';
+import { Form, Input, Button, Tag } from '@arco-design/web-react';
+import {
+  IconCheckCircle,
+  IconCloseCircle
+} from '@arco-design/web-react/icon';
 import {
   ActionLinks,
   AvatarNameCell,
+  BatchBarAction,
   BizListPage,
   DoubleLineCell,
   FilterField,
@@ -211,7 +216,7 @@ export default function UserQueryPage() {
                 >
                   <Input.TextArea
                     placeholder={t['userQuery.filter.userIds']}
-                    style={{ minHeight: 56 }}
+                    autoSize={{ minRows: 2, maxRows: 6 }}
                   />
                 </FormItem>
               </FilterField>
@@ -247,31 +252,39 @@ export default function UserQueryPage() {
           fetchData(1, pageSize);
         }}
         onRefresh={() => fetchData(page, pageSize)}
-        toolbar={
-          <Dropdown
-            disabled={!selectedRowKeys.length}
-            droplist={
-              <Menu
-                onClickMenuItem={(key) => {
+        batchActions={{
+          onExit: () => setSelectedRowKeys([]),
+          extra: (
+            <>
+              <BatchBarAction
+                status="danger"
+                icon={<IconCloseCircle />}
+                onClick={() =>
                   openBlacklistModal(
-                    key as 'add' | 'remove',
+                    'add',
                     selectedRowKeys.map(String),
                     'batch'
-                  );
-                }}
+                  )
+                }
               >
-                <Menu.Item key="add">{t['userQuery.action.batchBan']}</Menu.Item>
-                <Menu.Item key="remove">
-                  {t['userQuery.action.batchUnban']}
-                </Menu.Item>
-              </Menu>
-            }
-          >
-            <Button type="primary" disabled={!selectedRowKeys.length}>
-              {t['userQuery.action.batch']}
-            </Button>
-          </Dropdown>
-        }
+                {t['userQuery.action.batchBan']}
+              </BatchBarAction>
+              <BatchBarAction
+                status="success"
+                icon={<IconCheckCircle />}
+                onClick={() =>
+                  openBlacklistModal(
+                    'remove',
+                    selectedRowKeys.map(String),
+                    'batch'
+                  )
+                }
+              >
+                {t['userQuery.action.batchUnban']}
+              </BatchBarAction>
+            </>
+          )
+        }}
         tableProps={{
           loading,
           data,
@@ -282,6 +295,7 @@ export default function UserQueryPage() {
               title: t['userQuery.col.user'],
               dataIndex: 'user.nickname',
               width: 180,
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <AvatarNameCell
                   name={row.user?.nickname}
@@ -295,6 +309,7 @@ export default function UserQueryPage() {
               title: t['userQuery.col.contact'],
               dataIndex: 'user.phone',
               width: 180,
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <DoubleLineCell
                   primary={`${t['userQuery.cell.phone']}：${row.user?.phone || '--'}`}
@@ -313,6 +328,7 @@ export default function UserQueryPage() {
               title: t['userQuery.col.status'],
               dataIndex: 'user.status',
               width: 100,
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <StatusBadge
                   status={statusBadge(row.user?.status)}

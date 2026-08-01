@@ -183,9 +183,7 @@ function AccountsPage() {
               render: (_: unknown, row: AdminAPI.SysUserWrap) => {
                 const list = row.sys_user?.ip_whitelist || [];
                 if (!list.length) return t['accounts.ipWhitelist.empty'];
-                return list.length > 2
-                  ? `${list.slice(0, 2).join(', ')}…`
-                  : list.join(', ');
+                return list.join(', ');
               }
             },
             {
@@ -202,7 +200,8 @@ function AccountsPage() {
                       onClick: () =>
                         setResetTarget({
                           id: Number(row.sys_user?.id),
-                          username: row.sys_user?.username || ''
+                          username: row.sys_user?.username || '',
+                          display_name: row.sys_user?.display_name
                         })
                     },
                     {
@@ -211,7 +210,8 @@ function AccountsPage() {
                       onClick: () =>
                         setResetGaTarget({
                           id: Number(row.sys_user?.id),
-                          username: row.sys_user?.username || ''
+                          username: row.sys_user?.username || '',
+                          display_name: row.sys_user?.display_name
                         })
                     },
                     {

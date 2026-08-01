@@ -10,7 +10,6 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { UserDetailDrawer } from '@features/user-detail';
 import { UserChatModal } from '@features/user-chat-view';
 import useLocale from '@shared/lib/useLocale';
@@ -28,8 +27,7 @@ function statusBadge(
 
 /**
  * 用户会话查询 — Figma 770:22002
- * 数据：postV1AdminUsersList（与用户管理查询相同）
- * 列：用户信息 / 好友群聊数 / 账号状态 / 最后活跃 / 查聊天
+ * 会话接口暂不对接：保留筛选 / 表格交互，列表为空
  */
 export default function UserSessionPage() {
   const t = useLocale();
@@ -73,29 +71,16 @@ export default function UserSessionPage() {
     return status || '--';
   };
 
-  const fetchData = useCallback(
-    async (p = page, size = pageSize) => {
-      setLoading(true);
-      try {
-        const values = form.getFieldsValue();
-        const keyword = values.keyword || undefined;
-        const res = await postV1AdminUsersList({
-          page: p,
-          page_size: size,
-          keyword,
-          keyword_type: keyword
-            ? values.keyword_type || undefined
-            : undefined,
-          status: values.status || undefined
-        });
-        setData(res.data?.list || []);
-        setTotal(res.data?.total || 0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [form, page, pageSize]
-  );
+  const fetchData = useCallback(async (_p = page, _size = pageSize) => {
+    setLoading(true);
+    try {
+      // 会话相关接口暂不对接
+      setData([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize]);
 
   useEffect(() => {
     fetchData(1, pageSize);
@@ -187,6 +172,7 @@ export default function UserSessionPage() {
               title: t['userSession.col.status'],
               dataIndex: 'user.status',
               width: 120,
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <StatusBadge
                   status={statusBadge(row.user?.status)}

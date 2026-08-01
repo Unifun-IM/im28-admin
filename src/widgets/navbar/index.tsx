@@ -16,7 +16,6 @@ import {
   IconNotification,
   IconSunFill,
   IconMoonFill,
-  IconPoweroff,
   IconLoading,
   IconSettings,
   IconObliqueLine,
@@ -36,6 +35,7 @@ import useStorage from '@shared/lib/useStorage';
 import { postV1AdminAuthLogout } from '@shared/api/admin/auth';
 import { clearAuthSession, getAccessToken } from '@shared/api/request';
 import cs from 'classnames';
+import IconLogout from './assets/icon-logout.svg?react';
 import './navbar.less';
 
 export type NavbarBreadcrumbItem =
@@ -123,7 +123,7 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
       </Menu.Item>
       <Divider className="use-profile-menu-divider" />
       <Menu.Item key="logout" className="use-profile-logout">
-        <IconPoweroff className="use-profile-logout-icon" />
+        <IconLogout className="use-profile-logout-icon" />
         <span>{t['navbar.logout']}</span>
       </Menu.Item>
     </Menu>

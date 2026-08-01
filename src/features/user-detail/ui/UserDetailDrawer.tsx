@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
   Descriptions,
   Drawer,
   Message,
   Spin,
-  Tabs
+  Tabs,
+  Timeline
 } from '@arco-design/web-react';
-import { IconCopy } from '@arco-design/web-react/icon';
+import { IconCopy, IconRight } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import {
   postV1AdminUsersDetail,
@@ -23,19 +24,41 @@ import '@shared/ui/biz-detail-table.less';
 export type UserDetailDrawerProps = {
   visible: boolean;
   userId?: string | null;
+  /** 默认打开的 Tab */
   defaultTab?: 'basic' | 'logs';
   onClose: () => void;
 };
 
+function initials(name?: string) {
+  const text = (name || '').trim();
+  if (!text) return '?';
+  if (/^[a-zA-Z]/.test(text)) {
+    return text.slice(0, 2).toUpperCase();
+  }
+  return text.slice(0, 1);
+}
+
+function formatPhone(
+  phone?: string | null,
+  areaCode?: string | null
+): string {
+  const raw = String(phone || '').trim();
+  if (!raw) return '--';
+  if (raw.startsWith('+')) return raw;
+  const area = String(areaCode || '').trim();
+  if (area) return `${area} ${raw}`;
+  if (/^1\d{10}$/.test(raw)) return `+86 ${raw}`;
+  return raw;
+}
+
 function CopyValue({ value }: { value: string }) {
   const common = useLocale();
-
   return (
     <span className="inline-flex items-center gap-[8px]">
       <span className="text-[12px] leading-[22px] text-arco-text-1">{value}</span>
       <button
         type="button"
-        className="inline-flex size-[10px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-3"
+        className="inline-flex size-[10px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-3 hover:text-arco-text-1"
         aria-label={common['common.copy']}
         onClick={() => {
           copy(value);
@@ -48,7 +71,55 @@ function CopyValue({ value }: { value: string }) {
   );
 }
 
-/** 用户详情 — AdminAPI.AdminDetailUserEnvelope / AdminUserOperationLogWrap */
+function SocialLink({
+  value,
+  onClick
+}: {
+  value: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="inline-flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
+      onClick={onClick}
+    >
+      <span className="text-[14px] leading-[21px] text-[rgb(var(--link-6))]">
+        {value}
+      </span>
+      <IconRight className="text-[14px] text-arco-text-3" />
+    </button>
+  );
+}
+
+function logDetailText(
+  t: Record<string, string>,
+  log?: AdminAPI.AdminUserOperationLog
+): string {
+  if (!log) return '';
+  const parts: string[] = [];
+  if (log.status === 'success') parts.push(t['userLogs.status.success']);
+  if (log.status === 'failed') parts.push(t['userLogs.status.failed']);
+  const client = log.client;
+  if (client?.type) {
+    parts.push(
+      [t[`userLogs.client.${client.type}`] || client.type, client.version]
+        .filter(Boolean)
+        .join(' ')
+    );
+  }
+  const location = log.location;
+  if (location?.region || location?.ip) {
+    parts.push([location.region, location.ip].filter(Boolean).join(' / '));
+  }
+  if (log.remark) parts.push(log.remark);
+  return parts.filter(Boolean).join(' · ');
+}
+
+/**
+ * 用户详情抽屉 — Figma 666:21862（基本信息）/ 750:23153（操作日志 Timeline）
+ * 宽 640；对接 AdminAPI，交互按稿面保留
+ */
 export default function UserDetailDrawer({
   visible,
   userId,
@@ -61,9 +132,16 @@ export default function UserDetailDrawer({
   const [detail, setDetail] =
     useState<AdminAPI.AdminDetailUserEnvelope['data']>();
   const [logs, setLogs] = useState<AdminAPI.AdminUserOperationLogWrap[]>([]);
+  const [tab, setTab] = useState<string>(defaultTab);
+
+  useEffect(() => {
+    if (!visible) return;
+    setTab(defaultTab);
+  }, [visible, defaultTab]);
 
   useEffect(() => {
     if (!visible || !userId) return;
+    let cancelled = false;
     setLoading(true);
     Promise.all([
       postV1AdminUsersDetail({ user_id: userId }),
@@ -76,160 +154,216 @@ export default function UserDetailDrawer({
       })
     ])
       .then(([detailRes, logsRes]) => {
+        if (cancelled) return;
         setDetail(detailRes.data);
         setLogs(logsRes.data?.list || []);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [visible, userId]);
 
   const user = detail?.user;
+  const nickname = user?.nickname || '--';
+  const onlineLabel = openimLabel(t, 'online', detail?.online_status);
+  const onlineOk = detail?.online_status === 'online';
 
-  const statusText =
-    user?.status === 'active'
-      ? t['userDetail.status.active']
-      : user?.status === 'disabled'
-        ? t['userDetail.status.disabled']
-        : user?.status;
+  const timelineItems = useMemo(
+    () =>
+      logs.map((item, index) => {
+        const log = item.log;
+        const behavior =
+          (log?.behavior_type &&
+            t[`userLogs.behavior.${log.behavior_type}`]) ||
+          log?.behavior_type ||
+          '--';
+        return {
+          key: log?.log_id || `${log?.operated_at}-${index}`,
+          time: formatDateTime(
+            log?.operated_at,
+            'YYYY/MM/DD HH:mm:ss',
+            '--'
+          ),
+          action: behavior,
+          detail: logDetailText(t, log)
+        };
+      }),
+    [logs, t]
+  );
 
   return (
     <Drawer
-      width={720}
-      title={t['userDetail.title']}
+      className="use-user-detail-drawer"
+      width={640}
       visible={visible}
-      onCancel={onClose}
+      placement="right"
+      title={t['userDetail.title']}
       footer={null}
       unmountOnExit
-      className="use-user-detail-drawer"
+      maskClosable
+      onCancel={onClose}
+      maskStyle={{
+        background: 'rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(3.5px)'
+      }}
     >
-      <Spin loading={loading} className="w-full">
-        <div className="mb-4 flex items-center gap-3">
-          <Avatar size={48}>
-            {user?.avatar_url ? (
-              <img alt="" src={user.avatar_url} />
-            ) : (
-              (user?.nickname || '?').slice(0, 1)
-            )}
-          </Avatar>
-          <div>
-            <div className="text-[16px] font-medium">{user?.nickname || '--'}</div>
-            <div className="text-[12px] text-arco-text-3">
-              {t['userDetail.field.userId']}：
-              {user?.user_id ? <CopyValue value={user.user_id} /> : '--'}
+      <Spin loading={loading} className="block w-full">
+        <div className="flex flex-col gap-[12px]">
+          <div className="flex h-[56px] items-center gap-[16px]">
+            <Avatar size={56} className="use-user-detail-avatar shrink-0">
+              {user?.avatar_url ? (
+                <img alt="" src={user.avatar_url} />
+              ) : (
+                initials(nickname === '--' ? '' : nickname)
+              )}
+            </Avatar>
+            <div className="min-w-0">
+              <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
+                {nickname}
+              </div>
+              <div className="mt-[2px]">
+                <StatusBadge
+                  status={onlineOk ? 'success' : 'default'}
+                  text={onlineLabel}
+                  className="!text-[14px] !leading-[21px] !text-arco-text-2"
+                />
+              </div>
             </div>
           </div>
-          {user?.status ? (
-            <StatusBadge
-              status={user.status === 'active' ? 'success' : 'error'}
-              text={statusText}
-            />
-          ) : null}
-        </div>
-        <Tabs defaultActiveTab={defaultTab}>
-          <Tabs.TabPane key="basic" title={t['userDetail.tab.basic']}>
-            <Descriptions
-              column={2}
-              size="small"
-              data={[
-                { label: t['userDetail.field.account'], value: user?.account || '--' },
-                { label: t['userDetail.field.phone'], value: user?.phone || '--' },
-                { label: t['userDetail.field.email'], value: user?.email || '--' },
-                {
-                  label: t['userDetail.field.onlineStatus'],
-                  value: openimLabel(t, 'online', detail?.online_status)
-                },
-                {
-                  label: t['userDetail.field.gender'],
-                  value: openimLabel(t, 'gender', user?.gender)
-                },
-                {
-                  label: t['userDetail.field.friendCount'],
-                  value: detail?.friend_count ?? '--'
-                },
-                {
-                  label: t['userDetail.field.groupCount'],
-                  value: detail?.group_count ?? '--'
-                },
-                {
-                  label: t['userDetail.field.createdAt'],
-                  value: formatDateTime(user?.created_at)
-                },
-                {
-                  label: t['userDetail.field.lastLoginAt'],
-                  value: formatDateTime(user?.last_login_at)
-                },
-                { label: t['userDetail.field.registerIp'], value: user?.register_ip || '--' },
-                { label: t['userDetail.field.lastLoginIp'], value: user?.last_login_ip || '--' },
-                { label: t['userDetail.field.bio'], value: user?.bio || '--' }
-              ]}
-            />
-          </Tabs.TabPane>
-          <Tabs.TabPane key="logs" title={t['userDetail.tab.logs']}>
-            <div className="flex flex-col gap-3">
-              {logs.length ? (
-                logs.map((item, idx) => {
-                  const log = item.log;
-                  const client = log?.client;
-                  const location = log?.location;
-                  const behavior =
-                    (log?.behavior_type &&
-                      t[`userLogs.behavior.${log.behavior_type}`]) ||
-                    log?.behavior_type ||
-                    '--';
-                  const status =
-                    log?.status === 'success'
-                      ? t['userLogs.status.success']
-                      : log?.status === 'failed'
-                        ? t['userLogs.status.failed']
-                        : log?.status || '--';
-                  const clientText = client?.type
-                    ? [
-                        t[`userLogs.client.${client.type}`] || client.type,
-                        client.version
-                      ]
-                        .filter(Boolean)
-                        .join(' ')
-                    : '--';
-                  const locationText =
-                    [location?.region, location?.ip]
-                      .filter(Boolean)
-                      .join(' / ') || '--';
-                  return (
-                    <div
-                      key={log?.log_id || `${log?.operated_at}-${idx}`}
-                      className="rounded border border-solid border-[var(--color-border-2)] p-3 text-[12px]"
-                    >
-                      <div>
-                        {t['userDetail.log.operatedAt']}：
-                        {formatDateTime(log?.operated_at)}
-                      </div>
-                      <div>
-                        {t['userDetail.log.behaviorType']}：{behavior}
-                      </div>
-                      <div>
-                        {t['userDetail.log.behaviorCategory']}：
-                        {log?.behavior_category || '--'}
-                      </div>
-                      <div>
-                        {t['userDetail.log.status']}：{status}
-                      </div>
-                      <div>
-                        {t['userDetail.log.client']}：{clientText}
-                      </div>
-                      <div>
-                        {t['userDetail.log.location']}：{locationText}
-                      </div>
-                      <div>
-                        {t['userDetail.log.remark']}：{log?.remark || '--'}
-                      </div>
+
+          <Tabs
+            activeTab={tab}
+            onChange={setTab}
+            className="use-user-detail-tabs"
+          >
+            <Tabs.TabPane key="basic" title={t['userDetail.tab.basic']}>
+              <div className="flex flex-col gap-[12px] pt-[12px]">
+                <div>
+                  <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    {t['userDetail.section.basic']}
+                  </div>
+                  <Descriptions
+                    className="use-user-detail-descriptions"
+                    border
+                    column={2}
+                    size="small"
+                    tableLayout="fixed"
+                    data={[
+                      {
+                        label: t['userDetail.field.userId'],
+                        value: user?.user_id || '--'
+                      },
+                      {
+                        label: t['userDetail.field.account'],
+                        value: (
+                          <CopyValue value={user?.account || '--'} />
+                        )
+                      },
+                      {
+                        label: t['userDetail.field.phone'],
+                        value: formatPhone(
+                          user?.phone,
+                          user?.phone_area_code
+                        )
+                      },
+                      {
+                        label: t['userDetail.field.email'],
+                        value: user?.email || '--'
+                      },
+                      {
+                        label: t['userDetail.field.createdAt'],
+                        value: formatDateTime(user?.created_at)
+                      },
+                      {
+                        label: t['userDetail.field.lastActiveAt'],
+                        value: formatDateTime(user?.last_login_at)
+                      }
+                    ]}
+                  />
+                </div>
+
+                <div>
+                  <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    {t['userDetail.section.social']}
+                  </div>
+                  <Descriptions
+                    className="use-user-detail-descriptions"
+                    border
+                    column={2}
+                    size="small"
+                    tableLayout="fixed"
+                    data={[
+                      {
+                        label: t['userDetail.field.friendCount'],
+                        value: (
+                          <SocialLink
+                            value={detail?.friend_count ?? 0}
+                            onClick={() =>
+                              Message.info(t['userDetail.social.friendsTodo'])
+                            }
+                          />
+                        )
+                      },
+                      {
+                        label: t['userDetail.field.groupCount'],
+                        value: (
+                          <SocialLink
+                            value={detail?.group_count ?? 0}
+                            onClick={() =>
+                              Message.info(t['userDetail.social.groupsTodo'])
+                            }
+                          />
+                        )
+                      }
+                    ]}
+                  />
+                </div>
+              </div>
+            </Tabs.TabPane>
+
+            <Tabs.TabPane key="logs" title={t['userDetail.tab.logs']}>
+              <div className="pt-[12px]">
+                {timelineItems.length ? (
+                  <Timeline className="use-user-detail-timeline">
+                    {timelineItems.map((item, index) => (
+                      <Timeline.Item
+                        key={item.key}
+                        dotColor={
+                          index === 0
+                            ? 'rgb(var(--primary-6))'
+                            : 'var(--color-neutral-3, #c9cdd4)'
+                        }
+                      >
+                        <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
+                          <span className="w-[119px] shrink-0 text-arco-text-3">
+                            {item.time}
+                          </span>
+                          <span className="flex min-w-0 flex-1 items-center gap-[12px]">
+                            <span className="w-[200px] shrink-0 text-arco-text-1">
+                              {item.action}
+                            </span>
+                            <span className="min-w-0 shrink truncate text-arco-text-3">
+                              {item.detail}
+                            </span>
+                          </span>
+                        </div>
+                      </Timeline.Item>
+                    ))}
+                  </Timeline>
+                ) : (
+                  !loading && (
+                    <div className="py-8 text-center text-[12px] text-arco-text-3">
+                      {t['userDetail.logs.empty']}
                     </div>
-                  );
-                })
-              ) : (
-                <div className="text-arco-text-3">{common['common.empty']}</div>
-              )}
-            </div>
-          </Tabs.TabPane>
-        </Tabs>
+                  )
+                )}
+              </div>
+            </Tabs.TabPane>
+          </Tabs>
+        </div>
       </Spin>
     </Drawer>
   );

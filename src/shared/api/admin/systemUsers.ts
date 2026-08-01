@@ -2,19 +2,22 @@
 /* eslint-disable */
 import request from "@shared/api/request";
 
-/** 创建用户 创建的系统用户首次登录时必须先修改初始密码，再绑定或验证二步认证。 POST /v1/admin/system-users/create */
+/** 创建用户 需要 `admin.system_users.write` 权限。前端不传密码；服务端随机生成临时密码并仅在本次成功响应中返回。新用户首次登录时必须先修改该密码，再绑定或验证二步认证。 POST /v1/admin/system-users/create */
 export async function postV1AdminSystemUsersCreate(
   body: AdminAPI.CreateSysUserRequest,
   options?: { [key: string]: any }
 ) {
-  return request<AdminAPI.ResponseBase>("/v1/admin/system-users/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
+  return request<AdminAPI.CreateSysUserEnvelope>(
+    "/v1/admin/system-users/create",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
 }
 
 /** 删除用户 POST /v1/admin/system-users/delete */

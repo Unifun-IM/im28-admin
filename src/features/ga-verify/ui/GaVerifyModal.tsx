@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Message, Modal, VerificationCode } from '@arco-design/web-react';
-
 import useLocale from '@shared/lib/useLocale';
-
+import './ga-verify-modal.less';
 
 export type GaVerifyModalProps = {
   visible: boolean;
@@ -14,8 +13,7 @@ export type GaVerifyModalProps = {
 };
 
 /**
- * GA 验证码弹窗 — 非首次登录（已绑定）
- * Figma 602:35395；Toast 文案 Figma 979:39539
+ * 通用 GA 验证码弹窗 — Figma 602:35395 / 921:44417
  */
 export default function GaVerifyModal({
   visible,
@@ -57,8 +55,8 @@ export default function GaVerifyModal({
 
   return (
     <Modal
-      className="use-login-ga-modal"
-      wrapClassName="use-login-ga-modal-wrap"
+      className="use-ga-verify-modal"
+      wrapClassName="use-ga-verify-modal-wrap"
       visible={visible}
       title={null}
       footer={null}
@@ -74,15 +72,15 @@ export default function GaVerifyModal({
     >
       <div className="box-border px-[24px] pb-[12px] pt-[24px]">
         <div className="text-[20px] font-medium leading-[28px] text-[var(--color-text-1,#1d2129)]">
-          {t['login.gaVerify.title']}
+          {t['gaVerify.title']}
         </div>
         <div className="text-[12px] leading-[20px] text-[var(--color-text-3,#86909c)]">
-          {t['login.gaVerify.desc']}
+          {t['gaVerify.desc']}
         </div>
       </div>
       <div className="box-border px-[24px] py-[12px]">
         <VerificationCode
-          className="use-login-otp"
+          className="use-ga-otp"
           length={6}
           value={code}
           status={status}

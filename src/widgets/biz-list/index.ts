@@ -10,8 +10,10 @@ export { default as FilterInput } from './FilterInput';
 export { default as FilterSelect } from './FilterSelect';
 export { default as FilterMultiSelect } from './FilterMultiSelect';
 export { default as FilterDateRange } from './FilterDateRange';
-export { default as TableBatchBar } from './TableBatchBar';
-export { default as EllipsisCell } from './EllipsisCell';
+export {
+  default as TableBatchBar,
+  BatchBarAction
+} from './TableBatchBar';
 export {
   ActionLinks,
   AvatarNameCell,
@@ -31,8 +33,11 @@ export type { FilterKeywordInputProps } from './FilterKeywordInput';
 export type { FilterInputProps } from './FilterInput';
 export type { FilterMultiSelectProps } from './FilterMultiSelect';
 export type { FilterDateRangeProps } from './FilterDateRange';
-export type { TableBatchBarProps } from './TableBatchBar';
-export type { EllipsisCellProps } from './EllipsisCell';
+export type {
+  TableBatchBarProps,
+  BatchBarActionProps,
+  BatchBarActionStatus
+} from './TableBatchBar';
 export type {
   ActionLinkItem,
   ActionLinksProps,

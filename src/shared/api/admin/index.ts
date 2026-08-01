@@ -2,6 +2,7 @@
 /* eslint-disable */
 // API 更新时间：
 // API 唯一标识：
+import * as admintongyong from "./admintongyong";
 import * as auth from "./auth";
 import * as systemUsers from "./systemUsers";
 import * as rbac from "./rbac";
@@ -11,6 +12,7 @@ import * as groups from "./groups";
 import * as messages from "./messages";
 import * as health from "./health";
 export default {
+  admintongyong,
   auth,
   systemUsers,
   rbac,

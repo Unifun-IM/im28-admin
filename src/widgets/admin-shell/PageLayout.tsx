@@ -15,6 +15,7 @@ import {
   type GlobalState
 } from '@entities/global-state';
 import { pageTabsStore } from '@entities/page-tabs';
+import { systemSettingsStore } from '@entities/system-settings';
 import IconDashboard from '@shared/assets/icon-dashboard.svg?react';
 import IconRisk from '@shared/assets/icon-risk.svg?react';
 import IconSession from '@shared/assets/icon-session.svg?react';
@@ -82,7 +83,9 @@ export const PageLayout = observer(function PageLayout({
   const { settings, userInfo } = useGlobalSelector(
     (state: GlobalState) => state
   );
-  const contentFullscreen = pageTabsStore.contentFullscreen;
+  const chromeFullscreen = pageTabsStore.chromeFullscreen;
+  const tableFullscreen = pageTabsStore.tableFullscreen;
+  const hideChrome = pageTabsStore.hideChrome;
 
   const [routes, defaultRoute] = useRoute(userInfo?.permissions || {});
   const defaultSelectedKeys = [currentComponent || defaultRoute];
@@ -96,13 +99,18 @@ export const PageLayout = observer(function PageLayout({
   const [headerScrolled, setHeaderScrolled] = useState(false);
 
   useEffect(() => {
-    if (!contentFullscreen) return;
+    if (!hideChrome) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') pageTabsStore.setContentFullscreen(false);
+      if (e.key === 'Escape') pageTabsStore.exitFullscreen();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [contentFullscreen]);
+  }, [hideChrome]);
+
+  /* 切页时退出表格全屏，避免非列表页没有退出入口 */
+  useEffect(() => {
+    pageTabsStore.setTableFullscreen(false);
+  }, [pathname]);
 
   const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
   const menuMap = useRef<Map<string, { menuItem?: boolean; subMenu?: boolean }>>(
@@ -117,13 +125,16 @@ export const PageLayout = observer(function PageLayout({
   const showFooter = settings.footer && urlParams.footer !== false;
   const expandedWidth = settings.menuWidth || EXPANDED_WIDTH;
   const menuWidth = collapsed ? COLLAPSED_WIDTH : expandedWidth;
-  /** 侧栏占位：内容全屏时为 0，带动画收起 */
-  const siderOccupied = showMenu && !contentFullscreen ? menuWidth : 0;
-  /** 全屏时顶栏（Navbar + PageTabs）全部隐藏 */
-  const headerHeight =
-    showNavbar && !contentFullscreen
-      ? navbarHeight + headerGap + pageTabsHeight
-      : 0;
+  /** 侧栏占位：任一全屏时为 0，带动画收起 */
+  const siderOccupied = showMenu && !hideChrome ? menuWidth : 0;
+  /** 表格全屏：顶栏全隐；壳层全屏：仅保留 PageTabs */
+  const headerHeight = !showNavbar
+    ? 0
+    : tableFullscreen
+      ? 0
+      : chromeFullscreen
+        ? pageTabsHeight
+        : navbarHeight + headerGap + pageTabsHeight;
   const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
 
   /** 按 pathname 同步取标题，避免 breadcrumb 滞后导致 tab 标题闪一下 */
@@ -327,8 +338,10 @@ export const PageLayout = observer(function PageLayout({
       <div
         className={cs(styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar,
-          [styles['layout-navbar-content-fullscreen']]:
-            showNavbar && contentFullscreen,
+          [styles['layout-navbar-chrome-fullscreen']]:
+            showNavbar && chromeFullscreen && !tableFullscreen,
+          [styles['layout-navbar-table-fullscreen']]:
+            showNavbar && tableFullscreen,
           [styles['layout-navbar-scrolled']]: headerScrolled
         })}
         style={navbarStyle}
@@ -340,7 +353,7 @@ export const PageLayout = observer(function PageLayout({
             onOpenUserCenter={onOpenUserCenter}
           />
         </div>
-        {showNavbar && !contentFullscreen ? (
+        {showNavbar && !tableFullscreen ? (
           <PageTabs title={pageTabTitle} />
         ) : null}
       </div>
@@ -349,22 +362,35 @@ export const PageLayout = observer(function PageLayout({
             <Sider
               breakpoint="xl"
               className={cs(styles['layout-sider'], {
-                [styles['layout-sider-content-fullscreen']]: contentFullscreen
+                [styles['layout-sider-content-fullscreen']]: hideChrome
               })}
               collapsed={collapsed}
-              collapsedWidth={contentFullscreen ? 0 : COLLAPSED_WIDTH}
+              collapsedWidth={hideChrome ? 0 : COLLAPSED_WIDTH}
               collapsible
               onCollapse={setCollapsed}
               trigger={null}
-              width={contentFullscreen ? 0 : menuWidth}
+              width={hideChrome ? 0 : menuWidth}
             >
               <div
                 className={cs(styles['sider-logo'], {
                   [styles['sider-logo-collapsed']]: collapsed
                 })}
               >
-                <Logo />
-                {!collapsed && <span>{locale['common.appName']}</span>}
+                {systemSettingsStore.logoUrl ? (
+                  <img
+                    src={systemSettingsStore.logoUrl}
+                    alt=""
+                    className={styles['sider-logo-img']}
+                  />
+                ) : (
+                  <Logo />
+                )}
+                {!collapsed && (
+                  <span>
+                    {systemSettingsStore.systemName ||
+                      locale['common.appName']}
+                  </span>
+                )}
               </div>
               <div className={styles['menu-wrapper']}>
                 <Menu
@@ -386,7 +412,7 @@ export const PageLayout = observer(function PageLayout({
           )}
           <Layout
             className={cs(styles['layout-content'], {
-              [styles['layout-content-fullscreen']]: contentFullscreen
+              [styles['layout-content-table-fullscreen']]: tableFullscreen
             })}
             style={paddingStyle}
             data-layout-content
@@ -409,7 +435,7 @@ export const PageLayout = observer(function PageLayout({
                 </Routes>
               </Content>
             </div>
-            {showFooter && !contentFullscreen ? <Footer /> : null}
+            {showFooter && !hideChrome ? <Footer /> : null}
           </Layout>
         </Layout>
     </Layout>

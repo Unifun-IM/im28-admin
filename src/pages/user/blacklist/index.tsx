@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Form, Button } from '@arco-design/web-react';
+import { Form } from '@arco-design/web-react';
+import { IconCheckCircle } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
   AvatarNameCell,
+  BatchBarAction,
   BizListPage,
   FilterField,
   FilterKeywordInput,
@@ -109,20 +111,23 @@ export default function Page() {
           fetchData(1, pageSize);
         }}
         onRefresh={() => fetchData(page, pageSize)}
-        toolbar={
-          <Button
-            type="primary"
-            disabled={!selectedRowKeys.length}
-            onClick={() =>
-              setRemoveModal({
-                userIds: selectedRowKeys.map(String),
-                variant: 'batch'
-              })
-            }
-          >
-            {t['blacklist.action.batchUnban']}
-          </Button>
-        }
+        batchActions={{
+          onExit: () => setSelectedRowKeys([]),
+          extra: (
+            <BatchBarAction
+              status="success"
+              icon={<IconCheckCircle />}
+              onClick={() =>
+                setRemoveModal({
+                  userIds: selectedRowKeys.map(String),
+                  variant: 'batch'
+                })
+              }
+            >
+              {t['blacklist.action.batchUnban']}
+            </BatchBarAction>
+          )
+        }}
         tableProps={{
           loading,
           data,
@@ -131,6 +136,7 @@ export default function Page() {
           columns: [
             {
               title: t['blacklist.col.user'],
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <AvatarNameCell
                   name={row.user?.nickname}
@@ -142,6 +148,7 @@ export default function Page() {
             },
             {
               title: common['common.status'],
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
                 <StatusBadge
                   status="error"

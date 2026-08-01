@@ -3,6 +3,7 @@ import { Button, Form, Message } from '@arco-design/web-react';
 import { IconCloseCircle } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
+  BatchBarAction,
   BizListPage,
   FilterDateRange,
   FilterField,
@@ -99,7 +100,6 @@ export default function IpBlacklistPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [batchMode, setBatchMode] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
     []
   );
@@ -167,11 +167,6 @@ export default function IpBlacklistPage() {
 
   const notReady = () => Message.warning(common['common.apiNotReady']);
 
-  const exitBatch = () => {
-    setBatchMode(false);
-    setSelectedRowKeys([]);
-  };
-
   const handleAddSuccess = (payload: AddIpBlacklistPayload) => {
     const stamp = nowText();
     const existing = new Set(allRows.map((r) => r.ip));
@@ -210,7 +205,6 @@ export default function IpBlacklistPage() {
     const next = allRows.filter((r) => !remove.has(r.ip));
     setAllRows(next);
     setSelectedRowKeys([]);
-    setBatchMode(false);
     fetchData(page, pageSize, next);
   };
 
@@ -274,44 +268,23 @@ export default function IpBlacklistPage() {
           fetchData(1, pageSize);
         }}
         onRefresh={() => fetchData(page, pageSize)}
-        toolbar={
-          <>
-            <Button
-              type="outline"
-              onClick={() => {
-                if (batchMode) exitBatch();
-                else setBatchMode(true);
-              }}
-            >
-              {batchMode
-                ? t['ipBlacklist.action.cancelBatch']
-                : common['common.batchActions']}
-            </Button>
-          </>
-        }
         toolbarAlways={
           <Button type="primary" onClick={() => setAddVisible(true)}>
             {t['ipBlacklist.action.add']}
           </Button>
         }
-        batchActions={
-          batchMode
-            ? {
-                theme: 'light',
-                onExit: exitBatch,
-                extra: (
-                  <button
-                    type="button"
-                    className="inline-flex h-8 items-center gap-2 border-0 border-l border-solid border-[rgba(0,0,0,0.08)] bg-transparent px-3 text-[14px] leading-[21px] text-[rgb(var(--danger-6))] hover:bg-[rgba(0,0,0,0.04)] disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-[16px]"
-                    onClick={() => openBatchRelease(selectedRowKeys)}
-                  >
-                    <IconCloseCircle />
-                    {t['ipBlacklist.action.batchRelease']}
-                  </button>
-                )
-              }
-            : undefined
-        }
+        batchActions={{
+          onExit: () => setSelectedRowKeys([]),
+          extra: (
+            <BatchBarAction
+              status="danger"
+              icon={<IconCloseCircle />}
+              onClick={() => openBatchRelease(selectedRowKeys)}
+            >
+              {t['ipBlacklist.action.batchRelease']}
+            </BatchBarAction>
+          )
+        }}
         tableProps={{
           loading,
           data,
@@ -371,12 +344,10 @@ export default function IpBlacklistPage() {
               )
             }
           ],
-          rowSelection: batchMode
-            ? {
-                selectedRowKeys,
-                onChange: setSelectedRowKeys
-              }
-            : undefined,
+          rowSelection: {
+            selectedRowKeys,
+            onChange: setSelectedRowKeys
+          },
           pagination: {
             current: page,
             pageSize,

@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Form, Button } from '@arco-design/web-react';
+import { IconCloseCircle } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
   AvatarNameCell,
+  BatchBarAction,
   BizListPage,
   FilterField,
   FilterKeywordInput
@@ -118,22 +120,24 @@ export default function Page() {
             {t['whitelist.action.add']}
           </Button>
         }
-        toolbar={
-          <Button
-            type="primary"
-            status="danger"
-            disabled={!selectedRowKeys.length}
-            onClick={() =>
-              setActionModal({
-                mode: 'remove',
-                userIds: selectedRowKeys.map(String),
-                variant: 'batch'
-              })
-            }
-          >
-            {t['whitelist.action.batchRemove']}
-          </Button>
-        }
+        batchActions={{
+          onExit: () => setSelectedRowKeys([]),
+          extra: (
+            <BatchBarAction
+              status="danger"
+              icon={<IconCloseCircle />}
+              onClick={() =>
+                setActionModal({
+                  mode: 'remove',
+                  userIds: selectedRowKeys.map(String),
+                  variant: 'batch'
+                })
+              }
+            >
+              {t['whitelist.action.batchRemove']}
+            </BatchBarAction>
+          )
+        }}
         tableProps={{
           loading,
           data,
@@ -142,6 +146,7 @@ export default function Page() {
           columns: [
             {
               title: t['whitelist.col.user'],
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.AdminWhitelistedUserWrap) => (
                 <AvatarNameCell
                   name={row.user?.nickname}

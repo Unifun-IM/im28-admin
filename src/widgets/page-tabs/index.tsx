@@ -37,7 +37,7 @@ type ContextAction =
 
 /**
  * 页面打开记录快捷导航 — Figma 741:29115
- * 支持固定标签（默认最多 3）、右键菜单与内容区全屏
+ * 支持固定标签（默认最多 3）、右键菜单与壳层全屏（隐藏侧栏/Navbar，保留本栏）
  */
 function PageTabs({
   title,
@@ -48,7 +48,7 @@ function PageTabs({
   const t = useLocale();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const fullscreen = pageTabsStore.contentFullscreen;
+  const fullscreen = pageTabsStore.chromeFullscreen;
 
   useEffect(() => {
     pageTabsStore.setMaxPinned(maxPinned);
@@ -62,15 +62,6 @@ function PageTabs({
       closable
     });
   }, [pathname, title, closable]);
-
-  useEffect(() => {
-    if (!fullscreen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') pageTabsStore.setContentFullscreen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [fullscreen]);
 
   const tabs = pageTabsStore.tabs;
 
@@ -167,7 +158,7 @@ function PageTabs({
           type="button"
           className="use-page-tabs-action-btn"
           aria-pressed={fullscreen}
-          onClick={() => pageTabsStore.toggleContentFullscreen()}
+          onClick={() => pageTabsStore.toggleChromeFullscreen()}
         >
           {fullscreen ? <IconShrink /> : <IconExpand />}
         </button>

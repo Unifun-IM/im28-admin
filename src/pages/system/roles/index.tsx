@@ -161,6 +161,7 @@ function RolesPage() {
             {
               title: t['roles.col.isEnable'],
               dataIndex: 'role.is_enable',
+              ellipsis: false,
               render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
                 <StatusBadge
                   status={row.role?.is_enable ? 'success' : 'error'}

@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 import {
   Form,
   Input,
@@ -17,45 +23,58 @@ import {
   UnsavedChangesModal,
   useUnsavedChangesGuard
 } from '@features/unsaved-changes';
+import { postV1AdminSystemSettingsUpdate } from '@shared/api/admin/platform';
+import { systemSettingsStore } from '@entities/system-settings';
+import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
+import {
+  ADMIN_IMAGE_ACCEPT,
+  uploadAdminImage,
+  validateAdminImage
+} from '@shared/lib/uploadAdminImage';
 
+/** 与 AdminAPI.SystemSetting / UpdateSystemSettingRequest 对齐（Figma 979:38548） */
 type ParamsForm = {
   system_name: string;
   logo_url?: string;
-  cover_url?: string;
   locale: 'zh-CN' | 'en-US';
-  timezone: string;
   time_format: '12' | '24';
   ip_whitelist_enabled: boolean;
 };
 
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-
 const DEFAULT_VALUES: ParamsForm = {
   system_name: '后台管理系统',
   logo_url: undefined,
-  cover_url: undefined,
   locale: 'zh-CN',
-  timezone: 'system',
   time_format: '12',
   ip_whitelist_enabled: true
 };
 
-function ReplaceTrigger({
-  label,
-  tall
-}: {
-  label: string;
-  tall?: boolean;
-}) {
+function settingToForm(setting: AdminAPI.SystemSetting): ParamsForm {
+  return {
+    system_name: setting.system_name || DEFAULT_VALUES.system_name,
+    logo_url: setting.logo_url || undefined,
+    locale: setting.default_language === 'en-US' ? 'en-US' : 'zh-CN',
+    time_format: setting.time_format === '24h' ? '24' : '12',
+    ip_whitelist_enabled: Boolean(setting.ip_whitelist_enabled)
+  };
+}
+
+function formToUpdateBody(
+  values: ParamsForm
+): AdminAPI.UpdateSystemSettingRequest {
+  return {
+    system_name: values.system_name.trim(),
+    logo_url: values.logo_url?.trim() || '',
+    default_language: values.locale,
+    time_format: values.time_format === '24' ? '24h' : '12h',
+    ip_whitelist_enabled: values.ip_whitelist_enabled
+  };
+}
+
+function ReplaceTrigger({ label }: { label: string }) {
   return (
-    <div
-      className={
-        tall
-          ? 'box-border flex h-[67px] w-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)]'
-          : 'box-border flex size-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)]'
-      }
-    >
+    <div className="box-border flex size-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)]">
       <IconPlus className="text-[12px] text-arco-text-2" />
       <span className="text-[10px] font-medium leading-none text-arco-text-2">
         {label}
@@ -66,20 +85,23 @@ function ReplaceTrigger({
 
 /**
  * 系统参数设置 — Figma 979:38548
- * 未保存离开：改配置后切换菜单/返回/关浏览器提醒；保存后或未修改不提醒
- * OpenAPI 未覆盖读写：保存提示接口未就绪，并同步本地基线以符合离开规则
+ * 读写：postV1AdminSystemSettingsGet / Update
+ * Logo：upload-credential 直传后写 logo_url
  */
 export default function SystemParamsPage() {
   const t = useLocale();
+  const common = t;
+  const { setLang } = useContext(GlobalContext);
   const [form] = Form.useForm<ParamsForm>();
   const logoUrl = Form.useWatch('logo_url', form);
-  const coverUrl = Form.useWatch('cover_url', form);
   const [baseline, setBaseline] = useState<ParamsForm>(() => ({
     ...DEFAULT_VALUES,
     system_name: t['common.appName'] || DEFAULT_VALUES.system_name
   }));
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   const guard = useUnsavedChangesGuard(dirty);
 
@@ -90,6 +112,29 @@ export default function SystemParamsPage() {
     ],
     [t]
   );
+
+  const applyBaseline = useCallback(
+    (next: ParamsForm) => {
+      setBaseline(next);
+      form.setFieldsValue(next);
+      setDirty(false);
+    },
+    [form]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    // 优先用启动时已拉取的全局缓存，并再拉一次保证编辑页最新
+    void systemSettingsStore.fetch().then((setting) => {
+      if (cancelled) return;
+      if (setting) applyBaseline(settingToForm(setting));
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyBaseline]);
 
   const syncDirty = useCallback(() => {
     const values = { ...DEFAULT_VALUES, ...form.getFieldsValue() };
@@ -114,13 +159,21 @@ export default function SystemParamsPage() {
     }
     setSaving(true);
     try {
-      Message.warning(t['common.apiNotReady']);
       const values = {
         ...DEFAULT_VALUES,
         ...form.getFieldsValue()
       } as ParamsForm;
-      setBaseline(values);
-      setDirty(false);
+      await postV1AdminSystemSettingsUpdate(formToUpdateBody(values));
+      const setting = await systemSettingsStore.fetch();
+      if (setting) {
+        applyBaseline(settingToForm(setting));
+        setLang?.(systemSettingsStore.defaultLanguage);
+      } else {
+        applyBaseline(values);
+      }
+      Message.success(common['common.success']);
+    } catch {
+      // request
     } finally {
       setSaving(false);
     }
@@ -133,25 +186,30 @@ export default function SystemParamsPage() {
     }
   };
 
-  const beforeUpload = (
-    file: File,
-    field: 'logo_url' | 'cover_url',
-    maxBytes: number
-  ) => {
-    if (!IMAGE_TYPES.includes(file.type)) {
-      Message.warning(t['paramsSettings.msg.imageType']);
+  /** Logo：upload-credential 直传，保存时提交 logo_url */
+  const beforeUploadLogo = (file: File) => {
+    if (logoUploading) return false;
+    const invalid = validateAdminImage(file);
+    if (invalid === 'type') {
+      Message.warning(common['common.upload.imageType']);
       return false;
     }
-    if (file.size > maxBytes) {
-      Message.warning(
-        field === 'logo_url'
-          ? t['paramsSettings.msg.logoSize']
-          : t['paramsSettings.msg.coverSize']
-      );
+    if (invalid === 'size') {
+      Message.warning(t['paramsSettings.msg.logoSize']);
       return false;
     }
-    form.setFieldValue(field, URL.createObjectURL(file));
-    syncDirty();
+    void (async () => {
+      try {
+        setLogoUploading(true);
+        const url = await uploadAdminImage(file);
+        form.setFieldValue('logo_url', url);
+        syncDirty();
+      } catch {
+        Message.error(common['common.upload.failed']);
+      } finally {
+        setLogoUploading(false);
+      }
+    })();
     return false;
   };
 
@@ -159,6 +217,7 @@ export default function SystemParamsPage() {
     <>
       <SettingsPageShell
         title={t['paramsSettings.title']}
+        loading={loading}
         dirty={dirty}
         saving={saving}
         anchors={anchors}
@@ -203,43 +262,17 @@ export default function SystemParamsPage() {
                     <div className="size-10 rounded-lg bg-[var(--color-fill-1,#f7f8fa)]" />
                   )}
                   <Upload
-                    accept=".png,.jpg,.jpeg,.webp"
+                    accept={ADMIN_IMAGE_ACCEPT}
                     showUploadList={false}
-                    beforeUpload={(file) =>
-                      beforeUpload(file, 'logo_url', 1 * 1024 * 1024)
-                    }
-                  >
-                    <ReplaceTrigger label={t['paramsSettings.replace']} />
-                  </Upload>
-                </div>
-              </div>
-            </Form.Item>
-
-            <Form.Item label={t['paramsSettings.field.cover']}>
-              <div className="rounded-xl border border-solid border-[rgba(0,0,0,0.08)] px-3 py-2">
-                <p className="m-0 mb-2 text-[12px] leading-3 text-arco-text-3">
-                  {t['paramsSettings.cover.tip']}
-                </p>
-                <div className="flex items-start gap-3">
-                  {coverUrl ? (
-                    <img
-                      src={coverUrl}
-                      alt=""
-                      className="h-[67px] w-10 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="h-[67px] w-10 rounded-lg bg-[var(--color-fill-1,#f7f8fa)]" />
-                  )}
-                  <Upload
-                    accept=".png,.jpg,.jpeg,.webp"
-                    showUploadList={false}
-                    beforeUpload={(file) =>
-                      beforeUpload(file, 'cover_url', 5 * 1024 * 1024)
-                    }
+                    disabled={logoUploading}
+                    beforeUpload={beforeUploadLogo}
                   >
                     <ReplaceTrigger
-                      label={t['paramsSettings.replace']}
-                      tall
+                      label={
+                        logoUploading
+                          ? common['common.upload.uploading']
+                          : t['paramsSettings.replace']
+                      }
                     />
                   </Upload>
                 </div>
@@ -252,22 +285,8 @@ export default function SystemParamsPage() {
             >
               <Select
                 options={[
-                  { label: t['common.lang.zh'], value: 'zh-CN' },
-                  { label: t['common.lang.en'], value: 'en-US' }
-                ]}
-              />
-            </Form.Item>
-
-            <Form.Item
-              field="timezone"
-              label={t['paramsSettings.field.timezone']}
-            >
-              <Select
-                options={[
-                  {
-                    label: t['paramsSettings.timezone.system'],
-                    value: 'system'
-                  }
+                  { label: common['common.lang.zh'], value: 'zh-CN' },
+                  { label: common['common.lang.en'], value: 'en-US' }
                 ]}
               />
             </Form.Item>

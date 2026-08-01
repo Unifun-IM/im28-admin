@@ -6,14 +6,20 @@
 
 **优先采用 Arco Design 标准组件；Figma 约束交互细节；非标准组件强制像素级布局。**
 
+**对接接口不改交互：即便后端暂不支持（如部分搜索条件），也先保留 UI 交互。**
+
+**严格限定每次指令边界：只做用户点名的范围，不顺手扩修「同类问题」。**
+
 全仓库统一顺序：
 
 1. **优先 Arco Design / Arco Design Pro 标准组件** — `Form`、`Grid`、`Space`、`Card`、`Table`、`Button`、`Select` 等；能 props 解决的不要手写布局或 Tailwind 重做
 2. **Figma 约束交互与视觉细节** — 在标准组件之上，用稿约束状态、间距观感、色/圆角/字号等；以 `get_design_context` + 截图对照，差异用 `use-*` / props 补齐（**不**为贴稿拆掉 Grid 等标准结构）。**Figma 只读：禁止任何写入/编辑稿面**
 3. **非标准组件（自建壳层 / 无 Arco 对应物）** — **强制像素级布局**：对照 Figma 图层数值与截图双验证，逐帧还原
 4. **Tailwind** — 仅补 Arco 覆盖不到的自建装饰；`preflight: false`；禁止用 Tailwind 替代 Form/Grid/Table
+5. **对接接口不改交互** — 接 OpenAPI / 真实请求时，**禁止**因字段缺失、暂不支持而删减筛选、按钮、Tab、弹窗步骤等既有交互；能传的字段照常传，不能传的先留在 Form/UI 上（可先不进请求体），待接口补齐再接线。无整页契约时用 `ApiNotReady`，**不要**为「接口不够」简化稿面交互
+6. **严格限定指令边界** — 每一次用户指令只处理其**明确点名**的页面 / 组件 / 问题；禁止借「一并修掉」「同类都改」「追溯全仓」自行扩大范围。发现相关债或同类问题：在回复里**简短列出**，等用户下一条指令再改。用户写明「批量 / 全部 / 同类一并」才可扩面
 
-同内容：`.cursor/rules/arco-first.mdc`、`.cursor/rules/figma-pixel-verify.mdc`（均 `alwaysApply`）。
+同内容：`.cursor/rules/arco-first.mdc`、`.cursor/rules/figma-pixel-verify.mdc`、`.cursor/rules/api-keep-ui.mdc`、`.cursor/rules/task-scope.mdc`（均 `alwaysApply`）。
 
 ## 参考基线：Arco Design Pro
 
@@ -96,11 +102,13 @@ src/app | pages | widgets | features | entities | shared
 
 - Admin 网关生成物：`src/shared/api/admin/**`（`npm run openapi`），**禁止任何手改**
 - 业务页 / feature **直接**使用生成函数与 `AdminAPI` 字段名（Form/Table/state 不做映射）；列表信封用 `res.data?.list` / `res.data?.total`
+- **对接不改交互**（见全局准则 §5）：保留 Figma / 现有筛选与操作入口；接口暂不支持的条件先留 UI，勿删控件「迁就接口」
 - 无 OpenAPI 的菜单页：保留路由，统一 `ApiNotReady`（文案「接口未就绪」），不要再引入 mock / `/api/biz`
 - 手写 axios 单例 `shared/api/request.ts` 勿删；鉴权 token 走 `setAccessToken` / `getAccessToken`
 
 ## 改动边界
 
+- **指令边界优先**（见全局准则 §6）：范围以当条用户表述为准，不自行扩到「看起来相关」的其它模块
 - 只改任务相关文件；不顺手大重构、不批量「格式化无关文件」
 - 不擅自提交 git / 推远程；用户明确要求再提交
 - 新增依赖前先说明理由；UI 库以 Arco 为准，不要再引入第二套组件库

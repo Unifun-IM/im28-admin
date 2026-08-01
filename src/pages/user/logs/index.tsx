@@ -9,7 +9,6 @@ import {
   FilterKeywordInput,
   FilterSelect
 } from '@widgets/biz-list';
-import { postV1AdminUsersOperationLogsList } from '@shared/api/admin/users';
 import { UserDetailDrawer } from '@features/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -19,17 +18,6 @@ const FormItem = Form.Item;
 type LogsFormValues = AdminAPI.AdminListUserOperationLogRequest & {
   operated_range?: unknown[];
 };
-
-function toRfc3339(value: unknown): string | undefined {
-  if (value == null || value === '') return undefined;
-  const raw =
-    typeof (value as { toDate?: () => Date }).toDate === 'function'
-      ? (value as { toDate: () => Date }).toDate()
-      : value;
-  const d = raw instanceof Date ? raw : new Date(raw as string | number);
-  if (Number.isNaN(d.getTime())) return undefined;
-  return d.toISOString();
-}
 
 const BEHAVIOR_TYPES = [
   'register',
@@ -91,41 +79,16 @@ export default function Page() {
   const [pageSize, setPageSize] = useState(15);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
 
-  const buildBody = useCallback(
-    (p: number, size: number): AdminAPI.AdminListUserOperationLogRequest => {
-      const values = form.getFieldsValue();
-      const keyword = (values.keyword || '').trim() || undefined;
-      const range = values.operated_range;
-      const start = Array.isArray(range) ? toRfc3339(range[0]) : undefined;
-      const end = Array.isArray(range) ? toRfc3339(range[1]) : undefined;
-      return {
-        page: p,
-        page_size: size,
-        keyword,
-        keyword_type: keyword ? values.keyword_type || undefined : undefined,
-        behavior_type: values.behavior_type || undefined,
-        client_type: values.client_type || undefined,
-        operated_start_at: start,
-        operated_end_at: end,
-        sort_order: values.sort_order || undefined
-      };
-    },
-    [form]
-  );
-
-  const fetchData = useCallback(
-    async (p = page, size = pageSize) => {
-      setLoading(true);
-      try {
-        const res = await postV1AdminUsersOperationLogsList(buildBody(p, size));
-        setData(res.data?.list || []);
-        setTotal(res.data?.total || 0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [buildBody, page, pageSize]
-  );
+  const fetchData = useCallback(async (_p = page, _size = pageSize) => {
+    setLoading(true);
+    try {
+      // 用户日志接口暂不对接
+      setData([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize]);
 
   useEffect(() => {
     fetchData(1, pageSize);
@@ -144,6 +107,7 @@ export default function Page() {
       <BizListPage
         form={form}
         title={t['userLogs.title']}
+        filterCollapsible={false}
         filter={
           <>
             <FilterField>
@@ -226,6 +190,7 @@ export default function Page() {
               title: t['userLogs.col.user'],
               dataIndex: 'user',
               width: 200,
+              ellipsis: false,
               render: (_: unknown, record: AdminAPI.AdminUserOperationLogWrap) => {
                 const user = record.user;
                 if (!user?.user_id) return '--';
@@ -297,7 +262,6 @@ export default function Page() {
             {
               title: t['userLogs.col.remark'],
               dataIndex: 'log.remark',
-              ellipsis: true,
               render: (_: unknown, record: AdminAPI.AdminUserOperationLogWrap) =>
                 record.log?.remark || '--'
             },

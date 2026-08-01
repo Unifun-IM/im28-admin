@@ -68,6 +68,34 @@ export async function postV1AdminClientVersionsUpdate(
   });
 }
 
+/** 获取系统参数 需要 `admin.system_settings.read` 权限。首次读取时自动创建默认配置：系统名称为“后台管理系统”、默认语言为 zh-CN、时间格式为 12h、IP 白名单开启。 POST /v1/admin/system-settings/get */
+export async function postV1AdminSystemSettingsGet(options?: {
+  [key: string]: any;
+}) {
+  return request<AdminAPI.SystemSettingEnvelope>(
+    "/v1/admin/system-settings/get",
+    {
+      method: "POST",
+      ...(options || {}),
+    }
+  );
+}
+
+/** 更新系统参数 需要 `admin.system_settings.write` 权限。该接口为完整更新，所有字段都必须传；成功只返回 code 和 message。IP 白名单策略在网关内最多缓存 3 秒，更新当前实例后立即生效，读取策略失败时默认继续校验白名单。 POST /v1/admin/system-settings/update */
+export async function postV1AdminSystemSettingsUpdate(
+  body: AdminAPI.UpdateSystemSettingRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/system-settings/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 创建平台条款 POST /v1/admin/terms/create */
 export async function postV1AdminTermsCreate(
   body: AdminAPI.CreatePlatformTermRequest,

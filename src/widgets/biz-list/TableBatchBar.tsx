@@ -9,6 +9,58 @@ import {
 import cs from 'classnames';
 import useLocale from '@shared/lib/useLocale';
 
+export type BatchBarActionStatus = 'danger' | 'success' | 'default';
+
+export type BatchBarActionProps = {
+  status?: BatchBarActionStatus;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  /** dark 浮条内按钮（默认跟随外层 theme） */
+  tone?: 'light' | 'dark';
+};
+
+const STATUS_COLOR: Record<BatchBarActionStatus, string> = {
+  danger: 'text-[rgb(var(--danger-6))]',
+  success: 'text-[rgb(var(--success-6))]',
+  default: 'text-arco-text-1'
+};
+
+/** 批量条内操作按钮 — Figma 804:19957（浅色） */
+export function BatchBarAction({
+  status = 'default',
+  icon,
+  children,
+  onClick,
+  disabled,
+  className,
+  tone = 'light'
+}: BatchBarActionProps) {
+  const isDark = tone === 'dark';
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={cs(
+        'inline-flex h-8 items-center gap-2 border-0 border-l border-solid bg-transparent px-3 text-[14px] leading-[21px] disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-[16px]',
+        isDark
+          ? 'border-[#262828] text-[rgba(255,255,255,0.9)] hover:bg-[rgba(255,255,255,0.08)]'
+          : cs(
+              'border-[rgba(0,0,0,0.08)] hover:opacity-80',
+              STATUS_COLOR[status]
+            ),
+        className
+      )}
+      onClick={onClick}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
 export type TableBatchBarProps = {
   count: number;
   showSelectedOnly?: boolean;
@@ -19,23 +71,18 @@ export type TableBatchBarProps = {
   extra?: React.ReactNode;
   className?: string;
   /**
-   * dark — Figma 602:34650 深色浮条（用户查询）
-   * light — Figma 804:20186 浅色条（黑名单批量）
+   * light — Figma 804:19957 / 796:23138（列表统一）
+   * dark — 居中深色浮条（兼容）
    */
   theme?: 'dark' | 'light';
-  /** 浅色条左侧关闭（退出批量 / 清空选中）— Figma 979:43610 */
+  /** 左侧关闭：清空选中 / 退出批量 — Figma 804:19957 */
   onExit?: () => void;
 };
 
-const ACTION_BTN_DARK =
-  'inline-flex h-8 items-center gap-2 border-0 border-l border-solid border-[#262828] bg-transparent px-3 text-sm leading-[21px] text-[rgba(255,255,255,0.9)] hover:bg-[rgba(255,255,255,0.08)] disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-base';
-
-const ACTION_BTN_LIGHT =
-  'inline-flex h-8 items-center gap-2 border-0 border-l border-solid border-[rgba(0,0,0,0.08)] bg-transparent px-3 text-[14px] leading-[21px] text-[rgb(var(--success-6))] hover:bg-[rgba(0,0,0,0.04)] disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-[16px]';
-
 /**
  * 多选时浮出的批量操作条
- * dark: Figma 602:34650；light: Figma 804:20186
+ * 统一交互：浅色条 = 关闭 +「只显示已选 n」+ Switch + 业务操作
+ * @see https://www.figma.com/design/FHxYjuSXz1vHmtIbcfLSV3/?node-id=804-19957
  */
 export default function TableBatchBar({
   count,
@@ -46,22 +93,22 @@ export default function TableBatchBar({
   onDelete,
   extra,
   className,
-  theme = 'dark',
+  theme = 'light',
   onExit
 }: TableBatchBarProps) {
   const t = useLocale();
   if (count <= 0) return null;
 
   const isLight = theme === 'light';
-  const actionBtn = isLight ? ACTION_BTN_LIGHT : ACTION_BTN_DARK;
+  const actionTone = isLight ? 'light' : 'dark';
 
   return (
     <div
       className={cs(
-        'use-table-batch-bar flex h-8 items-center overflow-hidden rounded-[8px]',
+        'use-table-batch-bar flex h-8 items-center overflow-clip rounded-[8px]',
         isLight
-          ? 'border border-solid border-[var(--color-fill-3,#e5e6eb)] bg-[var(--color-bg-1,#f7f8fa)]'
-          : 'border border-[rgba(255,255,255,0.12)] bg-[#171a21] shadow-popover',
+          ? 'use-table-batch-bar-light border border-solid border-[var(--color-fill-3,#e5e6eb)] bg-[var(--color-bg-1,#f7f8fa)]'
+          : 'use-table-batch-bar-dark border border-[rgba(255,255,255,0.12)] bg-[#171a21] shadow-popover',
         className
       )}
       role="toolbar"
@@ -69,7 +116,7 @@ export default function TableBatchBar({
     >
       <div
         className={cs(
-          'flex items-center justify-center gap-2 px-3 text-[14px] leading-[21px]',
+          'flex h-8 shrink-0 items-center justify-center gap-2 px-3 text-[14px] leading-[21px]',
           isLight ? 'text-arco-text-1' : 'text-[rgba(255,255,255,0.9)]'
         )}
       >
@@ -93,28 +140,40 @@ export default function TableBatchBar({
         </span>
         <Switch
           size="small"
+          type="circle"
+          className="use-table-batch-switch shrink-0"
           checked={showSelectedOnly}
           onChange={onShowSelectedOnlyChange}
         />
       </div>
       <div className="flex items-center">
         {onArchive && (
-          <button type="button" className={actionBtn} onClick={onArchive}>
-            <IconArchive />
+          <BatchBarAction
+            tone={actionTone}
+            icon={<IconArchive />}
+            onClick={onArchive}
+          >
             {t['common.archive']}
-          </button>
+          </BatchBarAction>
         )}
         {onEdit && (
-          <button type="button" className={actionBtn} onClick={onEdit}>
-            <IconEdit />
+          <BatchBarAction
+            tone={actionTone}
+            icon={<IconEdit />}
+            onClick={onEdit}
+          >
             {t['common.edit']}
-          </button>
+          </BatchBarAction>
         )}
         {onDelete && (
-          <button type="button" className={actionBtn} onClick={onDelete}>
-            <IconDelete />
+          <BatchBarAction
+            tone={actionTone}
+            status="danger"
+            icon={<IconDelete />}
+            onClick={onDelete}
+          >
             {t['common.delete']}
-          </button>
+          </BatchBarAction>
         )}
         {extra}
       </div>

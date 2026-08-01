@@ -44,8 +44,16 @@
     gap: 0;
   }
 
-  /* 内容全屏：Navbar + PageTabs 一并收起 */
-  &-content-fullscreen {
+  /* 壳层全屏：仅保留 PageTabs，Navbar 收起 */
+  &-chrome-fullscreen {
+    height: @page-tabs-height;
+    gap: 0;
+    left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* 表格全屏：Navbar + PageTabs 一并收起 */
+  &-table-fullscreen {
     height: 0;
     gap: 0;
     padding: 0;
@@ -66,7 +74,8 @@
     opacity 0.2s ease,
     margin 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
 
-  .layout-navbar-content-fullscreen & {
+  .layout-navbar-chrome-fullscreen &,
+  .layout-navbar-table-fullscreen & {
     height: 0;
     opacity: 0;
     margin: 0;
@@ -145,11 +154,17 @@
   padding: 0 8px 0 8px;
   box-sizing: border-box;
 
-  svg {
+  svg,
+  .sider-logo-img {
     width: 28px;
     height: 28px;
     flex-shrink: 0;
     margin: 8px; /* 44 触控区中的 28 logo */
+  }
+
+  .sider-logo-img {
+    border-radius: 6px;
+    object-fit: cover;
   }
 
   span {
@@ -565,8 +580,8 @@
   padding: 12px;
 }
 
-/* 内容全屏：主区撑满视口，供列表页仅展示表格 */
-.layout-content-fullscreen {
+/* 表格全屏：主区撑满视口，供列表页仅展示表格 */
+.layout-content-table-fullscreen {
   .layout-content-wrapper {
     display: flex;
     flex-direction: column;

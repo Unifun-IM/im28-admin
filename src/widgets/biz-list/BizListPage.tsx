@@ -9,7 +9,11 @@ import {
   type TableColumnProps,
   type TableProps
 } from '@arco-design/web-react';
-import { IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconExpand,
+  IconRefresh,
+  IconShrink
+} from '@arco-design/web-react/icon';
 import { observer } from 'mobx-react-lite';
 import cs from 'classnames';
 import './biz-list.less';
@@ -34,32 +38,37 @@ export type BizListPageProps<T = Record<string, unknown>> = {
   summary?: SummaryItem[];
   /** 表格卡片标题，如「角色列表」 */
   title?: React.ReactNode;
-  /** 右侧操作按钮区（不含刷新）；浅色批量条出现时会隐藏 */
+  /** 右侧操作按钮区（不含刷新/全屏）；浅色批量条出现时会隐藏 */
   toolbar?: React.ReactNode;
   /** 始终展示的右侧操作（如「添加白名单」），不受批量选中隐藏 */
   toolbarAlways?: React.ReactNode;
   onRefresh?: () => void;
+  /** 是否展示表格全屏按钮，默认有标题或刷新时展示 */
+  showFullscreen?: boolean;
   /** 透传 SearchFilterBar */
   filterExtraActions?: React.ReactNode;
   filterResetText?: string;
   filterCollapsible?: boolean;
   filterDefaultCollapsed?: boolean;
-  /** 批量操作：有选中行时浮出 */
+  /**
+   * 批量操作（Figma 741:24735 / 804:19957）
+   * 提供后：表头「批量操作」进入模式才显示选择列；有选中时浮出批量条
+   */
   batchActions?: {
     onArchive?: (keys: (string | number)[]) => void;
     onEdit?: (keys: (string | number)[]) => void;
     onDelete?: (keys: (string | number)[]) => void;
     extra?: React.ReactNode;
-    /** dark 居中浮条；light 跟工具栏右侧 */
+    /** light 工具栏右侧（默认）；dark 居中浮条 */
     theme?: 'dark' | 'light';
-    /** 浅色条左侧关闭 */
+    /** 退出批量：清空选中并关闭选择列 */
     onExit?: () => void;
   };
   tableProps: TableProps<T>;
   className?: string;
 };
 
-/** 标准业务列表：筛选 → 汇总 → 表格（含标题栏 / 批量条；全屏由 PageTabs 控制） */
+/** 标准业务列表：筛选 → 汇总 → 表格（含标题栏 / 批量条 / 表格全屏） */
 function BizListPage<T extends Record<string, unknown>>({
   form,
   filter,
@@ -70,6 +79,7 @@ function BizListPage<T extends Record<string, unknown>>({
   toolbar,
   toolbarAlways,
   onRefresh,
+  showFullscreen,
   filterExtraActions,
   filterResetText,
   filterCollapsible,
@@ -81,12 +91,24 @@ function BizListPage<T extends Record<string, unknown>>({
   const { lang } = useContext(GlobalContext);
   const t = useLocale();
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
-  const contentFullscreen = pageTabsStore.contentFullscreen;
+  /** 有 batchActions 时：点「批量操作」后才进入选择模式 */
+  const [batchSelectMode, setBatchSelectMode] = useState(false);
+  const tableFullscreen = pageTabsStore.tableFullscreen;
+  const enableFullscreen =
+    showFullscreen ?? (title != null && title !== '' || Boolean(onRefresh));
 
-  const hasRowSelection = Boolean(tableProps.rowSelection);
+  const needsBatchEntry = Boolean(batchActions);
+  const inBatchSelect = !needsBatchEntry || batchSelectMode;
+  const hasRowSelection = Boolean(tableProps.rowSelection) && inBatchSelect;
   const selectedRowKeys = (tableProps.rowSelection?.selectedRowKeys ||
     []) as (string | number)[];
   const selectedCount = selectedRowKeys.length;
+
+  const exitBatchSelect = () => {
+    setBatchSelectMode(false);
+    setShowSelectedOnly(false);
+    batchActions?.onExit?.();
+  };
 
   const displayData = useMemo(() => {
     const data = (tableProps.data || []) as T[];
@@ -119,14 +141,15 @@ function BizListPage<T extends Record<string, unknown>>({
   );
 
   const hasFixedRight = columns.some((col) => col.fixed === 'right');
-  /** 有选择列时默认左侧固定；页面可显式 `fixed: false` 关闭 */
+  /** 有选择列时默认左侧固定；配置了 batchActions 时仅批量模式下展示 */
   const rowSelection = useMemo(() => {
     if (!tableProps.rowSelection) return undefined;
+    if (needsBatchEntry && !batchSelectMode) return undefined;
     return {
       fixed: true,
       ...tableProps.rowSelection
     };
-  }, [tableProps.rowSelection]);
+  }, [tableProps.rowSelection, needsBatchEntry, batchSelectMode]);
   const hasFixedSelection = Boolean(rowSelection?.fixed);
 
   const pagination = resolveBizPagination(
@@ -143,19 +166,19 @@ function BizListPage<T extends Record<string, unknown>>({
     };
   }, [hasFixedRight, hasFixedSelection, tableProps.scroll]);
 
-  const batchTheme = batchActions?.theme || 'dark';
+  const batchTheme = batchActions?.theme || 'light';
   const batchInToolbar = batchTheme === 'light';
 
   return (
     <div
       className={cs(
         'flex flex-col gap-4',
-        contentFullscreen && 'use-biz-list-fullscreen min-h-0 flex-1',
+        tableFullscreen && 'use-biz-list-fullscreen min-h-0 flex-1',
         className
       )}
     >
-      {/* 全屏：隐藏筛选 / 汇总，仅保留表格 */}
-      {!contentFullscreen && filter ? (
+      {/* 表格全屏：隐藏筛选 / 汇总，仅保留表格 */}
+      {!tableFullscreen && filter ? (
         <SearchFilterBar
           form={form}
           onSearch={onSearch}
@@ -168,7 +191,7 @@ function BizListPage<T extends Record<string, unknown>>({
           {filter}
         </SearchFilterBar>
       ) : null}
-      {!contentFullscreen && summary && summary.length > 0 ? (
+      {!tableFullscreen && summary && summary.length > 0 ? (
         <DataSummary items={summary} />
       ) : null}
       <Card
@@ -176,7 +199,7 @@ function BizListPage<T extends Record<string, unknown>>({
           'use-biz-table-card relative !p-0',
           // 无分页时裁切底角，避免末行方角顶出卡片圆角；有分页保留 visible 以便固定列阴影
           pagination === false ? 'overflow-hidden' : 'overflow-visible',
-          contentFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
+          tableFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
         )}
         bordered={false}
       >
@@ -184,6 +207,7 @@ function BizListPage<T extends Record<string, unknown>>({
           toolbar ||
           toolbarAlways ||
           onRefresh ||
+          enableFullscreen ||
           hasRowSelection) && (
           <div className="use-biz-table-toolbar relative max-md:h-auto max-md:flex-wrap">
             <div className="flex min-w-0 items-center gap-3">
@@ -201,23 +225,126 @@ function BizListPage<T extends Record<string, unknown>>({
               )}
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              {onRefresh && (
-                <Tooltip content={t['common.refresh']}>
+              {(onRefresh || enableFullscreen) && (
+                <div className="flex items-center gap-2">
+                  {onRefresh && (
+                    <Tooltip content={t['common.refresh']}>
+                      <Button
+                        type="secondary"
+                        className="use-biz-table-icon-btn"
+                        icon={<IconRefresh />}
+                        onClick={onRefresh}
+                      />
+                    </Tooltip>
+                  )}
+                  {enableFullscreen && (
+                    <Tooltip
+                      content={
+                        tableFullscreen
+                          ? t['pageTabs.exitFullscreen']
+                          : t['pageTabs.fullscreen']
+                      }
+                    >
+                      <Button
+                        type="secondary"
+                        className="use-biz-table-icon-btn"
+                        icon={
+                          tableFullscreen ? <IconShrink /> : <IconExpand />
+                        }
+                        aria-pressed={tableFullscreen}
+                        onClick={() => pageTabsStore.toggleTableFullscreen()}
+                      />
+                    </Tooltip>
+                  )}
+                </div>
+              )}
+              {batchInToolbar &&
+                batchActions &&
+                batchSelectMode &&
+                selectedCount > 0 && (
+                  <TableBatchBar
+                    count={selectedCount}
+                    showSelectedOnly={showSelectedOnly}
+                    onShowSelectedOnlyChange={setShowSelectedOnly}
+                    theme="light"
+                    onExit={exitBatchSelect}
+                    onArchive={
+                      batchActions.onArchive
+                        ? () => batchActions.onArchive?.(selectedRowKeys)
+                        : undefined
+                    }
+                    onEdit={
+                      batchActions.onEdit
+                        ? () => batchActions.onEdit?.(selectedRowKeys)
+                        : undefined
+                    }
+                    onDelete={
+                      batchActions.onDelete
+                        ? () => batchActions.onDelete?.(selectedRowKeys)
+                        : undefined
+                    }
+                    extra={batchActions.extra}
+                  />
+                )}
+              {/* 未进批量 / 已进但未选：表头「批量操作」或「取消批量」— Figma 741:24735 */}
+              {!tableFullscreen &&
+                batchInToolbar &&
+                batchActions &&
+                !(batchSelectMode && selectedCount > 0) && (
                   <Button
                     type="secondary"
-                    className="use-biz-table-icon-btn"
-                    icon={<IconRefresh />}
-                    onClick={onRefresh}
-                  />
-                </Tooltip>
+                    onClick={() =>
+                      batchSelectMode
+                        ? exitBatchSelect()
+                        : setBatchSelectMode(true)
+                    }
+                  >
+                    {batchSelectMode
+                      ? t['common.cancelBatch']
+                      : t['common.batchActions']}
+                  </Button>
+                )}
+              {/* 表格全屏时隐藏业务操作按钮，只留刷新/退出全屏 */}
+              {!tableFullscreen &&
+                toolbar &&
+                !(batchInToolbar && batchSelectMode && selectedCount > 0) && (
+                  <Space size={8}>{toolbar}</Space>
+                )}
+              {!tableFullscreen && toolbarAlways && (
+                <Space size={8}>{toolbarAlways}</Space>
               )}
-              {batchInToolbar && batchActions && (
+            </div>
+            {/* dark 浮条：仍需表头入口进入选择模式 */}
+            {!tableFullscreen &&
+              !batchInToolbar &&
+              batchActions &&
+              !batchSelectMode && (
+                <Button
+                  type="secondary"
+                  className="absolute right-4 top-3 z-10 max-md:static"
+                  onClick={() => setBatchSelectMode(true)}
+                >
+                  {t['common.batchActions']}
+                </Button>
+              )}
+            {batchActions && !batchInToolbar && batchSelectMode && (
+              <>
+                {selectedCount <= 0 && (
+                  <Button
+                    type="secondary"
+                    className="absolute right-4 top-3 z-10 max-md:static"
+                    onClick={exitBatchSelect}
+                  >
+                    {t['common.cancelBatch']}
+                  </Button>
+                )}
                 <TableBatchBar
                   count={selectedCount}
                   showSelectedOnly={showSelectedOnly}
                   onShowSelectedOnlyChange={setShowSelectedOnly}
-                  theme="light"
-                  onExit={batchActions.onExit}
+                  theme={batchTheme}
+                  onExit={exitBatchSelect}
+                  className="pointer-events-auto absolute left-1/2 top-3 z-20 -translate-x-1/2 max-md:static max-md:translate-x-0 max-md:self-center"
                   onArchive={
                     batchActions.onArchive
                       ? () => batchActions.onArchive?.(selectedRowKeys)
@@ -235,48 +362,14 @@ function BizListPage<T extends Record<string, unknown>>({
                   }
                   extra={batchActions.extra}
                 />
-              )}
-              {/* 全屏时隐藏业务操作按钮，只留刷新 */}
-              {!contentFullscreen &&
-                toolbar &&
-                !(batchInToolbar && selectedCount > 0) && (
-                  <Space size={8}>{toolbar}</Space>
-                )}
-              {!contentFullscreen && toolbarAlways && (
-                <Space size={8}>{toolbarAlways}</Space>
-              )}
-            </div>
-            {batchActions && !batchInToolbar && (
-              <TableBatchBar
-                count={selectedCount}
-                showSelectedOnly={showSelectedOnly}
-                onShowSelectedOnlyChange={setShowSelectedOnly}
-                theme={batchTheme}
-                className="pointer-events-auto absolute left-1/2 top-3 z-20 -translate-x-1/2 max-md:static max-md:translate-x-0 max-md:self-center"
-                onArchive={
-                  batchActions.onArchive
-                    ? () => batchActions.onArchive?.(selectedRowKeys)
-                    : undefined
-                }
-                onEdit={
-                  batchActions.onEdit
-                    ? () => batchActions.onEdit?.(selectedRowKeys)
-                    : undefined
-                }
-                onDelete={
-                  batchActions.onDelete
-                    ? () => batchActions.onDelete?.(selectedRowKeys)
-                    : undefined
-                }
-                extra={batchActions.extra}
-              />
+              </>
             )}
           </div>
         )}
         <div
           className={cs(
             'relative',
-            contentFullscreen && 'min-h-0 flex-1 overflow-auto'
+            tableFullscreen && 'min-h-0 flex-1 overflow-auto'
           )}
         >
           <Table

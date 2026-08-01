@@ -14,6 +14,32 @@ import useLocale from '@shared/lib/useLocale';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
+/** 组合单元格内单行截断；悬停用 Tooltip 展示全文 */
+function TruncateText({
+  children,
+  className
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const tip =
+    typeof children === 'string' || typeof children === 'number'
+      ? String(children)
+      : undefined;
+  const text = (
+    <span
+      className={cs(
+        'block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap',
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+  if (!tip) return text;
+  return <Tooltip content={tip}>{text}</Tooltip>;
+}
+
 export type AvatarNameCellProps = {
   name: React.ReactNode;
   sub?: React.ReactNode;
@@ -47,13 +73,9 @@ export function AvatarNameCell({
           {avatar ? <img alt="" src={avatar} /> : String(name || '?').slice(0, 1)}
         </Avatar>
       )}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div
-          className={cs(
-            'overflow-hidden text-ellipsis whitespace-nowrap text-[12px] leading-[12px] text-arco-text-1',
-            onNameClick && 'cursor-pointer',
-            nameClassName
-          )}
+          className={cs(onNameClick && 'cursor-pointer')}
           onClick={
             onNameClick
               ? (e) => {
@@ -75,11 +97,15 @@ export function AvatarNameCell({
           role={onNameClick ? 'button' : undefined}
           tabIndex={onNameClick ? 0 : undefined}
         >
-          {name}
+          <TruncateText className={nameClassName}>{name}</TruncateText>
         </div>
         {sub != null && sub !== '' && (
-          <div className="mt-[4px] flex items-center gap-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[10px] leading-[10px] text-arco-text-3">
-            <span className="min-w-0 truncate">{sub}</span>
+          <div className="mt-[4px] flex min-w-0 items-center gap-[4px]">
+            <div className="min-w-0 flex-1">
+              <TruncateText className="text-[10px] leading-[10px] text-arco-text-3">
+                {sub}
+              </TruncateText>
+            </div>
             {copyText != null && copyText !== '' && (
               <button
                 type="button"
@@ -110,13 +136,11 @@ export type DoubleLineCellProps = {
 export function DoubleLineCell({ primary, secondary }: DoubleLineCellProps) {
   return (
     <div className="flex min-w-0 flex-col justify-center gap-[4px]">
-      <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[10px] leading-[10px] text-arco-text-1">
-        {primary}
-      </div>
+      <TruncateText className="text-[10px] leading-[10px]">{primary}</TruncateText>
       {secondary != null && secondary !== '' && (
-        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[10px] leading-[10px] text-arco-text-3">
+        <TruncateText className="text-[10px] leading-[10px] text-arco-text-3">
           {secondary}
-        </div>
+        </TruncateText>
       )}
     </div>
   );

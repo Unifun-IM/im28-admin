@@ -72,7 +72,7 @@
   }
 }
 
-/* GA 弹窗 — Figma 602:35395 / 602:35484 */
+/* 绑定弹窗沿用通用 GA Modal 壳层样式 */
 .arco-modal.use-login-ga-modal {
   border-radius: 12px;
   overflow: hidden;
@@ -99,34 +99,6 @@
   .arco-btn-default {
     border-color: rgba(0, 0, 0, 0.08);
     color: var(--color-text-2, #4e5969);
-  }
-}
-
-/* 6 位 OTP — Figma 602:35395 */
-.use-login-otp.arco-verification-code {
-  display: flex;
-  width: 100%;
-  gap: 8px;
-
-  .arco-input {
-    flex: 1;
-    width: auto !important;
-    min-width: 0;
-    height: 48px;
-    padding: 10px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 28px;
-    border-radius: 6px;
-    border-color: rgba(0, 0, 0, 0.08);
-    background: transparent;
-    color: var(--color-text-1, #1d2129);
-  }
-
-  &.arco-verification-code-error .arco-input,
-  .arco-input.arco-input-error {
-    border-color: rgb(var(--danger-6));
   }
 }
 

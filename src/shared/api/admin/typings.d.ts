@@ -286,6 +286,34 @@ declare namespace AdminAPI {
     remark?: string;
   };
 
+  type AdminUploadCredential = {
+    /** OSS 表单字段 OSSAccessKeyId。 */
+    access_key_id: string;
+    /** Base64 编码的上传策略。 */
+    policy: string;
+    /** OSS 表单上传签名。 */
+    signature: string;
+    /** 后端生成的固定对象 Key，前端作为 key 字段提交；目录固定为 admin/images。 */
+    object_key: string;
+    /** OSS 表单上传地址。 */
+    host: string;
+    /** 上传成功后的访问 URL，保存系统 Logo 等后台图片时使用该值。 */
+    url: string;
+    /** 凭证过期 Unix 时间戳，单位秒。 */
+    expire: number;
+  };
+
+  type AdminUploadCredentialEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: AdminUploadCredential;
+    };
+
+  type AdminUploadCredentialRequest = {
+    /** 后台图片扩展名，可带或不带英文句点；不传默认 jpg。 */
+    ext?: string;
+  };
+
   type AdminUserOperationClient = {
     type?: "ios" | "android" | "web" | "server";
     /** 客户端版本号。 */
@@ -652,12 +680,16 @@ declare namespace AdminAPI {
     permission_ids?: number[];
   };
 
+  type CreateSysUserEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { username: string; temporary_password: string };
+    };
+
   type CreateSysUserRequest = {
     /** 后台用户名，不能仅包含空白字符。 */
     username: string;
     display_name?: string;
-    /** 初始密码；账号首次登录后必须修改。 */
-    password: string;
     description?: string;
     status?: AccountStatus;
     role_ids?: number[];
@@ -1435,12 +1467,32 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminAuthPasswordUpdateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAuthProfileUpdateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminAuthRefreshTokenParams = {
     ""?: any;
     ""?: any;
   };
 
+  type postV1AdminAuthSecurityVerifyParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminAuthTwoFactorConfirmParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAuthTwoFactorResetParams = {
     ""?: any;
     ""?: any;
   };
@@ -1471,6 +1523,11 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminClientVersionsUpdateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminCommonUploadCredentialParams = {
     ""?: any;
     ""?: any;
   };
@@ -1546,6 +1603,16 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminRolesUpdateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminSystemSettingsGetParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminSystemSettingsUpdateParams = {
     ""?: any;
     ""?: any;
   };
@@ -1756,6 +1823,11 @@ declare namespace AdminAPI {
     member_user_id: string;
   };
 
+  type ResetOwnTwoFactorRequest = {
+    /** 通过安全验证接口并指定 operation=reset_two_factor 获得的一次性 token。 */
+    security_token: string;
+  };
+
   type ResetPasswordRequest = {
     /** 当前旧密码。 */
     old_password: string;
@@ -1892,6 +1964,26 @@ declare namespace AdminAPI {
   type SystemMessageBody = {
     system: SystemMessage;
   };
+
+  type SystemSetting = {
+    /** 后台系统展示名称。 */
+    system_name: string;
+    /** 系统 Logo URL；空字符串表示未配置。Logo 文件通过后台上传接口上传，本接口只保存 URL。 */
+    logo_url: string;
+    /** 后台默认语言，使用语言标签，例如 zh-CN、en-US。 */
+    default_language: string;
+    /** 后台时间展示格式。 */
+    time_format: "12h" | "24h";
+    /** 是否全局启用后台 IPv4 白名单校验。 */
+    ip_whitelist_enabled: boolean;
+    updated_at: RFC3339Time;
+  };
+
+  type SystemSettingEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { setting?: SystemSetting };
+    };
 
   type SysUser = {
     id?: number;
@@ -2089,6 +2181,22 @@ declare namespace AdminAPI {
     delete?: DeleteMessageOperation;
   };
 
+  type UpdateOwnPasswordRequest = {
+    /** 通过安全验证接口并指定 operation=update_password 获得的一次性 token。 */
+    security_token: string;
+    /** 当前登录密码。 */
+    current_password: string;
+    /** 必须同时包含大写字母、小写字母、数字和特殊字符；不能与当前密码相同、不能包含用户名，且不能含连续或倒序的 3 位字母或数字。 */
+    new_password: string;
+    /** 必须与 new_password 完全一致，仅由网关校验，不传给内部服务。 */
+    confirm_password: string;
+  };
+
+  type UpdateOwnProfileRequest = {
+    /** 当前登录后台用户的新展示名称，不能仅包含空白字符。 */
+    display_name: string;
+  };
+
   type UpdatePlatformTermRequest = {
     id: PositiveUint64String;
     /** 传入时不能仅包含空白字符。 */
@@ -2111,6 +2219,18 @@ declare namespace AdminAPI {
     CreateSysRoleRequest & {
       id: number;
     };
+
+  type UpdateSystemSettingRequest = {
+    /** 系统名称，不能仅包含空白字符。 */
+    system_name: string;
+    /** 系统 Logo URL；允许传空字符串清空。文件需先通过 `/v1/admin/common/upload-credential` 获取后台凭证并直传 OSS。 */
+    logo_url: string;
+    /** 默认语言标签，不能仅包含空白字符。 */
+    default_language: string;
+    time_format: "12h" | "24h";
+    /** 开启后，后台登录、改密、二步验证、刷新 token 和已登录请求均校验系统用户各自的 IPv4 白名单；关闭后跳过 IP 条件，其他鉴权不受影响。 */
+    ip_whitelist_enabled: boolean;
+  };
 
   type UpdateSysUserIPWhitelistRequest = {
     /** 需要调整后台访问白名单的系统用户 ID。 */
@@ -2185,6 +2305,19 @@ declare namespace AdminAPI {
     /** type=email 或 type=phone 时必填；当前开发阶段固定传 666666，后续接短信或邮件发送。 */
     verification_code?: string;
     device_id: string;
+  };
+
+  type VerifySecurityEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { security_token: string; expires_in: number };
+    };
+
+  type VerifySecurityRequest = {
+    /** 本次安全验证用途。安全 token 只能用于对应操作，不能跨用途使用。 */
+    operation: "update_password" | "reset_two_factor";
+    /** 当前已绑定认证器生成的 6 位动态验证码。 */
+    two_factor_code: string;
   };
 
   type VerifyTwoFactorRequest = {

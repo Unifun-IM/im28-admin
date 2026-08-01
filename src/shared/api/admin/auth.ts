@@ -73,6 +73,36 @@ export async function postV1AdminAuthPasswordChange(
   );
 }
 
+/** 修改当前用户密码 使用 operation=update_password 对应的安全 token 修改当前用户密码。成功后该用户所有设备上的 access token 和 refresh token 立即失效，前端应跳转登录页。 POST /v1/admin/auth/password/update */
+export async function postV1AdminAuthPasswordUpdate(
+  body: AdminAPI.UpdateOwnPasswordRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/auth/password/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 修改当前用户名称 修改当前 Bearer token 对应后台用户的展示名称，不需要系统用户管理权限，也不能指定其他用户。 POST /v1/admin/auth/profile/update */
+export async function postV1AdminAuthProfileUpdate(
+  body: AdminAPI.UpdateOwnProfileRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/auth/profile/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 刷新 token POST /v1/admin/auth/refresh-token */
 export async function postV1AdminAuthRefreshToken(
   body: AdminAPI.RefreshTokenRequest,
@@ -80,6 +110,24 @@ export async function postV1AdminAuthRefreshToken(
 ) {
   return request<AdminAPI.SysUserTokenEnvelope>(
     "/v1/admin/auth/refresh-token",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 验证当前用户敏感操作 使用当前已绑定的谷歌验证码，为修改密码或重置谷歌验证换取一次性安全 token。动态码和安全 token 均不可重复使用；安全 token 有效期 5 分钟，并与当前用户和指定用途绑定。 POST /v1/admin/auth/security/verify */
+export async function postV1AdminAuthSecurityVerify(
+  body: AdminAPI.VerifySecurityRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.VerifySecurityEnvelope>(
+    "/v1/admin/auth/security/verify",
     {
       method: "POST",
       headers: {
@@ -107,6 +155,21 @@ export async function postV1AdminAuthTwoFactorConfirm(
       ...(options || {}),
     }
   );
+}
+
+/** 重置当前用户谷歌验证 使用 operation=reset_two_factor 对应的安全 token 清除当前绑定。成功后该用户所有登录会话立即失效；下次登录返回 next_step=bind_two_factor，必须重新绑定后才能进入后台。 POST /v1/admin/auth/two-factor/reset */
+export async function postV1AdminAuthTwoFactorReset(
+  body: AdminAPI.ResetOwnTwoFactorRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/auth/two-factor/reset", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
 }
 
 /** 生成二步验证绑定信息 使用 `next_step=bind_two_factor` 对应的 5 分钟预认证 token 生成新密钥。调用此接口不会签发正式 token，前端应使用 `otpauth_uri` 生成二维码并调用确认接口。 POST /v1/admin/auth/two-factor/setup */

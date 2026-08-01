@@ -12,6 +12,7 @@ import copy from 'copy-to-clipboard';
 import cs from 'classnames';
 import { postV1AdminSystemUsersResetPassword } from '@shared/api/admin/systemUsers';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './reset-password-modal.less';
 
@@ -21,6 +22,7 @@ const TextArea = Input.TextArea;
 export type ResetPasswordTarget = {
   id: number;
   username: string;
+  display_name?: string;
 };
 
 export type ResetPasswordModalProps = {
@@ -30,9 +32,12 @@ export type ResetPasswordModalProps = {
   onSuccess?: () => void;
 };
 
-type Step = 'form' | 'success';
+type Step = 'confirm' | 'ga' | 'success';
 
-/** 重置密码 — AdminAPI.ResetSysUserPasswordRequest / ResetSysUserPasswordEnvelope */
+/**
+ * 重置密码 — Figma 921:44486 / 921:44417 / 921:44606
+ * AdminAPI.ResetSysUserPasswordRequest / ResetSysUserPasswordEnvelope
+ */
 export default function ResetPasswordModal({
   visible,
   target,
@@ -41,9 +46,11 @@ export default function ResetPasswordModal({
 }: ResetPasswordModalProps) {
   const t = useLocale();
   const common = t;
-  const [form] = Form.useForm<AdminAPI.ResetSysUserPasswordRequest>();
-  const [step, setStep] = useState<Step>('form');
+  const [form] = Form.useForm<{ remark?: string }>();
+  const [step, setStep] = useState<Step>('confirm');
   const [submitting, setSubmitting] = useState(false);
+  const [remark, setRemark] = useState<string | undefined>();
+  const [gaErrorTick, setGaErrorTick] = useState(0);
   const [result, setResult] = useState<{
     username: string;
     temporary_password: string;
@@ -51,21 +58,39 @@ export default function ResetPasswordModal({
 
   useEffect(() => {
     if (!visible || !target) return;
-    setStep('form');
+    setStep('confirm');
+    setRemark(undefined);
+    setGaErrorTick(0);
     setResult(null);
     form.resetFields();
-    form.setFieldsValue({ id: target.id });
   }, [visible, form, target]);
 
-  const submit = async () => {
+  const displayLabel = (() => {
+    const name = (target?.display_name || '').trim();
+    const username = target?.username || '';
+    if (name && username) return `${name}（${username}）`;
+    return name || username || '--';
+  })();
+
+  const goGa = async () => {
     try {
       const values = await form.validate();
-      if (target?.id == null) return;
+      setRemark(values.remark?.trim() || undefined);
+      setGaErrorTick(0);
+      setStep('ga');
+    } catch {
+      // validate
+    }
+  };
+
+  const submitGa = async (code: string) => {
+    if (submitting || target?.id == null) return;
+    try {
       setSubmitting(true);
       const body: AdminAPI.ResetSysUserPasswordRequest = {
         id: target.id,
-        two_factor_code: values.two_factor_code,
-        remark: values.remark?.trim() || undefined
+        two_factor_code: code,
+        remark
       };
       const res = await postV1AdminSystemUsersResetPassword(body);
       setResult({
@@ -75,7 +100,7 @@ export default function ResetPasswordModal({
       setStep('success');
       onSuccess?.();
     } catch {
-      // validate / request
+      setGaErrorTick((n) => n + 1);
     } finally {
       setSubmitting(false);
     }
@@ -86,117 +111,149 @@ export default function ResetPasswordModal({
     Message.success(common['common.copied']);
   };
 
+  const copyAccountAndPassword = () => {
+    if (!result) return;
+    copyText(
+      `${t['resetPassword.success.username']}：${result.username}\n${t['resetPassword.success.tempPassword']}：${result.temporary_password}`
+    );
+  };
+
   return (
-    <Modal
-      visible={visible}
-      onCancel={onCancel}
-      unmountOnExit
-      closable={step === 'form'}
-      maskClosable={step === 'form'}
-      className={cs('use-reset-password-modal', {
-        'is-success': step === 'success'
-      })}
-      style={{ width: step === 'success' ? 520 : 480 }}
-      title={
-        step === 'form' ? (
+    <>
+      <Modal
+        visible={visible && step === 'confirm'}
+        onCancel={onCancel}
+        unmountOnExit
+        closable={false}
+        maskClosable={false}
+        className="use-reset-password-modal"
+        wrapClassName="use-reset-password-modal-wrap"
+        style={{ width: 480 }}
+        title={
           <div className="flex items-center gap-2">
             <img alt="" src={iconWarning} className="size-5" />
             <span>{t['resetPassword.title']}</span>
           </div>
-        ) : undefined
-      }
-      footer={
-        step === 'form' ? (
+        }
+        footer={
           <div className="flex justify-end gap-2">
-            <Button onClick={onCancel}>{common['common.cancel']}</Button>
+            <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
+              {common['common.cancel']}
+            </Button>
             <Button
               type="primary"
               status="danger"
-              loading={submitting}
-              onClick={submit}
+              className="!min-w-[80px]"
+              onClick={goGa}
             >
-              {common['common.confirm']}
+              {t['resetPassword.action.confirm']}
             </Button>
           </div>
-        ) : null
-      }
-    >
-      {step === 'form' ? (
-        <>
-          <p className="m-0 mb-3 text-[14px] leading-[22px] text-arco-text-2">
-            {t['resetPassword.target']
-              .replace('{username}', target?.username || '')
-              .replace('{id}', String(target?.id ?? ''))}
-          </p>
-          <p className="m-0 mb-4 text-[12px] leading-[18px] text-arco-text-3">
-            {t['resetPassword.hint']}
-          </p>
-          <Form form={form} layout="vertical">
-            <FormItem field="id" hidden>
-              <Input />
-            </FormItem>
-            <FormItem
-              field="two_factor_code"
-              label={t['accounts.field.twoFactorCode']}
-              rules={[
-                { required: true, message: t['accounts.msg.twoFactorRequired'] },
-                {
-                  match: /^\d{6}$/,
-                  message: t['accounts.msg.twoFactorFormat']
-                }
-              ]}
-            >
-              <Input
-                maxLength={6}
-                placeholder={t['accounts.placeholder.twoFactorCode']}
-                allowClear
-              />
-            </FormItem>
-            <FormItem field="remark" label={t['accounts.field.remark']}>
-              <TextArea
-                placeholder={t['accounts.placeholder.remark']}
-                maxLength={200}
-                showWordLimit
-              />
-            </FormItem>
-          </Form>
-        </>
-      ) : (
-        <div className="px-10 py-6">
+        }
+      >
+        <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+          {t['resetPassword.target'].replace('{name}', displayLabel)}
+        </p>
+        <ul className="m-0 mt-3 list-disc pl-[21px] text-[14px] leading-[21px] text-arco-text-1">
+          <li>{t['resetPassword.bullet.1']}</li>
+          <li>{t['resetPassword.bullet.2']}</li>
+          <li>{t['resetPassword.bullet.3']}</li>
+        </ul>
+        <Form form={form} layout="vertical" className="mt-3">
+          <FormItem field="remark" label={t['accounts.field.remark']}>
+            <TextArea
+              placeholder={t['resetPassword.placeholder.remark']}
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              maxLength={200}
+            />
+          </FormItem>
+        </Form>
+      </Modal>
+
+      <GaVerifyModal
+        visible={visible && step === 'ga'}
+        loading={submitting}
+        errorTick={gaErrorTick}
+        onCancel={onCancel}
+        onOk={submitGa}
+      />
+
+      <Modal
+        visible={visible && step === 'success'}
+        onCancel={onCancel}
+        unmountOnExit
+        closable={false}
+        maskClosable={false}
+        footer={null}
+        className={cs('use-reset-password-modal', 'is-success')}
+        wrapClassName="use-reset-password-modal-wrap"
+        style={{ width: 780 }}
+      >
+        <div className="use-reset-password-success px-20 py-6">
           <Result
             status="success"
             icon={
               <IconCheckCircleFill className="text-[48px] text-[rgb(var(--success-6))]" />
             }
             title={t['resetPassword.success.title']}
-            subTitle={t['resetPassword.success.subTitle']}
+            subTitle={
+              <span className="inline-block whitespace-pre-line text-center">
+                {t['resetPassword.success.subTitle']}
+              </span>
+            }
           />
-          <div className="mx-auto mt-4 w-full max-w-[420px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px]">
-            <div>
-              {common['common.username']}：{result?.username}
+          <div className="use-reset-password-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px] leading-[1.5] text-arco-text-1">
+            <div className="flex items-center gap-6">
+              <span className="w-[120px] shrink-0">
+                {t['resetPassword.success.username']}
+              </span>
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
+                <span className="truncate">{result?.username}</span>
+                <button
+                  type="button"
+                  className="inline-flex size-[14px] shrink-0 items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
+                  onClick={() =>
+                    result?.username && copyText(result.username)
+                  }
+                >
+                  <IconCopy />
+                </button>
+              </div>
             </div>
-            <div className="mt-2 flex items-center gap-2">
-              {t['resetPassword.success.tempPassword']}：
-              {result?.temporary_password}
-              <button
-                type="button"
-                className="border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
-                onClick={() =>
-                  result?.temporary_password &&
-                  copyText(result.temporary_password)
-                }
-              >
-                <IconCopy />
-              </button>
+            <div className="my-3 h-px w-full bg-[rgba(0,0,0,0.08)]" />
+            <div className="flex items-center gap-6">
+              <span className="w-[120px] shrink-0">
+                {t['resetPassword.success.tempPassword']}
+              </span>
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
+                <span className="truncate">{result?.temporary_password}</span>
+                <button
+                  type="button"
+                  className="inline-flex size-[14px] shrink-0 items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
+                  onClick={() =>
+                    result?.temporary_password &&
+                    copyText(result.temporary_password)
+                  }
+                >
+                  <IconCopy />
+                </button>
+              </div>
             </div>
           </div>
-          <div className="mt-4 flex justify-center">
-            <Button type="primary" onClick={onCancel}>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <Button type="secondary" onClick={copyAccountAndPassword}>
+              {t['resetPassword.success.copyBoth']}
+            </Button>
+            <Button
+              type="primary"
+              className="!min-w-[100px]"
+              onClick={onCancel}
+            >
               {common['common.done']}
             </Button>
           </div>
         </div>
-      )}
-    </Modal>
+      </Modal>
+    </>
   );
 }

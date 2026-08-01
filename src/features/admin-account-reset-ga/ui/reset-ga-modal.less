@@ -1,4 +1,4 @@
-/* —— 重置谷歌 Modal（Figma 921:44697 / 44748） —— */
+/* —— 重置谷歌确认 / 成功（Figma 921:44697 / 44748） —— */
 .arco-modal.use-reset-ga-modal {
   border-radius: 12px;
   overflow: hidden;
@@ -39,6 +39,11 @@
     background: var(--color-bg-2, #fff);
   }
 
+  .arco-btn {
+    border-radius: 6px;
+    height: 32px;
+  }
+
   .arco-btn-primary.arco-btn-status-danger {
     background-color: rgb(var(--danger-6));
     border-color: rgb(var(--danger-6));
@@ -64,9 +69,21 @@
     }
 
     .arco-modal-content {
-      padding: 0;
+      padding: 24px;
       background: var(--color-bg-2, #fff);
     }
+
+    .arco-result {
+      padding: 24px 0 0;
+    }
+  }
+}
+
+.use-reset-ga-success {
+  .arco-result-subtitle {
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
   }
 }
 

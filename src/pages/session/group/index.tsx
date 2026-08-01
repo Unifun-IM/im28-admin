@@ -9,13 +9,11 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import {
-  postV1AdminGroupsList,
-  postV1AdminGroupsUpdateStatus,
-  postV1AdminGroupsUpgrade
-} from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
-import { UserChatModal } from '@features/user-chat-view';
+import {
+  UserChatModal,
+  type ChatModalTarget
+} from '@features/user-chat-view';
 import useLocale from '@shared/lib/useLocale';
 import { openimLabel } from '@shared/lib/openimLabels';
 
@@ -31,7 +29,7 @@ function groupStatusBadge(
   return 'default';
 }
 
-/** 群列表 — AdminAPI.AdminListGroupRequest / { group?: Group } */
+/** 群列表 — 会话接口暂不对接，保留筛选 / 表格交互 */
 export default function GroupQueryPage() {
   const t = useLocale();
   const common = t;
@@ -49,7 +47,7 @@ export default function GroupQueryPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatTarget, setChatTarget] = useState<ChatModalTarget | null>(null);
 
   const statusOptions = useMemo(
     () =>
@@ -60,28 +58,15 @@ export default function GroupQueryPage() {
     [t]
   );
 
-  const fetchData = useCallback(
-    async (p = page, size = pageSize) => {
-      setLoading(true);
-      try {
-        const values = form.getFieldsValue();
-        const res = await postV1AdminGroupsList({
-          page: p,
-          page_size: size,
-          keyword: values.keyword || undefined,
-          status:
-            values.status === '' || values.status === undefined
-              ? undefined
-              : (Number(values.status) as AdminAPI.GroupStatus)
-        });
-        setData(res.data?.list || []);
-        setTotal(res.data?.total || 0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [form, page, pageSize]
-  );
+  const fetchData = useCallback(async (_p = page, _size = pageSize) => {
+    setLoading(true);
+    try {
+      setData([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize]);
 
   useEffect(() => {
     fetchData(1, pageSize);
@@ -137,6 +122,7 @@ export default function GroupQueryPage() {
             {
               title: t['groupQuery.col.group'],
               dataIndex: 'group.title',
+              ellipsis: false,
               render: (_: unknown, row: { group?: AdminAPI.Group }) => (
                 <AvatarNameCell
                   name={row.group?.title}
@@ -161,6 +147,7 @@ export default function GroupQueryPage() {
             {
               title: common['common.status'],
               dataIndex: 'group.status',
+              ellipsis: false,
               render: (_: unknown, row: { group?: AdminAPI.Group }) => (
                 <StatusBadge
                   status={groupStatusBadge(row.group?.status)}
@@ -186,7 +173,13 @@ export default function GroupQueryPage() {
                       {
                         key: 'chat',
                         label: t['groupQuery.action.chat'],
-                        onClick: () => setChatOpen(true)
+                        onClick: () =>
+                          setChatTarget({
+                            type: 'group',
+                            id: group_id,
+                            name: row.group?.title,
+                            memberCount: row.group?.member_count
+                          })
                       },
                       {
                         key: 'status',
@@ -194,13 +187,8 @@ export default function GroupQueryPage() {
                         onClick: () => {
                           Modal.confirm({
                             title: t['groupQuery.confirm.updateStatus'],
-                            onOk: async () => {
-                              await postV1AdminGroupsUpdateStatus({
-                                group_id,
-                                status: 0
-                              });
-                              Message.success(common['common.success']);
-                              fetchData(page, pageSize);
+                            onOk: () => {
+                              Message.info(common['common.apiNotReady']);
                             }
                           });
                         }
@@ -211,10 +199,8 @@ export default function GroupQueryPage() {
                         onClick: () => {
                           Modal.confirm({
                             title: t['groupQuery.confirm.upgrade'],
-                            onOk: async () => {
-                              await postV1AdminGroupsUpgrade({ group_id });
-                              Message.success(common['common.success']);
-                              fetchData(page, pageSize);
+                            onOk: () => {
+                              Message.info(common['common.apiNotReady']);
                             }
                           });
                         }
@@ -241,12 +227,22 @@ export default function GroupQueryPage() {
         visible={!!detailGroupId}
         groupId={detailGroupId}
         onClose={() => setDetailGroupId(null)}
+        onViewChat={(payload) => {
+          setDetailGroupId(null);
+          setChatTarget({
+            type: 'group',
+            id: payload.groupId,
+            name: payload.groupName,
+            memberCount: payload.memberCount
+          });
+        }}
       />
       <UserChatModal
-        visible={chatOpen}
-        onClose={() => setChatOpen(false)}
+        visible={!!chatTarget}
+        onClose={() => setChatTarget(null)}
         scene="group"
-        userId={null}
+        userId={chatTarget?.id || null}
+        target={chatTarget}
       />
     </>
   );

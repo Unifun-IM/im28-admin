@@ -266,21 +266,37 @@
     border-radius: 0 8px 8px 0;
   }
 
+  /* TextArea 视觉在 .arco-textarea 上（wrapper 仅布局） */
   .arco-textarea-wrapper {
-    background-color: var(--color-fill-1, #f7f8fa);
+    width: 100%;
+    background: transparent;
     border: none;
-    border-radius: 8px;
-    padding: 4px 12px;
-    min-height: 56px;
+    padding: 0;
     box-shadow: none;
   }
 
   .arco-textarea {
-    background: transparent;
+    background-color: var(--color-fill-1, #f7f8fa);
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    min-height: 32px;
+    padding: 5px 12px;
     font-size: 14px;
-    line-height: 21px;
-    min-height: 42px;
+    line-height: 22px;
     color: var(--color-text-1, #1d2129);
+    resize: vertical;
+  }
+
+  .arco-textarea:hover {
+    background-color: var(--color-fill-2, #f2f3f5);
+  }
+
+  .arco-textarea:focus,
+  .arco-textarea-focus {
+    background-color: var(--color-fill-2, #f2f3f5);
+    border: none;
+    box-shadow: none;
   }
 
   .arco-textarea::placeholder {
@@ -511,28 +527,49 @@
   max-height: 280px;
 }
 
-/* 批量操作条内 Switch：深色底适配（Figma 602:34650） */
+/* 批量操作条 Switch — Figma 804:19957 / 760:36068（小圆形 28×16，dot 12） */
 .use-table-batch-bar {
-  .arco-switch {
-    background-color: rgba(255, 255, 255, 0.16);
+  .arco-switch,
+  .arco-switch-small {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    width: 28px;
     min-width: 28px;
     height: 16px;
+    padding: 0;
     line-height: 16px;
+    border-radius: 16px;
+    vertical-align: middle;
   }
 
   .arco-switch-dot {
+    box-sizing: border-box;
     width: 12px;
     height: 12px;
     top: 2px;
     left: 2px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   .arco-switch-checked {
-    background-color: rgb(var(--primary-6));
+    background-color: rgb(var(--primary-6)) !important;
   }
 
   .arco-switch-checked .arco-switch-dot {
     left: calc(100% - 14px);
+  }
+}
+
+.use-table-batch-bar-light {
+  .arco-switch:not(.arco-switch-checked) {
+    background-color: var(--color-fill-4, #c9cdd4);
+  }
+}
+
+.use-table-batch-bar-dark {
+  .arco-switch:not(.arco-switch-checked) {
+    background-color: rgba(255, 255, 255, 0.16);
   }
 }
 
@@ -796,9 +833,22 @@
     overflow: hidden;
   }
 
-  .arco-table-cell-ellipsis .arco-table-cell-content,
-  .arco-table-td .arco-typography,
   .arco-table-td .arco-table-cell-wrap-value {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 12px;
+    line-height: 12px;
+  }
+
+  /* Arco Table column.ellipsis → .arco-table-cell-text-ellipsis */
+  .arco-table-cell-text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .arco-table-td .arco-typography {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1035,10 +1085,3 @@
   }
 }
 
-/* 表格超长省略 Tooltip — Figma 602:34994（class 挂在 Trigger 上） */
-.arco-tooltip.use-biz-table-tooltip {
-  .arco-tooltip-content {
-    padding: 4px 12px;
-    border-radius: 4px;
-  }
-}
