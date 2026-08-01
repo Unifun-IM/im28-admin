@@ -15,6 +15,7 @@ import {
   postV1AdminRolesUpdate
 } from '@shared/api/admin/rbac';
 import useLocale from '@shared/lib/useLocale';
+import { buildPermModules } from '../model/permTree';
 import PermissionConfig from './PermissionConfig';
 import './create-role-modal.less';
 
@@ -60,6 +61,7 @@ export default function CreateRoleModal({
   const common = t;
   const [form] = Form.useForm<CreateRoleForm>();
   const [submitting, setSubmitting] = useState(false);
+  const [permLoading, setPermLoading] = useState(false);
   const [permCatalog, setPermCatalog] = useState<AdminAPI.SysPermission[]>(
     []
   );
@@ -75,13 +77,18 @@ export default function CreateRoleModal({
     return map;
   }, [permCatalog]);
 
+  const permModules = useMemo(
+    () => buildPermModules(permCatalog),
+    [permCatalog]
+  );
+
   useEffect(() => {
     if (!visible) return;
     form.resetFields();
     let cancelled = false;
 
     const fetchAllPermissions = async () => {
-      const pageSize = 500;
+      const pageSize = 100;
       let page = 1;
       let total = Infinity;
       const all: AdminAPI.SysPermission[] = [];
@@ -100,12 +107,15 @@ export default function CreateRoleModal({
     };
 
     (async () => {
+      setPermLoading(true);
       try {
         const catalog = await fetchAllPermissions();
         if (cancelled) return;
         setPermCatalog(catalog);
       } catch {
         if (!cancelled) setPermCatalog([]);
+      } finally {
+        if (!cancelled) setPermLoading(false);
       }
 
       if (cancelled) return;
@@ -285,7 +295,7 @@ export default function CreateRoleModal({
           ]}
           triggerPropName="value"
         >
-          <PermissionConfig />
+          <PermissionConfig modules={permModules} loading={permLoading} />
         </FormItem>
       </Form>
     </Modal>

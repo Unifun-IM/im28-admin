@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Checkbox, Input } from '@arco-design/web-react';
+import { Checkbox, Input, Spin } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import useLocale from '@shared/lib/useLocale';
 import {
-  ROLE_PERM_MODULES,
   collectAllPermKeys,
   collectModuleKeys,
   type PermModule,
@@ -14,6 +13,9 @@ import {
 export type PermissionConfigProps = {
   value?: string[];
   onChange?: (keys: string[]) => void;
+  /** 由 postV1AdminPermissionsList 拼装的模块树 */
+  modules?: PermModule[];
+  loading?: boolean;
 };
 
 function matchKeyword(title: string, kw: string) {
@@ -23,11 +25,13 @@ function matchKeyword(title: string, kw: string) {
 
 /**
  * 权限配置面板 — Figma 666:21515
- * 交互以稿面为准；提交时由父组件用 permissions 接口做 key→id 映射
+ * 数据来自 permissions 列表，不再使用静态 permTree 假数据
  */
 export default function PermissionConfig({
   value = [],
-  onChange
+  onChange,
+  modules = [],
+  loading
 }: PermissionConfigProps) {
   const t = useLocale();
   const permTitle = (key: string, fallback: string) =>
@@ -35,23 +39,33 @@ export default function PermissionConfig({
 
   const checked = useMemo(() => new Set(value), [value]);
   const [keyword, setKeyword] = useState('');
-  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(ROLE_PERM_MODULES.map((m) => [m.key, true]))
-  );
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  const allKeys = useMemo(() => collectAllPermKeys(), []);
+  useEffect(() => {
+    setExpanded(
+      Object.fromEntries(
+        modules
+          .filter((m) => !m.leaf && (m.resources?.length || 0) > 0)
+          .map((m) => [m.key, true])
+      )
+    );
+  }, [modules]);
+
+  const allKeys = useMemo(() => collectAllPermKeys(modules), [modules]);
   const allChecked = allKeys.length > 0 && allKeys.every((k) => checked.has(k));
   const allIndeterminate =
     !allChecked && allKeys.some((k) => checked.has(k));
 
   const expandableKeys = useMemo(
     () =>
-      ROLE_PERM_MODULES.filter(
-        (m) => !m.leaf && (m.resources?.length || 0) > 0
-      ).map((m) => m.key),
-    []
+      modules
+        .filter((m) => !m.leaf && (m.resources?.length || 0) > 0)
+        .map((m) => m.key),
+    [modules]
   );
-  const allExpanded = expandableKeys.every((k) => expanded[k] !== false);
+  const allExpanded =
+    expandableKeys.length > 0 &&
+    expandableKeys.every((k) => expanded[k] !== false);
 
   const setKeys = (next: Set<string>) => {
     onChange?.(Array.from(next));
@@ -67,34 +81,36 @@ export default function PermissionConfig({
   };
 
   const filterModules = useMemo(() => {
-    if (!keyword.trim()) return ROLE_PERM_MODULES;
+    if (!keyword.trim()) return modules;
     const kw = keyword.trim();
-    return ROLE_PERM_MODULES.map((mod) => {
-      const modTitle = permTitle(mod.key, mod.title);
-      if (mod.leaf) {
-        return matchKeyword(modTitle, kw) ? mod : null;
-      }
-      const resources = (mod.resources || [])
-        .map((res) => {
-          const resTitle = permTitle(res.key, res.title);
-          const titleHit = matchKeyword(resTitle, kw);
-          const actions = (res.actions || []).filter((a) =>
-            matchKeyword(permTitle(a.key, a.title), kw)
-          );
-          if (titleHit) return res;
-          if (actions.length) return { ...res, actions };
-          return null;
-        })
-        .filter(Boolean) as PermResource[];
-      if (matchKeyword(modTitle, kw) || resources.length) {
-        return {
-          ...mod,
-          resources: matchKeyword(modTitle, kw) ? mod.resources : resources
-        };
-      }
-      return null;
-    }).filter(Boolean) as PermModule[];
-  }, [keyword, t]);
+    return modules
+      .map((mod) => {
+        const modTitle = permTitle(mod.key, mod.title);
+        if (mod.leaf) {
+          return matchKeyword(modTitle, kw) ? mod : null;
+        }
+        const resources = (mod.resources || [])
+          .map((res) => {
+            const resTitle = permTitle(res.key, res.title);
+            const titleHit = matchKeyword(resTitle, kw);
+            const actions = (res.actions || []).filter((a) =>
+              matchKeyword(permTitle(a.key, a.title), kw)
+            );
+            if (titleHit) return res;
+            if (actions.length) return { ...res, actions };
+            return null;
+          })
+          .filter(Boolean) as PermResource[];
+        if (matchKeyword(modTitle, kw) || resources.length) {
+          return {
+            ...mod,
+            resources: matchKeyword(modTitle, kw) ? mod.resources : resources
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as PermModule[];
+  }, [keyword, modules, t]);
 
   useEffect(() => {
     if (!keyword.trim()) return;
@@ -112,10 +128,15 @@ export default function PermissionConfig({
   const renderResource = (res: PermResource) => {
     const actionKeys = (res.actions || []).map((a) => a.key);
     const resKeys =
-      res.leaf || !actionKeys.length
-        ? [res.key]
-        : [res.key, ...actionKeys];
-    const resAll = resKeys.every((k) => checked.has(k));
+      res.id != null
+        ? [res.key, ...actionKeys]
+        : actionKeys.length
+          ? actionKeys
+          : res.key
+            ? [res.key]
+            : [];
+    const resAll =
+      resKeys.length > 0 && resKeys.every((k) => checked.has(k));
     const resSome = !resAll && resKeys.some((k) => checked.has(k));
 
     return (
@@ -127,6 +148,7 @@ export default function PermissionConfig({
           <Checkbox
             checked={resAll}
             indeterminate={resSome}
+            disabled={!resKeys.length}
             onChange={(v) => toggleMany(resKeys, v)}
           />
           <span className="truncate text-[14px] leading-[21px] text-arco-text-2">
@@ -143,13 +165,15 @@ export default function PermissionConfig({
                   const next = new Set(checked);
                   if (v) {
                     next.add(a.key);
-                    next.add(res.key);
+                    if (res.id != null) next.add(res.key);
                   } else {
                     next.delete(a.key);
-                    const still = (res.actions || []).some(
-                      (x) => x.key !== a.key && next.has(x.key)
-                    );
-                    if (!still) next.delete(res.key);
+                    if (res.id != null) {
+                      const still = (res.actions || []).some(
+                        (x) => x.key !== a.key && next.has(x.key)
+                      );
+                      if (!still) next.delete(res.key);
+                    }
                   }
                   setKeys(next);
                 }}
@@ -176,10 +200,12 @@ export default function PermissionConfig({
             value={keyword}
             onChange={setKeyword}
             className="max-w-[240px]"
+            disabled={loading}
           />
           <Checkbox
             checked={allChecked}
             indeterminate={allIndeterminate}
+            disabled={!allKeys.length || loading}
             onChange={(v) => toggleMany(allKeys, v)}
           >
             {t['createRole.perm.selectAll']}
@@ -187,7 +213,8 @@ export default function PermissionConfig({
         </div>
         <button
           type="button"
-          className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-[14px] font-medium leading-[21px] text-[rgb(var(--primary-6))]"
+          disabled={!expandableKeys.length || loading}
+          className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-[14px] font-medium leading-[21px] text-[rgb(var(--primary-6))] disabled:cursor-not-allowed disabled:opacity-40"
           onClick={() => {
             const nextOpen = !allExpanded;
             setExpanded(
@@ -202,14 +229,19 @@ export default function PermissionConfig({
       </div>
 
       <div className="max-h-[360px] overflow-y-auto">
-        {filterModules.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center px-4 py-10">
+            <Spin />
+          </div>
+        ) : filterModules.length === 0 ? (
           <div className="px-4 py-8 text-center text-[14px] text-arco-text-3">
             {t['common.empty']}
           </div>
         ) : (
           filterModules.map((mod) => {
             const keys = collectModuleKeys(mod);
-            const modAll = keys.every((k) => checked.has(k));
+            const modAll =
+              keys.length > 0 && keys.every((k) => checked.has(k));
             const modSome = !modAll && keys.some((k) => checked.has(k));
             const open = expanded[mod.key] !== false;
             const hasChildren = !mod.leaf && (mod.resources?.length || 0) > 0;
@@ -222,6 +254,7 @@ export default function PermissionConfig({
                     <Checkbox
                       checked={modAll}
                       indeterminate={modSome}
+                      disabled={!keys.length}
                       onChange={(v) => toggleMany(keys, v)}
                     />
                     <span className="truncate text-[14px] font-medium leading-[21px] text-arco-text-1">
