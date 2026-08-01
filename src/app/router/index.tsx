@@ -1,15 +1,9 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
-import type { AdminMenuItem } from '@widgets/admin-shell';
-
 import { appRoutes } from './app-routes';
 
-interface AppRouterProviderProps {
-  menuItems: AdminMenuItem[];
-}
+const appRouter = createBrowserRouter(appRoutes());
 
-export function AppRouterProvider({ menuItems }: AppRouterProviderProps) {
-  const appRouter = createBrowserRouter(appRoutes(menuItems));
-
+export function AppRouterProvider() {
   return <RouterProvider router={appRouter} />;
 }

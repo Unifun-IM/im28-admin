@@ -1,0 +1,195 @@
+// @ts-ignore
+/* eslint-disable */
+import request from "@shared/api/request";
+
+/** 拉黑用户 需要 `admin.users.write` 权限；拉黑成功后立即撤销该用户全部登录态。支持限时和永久拉黑。 POST /v1/admin/users/ban */
+export async function postV1AdminUsersBan(
+  body: AdminAPI.AdminBanUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/ban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 批量拉黑用户 需要 `admin.users.write` 权限；单次最多操作 100 个用户。全部用户在同一事务中处理，任一用户不存在或处理失败时整批回滚；成功后撤销全部目标用户的登录态。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-ban */
+export async function postV1AdminUsersBatchBan(
+  body: AdminAPI.AdminBatchBanUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/batch-ban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 批量解禁用户 需要 `admin.users.write` 权限；单次最多操作 100 个用户，且全部用户都必须处于拉黑状态。全部用户在同一事务中处理，任一用户不存在、状态不满足或处理失败时整批回滚。响应仅包含 `code` 和 `message`。 POST /v1/admin/users/batch-unban */
+export async function postV1AdminUsersBatchUnban(
+  body: AdminAPI.AdminBatchUnbanUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/batch-unban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 查询平台封禁用户 需要 `admin.users.read` 权限；返回当前仍有效的封禁用户及其最近一次封禁记录和后台操作人，不是 C 端好友黑名单。 POST /v1/admin/users/blacklist/list */
+export async function postV1AdminUsersBlacklistList(
+  body: AdminAPI.AdminListBannedUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListBannedUserEnvelope>(
+    "/v1/admin/users/blacklist/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 查询用户详情 需要 `admin.users.read` 权限；不返回邀请码或邀请人信息。 POST /v1/admin/users/detail */
+export async function postV1AdminUsersDetail(
+  body: AdminAPI.AdminDetailUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminDetailUserEnvelope>("/v1/admin/users/detail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 查询用户 需要 `admin.users.read` 权限；`super_admin` 角色不受单项权限限制。 POST /v1/admin/users/list */
+export async function postV1AdminUsersList(
+  body: AdminAPI.AdminListUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListUserEnvelope>("/v1/admin/users/list", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 查询用户操作日志 需要 `admin.users.read` 权限；当前仅固定返回空列表，操作日志采集与查询逻辑尚未接入。 POST /v1/admin/users/operation-logs/list */
+export async function postV1AdminUsersOperationLogsList(
+  body: AdminAPI.AdminListUserOperationLogRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListUserOperationLogEnvelope>(
+    "/v1/admin/users/operation-logs/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 解禁用户 需要 `admin.users.write` 权限；仅拉黑状态的用户可以人工解禁。 POST /v1/admin/users/unban */
+export async function postV1AdminUsersUnban(
+  body: AdminAPI.AdminUnbanUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/unban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 添加平台白名单用户 需要 `admin.users.write` 权限；只支持已注册用户。重复添加按成功处理并保留原加入记录；加入白名单不会解除账号封禁。 POST /v1/admin/users/whitelist/add */
+export async function postV1AdminUsersWhitelistAdd(
+  body: AdminAPI.AdminAddWhitelistUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/whitelist/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 批量移除平台白名单用户 需要 `admin.users.write` 权限；单次最多 100 个用户，不在白名单中的用户不会导致整批失败。 POST /v1/admin/users/whitelist/batch-remove */
+export async function postV1AdminUsersWhitelistBatchRemove(
+  body: AdminAPI.AdminBatchRemoveWhitelistUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>(
+    "/v1/admin/users/whitelist/batch-remove",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 查询平台白名单用户 需要 `admin.users.read` 权限；仅返回已注册用户。白名单与账号封禁状态相互独立。 POST /v1/admin/users/whitelist/list */
+export async function postV1AdminUsersWhitelistList(
+  body: AdminAPI.AdminListWhitelistedUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListWhitelistedUserEnvelope>(
+    "/v1/admin/users/whitelist/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 移除平台白名单用户 需要 `admin.users.write` 权限；用户不在白名单时仍按成功处理。 POST /v1/admin/users/whitelist/remove */
+export async function postV1AdminUsersWhitelistRemove(
+  body: AdminAPI.AdminRemoveWhitelistUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/users/whitelist/remove", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}

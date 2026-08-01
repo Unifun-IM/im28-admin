@@ -1,0 +1,239 @@
+@import 'nprogress/nprogress.css';
+@import './theme-tokens.less';
+
+/**
+ * 全局样式（仅放跨页面 / portal / 基础设施）：
+ * - Arco 兼容补丁、主题色、html/body
+ * - 侧栏折叠菜单浮层、全局 Message、通用 Switch
+ *
+ * 业务样式请放在对应 feature / widget 下的 *.less，并由组件自行 import。
+ */
+
+/**
+ * Patch：@arco-themes/react-arco-pro 基于旧版 Select DOM，缺少单选 view-selector / value-mirror 布局。
+ * 官方 @arco-design/web-react@2.66 依赖这些规则，否则 input 非 absolute，「全部」会重影漏出。
+ */
+.arco-select-single .arco-select-view-selector,
+.arco-tree-select-single .arco-tree-select-view-selector,
+.arco-cascader-single .arco-cascader-view-selector {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.arco-select-single .arco-select-view-selector .arco-select-view-input,
+.arco-tree-select-single .arco-tree-select-view-selector .arco-tree-select-view-input,
+.arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-input {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.arco-select-single .arco-select-view-selector .arco-select-view-value-mirror,
+.arco-tree-select-single .arco-tree-select-view-selector .arco-tree-select-view-value-mirror,
+.arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-value-mirror {
+  opacity: 0;
+}
+
+.arco-select-single .arco-select-view-value,
+.arco-select-single .arco-select-view-value-mirror,
+.arco-tree-select-single .arco-tree-select-view-value,
+.arco-tree-select-single .arco-tree-select-view-value-mirror,
+.arco-cascader-single .arco-cascader-view-value,
+.arco-cascader-single .arco-cascader-view-value-mirror {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.arco-select-single .arco-select-view .arco-select-hidden,
+.arco-tree-select-single .arco-tree-select-view .arco-tree-select-hidden {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+/* 默认主题色 #635CFF → --arcoblue-*（运行时由 applyThemeColor 覆盖；此处作 SSR/首屏兜底）
+ * Figma：浅/暗 primary/6 均为 #635CFF
+ */
+body {
+  --arcoblue-1: 237, 232, 255;
+  --arcoblue-2: 213, 204, 255;
+  --arcoblue-3: 188, 176, 255;
+  --arcoblue-4: 161, 148, 255;
+  --arcoblue-5: 131, 120, 255;
+  --arcoblue-6: 99, 92, 255;
+  --arcoblue-7: 59, 57, 210;
+  --arcoblue-8: 30, 32, 166;
+  --arcoblue-9: 11, 16, 121;
+  --arcoblue-10: 0, 6, 77;
+}
+
+/* 暗色阶梯（1 深 → 10 浅），但 --arcoblue-6 仍钉品牌色 */
+body[arco-theme='dark'] {
+  --arcoblue-1: 0, 6, 77;
+  --arcoblue-2: 9, 14, 121;
+  --arcoblue-3: 30, 32, 166;
+  --arcoblue-4: 63, 61, 210;
+  --arcoblue-5: 109, 102, 255;
+  --arcoblue-6: 99, 92, 255;
+  --arcoblue-7: 168, 156, 255;
+  --arcoblue-8: 192, 181, 255;
+  --arcoblue-9: 215, 207, 255;
+  --arcoblue-10: 237, 232, 255;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  background-color: var(--color-bg-1);
+  color: var(--color-text-1);
+}
+
+/* 侧栏折叠时二级菜单浮层（portal 渲染，需全局样式）
+ * 勿用 .arco-menu-pop：折叠态一级项也带该类，会误伤侧栏图标
+ */
+.arco-trigger-popup .arco-menu,
+.arco-menu-pop-slide {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--color-border-2, #e5e6eb);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  background: var(--color-bg-popup, #fff) !important;
+
+  .arco-menu-item {
+    min-width: 120px;
+    height: 32px !important;
+    margin: 0;
+    padding: 0 12px !important;
+    border-radius: 8px;
+    color: var(--color-text-1, #1d2129);
+    font-size: 14px;
+    line-height: 32px;
+
+    &:hover,
+    &.arco-menu-selected {
+      background: var(--color-fill-2, #f2f3f5) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 500;
+      border-radius: 6px;
+    }
+
+    &::before,
+    &::after {
+      display: none !important;
+    }
+  }
+}
+
+/* 折叠态叶子项 Tooltip：仅文字，浅色样式与二级浮层一致 */
+.arco-menu-item-tooltip {
+  .arco-tooltip-content {
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-2, #e5e6eb);
+    background: var(--color-bg-popup, #fff);
+    color: var(--color-text-1, #1d2129);
+    font-size: 14px;
+    line-height: 22px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .arco-tooltip-arrow {
+    background: var(--color-bg-popup, #fff);
+    border: 1px solid var(--color-border-2, #e5e6eb);
+  }
+}
+
+/* 全局 Message — Figma 602:35325（登录验证提醒） */
+.arco-message-wrapper .arco-message {
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: none;
+
+  .arco-message-icon {
+    margin-right: 8px;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .arco-message-content {
+    font-size: 14px;
+    line-height: 21px;
+    color: var(--color-text-1, #1d2129);
+  }
+}
+
+/* 启用态 Switch：success 绿（Arco Switch 无 checkedColor API） */
+.arco-switch.use-switch-success.arco-switch-checked {
+  background-color: rgb(var(--success-6));
+}
+
+/**
+ * Modal：标题左对齐；底栏按钮 8px 圆角 + 取消描边（Figma 666:21515 等）
+ * 全局按钮圆角由 theme-tokens --border-radius-small 驱动（Arco size-* 依赖该变量）
+ *
+ * Checkbox 也吃 --border-radius-small：14px 方框 + 8px 圆角会像 Radio，
+ * 单独压回 2px，保持列表选择列为方形勾选框。
+ */
+.arco-checkbox-mask {
+  border-radius: 2px;
+}
+
+.arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
+  border-radius: var(--border-radius-small, 8px);
+}
+
+.arco-modal {
+  .arco-modal-header {
+    justify-content: flex-start;
+  }
+
+  .arco-modal-title {
+    flex: 1;
+    text-align: left;
+  }
+
+  .arco-modal-footer {
+    .arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
+      border-radius: var(--border-radius-small, 8px);
+    }
+
+    /* 取消 / 次要：白底描边，不用 Arco 默认灰底 */
+    .arco-btn-secondary,
+    .arco-btn-outline,
+    .arco-btn-default:not(.arco-btn-primary) {
+      background: var(--color-bg-2, #fff);
+      border: 1px solid var(--color-border-2, #e5e6eb);
+      color: var(--color-text-2, #4e5969);
+
+      &:hover {
+        background: var(--color-fill-1, #f7f8fa);
+        border-color: var(--color-border-2, #e5e6eb);
+        color: var(--color-text-1, #1d2129);
+      }
+    }
+  }
+}
+
+/* Modal.confirm / 简易弹窗标题也左对齐 */
+.arco-modal-simple .arco-modal-title,
+.arco-modal-confirm .arco-modal-title {
+  text-align: left;
+}

@@ -1,0 +1,80 @@
+/**
+ * Figma 浅色 / 暗色语义色 → Arco CSS 变量
+ * 浅色: node 609:47589 | 暗色: node 608:46600
+ * primary/6 两端均为 #635CFF
+ */
+
+/* —— 浅色（与 Arco 默认接近，显式锁定 Figma 值） —— */
+body {
+  /* bg */
+  --color-bg-1: #f7f8fa; /* 页面背景 */
+  --color-bg-2: #ffffff; /* 侧栏 / 卡片 / 表格 */
+  --color-bg-3: #ffffff;
+  --color-bg-4: #ffffff;
+  --color-bg-5: #ffffff;
+  --color-bg-white: #ffffff;
+  --color-bg-popup: #ffffff;
+
+  /* fill */
+  --color-fill-1: #f7f8fa;
+  --color-fill-2: #f2f3f5;
+  --color-fill-3: #e5e6eb;
+  --color-fill-4: #c9cdd4;
+
+  /* text */
+  --color-text-1: #1d2129;
+  --color-text-2: #4e5969;
+  --color-text-3: #86909c;
+  --color-text-4: #c9cdd4;
+
+  /* border */
+  --color-border-1: #f2f3f5;
+  --color-border-2: #e5e6eb;
+  --color-border-3: #c9cdd4;
+  --color-border-4: #86909c;
+
+  /* status（Figma success/danger） */
+  --success-1: 247, 255, 249;
+  --success-6: 77, 181, 130;
+  --danger-1: 255, 236, 232;
+  --danger-6: 235, 87, 88;
+
+  /**
+   * 圆角（Figma：圆角/s=8、圆角/m=12）
+   * Arco 按钮默认用 --border-radius-small（原 2px），需提到 8 才能与稿面一致
+   */
+  --border-radius-small: 8px;
+  --border-radius-medium: 8px;
+  --border-radius-large: 12px;
+}
+
+/* —— 暗色 —— */
+body[arco-theme='dark'] {
+  --color-bg-1: #171a21; /* 页面背景 */
+  --color-bg-2: #232832; /* 侧栏 / 卡片 / 表格 */
+  --color-bg-3: #232832;
+  --color-bg-4: #2a303c;
+  --color-bg-5: #232832;
+  --color-bg-white: rgba(255, 255, 255, 0.9);
+  --color-bg-popup: #232832;
+
+  --color-fill-1: rgba(255, 255, 255, 0.04);
+  --color-fill-2: rgba(255, 255, 255, 0.08);
+  --color-fill-3: rgba(255, 255, 255, 0.12);
+  --color-fill-4: rgba(255, 255, 255, 0.16);
+
+  --color-text-1: rgba(255, 255, 255, 0.9);
+  --color-text-2: rgba(255, 255, 255, 0.7);
+  --color-text-3: rgba(255, 255, 255, 0.5);
+  --color-text-4: rgba(255, 255, 255, 0.3);
+
+  --color-border-1: #1f2228;
+  --color-border-2: #262828;
+  --color-border-3: rgba(255, 255, 255, 0.16);
+  --color-border-4: rgba(255, 255, 255, 0.3);
+
+  --success-1: 47, 58, 55;
+  --success-6: 77, 181, 130;
+  --danger-1: 59, 37, 39;
+  --danger-6: 235, 87, 88;
+}

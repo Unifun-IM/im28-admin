@@ -1,0 +1,37 @@
+---
+description: 图标优先使用 Figma 设计稿 SVG，并单独落盘；公用抽到 shared/assets
+alwaysApply: true
+---
+
+# Figma 图标 SVG 资源（全局）
+
+从设计稿还原 UI 时，**图标优先导入 Figma 导出的 SVG**，不要手写 path、不要用近似的第三方图标凑合（Arco 标准组件自带图标除外）。
+
+## 必须遵守
+
+1. **来源**：用 Figma MCP `get_design_context` / `download_assets` 拿到的矢量资源（或等价导出），禁止凭记忆手绘 SVG。
+2. **落盘**：每个图标保存为**独立文件**（如 `src/**/assets/icon-*.svg`），`import` 后以 `<img>` / 组件引用；禁止把整段 SVG 内联进 TSX（装饰性 inline 仅作临时调试，合并前须改成文件）。
+3. **FSD 归属**：
+   - 仅某一 `feature` / `page` / `widget` 使用 → 放该切片的 `assets/`（如 `features/user-chat-view/assets/`）
+   - **≥2 个切片复用，或壳层/全局通用**（logo、侧栏菜单、Empty、跨页状态图标等）→ **抽到 `shared/assets/`**，禁止在多个 feature 里复制同一份 SVG
+   - `shared` 不得依赖 `features` / `pages` 下的资源；下层只 `import` `@shared/assets/...` 或相对路径到 `shared/assets`
+4. **命名**：`icon-{场景}-{名称}.svg`，同色变体可加后缀（如 `-self` / `-peer`、`-white`）；进 `shared/assets` 的用通用名（如 `logo.svg`、`empty-state.svg`），避免带单一业务前缀。
+5. **过期 URL**：MCP asset URL 约 7 天失效；提交仓库的必须是本地文件字节，不是远程链接。
+6. **例外**：Arco 组件自带图标（`IconSearch` 等）可继续用；仅**稿面自定义图标**走本规则。
+
+## 反例 / 正例
+
+```tsx
+// ❌ 手写双勾 / 内联大段 SVG
+<svg viewBox="0 0 12 12">...</svg>
+
+// ❌ 同一图标在两个 feature 各拷一份
+// features/a/assets/icon-copy.svg + features/b/assets/icon-copy.svg
+
+// ✅ 切片私有：设计稿导出后落盘再引用
+import iconChatRead from '../assets/icon-chat-read.svg';
+<img src={iconChatRead} alt="" className="size-3" />
+
+// ✅ 公用：抽到 shared/assets
+import emptyState from '@shared/assets/empty-state.svg';
+```

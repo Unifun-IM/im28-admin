@@ -1,0 +1,609 @@
+@nav-size-height: 44px;
+@page-tabs-height: 32px;
+@header-navbar-gap: 10px;
+@header-size-height: @nav-size-height + @header-navbar-gap + @page-tabs-height;
+@sider-logo-height: 64px;
+@sider-width: 240px;
+@sider-collapsed-width: 56px;
+@layout-max-width: 1100px;
+
+.layout {
+  width: 100%;
+  height: 100%;
+}
+
+.layout-navbar {
+  position: fixed;
+  min-width: 0;
+  top: 0;
+  height: @header-size-height;
+  z-index: 100;
+  box-sizing: border-box;
+  padding: 0 12px;
+  /* Figma 741:29115：顶栏白底，与内容区 fill-1 区分 */
+  background-color: var(--color-bg-2, #fff);
+  transition:
+    left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    height 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    gap 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    padding 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: @header-navbar-gap;
+
+  &-scrolled {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &-hidden {
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    gap: 0;
+  }
+
+  /* 内容全屏：Navbar + PageTabs 一并收起 */
+  &-content-fullscreen {
+    height: 0;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    left: 0 !important;
+    width: 100% !important;
+    pointer-events: none;
+  }
+}
+
+.layout-navbar-main {
+  flex-shrink: 0;
+  height: @nav-size-height;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    height 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    opacity 0.2s ease,
+    margin 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
+
+  .layout-navbar-content-fullscreen & {
+    height: 0;
+    opacity: 0;
+    margin: 0;
+    pointer-events: none;
+  }
+}
+
+/* —— Figma 862:20168：贴边全高 240，仅右边框，无圆角/外边距 —— */
+.layout-sider {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  box-sizing: border-box;
+  height: 100% !important;
+  background-color: var(--color-bg-2, #fff);
+  border: none;
+  border-right: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+  border-radius: 0;
+  overflow: hidden;
+  transition:
+    width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    min-width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    opacity 0.2s ease,
+    transform 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    border-color 0.2s ease;
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 4px solid transparent;
+    background-clip: padding-box;
+    border-radius: 7px;
+    background-color: var(--color-text-4);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-3);
+  }
+
+  &::after {
+    display: none;
+  }
+
+  > :global(.arco-layout-sider-children) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: hidden;
+  }
+
+  :global(.arco-layout-sider-trigger) {
+    display: none;
+  }
+}
+
+.layout-sider-content-fullscreen {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0;
+  transform: translateX(-12px);
+  border-right-color: transparent !important;
+  pointer-events: none;
+}
+
+.sider-logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  height: @sider-logo-height;
+  padding: 0 8px 0 8px;
+  box-sizing: border-box;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    margin: 8px; /* 44 触控区中的 28 logo */
+  }
+
+  span {
+    flex: 1;
+    min-width: 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    color: var(--color-text-1, #1d2129);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.sider-logo-collapsed {
+  justify-content: center;
+  padding: 0 8px;
+
+  svg {
+    margin: 8px;
+  }
+}
+
+.menu-wrapper {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 0 8px 16px;
+}
+
+.sideMenu {
+  width: 100% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-right: none !important;
+
+  :global(.arco-menu-inner) {
+    padding: 0;
+  }
+
+  /* 缩进只走下方 padding；隐藏 Arco 按 level 叠出的多个 .arco-menu-indent */
+  :global(.arco-menu-indent) {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  /*
+   * Figma 796:20719
+   * L1：text-2 / 透明底 / 圆角 2 / px12 py5 / gap16
+   * 选中叶子：fill-3 + text-1 Medium / 圆角 8（与二三级一致）
+   * L2 叶子：text-1 / pl42 / 选中 fill-3 圆角 8
+   * L2 分组（嵌套 SubMenu）：fill-1 圆角 8 p4；组头 text-3；组内 pl56
+   */
+  :global(.arco-menu-item),
+  :global(.arco-menu-inline-header) {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: auto !important;
+    min-height: 32px;
+    margin-bottom: 4px;
+    padding: 5px 12px !important;
+    line-height: 22px;
+    border-radius: 2px;
+    color: var(--color-text-2, #4e5969) !important;
+    font-size: 14px;
+    font-weight: 400;
+    background: transparent !important;
+
+    > :global(.arco-icon),
+    > :global(svg),
+    > span :global(svg),
+    :global(.arco-menu-item-inner) > :global(.arco-icon),
+    :global(.arco-menu-item-inner) > :global(svg) {
+      margin-right: 0 !important;
+      margin-left: 0 !important;
+      color: var(--color-text-2, #4e5969) !important;
+    }
+
+    &:hover {
+      background-color: var(--color-fill-1, #f7f8fa) !important;
+      color: var(--color-text-1, #1d2129) !important;
+
+      > :global(.arco-icon),
+      > :global(svg),
+      > span :global(svg),
+      :global(.arco-menu-item-inner) > :global(.arco-icon),
+      :global(.arco-menu-item-inner) > :global(svg) {
+        color: var(--color-text-1, #1d2129) !important;
+      }
+    }
+  }
+
+  :global(.arco-menu-item) > :global(.arco-menu-item-inner) {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+    padding: 0 !important;
+    color: inherit;
+  }
+
+  :global(.arco-menu-inline-header) {
+    font-weight: 400;
+    /* Arco 默认 overflow:hidden，易裁切 inline SVG 图标 */
+    overflow: visible !important;
+
+    /* Arco 将 title 包在单一 span 内；用 flex 对齐叶子项的 icon + 16px 间距 */
+    > span:not(:global(.arco-menu-icon-suffix)) {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+      overflow: visible;
+    }
+  }
+
+  /* 选中叶子：fill-3 + text-1 圆角 8，与二三级一致；去掉 Arco primary 紫 */
+  :global(.arco-menu-item.arco-menu-selected),
+  :global(.arco-menu-item.arco-menu-selected:hover) {
+    border-radius: 8px;
+    background-color: var(--color-fill-3, #e5e6eb) !important;
+    color: var(--color-text-1, #1d2129) !important;
+    font-weight: 500;
+
+    > :global(.arco-icon),
+    > :global(svg),
+    :global(.arco-menu-item-inner),
+    :global(.arco-menu-item-inner) > :global(.arco-icon),
+    :global(.arco-menu-item-inner) > :global(svg) {
+      color: var(--color-text-1, #1d2129) !important;
+    }
+
+    &::before,
+    &::after {
+      display: none !important;
+    }
+  }
+
+  /* L1 SubMenu 头：有选中子项时保持未选中外观 */
+  :global(.arco-menu-inline-header.arco-menu-selected),
+  :global(.arco-menu-inline-header.arco-menu-selected:hover) {
+    background-color: transparent !important;
+    color: var(--color-text-2, #4e5969) !important;
+    font-weight: 400;
+
+    > :global(svg),
+    > :global(.arco-icon),
+    > span :global(svg) {
+      color: var(--color-text-2, #4e5969) !important;
+    }
+  }
+
+  :global(.arco-menu-icon-suffix) {
+    color: var(--color-text-3, #86909c) !important;
+    font-size: 12px;
+  }
+
+  /* L2：直接挂在一级下的叶子（如用户日志） */
+  :global(.arco-menu-inline-content) {
+    > :global(.arco-menu-item) {
+      padding-left: 42px !important;
+      padding-right: 12px !important;
+      gap: 0;
+      border-radius: 2px;
+      color: var(--color-text-1, #1d2129) !important;
+      background: transparent !important;
+
+      &:hover {
+        background-color: var(--color-fill-1, #f7f8fa) !important;
+        color: var(--color-text-1, #1d2129) !important;
+      }
+    }
+
+    > :global(.arco-menu-item.arco-menu-selected),
+    > :global(.arco-menu-item.arco-menu-selected:hover) {
+      border-radius: 8px;
+      background-color: var(--color-fill-3, #e5e6eb) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 500;
+    }
+  }
+
+  /* L2 分组：嵌套 SubMenu（用户管理）
+   * 尺寸（padding / 表头缩进）始终固定，避免展开时与高度动画叠加产生晃动；
+   * 仅在三级展开时切换 fill-1 背景与组头字色。
+   */
+  :global(.arco-menu-inline .arco-menu-inline) {
+    box-sizing: border-box;
+    margin-bottom: 4px;
+    padding: 4px;
+    border-radius: 8px;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+
+    > :global(.arco-menu-inline-header) {
+      gap: 0;
+      margin-bottom: 4px;
+      /* 容器已有 4px padding，左侧 38 对齐 L2 叶子的 42 */
+      padding: 5px 8px 5px 38px !important;
+      border-radius: 8px;
+      color: var(--color-text-1, #1d2129) !important;
+      background: transparent !important;
+      font-weight: 400;
+      transition: color 0.15s ease, background-color 0.15s ease;
+
+      &:hover {
+        color: var(--color-text-1, #1d2129) !important;
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+      }
+
+      > :global(svg),
+      > :global(.arco-icon) {
+        display: none;
+      }
+    }
+
+    > :global(.arco-menu-inline-header.arco-menu-selected),
+    > :global(.arco-menu-inline-header.arco-menu-selected:hover) {
+      color: var(--color-text-1, #1d2129) !important;
+      background: transparent !important;
+      font-weight: 400;
+    }
+
+    /* L3：组内项 pl56 / text-1 / 选中 fill-3 Medium 圆角 8 */
+    :global(.arco-menu-inline-content) > :global(.arco-menu-item) {
+      padding-left: 52px !important;
+      padding-right: 8px !important;
+      margin-bottom: 4px;
+      border-radius: 8px;
+      color: var(--color-text-1, #1d2129) !important;
+      background: transparent !important;
+      font-weight: 400;
+
+      &:hover {
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+        color: var(--color-text-1, #1d2129) !important;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    :global(.arco-menu-inline-content)
+      > :global(.arco-menu-item.arco-menu-selected),
+    :global(.arco-menu-inline-content)
+      > :global(.arco-menu-item.arco-menu-selected:hover) {
+      background-color: var(--color-fill-3, #e5e6eb) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 500;
+    }
+  }
+
+  /* 三级展开：只变色，不改盒模型 */
+  :global(
+    .arco-menu-inline
+      .arco-menu-inline:has(> .arco-menu-inline-header .arco-menu-icon-suffix.is-open)
+  ) {
+    background-color: var(--color-fill-1, #f7f8fa);
+
+    > :global(.arco-menu-inline-header) {
+      color: var(--color-text-3, #86909c) !important;
+
+      &:hover {
+        color: var(--color-text-2, #4e5969) !important;
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+      }
+    }
+
+    > :global(.arco-menu-inline-header.arco-menu-selected),
+    > :global(.arco-menu-inline-header.arco-menu-selected:hover) {
+      color: var(--color-text-3, #86909c) !important;
+      background: transparent !important;
+    }
+  }
+
+  :global(.arco-menu-pop-header) {
+    border-radius: 8px;
+  }
+
+  /* 折叠：仅图标（Figma 602:35590 menu最小展示）
+   * 默认 40×32 / 圆角 2；选中·悬停 40×40 / 圆角 12 / fill-2
+   */
+  &:global(.arco-menu-collapse) {
+    width: 40px !important;
+    margin: 0 auto;
+
+    :global(.arco-menu-item),
+    :global(.arco-menu-pop-header) {
+      display: flex !important;
+      width: 40px !important;
+      height: 40px !important;
+      min-height: 40px;
+      margin: 0 auto 4px;
+      padding: 0 !important;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      border-radius: 2px;
+      background: transparent !important;
+      overflow: hidden;
+      color: var(--color-text-2, #4e5969) !important;
+
+      > span,
+      > :global(.arco-menu-item-inner) > span {
+        display: none !important;
+      }
+
+      :global(.arco-icon),
+      :global(svg) {
+        display: block;
+        flex-shrink: 0;
+        margin: 0 !important;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: inherit !important;
+      }
+
+      &:hover {
+        height: 40px !important;
+        min-height: 40px;
+        border-radius: 12px;
+        background-color: var(--color-fill-2, #f2f3f5) !important;
+        color: var(--color-text-1, #1d2129) !important;
+      }
+    }
+
+    :global(.arco-menu-item.arco-menu-selected),
+    :global(.arco-menu-pop-header.arco-menu-selected) {
+      height: 40px !important;
+      min-height: 40px;
+      border-radius: 12px;
+      background-color: var(--color-fill-2, #f2f3f5) !important;
+      color: var(--color-text-1, #1d2129) !important;
+      font-weight: 400;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
+    }
+
+    :global(.arco-menu-icon-suffix) {
+      display: none !important;
+    }
+
+    :global(.arco-menu-item-inner),
+    :global(.arco-menu-pop-header) {
+      justify-content: center;
+    }
+  }
+}
+
+.collapse-btn {
+  flex-shrink: 0;
+  height: 24px;
+  width: 24px;
+  margin: 12px;
+  margin-left: auto;
+  background-color: var(--color-fill-1, #f7f8fa);
+  color: var(--color-text-3, #86909c);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    background-color: var(--color-fill-2, #f2f3f5);
+    color: var(--color-text-1);
+  }
+
+  :global(svg) {
+    font-size: 14px;
+  }
+}
+
+.layout-sider:global(.arco-layout-sider-collapsed) {
+  .sider-logo {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .sider-logo :global(svg) {
+    margin: 0;
+  }
+
+  .collapse-btn {
+    /* Figma shrink-wrapper：高 48 = 上下 12 + 按钮 24，水平居中 */
+    margin: 12px auto;
+  }
+
+  .menu-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 0 8px 16px;
+  }
+}
+
+.icon {
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  overflow: visible;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+.icon-empty {
+  display: none;
+}
+
+.layout-content {
+  background-color: var(--color-bg-1, #f7f8fa);
+  min-width: @layout-max-width;
+  min-height: 100vh;
+  transition:
+    padding-left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
+    padding-top 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
+  box-sizing: border-box;
+}
+
+.layout-content-wrapper {
+  padding: 12px;
+}
+
+/* 内容全屏：主区撑满视口，供列表页仅展示表格 */
+.layout-content-fullscreen {
+  .layout-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100vh;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  :global(.arco-layout-content) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+
+.spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - @nav-size-height);
+}

@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * preflight: false 时未启用 Tailwind 边框重置。
+ * 仅用 border-solid（四边 style:solid）而不设 width 时，未声明的边会回退为
+ * CSS 初始值 medium ≈ 3px，与 border-b / border-t 等联用会出现「底边 1px、其它边 3px」。
+ * 此处只补齐 preflight 中的 border 重置，不全开 preflight，避免冲掉 Arco 其它基础样式。
+ * Arco 组件用 class 选择器写明 border，特异性高于 *，不受影响。
+ */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-width: 0;
+    border-style: solid;
+    border-color: currentColor;
+  }
+}
+

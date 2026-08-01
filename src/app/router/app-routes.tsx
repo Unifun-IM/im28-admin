@@ -1,25 +1,24 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 
-import { LoginPage } from '@pages/login';
-import type { AdminMenuItem } from '@widgets/admin-shell';
+import LoginPage from '@pages/login';
 
-import { DashboardRoute } from './DashboardRoute';
+import { AdminLayout } from './admin-layout';
 
-export function appRoutes(menuItems: AdminMenuItem[] = []): RouteObject[] {
+export function appRoutes(): RouteObject[] {
   return [
-    {
-      path: '/',
-      element: <Navigate replace to="/dashboard" />
-    },
     {
       path: '/login',
       element: <LoginPage />,
       handle: { title: 'Login', public: true }
     },
     {
-      path: '/dashboard',
-      element: <DashboardRoute menuItems={menuItems} />,
-      handle: { menuKey: 'dashboard', title: 'Dashboard' }
+      path: '/*',
+      element: <AdminLayout />,
+      handle: { title: 'Admin' }
+    },
+    {
+      path: '/',
+      element: <Navigate replace to="/user/query" />
     }
   ];
 }

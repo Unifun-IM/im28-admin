@@ -1,21 +1,50 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Local editor and OS files
-.DS_Store
-*.log
-
-.idea
+# Build
+dist/
 build/
-.gradle
-local.properties
-*.iml
-*.hprof
-.cxx/
-*.keystore
-!debug.keystore
-.kotlin/
-CLAUDE.md
-packages/im-sdk/dist
-.claude
-.trae
+out/
+
+# Test / coverage
+coverage/
+
+# Logs / debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Lint caches
+.eslintcache
+.stylelintcache
+
+# Vite
+.vite/
+
+# OpenAPI generated intermediate
+openapi.json
+
+# Misc
+*.pem
+.vercel

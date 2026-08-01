@@ -1,0 +1,275 @@
+/* —— 页面标签：Arco Tabs + Figma 741:29115 视觉 —— */
+.use-page-tabs.arco-tabs {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: visible;
+  /* 顶栏白底，激活态用页面底色衔接内容区 */
+  background-color: transparent;
+}
+
+.use-page-tabs .arco-tabs-content {
+  display: none;
+}
+
+.use-page-tabs .arco-tabs-header-nav {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  overflow: visible;
+}
+
+.use-page-tabs .arco-tabs-header-nav::before {
+  height: 0;
+}
+
+.use-page-tabs .arco-tabs-header-scroll {
+  width: 100%;
+  height: 32px;
+  align-items: center;
+}
+
+.use-page-tabs .arco-tabs-header-nav-card-gutter {
+  .arco-tabs-header-title {
+    position: relative;
+    box-sizing: border-box;
+    height: 32px;
+    margin: 0;
+    margin-right: 2px;
+    /* 右侧固定预留关闭区，有无 × 宽度一致，避免切换跳动 */
+    padding: 5px 28px 5px 12px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background-color: transparent;
+    color: var(--color-text-3, #86909c);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .arco-tabs-header-title:hover {
+    color: var(--color-text-2, #4e5969);
+    background-color: transparent;
+  }
+
+  .arco-tabs-header-title:last-child {
+    margin-right: 0;
+  }
+
+  .arco-tabs-header-title-editable {
+    padding-right: 28px;
+  }
+
+  /* 激活：高度保持 32，box-shadow 向下盖住底边，避免 32↔33 跳动 */
+  .arco-tabs-header-title-active,
+  .arco-tabs-header-title-active:hover {
+    z-index: 1;
+    height: 32px;
+    margin-bottom: 0;
+    border-bottom-color: transparent;
+    background-color: var(--color-bg-1, #f7f8fa);
+    box-shadow: 0 1px 0 0 var(--color-bg-1, #f7f8fa);
+    color: rgb(var(--primary-6));
+    line-height: 22px;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      width: 16px;
+      height: 8px;
+      background-color: var(--color-bg-1, #f7f8fa);
+      pointer-events: none;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cpath d='M8 0C8 4.41828 11.5817 8 16 8H0C4.41828 8 8 4.41828 8 0Z' fill='black'/%3E%3C/svg%3E")
+        center / 100% 100% no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cpath d='M8 0C8 4.41828 11.5817 8 16 8H0C4.41828 8 8 4.41828 8 0Z' fill='black'/%3E%3C/svg%3E")
+        center / 100% 100% no-repeat;
+    }
+
+    &::before {
+      left: -8px;
+    }
+
+    &::after {
+      right: -8px;
+    }
+  }
+}
+
+.use-page-tab-title {
+  display: inline-flex;
+  max-width: 120px;
+  align-items: center;
+  gap: 4px;
+  vertical-align: top;
+  cursor: default;
+  user-select: none;
+}
+
+.use-page-tab-title-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.use-page-tab-pin {
+  flex-shrink: 0;
+  width: 12px;
+  font-size: 12px;
+  color: var(--color-text-3, #86909c);
+}
+
+.use-page-tabs
+  .arco-tabs-header-title-active
+  .use-page-tab-pin {
+  color: rgb(var(--primary-6));
+}
+
+.use-page-tabs-context-menu.arco-dropdown-menu {
+  min-width: 140px;
+  padding: 4px 0;
+}
+
+.use-page-tabs .arco-tabs-close-icon {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  margin-left: 0;
+  transform: translateY(-50%);
+  color: inherit;
+
+  .arco-icon-hover::before {
+    width: 12px;
+    height: 12px;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.use-page-tabs
+  .arco-tabs-header-title-active
+  .arco-tabs-close-icon {
+  color: rgb(var(--primary-6));
+}
+
+/* 固定标签隐藏 ×，仍占位，切换不挤动 */
+.use-page-tabs
+  .arco-tabs-header-title:has(.use-page-tab-title.is-pinned)
+  .arco-tabs-close-icon {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* 溢出左右箭头：与标签栏同高，内容垂直居中 */
+.use-page-tabs .arco-tabs-left-icon,
+.use-page-tabs .arco-tabs-right-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border-radius: 4px;
+  color: var(--color-text-2, #4e5969);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &::before {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover:not(.arco-tabs-nav-icon-disabled) {
+    color: var(--color-text-1, #1d2129);
+
+    &::before {
+      background: var(--color-fill-2, #f2f3f5);
+    }
+  }
+
+  &.arco-tabs-nav-icon-disabled {
+    color: var(--color-text-4, #c9cdd4);
+    cursor: not-allowed;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+.use-page-tabs .arco-tabs-header-extra {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px 0 0;
+  line-height: 1;
+}
+
+.use-page-tabs-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 32px;
+
+  /* Tooltip 触发包裹层也占满行高，避免图标偏上 */
+  > * {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+  }
+}
+
+.use-page-tabs-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-2, #4e5969);
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-1, #1d2129);
+  }
+
+  /* hover 底与 IconHover 一致，不撑高 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: transparent;
+    transform: translate(-50%, -50%);
+  }
+
+  position: relative;
+
+  &:hover::before {
+    background: var(--color-fill-2, #f2f3f5);
+  }
+
+  svg {
+    position: relative;
+    z-index: 1;
+    display: block;
+    font-size: 14px;
+  }
+}

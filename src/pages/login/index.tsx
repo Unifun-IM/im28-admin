@@ -1,27 +1,62 @@
-import { PasswordLoginForm } from '@features/password-login';
-import { Card, Typography } from '@shared/ui';
+import React, { useEffect } from 'react';
+import loginBannerBg from './assets/login-banner-bg.svg';
+import loginLogo from './assets/login-logo.svg';
+import LoginForm from './form';
+import './login.less';
 
-export function LoginPage() {
+/**
+ * 登录页 — Figma 602:35261
+ * 左栏背景：Frame 671 导出图（524×900）
+ */
+function Login() {
+  useEffect(() => {
+    document.body.setAttribute('arco-theme', 'light');
+  }, []);
+
   return (
-    <main className="login-page">
-      <section className="login-visual" aria-label="Arco Design Pro">
-        <div className="login-brand-mark">IM</div>
-        <Typography.Title heading={2} style={{ margin: 0 }}>
-          im-admin
-        </Typography.Title>
-        <Typography.Text className="login-brand-subtitle">
-          Arco Design Pro
-        </Typography.Text>
-      </section>
-      <Card className="login-card">
-        <Typography.Title heading={3} style={{ marginTop: 0 }}>
-          登录
-        </Typography.Title>
-        <Typography.Text className="login-card-subtitle" type="secondary">
-          管理后台工作台入口
-        </Typography.Text>
-        <PasswordLoginForm />
-      </Card>
-    </main>
+    <div className="use-login-page flex h-screen bg-[var(--color-bg-1,#f7f8fa)]">
+      <div className="use-login-banner relative box-border flex h-full w-[524px] shrink-0 overflow-hidden p-[64px] text-white max-[900px]:hidden">
+        <img
+          src={loginBannerBg}
+          alt=""
+          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
+          aria-hidden
+        />
+        <div className="relative z-[1] flex h-full w-[396px] flex-col justify-between">
+          <div className="flex items-center gap-[16px]">
+            <img src={loginLogo} alt="" className="block size-[24px]" />
+            <span className="text-[20px] font-bold leading-[28px] text-white">
+              IM-28 Management
+            </span>
+          </div>
+          <div className="flex flex-col gap-[21px]">
+            <h1 className="m-0 text-[31.5px] font-semibold leading-[39.375px] text-white">
+              Elevate your
+              <br />
+              communication management
+            </h1>
+            <p className="m-0 max-w-[336px] text-[12.25px] leading-[19.906px] text-white/80">
+              A comprehensive backend to manage accounts, control precise permissions,
+              and audit system operations securely.
+            </p>
+          </div>
+          <div className="flex h-[14px] items-center gap-[14px] text-[10.5px] font-medium leading-[14px] text-white/70">
+            <span>© 2026 NexIM Corp</span>
+            <span>•</span>
+            <span>Privacy Policy</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1 items-center justify-center bg-[var(--color-bg-1,#f7f8fa)] px-[24px] pb-[40px]">
+        <div className="w-[360px]">
+          <LoginForm />
+        </div>
+      </div>
+    </div>
   );
 }
+
+Login.displayName = 'LoginPage';
+
+export default Login;

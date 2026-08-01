@@ -1,0 +1,215 @@
+/* —— 用户查聊天 Modal（Figma 791:30433，1024×768 / 圆角 24，上限 90vw×90vh） —— */
+.arco-modal.use-user-chat-modal {
+  width: min(1024px, 90vw);
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: none;
+
+  .arco-modal-content {
+    padding: 0;
+    background: transparent;
+  }
+
+  .arco-modal-header,
+  .arco-modal-footer {
+    display: none;
+  }
+
+  .use-user-chat-search.arco-input-inner-wrapper {
+    height: 32px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 6px;
+    padding: 0 12px;
+
+    .arco-input {
+      font-size: 16px;
+      line-height: 24px;
+    }
+  }
+
+  .use-user-chat-alert.arco-alert {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    padding: 8px 16px;
+    align-items: flex-start;
+
+    .arco-alert-content {
+      font-size: 12px;
+      line-height: 18px;
+      color: var(--color-text-1, #1d2129);
+    }
+  }
+
+  .use-chat-history-search.arco-input-inner-wrapper {
+    height: 40px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 6px;
+    padding: 0 12px;
+    box-shadow: none;
+
+    &:hover,
+    &.arco-input-inner-wrapper-focus {
+      background: #f0f0f0;
+      border: none;
+      box-shadow: none;
+    }
+
+    .arco-input-group-prefix {
+      padding-right: 4px;
+      color: rgba(0, 0, 0, 0.4);
+    }
+
+    .arco-input {
+      font-size: 16px;
+      line-height: 24px;
+      color: rgba(0, 0, 0, 0.9);
+
+      &::placeholder {
+        color: rgba(0, 0, 0, 0.4);
+      }
+    }
+  }
+
+  .use-chat-history-search-btn.arco-btn {
+    height: 40px;
+    background: #7b61ff;
+    border: none;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: #6a52e6;
+      border: none;
+      color: #fff;
+    }
+  }
+
+  .use-chat-history-tabs.arco-tabs {
+    .arco-tabs-header-nav {
+      &::before {
+        display: none;
+      }
+    }
+
+    .arco-tabs-header {
+      height: 48px;
+    }
+
+    .arco-tabs-header-title {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      margin: 0;
+      padding: 0 16px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+      color: rgba(0, 0, 0, 0.4);
+
+      /* Figma：选中下划线 16×3 居中圆角条，不用 Arco ink（强制宽度会左偏） */
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        width: 16px;
+        height: 3px;
+        border-radius: 999px;
+        background: transparent;
+        transform: translateX(-50%);
+        transition: background-color 0.15s ease;
+      }
+    }
+
+    .arco-tabs-header-title:hover {
+      color: var(--color-text-1, #1d2129);
+    }
+
+    .arco-tabs-header-title-active,
+    .arco-tabs-header-title-active:hover {
+      color: var(--color-text-1, #1d2129);
+      font-weight: 400;
+
+      &::after {
+        background: var(--color-text-1, #1d2129);
+      }
+    }
+
+    .arco-tabs-header-ink {
+      display: none !important;
+    }
+
+    /* 「全部」Tab 有搜索结果时用品牌色下划线 */
+    &.is-all-active .arco-tabs-header-title-active::after {
+      background: rgb(var(--primary-6));
+    }
+
+    .arco-tabs-content {
+      display: none;
+    }
+  }
+
+  .use-chat-virtual-list.arco-list {
+    height: 100%;
+    border: none;
+    background: transparent;
+
+    /* 消息不足一屏时贴底（对齐 Figma 聊天区留白在上方） */
+    &:not(.arco-list-virtual) {
+      display: flex;
+      flex-direction: column;
+
+      > .arco-list-content-wrapper,
+      > .arco-spin {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .arco-list-content {
+        margin-top: auto;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+    }
+
+    .arco-list-content,
+    .arco-list-content-wrapper {
+      border: none;
+      background: transparent;
+    }
+
+    .arco-list-item,
+    .arco-list-item-content {
+      padding: 0;
+      border: none;
+      background: transparent;
+      /* 气泡尾巴 / 群聊头像不被裁切 */
+      overflow: visible;
+    }
+
+    .arco-list-scroll-loading {
+      display: none;
+    }
+  }
+}
+
+.use-user-chat-modal-wrap .arco-modal-mask {
+  backdrop-filter: blur(3.5px);
+  background: rgba(0, 0, 0, 0.4);
+}
