@@ -54,7 +54,8 @@ src/app | pages | widgets | features | entities | shared
 ```
 
 - 禁止在 `src/` 下新建 `components`、`containers`、`services`、`utils`、`hooks` 等遗留根目录
-- 页面放 `pages/`；用户交互特性放 `features/`（如拉黑/白名单弹窗、用户详情 Drawer）；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
+- 页面放 `pages/`；用户交互特性放 `features/`（如拉黑/白名单弹窗、用户详情 Drawer、个人中心）；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
+- `entities` 现有 MobX 单例：`global-state`（用户信息 / Pro 壳层 settings）、`page-tabs`、`system-settings`（登录后拉取的后台系统参数）
 - 依赖方向：`pages → widgets/features → entities → shared`，禁止反向依赖；`features` 与 `widgets` 同层，优先不要互相依赖
 
 ## 样式优先级（强制）
@@ -91,12 +92,13 @@ src/app | pages | widgets | features | entities | shared
 
 - 视觉与交互以 Figma「IM管理后台 / 业务1.0」为准；侧栏常规 **240px** / 最小 **56px**（贴边全高、仅右边框，Figma `862:20168`；折叠见 `602:35590`）
 - 通用列表积木复用 `@widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage` / `TableBatchBar`）
-- 业务表格约定（`BizListPage`）：单元格默认单行省略 + 溢出 Tooltip；默认斑马纹（Hover/选中优先）；`操作` 列自动 `fixed: 'right'`，左侧投影走 Arco 横向滚动标准（仅 fixed + 未滚到最右时出现）；分页默认 15 条、选项 15/30/50，**total ≤ 15 不展示分页**；多选时标题旁展示已选数量
+- 业务表格约定（`BizListPage`）：单元格默认单行省略 + 溢出用 Arco `Tooltip`；默认斑马纹（Hover/选中优先）；`操作` 列自动 `fixed: 'right'`，左侧投影走 Arco 横向滚动标准；分页默认 15 条、选项 15/30/50，**total ≤ 15 不展示分页**
 - 详情 Drawer / Modal 内表格统一 `className="use-biz-detail-table"`（外框 + 单元格网格，见 `global.less`）
-- 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉（Figma `602:34917`）
-- 批量操作条 `TableBatchBar`：选中后顶栏居中浮出深色条（Figma `602:34650`），含「只显示已选」开关 + 归档/编辑/删除
+- 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉（Figma `602:34917`）；用户查询等可为 `variant="text"`
+- 批量操作（Figma `741:24735` / `804:19957`）：配置了 `batchActions` 时，表头点「批量操作」才进入选择列；勾选后工具栏右侧浅色 `TableBatchBar`（关闭 / 只显示已选 + Switch / 业务操作）；关闭或「取消批量」退出并清空选中
 - 页面打开记录快捷导航复用 `@widgets/page-tabs`（Figma `609:47633`），由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
-- 文案默认中文；需要 i18n 时走现有 `locale` 模式
+- 系统参数：`systemSettingsStore` 登录后与 `auth/me` 并行拉取；侧栏品牌用 `system_name` / `logo_url`；`formatDateTime` 未传 format 时跟随 `time_format`（`12h`/`24h`）；后台图片上传用 `@shared/lib/uploadAdminImage`（`upload-credential`）
+- UI 文案走 `src/shared/locale/*.ts` + `useLocale()`（zh-CN / en-US）
 
 ## API
 

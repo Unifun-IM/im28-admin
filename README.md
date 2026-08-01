@@ -27,13 +27,15 @@ npm test
 
 联调账号以网关环境为准。登录后默认进入 **用户查询** `/user/query`。
 
+**环境变量：** 复制 `.env.example` → `.env`（已 gitignore，勿提交）。生产构建在 CI 注入 `VITE_API_BASE_URL` 等 `VITE_*`（Vite 构建期打进产物），**不要**提交 `.env.production`。
+
 ## 业务菜单（Figma 业务1.0）
 
 | 模块 | 路由前缀 | 说明 |
 | --- | --- | --- |
 | 用户 | `/user/*` | 查询、黑/白名单、邀请码、日志、详情 |
 | 系统 | `/system/*` | 后台账号、角色、操作日志 |
-| 系统参数 | `/system-params/settings` | 登录/邀请/群聊/消息/推送等配置 |
+| 系统参数 | `/system-params/settings` | 系统名称 / Logo / 默认语言 / 时间格式 / IP 白名单开关 |
 | 财务 | `/finance/*` | 充值/提现订单与渠道 |
 | 交易 | `/trade/*` | 红包记录、配置、详情 |
 | 会话 | `/session/*` | 用户会话、群聊、群详情、聊天记录（只读） |
@@ -47,8 +49,8 @@ src/
   app/           # 应用入口、Providers、路由
   pages/         # 业务页面：user / system / system-params / finance / trade / session / login
   widgets/       # 布局与复合 UI：admin-shell、navbar、biz-list（筛选/汇总/列表）…
-  features/      # 用户交互特性：user-blacklist-action / user-whitelist-action / user-detail / group-detail …
-  entities/      # 业务实体；global-state 为 MobX 全局状态
+  features/      # 用户交互特性：拉黑/白名单、个人中心、角色创建、用户详情 …
+  entities/      # MobX：global-state、page-tabs、system-settings（后台系统参数）
   shared/        # api（含 admin 生成物）、lib、locale、config、assets
 ```
 
@@ -58,8 +60,10 @@ src/
 - 页面 Form `field` / Table `dataIndex` / state **不做字段映射**，列表用 `res.data?.list` / `res.data?.total`
 - **禁止手改** `src/shared/api/admin/**`；文档更新后执行 `npm run openapi`
 - 无文档模块：保留菜单，页面展示「接口未就绪」（`ApiNotReady`）
+- 登录后 `AppProviders` 并行拉 `auth/me` 与 `system-settings/get`；侧栏品牌与 `formatDateTime` 消费 `systemSettingsStore`
+- 后台图片：`@shared/lib/uploadAdminImage` → `postV1AdminCommonUploadCredential`（取返回 `url`）
 
-通用列表积木：`widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage`）。
+通用列表积木：`widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage` / `TableBatchBar`）。批量：表头「批量操作」进入选择模式后再勾选。
 
 壳层对齐：侧栏展开 **240px**、收起 **56px**（贴边全高、仅右边框，见 Figma `862:20168`）；主题色默认 `#635CFF`。
 
@@ -84,7 +88,7 @@ const res = await postV1AdminAuthLogin({ username: 'admin', password: '***' });
 | `shared/api/admin/*` | **Admin OpenAPI 生成物**，不要手改 |
 | `shared/ui/api-not-ready` | 无 OpenAPI 页面空态「接口未就绪」 |
 
-联调时复制 `cp .env.example .env`，按需改 `VITE_API_BASE_URL`。
+联调时复制 `cp .env.example .env`，按需改 `VITE_API_BASE_URL`。正式部署在构建流水线设置同名变量，勿把 `.env.production` 提交进仓库。
 
 ## 脚本
 
