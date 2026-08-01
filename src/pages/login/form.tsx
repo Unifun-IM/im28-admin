@@ -5,7 +5,6 @@ import {
   Message
 } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
-import { IconUnlock, IconUser } from '@arco-design/web-react/icon';
 import React, { useRef, useState } from 'react';
 
 import {
@@ -22,6 +21,8 @@ import ForceChangePasswordModal from './ForceChangePasswordModal';
 import ForcePasswordNoticeModal from './ForcePasswordNoticeModal';
 import GaBindModal from './GaBindModal';
 import GaVerifyModal from './GaVerifyModal';
+import iconUnlock from './assets/icon-unlock.svg';
+import iconUser from './assets/icon-user.svg';
 import { mapLoginToast } from './mapLoginToast';
 import SlideCaptcha from './SlideCaptcha';
 import locale from './locale';
@@ -251,7 +252,9 @@ export default function LoginForm() {
             rules={[{ required: true, message: t['login.form.userName.errMsg'] }]}
           >
             <Input
-              prefix={<IconUser />}
+              prefix={
+                <img src={iconUser} alt="" className="block size-[14px]" />
+              }
               placeholder={t['login.form.userName.placeholder']}
               onPressEnter={onSubmitClick}
             />
@@ -262,7 +265,9 @@ export default function LoginForm() {
             rules={[{ required: true, message: t['login.form.password.errMsg'] }]}
           >
             <Input.Password
-              prefix={<IconUnlock />}
+              prefix={
+                <img src={iconUnlock} alt="" className="block size-[14px]" />
+              }
               placeholder={t['login.form.password.placeholder']}
               onPressEnter={onSubmitClick}
             />

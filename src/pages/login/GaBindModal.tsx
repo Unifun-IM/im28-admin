@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Message, Modal, VerificationCode } from '@arco-design/web-react';
+
+import useLocale from '@shared/lib/useLocale';
+
 import copyIcon from './assets/icon-copy.svg';
+import locale from './locale';
 
 export type GaBindModalProps = {
   visible: boolean;
@@ -31,15 +35,22 @@ export default function GaBindModal({
   onCancel,
   onOk
 }: GaBindModalProps) {
+  const t = useLocale(locale);
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'error' | undefined>();
+  const [qrFailed, setQrFailed] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setCode('');
       setStatus(undefined);
+      setQrFailed(false);
     }
   }, [visible]);
+
+  useEffect(() => {
+    setQrFailed(false);
+  }, [qrUrl]);
 
   useEffect(() => {
     if (!errorTick) return;
@@ -50,11 +61,11 @@ export default function GaBindModal({
   const submit = (value: string) => {
     if (loading) return;
     if (!value) {
-      Message.warning('请输入验证码');
+      Message.warning(t['login.msg.codeEmpty']);
       return;
     }
     if (value.length < 6 || !/^\d{6}$/.test(value)) {
-      Message.warning('请输入6位数字验证码');
+      Message.warning(t['login.msg.codeFormat']);
       return;
     }
     setStatus(undefined);
@@ -65,9 +76,9 @@ export default function GaBindModal({
     if (!secret) return;
     try {
       await navigator.clipboard.writeText(secret.replace(/\s/g, ''));
-      Message.success('已复制密钥');
+      Message.success(t['login.msg.secretCopied']);
     } catch {
-      Message.error('复制失败');
+      Message.error(t['login.msg.secretCopyFail']);
     }
   };
 
@@ -101,11 +112,19 @@ export default function GaBindModal({
       <div className="box-border flex flex-col gap-[24px] px-[24px] py-[12px]">
         <div className="flex justify-center">
           <div className="box-border size-[142px] rounded-[11px] border border-solid border-[#e5e7eb] bg-[#f7f8fa] p-[15px]">
-            {qrUrl ? (
-              <img src={qrUrl} alt="GA QR" className="size-full object-contain" />
+            {qrUrl && !qrFailed ? (
+              <img
+                src={qrUrl}
+                alt="GA QR"
+                className="size-full object-contain"
+                onError={() => {
+                  setQrFailed(true);
+                  Message.error(t['login.msg.qrLoadFail']);
+                }}
+              />
             ) : (
               <div className="flex h-[112px] w-full items-center justify-center border border-dashed border-[#99a1af] bg-[#e5e7eb] text-[10.5px] leading-[14px] text-[#6b7280]">
-                二维码加载中
+                {qrFailed ? '二维码加载失败' : '二维码加载中'}
               </div>
             )}
           </div>

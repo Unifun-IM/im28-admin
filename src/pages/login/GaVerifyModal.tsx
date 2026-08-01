@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, VerificationCode } from '@arco-design/web-react';
+import { Button, Message, Modal, VerificationCode } from '@arco-design/web-react';
+
+import useLocale from '@shared/lib/useLocale';
+
+import locale from './locale';
 
 export type GaVerifyModalProps = {
   visible: boolean;
@@ -12,7 +16,7 @@ export type GaVerifyModalProps = {
 
 /**
  * GA 验证码弹窗 — 非首次登录（已绑定）
- * Figma 602:35395
+ * Figma 602:35395；Toast 文案 Figma 979:39539
  */
 export default function GaVerifyModal({
   visible,
@@ -21,6 +25,7 @@ export default function GaVerifyModal({
   onCancel,
   onOk
 }: GaVerifyModalProps) {
+  const t = useLocale(locale);
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'error' | undefined>();
 
@@ -38,7 +43,15 @@ export default function GaVerifyModal({
   }, [errorTick]);
 
   const submit = (value: string) => {
-    if (loading || value.length < 6) return;
+    if (loading) return;
+    if (!value) {
+      Message.warning(t['login.msg.codeEmpty']);
+      return;
+    }
+    if (value.length < 6 || !/^\d{6}$/.test(value)) {
+      Message.warning(t['login.msg.codeFormatShort']);
+      return;
+    }
     setStatus(undefined);
     onOk(value);
   };
@@ -91,7 +104,6 @@ export default function GaVerifyModal({
           className="min-w-[80px]"
           type="primary"
           loading={loading}
-          disabled={code.length < 6}
           onClick={() => submit(code)}
         >
           确定
