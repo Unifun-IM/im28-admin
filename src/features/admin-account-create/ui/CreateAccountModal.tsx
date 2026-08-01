@@ -119,7 +119,7 @@ export default function CreateAccountModal({
       onCancel={onCancel}
       footer={footer}
       unmountOnExit
-      closable={step === 'form'}
+      closable={false}
       maskClosable={step === 'form'}
       className={cs('use-create-account-modal', {
         'is-success': step === 'success'

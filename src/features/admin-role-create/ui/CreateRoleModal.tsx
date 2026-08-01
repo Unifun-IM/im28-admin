@@ -80,17 +80,35 @@ export default function CreateRoleModal({
     form.resetFields();
     let cancelled = false;
 
+    const fetchAllPermissions = async () => {
+      const pageSize = 500;
+      let page = 1;
+      let total = Infinity;
+      const all: AdminAPI.SysPermission[] = [];
+      while (all.length < total) {
+        const res = await postV1AdminPermissionsList({
+          page,
+          page_size: pageSize
+        });
+        const list = res.data?.list || [];
+        total = res.data?.total ?? list.length;
+        all.push(...list);
+        if (!list.length || list.length < pageSize) break;
+        page += 1;
+      }
+      return all;
+    };
+
     (async () => {
       try {
-        const catalogRes = await postV1AdminPermissionsList({
-          page: 1,
-          page_size: 500
-        });
+        const catalog = await fetchAllPermissions();
         if (cancelled) return;
-        setPermCatalog(catalogRes.data?.list || []);
+        setPermCatalog(catalog);
       } catch {
         if (!cancelled) setPermCatalog([]);
       }
+
+      if (cancelled) return;
 
       if (editingId == null) {
         form.setFieldsValue({ is_enable: true, permission_keys: [] });

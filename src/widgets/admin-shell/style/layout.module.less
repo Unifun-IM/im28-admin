@@ -191,6 +191,12 @@
     padding: 0;
   }
 
+  /* 缩进只走下方 padding；隐藏 Arco 按 level 叠出的多个 .arco-menu-indent */
+  :global(.arco-menu-indent) {
+    display: none !important;
+    width: 0 !important;
+  }
+
   /*
    * Figma 796:20719
    * L1：text-2 / 透明底 / 圆角 2 / px12 py5 / gap16

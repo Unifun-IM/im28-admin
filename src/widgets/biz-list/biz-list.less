@@ -616,6 +616,24 @@
     border: none;
   }
 
+  /* 表头在工具栏下方，不要顶角圆角（Arco 默认吃 --border-radius-medium） */
+  .arco-table-container,
+  .arco-table-header {
+    border-radius: 0;
+  }
+
+  .arco-table-content-scroll::before,
+  .arco-table-content-scroll::after {
+    border-radius: 0;
+  }
+
+  table thead tr:first-child {
+    th:first-child,
+    th:last-child {
+      border-radius: 0;
+    }
+  }
+
   .arco-table-th {
     box-sizing: border-box;
     background: var(--color-fill-1, #f7f8fa);
@@ -628,6 +646,7 @@
     color: var(--color-text-3, #86909c);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
     border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0;
     vertical-align: middle;
   }
 

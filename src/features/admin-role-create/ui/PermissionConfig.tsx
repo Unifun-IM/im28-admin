@@ -23,7 +23,7 @@ function matchKeyword(title: string, kw: string) {
 
 /**
  * 权限配置面板 — Figma 666:21515
- * 层级勾选 / 搜索过滤 / 全选 / 全部展开收起
+ * 交互以稿面为准；提交时由父组件用 permissions 接口做 key→id 映射
  */
 export default function PermissionConfig({
   value = [],
@@ -96,7 +96,6 @@ export default function PermissionConfig({
     }).filter(Boolean) as PermModule[];
   }, [keyword, t]);
 
-  // 搜索时自动展开命中模块
   useEffect(() => {
     if (!keyword.trim()) return;
     setExpanded((prev) => {
@@ -112,9 +111,10 @@ export default function PermissionConfig({
 
   const renderResource = (res: PermResource) => {
     const actionKeys = (res.actions || []).map((a) => a.key);
-    const resKeys = res.leaf || !actionKeys.length
-      ? [res.key]
-      : [res.key, ...actionKeys];
+    const resKeys =
+      res.leaf || !actionKeys.length
+        ? [res.key]
+        : [res.key, ...actionKeys];
     const resAll = resKeys.every((k) => checked.has(k));
     const resSome = !resAll && resKeys.some((k) => checked.has(k));
 

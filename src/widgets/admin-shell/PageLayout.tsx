@@ -16,6 +16,7 @@ import {
 } from '@entities/global-state';
 import { pageTabsStore } from '@entities/page-tabs';
 import IconDashboard from '@shared/assets/icon-dashboard.svg?react';
+import IconRisk from '@shared/assets/icon-risk.svg?react';
 import IconSession from '@shared/assets/icon-session.svg?react';
 import IconSystem from '@shared/assets/icon-system.svg?react';
 import IconTrade from '@shared/assets/icon-trade.svg?react';
@@ -61,6 +62,8 @@ function getIconFromKey(key: string) {
       return <IconTrade className={styles.icon} />;
     case 'session':
       return <IconSession className={styles.icon} />;
+    case 'risk':
+      return <IconRisk className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }
@@ -367,6 +370,7 @@ export const PageLayout = observer(function PageLayout({
                 <Menu
                   className={styles.sideMenu}
                   collapse={collapsed}
+                  levelIndent={0}
                   onClickMenuItem={onClickMenuItem}
                   onClickSubMenu={(_, keys) => setOpenKeys(keys)}
                   openKeys={openKeys}

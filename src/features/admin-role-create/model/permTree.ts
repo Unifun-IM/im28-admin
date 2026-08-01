@@ -1,4 +1,4 @@
-/** 角色权限树 — 对齐 Figma 666:21515 */
+/** 角色权限树 — 对齐 Figma 666:21515 交互结构；提交时用接口 key→id 映射 */
 
 export type PermAction = {
   key: string;

@@ -12,12 +12,20 @@
 }
 
 .use-page-tabs .arco-tabs-header-nav {
+  display: flex;
+  align-items: center;
   height: 32px;
   overflow: visible;
 }
 
 .use-page-tabs .arco-tabs-header-nav::before {
   height: 0;
+}
+
+.use-page-tabs .arco-tabs-header-scroll {
+  width: 100%;
+  height: 32px;
+  align-items: center;
 }
 
 .use-page-tabs .arco-tabs-header-nav-card-gutter {
@@ -157,59 +165,111 @@
   pointer-events: none;
 }
 
-/* 溢出左右箭头：与右侧操作按钮同规格 */
+/* 溢出左右箭头：与标签栏同高，内容垂直居中 */
 .use-page-tabs .arco-tabs-left-icon,
 .use-page-tabs .arco-tabs-right-icon {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin: 0 4px;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  margin: 0;
   border-radius: 4px;
   color: var(--color-text-2, #4e5969);
   font-size: 14px;
+  line-height: 1;
   cursor: pointer;
 
+  &::before {
+    width: 20px;
+    height: 20px;
+  }
+
   &:hover:not(.arco-tabs-nav-icon-disabled) {
-    background: var(--color-fill-2, #f2f3f5);
     color: var(--color-text-1, #1d2129);
+
+    &::before {
+      background: var(--color-fill-2, #f2f3f5);
+    }
+  }
+
+  &.arco-tabs-nav-icon-disabled {
+    color: var(--color-text-4, #c9cdd4);
+    cursor: not-allowed;
+  }
+
+  svg {
+    display: block;
   }
 }
 
 .use-page-tabs .arco-tabs-header-extra {
-  line-height: 32px;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.use-page-tabs-actions {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  align-self: stretch;
-  padding: 0 12px;
+  height: 32px;
+  padding: 0 8px 0 0;
+  line-height: 1;
+}
+
+.use-page-tabs-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 32px;
+
+  /* Tooltip 触发包裹层也占满行高，避免图标偏上 */
+  > * {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+  }
 }
 
 .use-page-tabs-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  box-sizing: border-box;
+  width: 28px;
+  height: 32px;
   padding: 0;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: var(--color-text-2, #4e5969);
+  line-height: 1;
   cursor: pointer;
 
   &:hover {
-    background: var(--color-fill-2, #f2f3f5);
     color: var(--color-text-1, #1d2129);
   }
 
+  /* hover 底与 IconHover 一致，不撑高 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: transparent;
+    transform: translate(-50%, -50%);
+  }
+
+  position: relative;
+
+  &:hover::before {
+    background: var(--color-fill-2, #f2f3f5);
+  }
+
   svg {
+    position: relative;
+    z-index: 1;
+    display: block;
     font-size: 14px;
   }
 }

@@ -88,7 +88,14 @@ export function AppProviders({ children }: PropsWithChildren) {
   }, [theme]);
 
   return (
-    <ConfigProvider locale={getArcoLocale(lang)}>
+    <ConfigProvider
+      locale={getArcoLocale(lang)}
+      componentConfig={{
+        Modal: {
+          closable: false
+        }
+      }}
+    >
       <GlobalContext.Provider value={contextValue}>{children}</GlobalContext.Provider>
     </ConfigProvider>
   );

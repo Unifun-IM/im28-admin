@@ -2,6 +2,7 @@ import React from 'react';
 import { Switch } from '@arco-design/web-react';
 import {
   IconArchive,
+  IconClose,
   IconDelete,
   IconEdit
 } from '@arco-design/web-react/icon';
@@ -22,6 +23,8 @@ export type TableBatchBarProps = {
    * light — Figma 804:20186 浅色条（黑名单批量）
    */
   theme?: 'dark' | 'light';
+  /** 浅色条左侧关闭（退出批量 / 清空选中）— Figma 979:43610 */
+  onExit?: () => void;
 };
 
 const ACTION_BTN_DARK =
@@ -43,7 +46,8 @@ export default function TableBatchBar({
   onDelete,
   extra,
   className,
-  theme = 'dark'
+  theme = 'dark',
+  onExit
 }: TableBatchBarProps) {
   const t = useLocale();
   if (count <= 0) return null;
@@ -69,6 +73,21 @@ export default function TableBatchBar({
           isLight ? 'text-arco-text-1' : 'text-[rgba(255,255,255,0.9)]'
         )}
       >
+        {onExit ? (
+          <button
+            type="button"
+            className={cs(
+              'inline-flex size-3.5 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0',
+              isLight
+                ? 'text-arco-text-2 hover:text-arco-text-1'
+                : 'text-[rgba(255,255,255,0.7)] hover:text-white'
+            )}
+            aria-label={t['common.cancel']}
+            onClick={onExit}
+          >
+            <IconClose className="text-[14px]" />
+          </button>
+        ) : null}
         <span className="whitespace-nowrap">
           {t['common.showSelectedOnly'].replace('{n}', String(count))}
         </span>

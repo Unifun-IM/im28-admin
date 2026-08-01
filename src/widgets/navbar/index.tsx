@@ -19,7 +19,6 @@ import {
   IconPoweroff,
   IconLoading,
   IconSettings,
-  IconClockCircle,
   IconObliqueLine,
   IconSearch
 } from '@arco-design/web-react/icon';
@@ -179,11 +178,6 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
           allowClear
         />
         <div className="flex items-center gap-[8px]">
-          <Settings
-            trigger={
-              <IconButton icon={<IconClockCircle />} tip={t['settings.title']} />
-            }
-          />
           <Select
             triggerElement={
               <IconButton icon={<IconLanguage />} tip={t['message.lang.tips']} />

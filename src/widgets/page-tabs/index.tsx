@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
-import { Dropdown, Menu, Message, Tabs } from '@arco-design/web-react';
-import { IconClose, IconPushpin } from '@arco-design/web-react/icon';
+import { Dropdown, Menu, Message, Tabs, Tooltip } from '@arco-design/web-react';
+import {
+  IconClose,
+  IconExpand,
+  IconPushpin,
+  IconShrink
+} from '@arco-design/web-react/icon';
 import { observer } from 'mobx-react-lite';
 import { useLocation, useNavigate } from 'react-router-dom';
 import cs from 'classnames';
@@ -32,8 +37,7 @@ type ContextAction =
 
 /**
  * 页面打开记录快捷导航 — Figma 741:29115
- * 支持固定标签（默认最多 3）与右键菜单
- * 全屏入口在业务表格工具栏（BizListPage），避免与 PageTabs 重复
+ * 支持固定标签（默认最多 3）、右键菜单与内容区全屏
  */
 function PageTabs({
   title,
@@ -44,6 +48,7 @@ function PageTabs({
   const t = useLocale();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const fullscreen = pageTabsStore.contentFullscreen;
 
   useEffect(() => {
     pageTabsStore.setMaxPinned(maxPinned);
@@ -57,6 +62,15 @@ function PageTabs({
       closable
     });
   }, [pathname, title, closable]);
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') pageTabsStore.setContentFullscreen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [fullscreen]);
 
   const tabs = pageTabsStore.tabs;
 
@@ -140,6 +154,27 @@ function PageTabs({
 
   if (!tabs.length) return null;
 
+  const extra = (
+    <div className="use-page-tabs-actions">
+      <Tooltip
+        content={
+          fullscreen
+            ? t['pageTabs.exitFullscreen']
+            : t['pageTabs.fullscreen']
+        }
+      >
+        <button
+          type="button"
+          className="use-page-tabs-action-btn"
+          aria-pressed={fullscreen}
+          onClick={() => pageTabsStore.toggleContentFullscreen()}
+        >
+          {fullscreen ? <IconShrink /> : <IconExpand />}
+        </button>
+      </Tooltip>
+    </div>
+  );
+
   return (
     <Tabs
       className={cs('use-page-tabs', className)}
@@ -153,6 +188,7 @@ function PageTabs({
       activeTab={pathname}
       onChange={onSelect}
       onDeleteTab={onDeleteTab}
+      extra={extra}
       icons={{ delete: <IconClose /> }}
     >
       {tabs.map((tab) => {
