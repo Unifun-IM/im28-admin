@@ -14,9 +14,15 @@ import {
   IconRight,
   IconSearch
 } from '@arco-design/web-react/icon';
+import {
+  postV1AdminGroupsDetail,
+  postV1AdminGroupsOperationLogsList
+} from '@shared/api/admin/groups';
+import { postV1AdminUsersDetail } from '@shared/api/admin/users';
 import { StatusBadge } from '@shared/ui';
 import { openimLabel } from '@shared/lib/openimLabels';
 import useLocale from '@shared/lib/useLocale';
+import { formatDateTime } from '@shared/lib/formatTime';
 import '@features/user-detail/ui/user-detail-drawer.less';
 import '@shared/ui/biz-detail-table.less';
 
@@ -34,20 +40,17 @@ export type GroupDetailDrawerProps = {
   }) => void;
 };
 
-type DetailData = Record<string, unknown>;
-
 type MemberItem = {
   id?: string;
   userId?: string;
   nickname?: string;
   avatar?: string;
   role?: string;
+  roleLevel?: AdminAPI.RoleLevel;
   joinTime?: string;
   account?: string;
   phone?: string;
-  sharedGroupCount?: number;
-  online?: string;
-  isF1?: boolean;
+  phoneAreaCode?: string;
 };
 
 type LogItem = {
@@ -66,12 +69,60 @@ function initials(name?: string) {
   return text.slice(0, 1);
 }
 
-function formatPhone(phone?: unknown) {
+function formatPhone(phone?: string | null, areaCode?: string | null) {
   const raw = String(phone || '').trim();
   if (!raw || raw === '-') return '-';
   if (raw.startsWith('+')) return raw;
+  const area = String(areaCode || '').trim();
+  if (area) return `${area} ${raw}`;
   if (/^1\d{10}$/.test(raw)) return `+86 ${raw}`;
   return raw;
+}
+
+function displayName(user?: AdminAPI.User | null, fallback = '-') {
+  return user?.nickname || user?.account || user?.user_id || fallback;
+}
+
+function mapManager(
+  t: Record<string, string>,
+  wrap: AdminAPI.AdminDetailGroupManagerWrap
+): MemberItem {
+  const member = wrap.member;
+  const user = wrap.user;
+  const userId = member?.user_id || user?.user_id;
+  return {
+    id: userId,
+    userId,
+    nickname: displayName(user, userId || '-'),
+    avatar: user?.avatar_url,
+    role: openimLabel(t, 'roleLevel', member?.role),
+    roleLevel: member?.role,
+    joinTime: formatDateTime(member?.joined_at, undefined, '-'),
+    account: user?.account,
+    phone: user?.phone,
+    phoneAreaCode: user?.phone_area_code
+  };
+}
+
+function logDetailText(item: AdminAPI.AdminGroupOperationLogWrap): string {
+  const log = item.log;
+  if (!log) return '';
+  const parts: string[] = [];
+  if (log.description) parts.push(log.description);
+  const operator =
+    item.operator_user?.nickname ||
+    item.operator_user?.user_id ||
+    item.operator_sys_user?.display_name ||
+    item.operator_sys_user?.username ||
+    (item.operator_sys_user?.id != null
+      ? String(item.operator_sys_user.id)
+      : undefined) ||
+    log.operator_id;
+  if (operator) parts.push(String(operator));
+  if (log.target_user_ids?.length) {
+    parts.push(log.target_user_ids.join(', '));
+  }
+  return parts.join(' · ');
 }
 
 function LinkValue({
@@ -113,14 +164,23 @@ function SocialLink({
   );
 }
 
-/** 群头像：成员头像九宫格（不足用字） */
+/** 群头像：稿面九宫格；无成员时回退群头像 */
 function GroupAvatar({
   name,
+  avatarUrl,
   members
 }: {
   name: string;
+  avatarUrl?: string;
   members: MemberItem[];
 }) {
+  if (!members.length && avatarUrl) {
+    return (
+      <Avatar size={56} className="use-user-detail-avatar shrink-0">
+        <img alt="" src={avatarUrl} />
+      </Avatar>
+    );
+  }
   const cells = Array.from({ length: 9 }, (_, i) => members[i]);
   return (
     <div className="box-border grid size-[56px] shrink-0 grid-cols-3 grid-rows-3 gap-[1.4px] overflow-hidden rounded-[8.4px] bg-[#e7e7e7]">
@@ -141,33 +201,10 @@ function GroupAvatar({
 }
 
 /**
- * 群详情 Drawer — Figma 666:22243（基本信息）/ 755:13957（操作日志）
- * 群成员 666:22310 / 成员用户信息 666:22396
+ * 群详情 Drawer
+ * Figma 977:22817 基本信息 / 977:22961 操作日志 / 977:23026 群成员 / 977:23094 成员用户信息
+ * 全量成员列表暂无 Admin 契约，成员视图展示 detail.managers（群主及管理员）
  */
-/** 会话接口暂不对接：仅用 groupId 撑起交互壳 */
-function emptyDetail(groupId?: string | null): DetailData {
-  return {
-    groupId: groupId || '-',
-    name: '-',
-    groupName: '-',
-    ownerId: '',
-    ownerName: '-',
-    memberCount: 0,
-    createdAt: '-',
-    lastActiveTime: '-',
-    creatorName: '-',
-    joinMethod: '邀请加入',
-    allowInvite: false,
-    invitePermission: '关',
-    speakPermission: '无限制',
-    muteStatus: '不禁言',
-    members: [] as MemberItem[],
-    admins: [] as MemberItem[],
-    logs: [] as LogItem[],
-    _statusRaw: undefined
-  };
-}
-
 export default function GroupDetailDrawer({
   visible,
   groupId,
@@ -177,11 +214,17 @@ export default function GroupDetailDrawer({
 }: GroupDetailDrawerProps) {
   const t = useLocale();
   const [loading, setLoading] = useState(false);
-  const [detail, setDetail] = useState<DetailData | null>(null);
+  const [memberLoading, setMemberLoading] = useState(false);
+  const [detail, setDetail] =
+    useState<AdminAPI.AdminDetailGroupEnvelope['data']>();
+  const [logs, setLogs] = useState<AdminAPI.AdminGroupOperationLogWrap[]>([]);
   const [tab, setTab] = useState<string>(defaultTab);
   const [view, setView] = useState<View>('main');
   const [memberKeyword, setMemberKeyword] = useState('');
   const [activeMember, setActiveMember] = useState<MemberItem | null>(null);
+  const [memberFrom, setMemberFrom] = useState<'main' | 'members'>('members');
+  const [memberUser, setMemberUser] =
+    useState<AdminAPI.AdminDetailUserEnvelope['data']>();
 
   useEffect(() => {
     if (!visible) return;
@@ -189,30 +232,79 @@ export default function GroupDetailDrawer({
     setView('main');
     setMemberKeyword('');
     setActiveMember(null);
+    setMemberFrom('members');
+    setMemberUser(undefined);
   }, [visible, defaultTab, groupId]);
 
   useEffect(() => {
     if (!visible || !groupId) return;
+    let cancelled = false;
     setLoading(true);
-    setDetail(emptyDetail(groupId));
-    setLoading(false);
+    Promise.all([
+      postV1AdminGroupsDetail({ group_id: groupId }),
+      postV1AdminGroupsOperationLogsList({
+        group_id: groupId,
+        page: 1,
+        page_size: 50
+      })
+    ])
+      .then(([detailRes, logsRes]) => {
+        if (cancelled) return;
+        setDetail(detailRes.data);
+        setLogs(logsRes.data?.list || []);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [visible, groupId]);
 
-  const name = String(detail?.name || '-');
-  const statusRaw = detail?._statusRaw as AdminAPI.GroupStatus | undefined;
+  useEffect(() => {
+    if (view !== 'member' || !activeMember?.userId) {
+      setMemberUser(undefined);
+      return;
+    }
+    let cancelled = false;
+    setMemberLoading(true);
+    postV1AdminUsersDetail({ user_id: activeMember.userId })
+      .then((res) => {
+        if (!cancelled) setMemberUser(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setMemberUser(undefined);
+      })
+      .finally(() => {
+        if (!cancelled) setMemberLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [view, activeMember?.userId]);
+
+  const group = detail?.group;
+  const name = group?.title || '-';
+  const statusRaw = group?.status;
   const status = openimLabel(t, 'groupStatus', statusRaw);
+
   const members = useMemo(
-    () => ((detail?.members as MemberItem[]) || []) as MemberItem[],
-    [detail]
+    () => (detail?.managers || []).map((wrap) => mapManager(t, wrap)),
+    [detail?.managers, t]
   );
-  const admins = useMemo(() => {
-    const fromDetail = (detail?.admins as MemberItem[]) || [];
-    if (fromDetail.length) return fromDetail;
-    return members.filter((m) => m.role === '管理员' || m.role === '群主');
-  }, [detail, members]);
-  const logs = useMemo(
-    () => ((detail?.logs as LogItem[]) || []) as LogItem[],
-    [detail]
+
+  const timelineItems = useMemo<LogItem[]>(
+    () =>
+      logs.map((item, index) => {
+        const log = item.log;
+        return {
+          id: log?.log_id || `${log?.operated_at}-${index}`,
+          time: formatDateTime(log?.operated_at, 'YYYY/MM/DD HH:mm:ss', '-'),
+          action: log?.action || '-',
+          detail: logDetailText(item)
+        };
+      }),
+    [logs]
   );
 
   const filteredMembers = useMemo(() => {
@@ -229,47 +321,108 @@ export default function GroupDetailDrawer({
     );
   }, [members, memberKeyword]);
 
+  const ownerName = displayName(detail?.owner, group?.owner_user_id || '-');
+  const creatorName = displayName(detail?.creator, ownerName);
+  const memberTotal = group?.member_count ?? members.length;
+
+  const joinMethod = group?.join_approval_required
+    ? t['groupDetail.join.approval']
+    : t['groupDetail.join.invite'];
+  const invitePermission = group?.allow_member_invite
+    ? t['groupDetail.switch.on']
+    : t['groupDetail.switch.off'];
+  const speakPermission =
+    group?.send_frequency_enabled && group.send_frequency_seconds
+      ? t['groupDetail.speak.seconds'].replace(
+          '{n}',
+          String(group.send_frequency_seconds)
+        )
+      : t['groupDetail.speak.unlimited'];
+  const muteStatus = group?.mute_all
+    ? t['groupDetail.mute.all']
+    : group?.mute_member
+      ? t['groupDetail.mute.member']
+      : t['groupDetail.mute.none'];
+
   const titleText =
-    view === 'members' ? '群成员' : view === 'member' ? '用户详情' : '群详情';
+    view === 'members'
+      ? t['groupDetail.members.title']
+      : view === 'member'
+        ? t['groupDetail.member.title']
+        : t['groupDetail.title'];
+
+  const openMember = (
+    member: MemberItem,
+    from: 'main' | 'members' = 'members'
+  ) => {
+    setMemberFrom(from);
+    setActiveMember(member);
+    setView('member');
+  };
+
+  const openMemberByUserId = (
+    userId?: string,
+    from: 'main' | 'members' = 'main'
+  ) => {
+    if (!userId) return;
+    const found = members.find((m) => m.userId === userId);
+    if (found) {
+      openMember(found, from);
+      return;
+    }
+    openMember(
+      {
+        id: userId,
+        userId,
+        nickname: userId
+      },
+      from
+    );
+  };
 
   const handleBack = () => {
     if (view === 'member') {
       setActiveMember(null);
-      setView('members');
+      setMemberUser(undefined);
+      setView(memberFrom);
       return;
     }
     if (view === 'members') {
       setView('main');
       setMemberKeyword('');
+      return;
     }
+    onClose();
   };
 
   const openChat = () => {
-    const gid = String(detail?.groupId || groupId || '');
+    const gid = String(group?.group_id || groupId || '');
     onViewChat?.({
       groupId: gid,
-      groupName: String(detail?.name || detail?.groupName || gid),
-      memberCount: Number(detail?.memberCount || 0) || undefined,
-      ownerId: String(detail?.ownerId || '')
+      groupName: String(group?.title || gid),
+      memberCount: Number(group?.member_count || 0) || undefined,
+      ownerId: String(group?.owner_user_id || detail?.owner?.user_id || '')
     });
     onClose();
   };
 
   const drawerTitle = (
     <div className="flex w-full items-center gap-[16px]">
-      {view !== 'main' ? (
-        <button
-          type="button"
-          className="inline-flex size-4 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-1"
-          aria-label="返回"
-          onClick={handleBack}
-        >
-          <IconLeft className="text-[16px]" />
-        </button>
-      ) : null}
+      <button
+        type="button"
+        className="inline-flex size-4 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-1"
+        aria-label={t['groupDetail.back']}
+        onClick={handleBack}
+      >
+        <IconLeft className="text-[16px]" />
+      </button>
       <span>{titleText}</span>
     </div>
   );
+
+  const memberProfile = memberUser?.user;
+  const memberOnline = memberUser?.online_status;
+  const memberOnlineOk = memberOnline === 'online';
 
   return (
     <Drawer
@@ -281,7 +434,7 @@ export default function GroupDetailDrawer({
       footer={
         view === 'main' ? (
           <Button type="primary" long onClick={openChat}>
-            查看聊天
+            {t['groupDetail.action.viewChat']}
           </Button>
         ) : null
       }
@@ -293,11 +446,18 @@ export default function GroupDetailDrawer({
         backdropFilter: 'blur(3.5px)'
       }}
     >
-      <Spin loading={loading} className="block w-full">
+      <Spin
+        loading={loading || (view === 'member' && memberLoading)}
+        className="block w-full"
+      >
         {view === 'main' && (
           <div className="flex flex-col gap-[12px]">
             <div className="flex h-[56px] items-center gap-[16px]">
-              <GroupAvatar name={name} members={members} />
+              <GroupAvatar
+                name={name}
+                avatarUrl={group?.avatar_url}
+                members={members}
+              />
               <div className="min-w-0">
                 <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
                   {name}
@@ -309,7 +469,7 @@ export default function GroupDetailDrawer({
                         ? 'success'
                         : statusRaw === 1
                           ? 'error'
-                          : statusRaw === 2 || statusRaw === 3
+                          : statusRaw === 3
                             ? 'warning'
                             : 'default'
                     }
@@ -325,11 +485,11 @@ export default function GroupDetailDrawer({
               onChange={setTab}
               className="use-user-detail-tabs"
             >
-              <Tabs.TabPane key="basic" title="基本信息">
+              <Tabs.TabPane key="basic" title={t['groupDetail.tab.basic']}>
                 <div className="flex flex-col gap-[12px] pt-[12px]">
                   <div>
                     <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                      基础信息
+                      {t['groupDetail.section.basic']}
                     </div>
                     <Descriptions
                       className="use-user-detail-descriptions"
@@ -339,32 +499,43 @@ export default function GroupDetailDrawer({
                       tableLayout="fixed"
                       data={[
                         {
-                          label: '群ID',
-                          value: String(detail?.groupId || '-')
+                          label: t['groupDetail.field.groupId'],
+                          value: String(group?.group_id || groupId || '-')
                         },
                         {
-                          label: '群主',
+                          label: t['groupDetail.field.owner'],
                           value: (
-                            <LinkValue>
-                              {String(detail?.ownerName || '-')}
+                            <LinkValue
+                              onClick={() =>
+                                openMemberByUserId(
+                                  detail?.owner?.user_id ||
+                                    group?.owner_user_id
+                                )
+                              }
+                            >
+                              {ownerName}
                             </LinkValue>
                           )
                         },
                         {
-                          label: '群创建时间',
-                          value: String(detail?.createdAt || '-')
-                        },
-                        {
-                          label: '最后活跃时间',
-                          value: String(
-                            detail?.lastActiveTime || detail?.createdAt || '-'
+                          label: t['groupDetail.field.createdAt'],
+                          value: formatDateTime(
+                            group?.created_at,
+                            undefined,
+                            '-'
                           )
                         },
                         {
-                          label: '创建人',
-                          value: String(
-                            detail?.creatorName || detail?.ownerName || '-'
+                          label: t['groupDetail.field.lastActiveAt'],
+                          value: formatDateTime(
+                            detail?.last_active_at || group?.updated_at,
+                            undefined,
+                            '-'
                           )
+                        },
+                        {
+                          label: t['groupDetail.field.creator'],
+                          value: creatorName
                         }
                       ]}
                     />
@@ -372,7 +543,7 @@ export default function GroupDetailDrawer({
 
                   <div>
                     <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                      群成员
+                      {t['groupDetail.section.members']}
                     </div>
                     <Descriptions
                       className="use-user-detail-descriptions"
@@ -382,10 +553,10 @@ export default function GroupDetailDrawer({
                       tableLayout="fixed"
                       data={[
                         {
-                          label: '群成员',
+                          label: t['groupDetail.field.members'],
                           value: (
                             <SocialLink
-                              value={String(detail?.memberCount ?? members.length)}
+                              value={String(memberTotal)}
                               onClick={() => setView('members')}
                             />
                           )
@@ -396,7 +567,7 @@ export default function GroupDetailDrawer({
 
                   <div>
                     <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                      群设置
+                      {t['groupDetail.section.settings']}
                     </div>
                     <Descriptions
                       className="use-user-detail-descriptions"
@@ -406,25 +577,20 @@ export default function GroupDetailDrawer({
                       tableLayout="fixed"
                       data={[
                         {
-                          label: '加入方式',
-                          value: String(detail?.joinMethod || '邀请加入')
+                          label: t['groupDetail.field.joinMethod'],
+                          value: joinMethod
                         },
                         {
-                          label: '邀请权限',
-                          value: String(
-                            detail?.invitePermission ??
-                              (detail?.allowInvite ? '开' : '关')
-                          )
+                          label: t['groupDetail.field.invitePermission'],
+                          value: invitePermission
                         },
                         {
-                          label: '发言权限',
-                          value: String(
-                            detail?.speakPermission || '无限制'
-                          )
+                          label: t['groupDetail.field.speakPermission'],
+                          value: speakPermission
                         },
                         {
-                          label: '禁言状态',
-                          value: String(detail?.muteStatus || '不禁言')
+                          label: t['groupDetail.field.muteStatus'],
+                          value: muteStatus
                         }
                       ]}
                     />
@@ -432,7 +598,7 @@ export default function GroupDetailDrawer({
 
                   <div>
                     <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                      群管理
+                      {t['groupDetail.section.manage']}
                     </div>
                     <Descriptions
                       className="use-user-detail-descriptions"
@@ -442,20 +608,30 @@ export default function GroupDetailDrawer({
                       tableLayout="fixed"
                       data={[
                         {
-                          label: '群主',
+                          label: t['groupDetail.field.owner'],
                           value: (
-                            <LinkValue>
-                              {String(detail?.ownerName || '-')}
+                            <LinkValue
+                              onClick={() =>
+                                openMemberByUserId(
+                                  detail?.owner?.user_id ||
+                                    group?.owner_user_id
+                                )
+                              }
+                            >
+                              {ownerName}
                             </LinkValue>
                           )
                         },
-                        ...admins
-                          .filter((a) => a.role !== '群主')
+                        ...members
+                          .filter((a) => a.roleLevel !== 100)
                           .slice(0, 5)
                           .map((a) => ({
-                            label: '管理员',
+                            label: t['groupDetail.field.admin'],
                             value: (
-                              <LinkValue key={a.userId || a.id}>
+                              <LinkValue
+                                key={a.userId || a.id}
+                                onClick={() => openMember(a)}
+                              >
                                 {String(a.nickname || '-')}
                               </LinkValue>
                             )
@@ -466,25 +642,30 @@ export default function GroupDetailDrawer({
                 </div>
               </Tabs.TabPane>
 
-              <Tabs.TabPane key="logs" title="操作日志">
+              <Tabs.TabPane key="logs" title={t['groupDetail.tab.logs']}>
                 <div className="pt-[12px]">
-                  {logs.length ? (
+                  {timelineItems.length ? (
                     <Timeline className="use-group-detail-timeline">
-                      {logs.map((item, index) => (
+                      {timelineItems.map((item, index) => (
                         <Timeline.Item
                           key={item.id || `${item.time}-${index}`}
-                          label={
-                            <span className="text-[12px] leading-[20px] text-arco-text-3">
-                              {String(item.time || '-')}
-                            </span>
+                          dotColor={
+                            index === 0
+                              ? 'rgb(var(--primary-6))'
+                              : 'var(--color-neutral-3, #c9cdd4)'
                           }
                         >
-                          <div className="flex flex-wrap items-center gap-[12px] text-[12px] leading-[20px]">
-                            <span className="min-w-[120px] text-arco-text-1">
-                              {item.action || '-'}
+                          <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
+                            <span className="w-[119px] shrink-0 text-arco-text-3">
+                              {item.time}
                             </span>
-                            <span className="text-arco-text-3">
-                              {item.detail || ''}
+                            <span className="flex min-w-0 flex-1 items-center gap-[12px]">
+                              <span className="w-[200px] shrink-0 text-arco-text-1">
+                                {item.action || '-'}
+                              </span>
+                              <span className="min-w-0 shrink truncate text-arco-text-3">
+                                {item.detail || ''}
+                              </span>
                             </span>
                           </div>
                         </Timeline.Item>
@@ -493,7 +674,7 @@ export default function GroupDetailDrawer({
                   ) : (
                     !loading && (
                       <div className="py-8 text-center text-[12px] text-arco-text-3">
-                        暂无操作日志
+                        {t['groupDetail.logs.empty']}
                       </div>
                     )
                   )}
@@ -507,13 +688,20 @@ export default function GroupDetailDrawer({
           <div className="flex flex-col gap-[12px]">
             <Input
               allowClear
-              placeholder="搜索群成员"
+              placeholder={t['groupDetail.members.search']}
               prefix={<IconSearch className="text-arco-text-3" />}
               value={memberKeyword}
               onChange={setMemberKeyword}
             />
             <div className="text-[14px] leading-[21px] text-arco-text-2">
-              共{filteredMembers.length}个群成员
+              {t['groupDetail.members.total'].replace(
+                '{n}',
+                String(
+                  memberKeyword.trim()
+                    ? filteredMembers.length
+                    : memberTotal
+                )
+              )}
             </div>
             <div className="flex flex-col gap-[16px]">
               {filteredMembers.map((m) => (
@@ -521,26 +709,19 @@ export default function GroupDetailDrawer({
                   key={m.id || m.userId}
                   type="button"
                   className="flex min-h-[56px] w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
-                  onClick={() => {
-                    setActiveMember(m);
-                    setView('member');
-                  }}
+                  onClick={() => openMember(m)}
                 >
                   <div className="flex items-center gap-[16px]">
-                    <div className="relative size-10 shrink-0">
-                      <Avatar size={40} className="use-user-detail-avatar !text-[14px]">
-                        {m.avatar ? (
-                          <img alt="" src={m.avatar} />
-                        ) : (
-                          initials(m.nickname)
-                        )}
-                      </Avatar>
-                      {m.isF1 ? (
-                        <span className="absolute bottom-0 left-0 rounded-[4px] bg-[rgba(123,97,255,0.15)] px-[2px] text-[10px] font-bold leading-[14px] text-[#7b61ff]">
-                          F1
-                        </span>
-                      ) : null}
-                    </div>
+                    <Avatar
+                      size={40}
+                      className="use-user-detail-avatar shrink-0 !text-[14px]"
+                    >
+                      {m.avatar ? (
+                        <img alt="" src={m.avatar} />
+                      ) : (
+                        initials(m.nickname)
+                      )}
+                    </Avatar>
                     <div>
                       <div className="text-[14px] font-medium leading-[21px] text-arco-text-2">
                         {m.nickname || '-'}
@@ -553,6 +734,11 @@ export default function GroupDetailDrawer({
                   <IconRight className="text-[16px] text-arco-text-3" />
                 </button>
               ))}
+              {!loading && !filteredMembers.length ? (
+                <div className="py-8 text-center text-[12px] text-arco-text-3">
+                  {t['groupDetail.members.empty']}
+                </div>
+              ) : null}
             </div>
           </div>
         )}
@@ -561,22 +747,29 @@ export default function GroupDetailDrawer({
           <div className="flex flex-col gap-[12px]">
             <div className="flex h-[56px] items-center gap-[16px]">
               <Avatar size={56} className="use-user-detail-avatar shrink-0">
-                {activeMember.avatar ? (
-                  <img alt="" src={activeMember.avatar} />
+                {memberProfile?.avatar_url || activeMember.avatar ? (
+                  <img
+                    alt=""
+                    src={
+                      memberProfile?.avatar_url || activeMember.avatar || ''
+                    }
+                  />
                 ) : (
-                  initials(activeMember.nickname)
+                  initials(
+                    memberProfile?.nickname || activeMember.nickname
+                  )
                 )}
               </Avatar>
               <div className="min-w-0">
                 <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
-                  {activeMember.nickname || '-'}
+                  {memberProfile?.nickname ||
+                    activeMember.nickname ||
+                    '-'}
                 </div>
                 <div className="mt-[2px]">
                   <StatusBadge
-                    status={
-                      activeMember.online === '在线' ? 'success' : 'default'
-                    }
-                    text={activeMember.online || '离线'}
+                    status={memberOnlineOk ? 'success' : 'default'}
+                    text={openimLabel(t, 'online', memberOnline)}
                     className="!text-[14px] !leading-[21px] !text-arco-text-2"
                   />
                 </div>
@@ -585,7 +778,7 @@ export default function GroupDetailDrawer({
 
             <div>
               <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
-                基础信息
+                {t['groupDetail.member.section.basic']}
               </div>
               <Descriptions
                 className="use-user-detail-descriptions"
@@ -595,28 +788,28 @@ export default function GroupDetailDrawer({
                 tableLayout="fixed"
                 data={[
                   {
-                    label: '用户ID',
-                    value: String(activeMember.userId || '-')
-                  },
-                  {
-                    label: '账号',
-                    value: String(activeMember.account || '-')
-                  },
-                  {
-                    label: '手机号',
-                    value: formatPhone(activeMember.phone)
-                  },
-                  {
-                    label: '加入时间',
-                    value: String(activeMember.joinTime || '-')
-                  },
-                  {
-                    label: '共同群聊',
-                    value: (
-                      <LinkValue>
-                        {String(activeMember.sharedGroupCount ?? 0)}
-                      </LinkValue>
+                    label: t['groupDetail.member.field.userId'],
+                    value: String(
+                      memberProfile?.user_id || activeMember.userId || '-'
                     )
+                  },
+                  {
+                    label: t['groupDetail.member.field.account'],
+                    value: String(
+                      memberProfile?.account || activeMember.account || '-'
+                    )
+                  },
+                  {
+                    label: t['groupDetail.member.field.phone'],
+                    value: formatPhone(
+                      memberProfile?.phone || activeMember.phone,
+                      memberProfile?.phone_area_code ||
+                        activeMember.phoneAreaCode
+                    )
+                  },
+                  {
+                    label: t['groupDetail.member.field.joinedAt'],
+                    value: String(activeMember.joinTime || '-')
                   }
                 ]}
               />

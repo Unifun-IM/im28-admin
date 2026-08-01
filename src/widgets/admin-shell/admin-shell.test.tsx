@@ -7,7 +7,7 @@ import { PageLayout } from './PageLayout';
 describe('PageLayout', () => {
   it('renders the Arco Pro simple admin shell chrome', () => {
     const { container } = render(
-      <MemoryRouter initialEntries={['/dashboard/workplace']}>
+      <MemoryRouter initialEntries={['/dashboard']}>
         <GlobalContext.Provider
           value={{
             lang: 'zh-CN',

@@ -4,12 +4,14 @@ import lazyload from '@shared/lib/lazyload';
 
 /** 页面模块发现（仅允许在 app 层引用 @pages） */
 const pageModules = import.meta.glob([
-  '../../pages/dashboard/**/index.tsx',
+  '../../pages/dashboard/index.tsx',
   '../../pages/user/**/index.tsx',
+  '../../pages/group/**/index.tsx',
   '../../pages/system/**/index.tsx',
   '../../pages/system-params/**/index.tsx',
   '../../pages/trade/**/index.tsx',
   '../../pages/session/**/index.tsx',
+  '../../pages/risk/**/index.tsx',
   '../../pages/exception/**/index.tsx'
 ]);
 

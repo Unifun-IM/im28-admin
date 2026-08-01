@@ -15,7 +15,7 @@ const i18n = {
     // GroupStatus — https://docs.openim.io/zh-Hans/sdks/enum/groupstatus
     'openim.groupStatus.0': 'Normal',
     'openim.groupStatus.1': 'Banned',
-    'openim.groupStatus.2': 'Dismissed',
+    'openim.groupStatus.2': 'Dissolved',
     'openim.groupStatus.3': 'Muted',
 
     // GroupType — https://docs.openim.io/zh-Hans/sdks/enum/grouptype （文档固定 2=工作大群；Admin 另有 1=普通群）
@@ -85,7 +85,7 @@ const i18n = {
 
     'openim.groupStatus.0': '正常',
     'openim.groupStatus.1': '封禁',
-    'openim.groupStatus.2': '解散',
+    'openim.groupStatus.2': '已解散',
     'openim.groupStatus.3': '禁言',
 
     'openim.groupType.1': '普通群',

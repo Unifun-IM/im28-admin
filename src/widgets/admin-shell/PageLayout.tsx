@@ -3,7 +3,8 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { Layout, Menu } from '@arco-design/web-react';
 import {
   IconDoubleRight,
-  IconMenuFold
+  IconMenuFold,
+  IconUserGroup
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { observer } from 'mobx-react-lite';
@@ -53,10 +54,11 @@ export type PageLayoutProps = {
 function getIconFromKey(key: string) {
   switch (key) {
     case 'dashboard':
-    case 'dashboard/workplace':
       return <IconDashboard className={styles.icon} />;
     case 'user':
       return <IconUser className={styles.icon} />;
+    case 'group':
+      return <IconUserGroup className={styles.icon} />;
     case 'system':
       return <IconSystem className={styles.icon} />;
     case 'trade':

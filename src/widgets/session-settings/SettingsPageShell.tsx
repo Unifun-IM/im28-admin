@@ -49,7 +49,7 @@ export default function SettingsPageShell({
         </h2>
         <Space size={8}>
           <Button
-            className="!min-w-[98px] !rounded-lg"
+            className="!min-w-[80px] !rounded-lg"
             disabled={!dirty}
             onClick={onCancel}
           >
@@ -57,7 +57,7 @@ export default function SettingsPageShell({
           </Button>
           <Button
             type="primary"
-            className="!rounded-lg"
+            className="!min-w-[80px] !rounded-lg"
             loading={saving}
             disabled={!dirty}
             onClick={onSave}

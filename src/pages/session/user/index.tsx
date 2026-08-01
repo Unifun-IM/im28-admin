@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Form } from '@arco-design/web-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Button, Form, Input } from '@arco-design/web-react';
 import { IconUserGroup } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
@@ -10,12 +10,18 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
+import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { UserDetailDrawer } from '@features/user-detail';
 import { UserChatModal } from '@features/user-chat-view';
+import { EmptyState } from '@shared/ui';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
+
+type UserSessionForm = AdminAPI.AdminListUserRequest & {
+  batchUserIds?: string;
+};
 
 function statusBadge(
   status?: AdminAPI.AccountStatus
@@ -25,14 +31,24 @@ function statusBadge(
   return 'default';
 }
 
+function parseBatchIds(raw?: string) {
+  return String(raw || '')
+    .split(/[\s,，]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 /**
- * 用户会话查询 — Figma 770:22002
- * 会话接口暂不对接：保留筛选 / 表格交互，列表为空
+ * 用户会话查询 — Figma 977:32512
+ * 搜索优先空态；列表走 Admin users/list；会话场景操作以查聊天为主
  */
 export default function UserSessionPage() {
   const t = useLocale();
-  const [form] = Form.useForm<AdminAPI.AdminListUserRequest>();
+  const common = t;
+  const [form] = Form.useForm<UserSessionForm>();
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [batchMode, setBatchMode] = useState(false);
   const [data, setData] = useState<AdminAPI.AdminUserWrap[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -47,10 +63,7 @@ export default function UserSessionPage() {
   const keywordTypeOptions = useMemo(
     () =>
       (['user_id', 'nickname'] as const).map((value) => ({
-        label:
-          value === 'user_id'
-            ? t['common.userId']
-            : t['common.nickname'],
+        label: t[`userQuery.keywordType.${value}`],
         value
       })),
     [t]
@@ -71,22 +84,57 @@ export default function UserSessionPage() {
     return status || '--';
   };
 
-  const fetchData = useCallback(async (_p = page, _size = pageSize) => {
-    setLoading(true);
-    try {
-      // 会话相关接口暂不对接
-      setData([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize]);
+  const buildBody = useCallback(
+    (p: number, size: number): AdminAPI.AdminListUserRequest => {
+      const values = form.getFieldsValue();
+      const keyword = values.keyword?.trim() || undefined;
+      const statusRaw = values.status;
+      const body: AdminAPI.AdminListUserRequest = {
+        page: p,
+        page_size: size,
+        keyword,
+        keyword_type: keyword ? values.keyword_type || undefined : undefined,
+        status:
+          statusRaw === '' || statusRaw === undefined || statusRaw === null
+            ? undefined
+            : statusRaw
+      };
+      if (batchMode) {
+        const ids = parseBatchIds(values.batchUserIds);
+        if (ids.length) body.user_ids = ids;
+      }
+      return body;
+    },
+    [batchMode, form]
+  );
 
-  useEffect(() => {
-    fetchData(1, pageSize);
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const fetchData = useCallback(
+    async (p = page, size = pageSize) => {
+      setLoading(true);
+      try {
+        if (batchMode) {
+          const ids = parseBatchIds(form.getFieldValue('batchUserIds'));
+          if (!ids.length) {
+            setData([]);
+            setTotal(0);
+            return;
+          }
+        }
+        const res = await postV1AdminUsersList(buildBody(p, size));
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [batchMode, buildBody, form, page, pageSize]
+  );
+
+  const runSearch = (p = 1, size = pageSize) => {
+    setSearched(true);
+    setPage(p);
+    void fetchData(p, size);
+  };
 
   return (
     <>
@@ -95,48 +143,115 @@ export default function UserSessionPage() {
         title={t['userSession.title']}
         filterCollapsible={false}
         filterDefaultCollapsed={false}
-        filterResetText={t['common.clearAll']}
-        filter={
-          <>
-            <FilterField>
-              <FormItem
-                field="keyword"
-                label={t['userSession.filter.keyword']}
-              >
-                <FilterKeywordInput
-                  typeField="keyword_type"
-                  typeOptions={keywordTypeOptions}
-                  typeInitialValue="user_id"
-                  typeWidth={88}
-                  placeholder={t['common.placeholder']}
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="status" label={t['userSession.filter.status']} initialValue="">
-                <FilterSelect
-                  placeholder={t['common.all']}
-                  options={statusOptions}
-                />
-              </FormItem>
-            </FilterField>
-          </>
+        filterResetText={common['common.reset']}
+        filterExtraActions={
+          batchMode ? (
+            <Button
+              type="text"
+              className="use-biz-filter-action-text is-danger"
+              onClick={() => {
+                setBatchMode(false);
+                form.setFieldValue('batchUserIds', undefined);
+              }}
+            >
+              {t['userSession.action.cancelBatchSearch']}
+            </Button>
+          ) : (
+            <Button
+              type="text"
+              className="use-biz-filter-action-text"
+              onClick={() => setBatchMode(true)}
+            >
+              {t['userSession.action.batchSearch']}
+            </Button>
+          )
         }
-        onSearch={() => {
-          setPage(1);
-          fetchData(1, pageSize);
-        }}
+        filter={
+          batchMode ? (
+            <>
+              <FilterField span="full">
+                <FormItem
+                  field="batchUserIds"
+                  label={t['userSession.filter.userIds']}
+                >
+                  <Input.TextArea
+                    placeholder={t['userSession.filter.userIdsPlaceholder']}
+                    autoSize={{ minRows: 2, maxRows: 6 }}
+                  />
+                </FormItem>
+              </FilterField>
+              <FilterField>
+                <FormItem
+                  field="status"
+                  label={t['userSession.filter.status']}
+                  initialValue=""
+                >
+                  <FilterSelect
+                    placeholder={t['common.all']}
+                    options={statusOptions}
+                    allowClear
+                  />
+                </FormItem>
+              </FilterField>
+            </>
+          ) : (
+            <>
+              <FilterField>
+                <FormItem
+                  field="keyword"
+                  label={t['userSession.filter.keyword']}
+                >
+                  <FilterKeywordInput
+                    typeField="keyword_type"
+                    typeOptions={keywordTypeOptions}
+                    typeInitialValue="user_id"
+                    typeWidth={88}
+                    placeholder={t['userSession.filter.keywordPlaceholder']}
+                  />
+                </FormItem>
+              </FilterField>
+              <FilterField>
+                <FormItem
+                  field="status"
+                  label={t['userSession.filter.status']}
+                  initialValue=""
+                >
+                  <FilterSelect
+                    placeholder={t['common.all']}
+                    options={statusOptions}
+                    allowClear
+                  />
+                </FormItem>
+              </FilterField>
+            </>
+          )
+        }
+        onSearch={() => runSearch(1, pageSize)}
         onReset={() => {
           form.resetFields();
+          form.setFieldsValue({ keyword_type: 'user_id', status: '' });
+          setBatchMode(false);
+          setSearched(false);
+          setData([]);
+          setTotal(0);
           setPage(1);
-          fetchData(1, pageSize);
         }}
-        onRefresh={() => fetchData(page, pageSize)}
+        onRefresh={() => {
+          if (!searched) return;
+          void fetchData(page, pageSize);
+        }}
         tableProps={{
           loading,
-          data,
+          data: searched ? data : [],
           rowKey: (row: AdminAPI.AdminUserWrap) =>
             row.user?.user_id || String(Math.random()),
+          noDataElement: (
+            <EmptyState
+              description={
+                searched ? common['common.empty'] : t['userSession.empty']
+              }
+            />
+          ),
           columns: [
             {
               title: t['userSession.col.user'],
@@ -213,16 +328,18 @@ export default function UserSessionPage() {
               )
             }
           ],
-          pagination: {
-            current: page,
-            pageSize,
-            total,
-            onChange: (p, s) => {
-              setPage(p);
-              setPageSize(s);
-              fetchData(p, s);
-            }
-          }
+          pagination: searched
+            ? {
+                current: page,
+                pageSize,
+                total,
+                onChange: (p, s) => {
+                  setPage(p);
+                  setPageSize(s);
+                  void fetchData(p, s);
+                }
+              }
+            : false
         }}
       />
       <UserDetailDrawer

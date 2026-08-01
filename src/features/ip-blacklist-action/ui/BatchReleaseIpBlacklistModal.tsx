@@ -3,7 +3,6 @@ import {
   Button,
   Form,
   Input,
-  Message,
   Modal,
   Select
 } from '@arco-design/web-react';
@@ -66,7 +65,6 @@ export default function BatchReleaseIpBlacklistModal({
       const values = await form.validate();
       if (!ips.length) return;
       setSubmitting(true);
-      Message.warning(common['common.apiNotReady']);
       onSuccess?.({
         ips,
         reason: values.reason,

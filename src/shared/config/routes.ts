@@ -14,14 +14,14 @@ export type IRoute = AuthParams & {
 };
 
 /**
- * 侧栏顺序对齐稿面：首页看板 → 用户 → 会话 → 交易 → 系统 → 风控
+ * 侧栏顺序对齐稿面：首页看板 → 用户 → 群组 → 会话 → 交易 → 系统 → 风控
  * 系统下：后台账号 / 角色 / 系统参数设置 / 系统操作日志
  * 风控下：IP黑名单
  */
 export const routes: IRoute[] = [
   {
     name: 'menu.dashboard',
-    key: 'dashboard/workplace'
+    key: 'dashboard'
   },
   {
     name: 'menu.user',
@@ -41,6 +41,14 @@ export const routes: IRoute[] = [
     ]
   },
   {
+    name: 'menu.group',
+    key: 'group',
+    children: [
+      { name: 'menu.group.query', key: 'group/query' },
+      { name: 'menu.group.settings', key: 'group/settings' }
+    ]
+  },
+  {
     name: 'menu.session',
     key: 'session',
     children: [
@@ -49,25 +57,11 @@ export const routes: IRoute[] = [
         key: 'session/query',
         breadcrumb: false,
         children: [
-          { name: 'menu.session.group', key: 'session/group' },
-          { name: 'menu.session.user', key: 'session/user' }
+          { name: 'menu.session.user', key: 'session/user' },
+          { name: 'menu.session.group', key: 'session/group' }
         ]
       },
-      {
-        name: 'menu.session.settings',
-        key: 'session/settings',
-        breadcrumb: false,
-        children: [
-          {
-            name: 'menu.session.settings.group',
-            key: 'session/settings/group'
-          },
-          {
-            name: 'menu.session.settings.user',
-            key: 'session/settings/user'
-          }
-        ]
-      },
+      { name: 'menu.session.settings', key: 'session/settings' },
       {
         name: 'menu.session.chat',
         key: 'session/chat',
@@ -108,8 +102,6 @@ export const routes: IRoute[] = [
   {
     name: 'menu.risk',
     key: 'risk',
-    /** 风控模块暂未对接，侧栏先隐藏 */
-    ignore: true,
     children: [
       { name: 'menu.risk.ipBlacklist', key: 'risk/ip-blacklist' }
     ]

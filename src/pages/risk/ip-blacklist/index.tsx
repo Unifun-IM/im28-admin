@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Form, Message } from '@arco-design/web-react';
+import { Button, Form } from '@arco-design/web-react';
 import { IconCloseCircle } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
@@ -165,8 +165,6 @@ export default function IpBlacklistPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const notReady = () => Message.warning(common['common.apiNotReady']);
-
   const handleAddSuccess = (payload: AddIpBlacklistPayload) => {
     const stamp = nowText();
     const existing = new Set(allRows.map((r) => r.ip));
@@ -222,15 +220,6 @@ export default function IpBlacklistPage() {
         form={form}
         title={t['ipBlacklist.title']}
         filterResetText={common['common.reset']}
-        filterExtraActions={
-          <Button
-            type="text"
-            className="use-biz-filter-action-text"
-            onClick={notReady}
-          >
-            {t['ipBlacklist.filter.advanced']}
-          </Button>
-        }
         filter={
           <>
             <FilterField span={2}>

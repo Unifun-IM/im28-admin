@@ -88,6 +88,27 @@ declare namespace AdminAPI {
     two_factor_code: string;
   };
 
+  type AdminDetailGroupEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: {
+        group?: Group;
+        creator?: User;
+        owner?: User;
+        managers?: AdminDetailGroupManagerWrap[];
+        last_active_at?: string;
+      };
+    };
+
+  type AdminDetailGroupManagerWrap = {
+    member?: GroupMember;
+    user?: User;
+  };
+
+  type AdminDetailGroupRequest = {
+    group_id: string;
+  };
+
   type AdminDetailUserEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -101,6 +122,25 @@ declare namespace AdminAPI {
 
   type AdminDetailUserRequest = {
     user_id: string;
+  };
+
+  type AdminGroupOperationLog = {
+    log_id?: string;
+    group_id?: string;
+    operator_type?: "user" | "sys_user";
+    operator_id?: string;
+    action?: string;
+    description?: string;
+    target_user_ids?: string[];
+    operated_at?: RFC3339Time;
+  };
+
+  type AdminGroupOperationLogWrap = {
+    log?: AdminGroupOperationLog;
+    /** operator_type=user 时返回，否则为 null。 */
+    operator_user?: User;
+    /** operator_type=sys_user 时返回，否则为 null。 */
+    operator_sys_user?: SysUser;
   };
 
   type AdminListBannedUserEnvelope =
@@ -128,13 +168,44 @@ declare namespace AdminAPI {
   type AdminListGroupEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
-      data?: { list?: { group?: Group }[]; total?: number };
+      data?: { list?: { group?: Group; owner?: User }[]; total?: number };
     };
 
+  type AdminListGroupOperationLogEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminGroupOperationLogWrap[]; total?: number };
+    };
+
+  type AdminListGroupOperationLogRequest = {
+    group_id: string;
+    /** 按操作类型精确筛选，例如 `group_created`、`title_updated`、`members_removed`。 */
+    action?: string;
+    /** 操作时间起点，必须早于或等于 `operated_end_at`。 */
+    operated_start_at?: RFC3339Time;
+    /** 操作时间终点。 */
+    operated_end_at?: RFC3339Time;
+    page?: number;
+    page_size?: number;
+  };
+
   type AdminListGroupRequest = {
-    /** 按群 ID、会话 ID、群名或群主 ID 模糊查询。 */
+    /** 群搜索关键词；`keyword_type=group_id` 时精确匹配群 ID，`keyword_type=title` 时模糊匹配群名称；不传类型时同时匹配两者。 */
     keyword?: string;
+    /** 关键词类型；传此字段时必须同时传 `keyword`。 */
+    keyword_type?: "group_id" | "title";
+    owner_user_id?: string;
+    /** 群创建人用户 ID；群主转让后保持不变。 */
+    creator_user_id?: string;
     status?: GroupStatus;
+    /** 群创建时间起点，必须早于或等于 `created_end_at`。 */
+    created_start_at?: RFC3339Time;
+    /** 群创建时间终点。 */
+    created_end_at?: RFC3339Time;
+    /** 排序字段；不传时按创建时间排序。 */
+    sort_by?: "member_count" | "created_at";
+    /** 排序方向；传此字段时必须同时传 `sort_by`，不传时默认 `desc`。 */
+    sort_order?: "asc" | "desc";
     page?: number;
     page_size?: number;
   };
@@ -1532,7 +1603,17 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminGroupsDetailParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminGroupsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminGroupsOperationLogsListParams = {
     ""?: any;
     ""?: any;
   };

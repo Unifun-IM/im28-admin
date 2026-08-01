@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
+import { Button, Form, Input, Modal } from '@arco-design/web-react';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 import useLocale from '@shared/lib/useLocale';
 import './ip-blacklist-action-modal.less';
@@ -21,7 +21,7 @@ export type ReleaseIpBlacklistModalProps = {
 
 /**
  * 解除 IP 黑名单 — Figma 979:41995
- * 接口未就绪：校验通过后交给页面做本地 mock
+ * 校验通过后交给页面做本地更新
  */
 export default function ReleaseIpBlacklistModal({
   visible,
@@ -44,7 +44,6 @@ export default function ReleaseIpBlacklistModal({
       const values = await form.validate();
       if (!ip) return;
       setSubmitting(true);
-      Message.warning(common['common.apiNotReady']);
       onSuccess?.({
         ip,
         reason_description: values.reason_description

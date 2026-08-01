@@ -40,7 +40,7 @@ export function parseIpList(raw: string): string[] {
 
 /**
  * 添加 IP 黑名单 — Figma 979:44120
- * 接口未就绪：校验通过后交给页面做本地 mock
+ * 校验通过后交给页面做本地更新
  */
 export default function AddIpBlacklistModal({
   visible,
@@ -86,7 +86,6 @@ export default function AddIpBlacklistModal({
         return;
       }
       setSubmitting(true);
-      Message.warning(common['common.apiNotReady']);
       onSuccess?.({
         ips,
         reason: values.reason,

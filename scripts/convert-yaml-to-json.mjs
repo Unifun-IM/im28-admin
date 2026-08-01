@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * 将远程 OpenAPI YAML 转为 JSON
+ * 将 OpenAPI YAML（远程 URL 或本地文件）转为 JSON
  *
  * 用法:
  *   npm run openapi
+ *   npm run openapi:convert -- docs/openapi.yaml
+ *   OPENAPI_YAML_URL=docs/openapi.yaml npm run openapi:convert
  *   OPENAPI_YAML_URL=https://... npm run openapi:convert
  *
  * 优先级: 命令行参数 > 环境变量 / .env > 默认远程地址
+ * OPENAPI_YAML_URL 可为 https://... 或相对仓库根目录的本地路径
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { load as loadYaml } from 'js-yaml';
@@ -54,16 +57,26 @@ function isRemoteUrl(input) {
   );
 }
 
+function resolveLocalYamlPath(source) {
+  return isAbsolute(source) ? source : resolve(ROOT, source);
+}
+
 async function loadYamlText(source) {
-  if (!isRemoteUrl(source)) {
-    throw new Error(`仅支持远程 OpenAPI YAML: ${source}`);
+  if (isRemoteUrl(source)) {
+    console.log(`📥 正在下载 YAML: ${source}`);
+    const response = await fetch(source);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.text();
   }
-  console.log(`📥 正在下载 YAML: ${source}`);
-  const response = await fetch(source);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+
+  const filePath = resolveLocalYamlPath(source);
+  if (!existsSync(filePath)) {
+    throw new Error(`本地 OpenAPI YAML 不存在: ${filePath}`);
   }
-  return response.text();
+  console.log(`📄 正在读取本地 YAML: ${filePath}`);
+  return readFileSync(filePath, 'utf8');
 }
 
 async function convertYamlToJson(yamlSource) {

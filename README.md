@@ -19,7 +19,7 @@ IM 管理后台。基于 **Arco Design Pro（Vite 精简版）** 能力，按 **
 ```bash
 npm install
 cp .env.example .env   # 本机环境，勿提交
-npm run openapi          # 从远程 OpenAPI 生成 Admin API
+npm run openapi          # OpenAPI → Admin API（远程或本地 yaml）
 npm run dev
 npm run build
 npm test
@@ -33,21 +33,20 @@ npm test
 
 | 模块 | 路由前缀 | 说明 |
 | --- | --- | --- |
-| 用户 | `/user/*` | 查询、黑/白名单、邀请码、日志、详情 |
+| 用户 | `/user/*` | 查询、黑/白名单、日志、详情 |
+| 群组 | `/group/*` | 群组查询、群组设置、群详情 |
 | 系统 | `/system/*` | 后台账号、角色、操作日志 |
 | 系统参数 | `/system-params/settings` | 系统名称 / Logo / 默认语言 / 时间格式 / IP 白名单开关 |
 | 财务 | `/finance/*` | 充值/提现订单与渠道 |
 | 交易 | `/trade/*` | 红包记录、配置、详情 |
-| 会话 | `/session/*` | 用户会话、群聊、群详情、聊天记录（只读） |
-
-演示页 `dashboard/workplace`、`example` 仍保留源码，**未挂入菜单与默认入口**。
+| 会话 | `/session/*` | 用户/群组会话查询、会话设置、聊天记录（只读） |
 
 ## 目录结构（FSD）
 
 ```text
 src/
   app/           # 应用入口、Providers、路由
-  pages/         # 业务页面：user / system / system-params / finance / trade / session / login
+  pages/         # 业务页面：user / group / system / system-params / finance / trade / session / login
   widgets/       # 布局与复合 UI：admin-shell、navbar、biz-list（筛选/汇总/列表）…
   features/      # 用户交互特性：拉黑/白名单、个人中心、角色创建、用户详情 …
   entities/      # MobX：global-state、page-tabs、system-settings（后台系统参数）
@@ -82,8 +81,8 @@ const res = await postV1AdminAuthLogin({ username: 'admin', password: '***' });
 
 | 路径 | 职责 |
 | --- | --- |
-| `OPENAPI_YAML_URL` | 远程 OpenAPI 地址（见 `.env.example`） |
-| `npm run openapi` | 拉取远程 yaml→json + 生成 `src/shared/api/admin/*` |
+| `OPENAPI_YAML_URL` | OpenAPI 源：远程 URL 或本地路径如 `docs/openapi.yaml`（见 `.env.example`） |
+| `npm run openapi` | yaml→json + 生成 `src/shared/api/admin/*` |
 | `shared/api/request.ts` | axios 单例（Bearer / `X-Request-ID` / `X-Language`，勿删） |
 | `shared/api/admin/*` | **Admin OpenAPI 生成物**，不要手改 |
 | `shared/ui/api-not-ready` | 无 OpenAPI 页面空态「接口未就绪」 |
@@ -100,4 +99,5 @@ const res = await postV1AdminAuthLogin({ username: 'admin', password: '***' });
 | `npm run lint` | ESLint |
 | `npm run typecheck` | 仅类型检查 |
 | `npm test` | Vitest |
-| `npm run openapi` | 从远程 OpenAPI 生成 `src/shared/api/admin` |
+| `npm run openapi` | 从 OpenAPI（远程或本地）生成 `src/shared/api/admin` |
+| `npm run openapi:convert -- docs/openapi.yaml` | 仅用本地 yaml 转 `openapi.json` |
