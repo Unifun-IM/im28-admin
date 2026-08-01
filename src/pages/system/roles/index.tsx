@@ -16,8 +16,15 @@ import {
 import { CreateRoleModal } from '@features/admin-role-create';
 import useLocale from '@shared/lib/useLocale';
 
-
 const FormItem = Form.Item;
+
+/** 内置超级管理员：不展示编辑 / 删除 */
+function isSuperAdminRole(role?: AdminAPI.SysRole) {
+  const code = role?.code?.trim().toLowerCase();
+  if (code === 'super_admin') return true;
+  const name = role?.name?.trim().toLowerCase();
+  return name === 'super admin' || name === '超级管理员';
+}
 
 function RolesPage() {
   const t = useLocale();
@@ -35,7 +42,10 @@ function RolesPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [createVisible, setCreateVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingRole, setEditingRole] = useState<AdminAPI.SysRoleWrap | null>(
+    null
+  );
 
   const fetchData = useCallback(
     async (p = page, size = pageSize) => {
@@ -65,6 +75,21 @@ function RolesPage() {
     setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const openCreate = () => {
+    setEditingRole(null);
+    setModalVisible(true);
+  };
+
+  const openEdit = (row: AdminAPI.SysRoleWrap) => {
+    setEditingRole(row);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setEditingRole(null);
+  };
 
   return (
     <>
@@ -105,7 +130,7 @@ function RolesPage() {
         }}
         onRefresh={() => fetchData(page, pageSize)}
         toolbar={
-          <Button type="primary" onClick={() => setCreateVisible(true)}>
+          <Button type="primary" onClick={openCreate}>
             {t['roles.create']}
           </Button>
         }
@@ -151,29 +176,38 @@ function RolesPage() {
               title: common['common.action'],
               dataIndex: 'op',
               width: 120,
-              render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
-                <ActionLinks
-                  variant="text"
-                  items={[
-                    {
-                      key: 'delete',
-                      label: common['common.delete'],
-                      onClick: () => {
-                        const id = row.role?.id;
-                        if (id == null) return;
-                        Modal.confirm({
-                          title: t['roles.deleteConfirm'],
-                          onOk: async () => {
-                            await postV1AdminRolesDelete({ id });
-                            Message.success(common['common.success']);
-                            fetchData(page, pageSize);
-                          }
-                        });
+              render: (_: unknown, row: AdminAPI.SysRoleWrap) => {
+                if (isSuperAdminRole(row.role)) return '--';
+                return (
+                  <ActionLinks
+                    variant="text"
+                    items={[
+                      {
+                        key: 'edit',
+                        label: common['common.edit'],
+                        onClick: () => openEdit(row)
+                      },
+                      {
+                        key: 'delete',
+                        label: common['common.delete'],
+                        danger: true,
+                        onClick: () => {
+                          const id = row.role?.id;
+                          if (id == null) return;
+                          Modal.confirm({
+                            title: t['roles.deleteConfirm'],
+                            onOk: async () => {
+                              await postV1AdminRolesDelete({ id });
+                              Message.success(common['common.success']);
+                              fetchData(page, pageSize);
+                            }
+                          });
+                        }
                       }
-                    }
-                  ]}
-                />
-              )
+                    ]}
+                  />
+                );
+              }
             }
           ],
           pagination: {
@@ -189,8 +223,9 @@ function RolesPage() {
         }}
       />
       <CreateRoleModal
-        visible={createVisible}
-        onCancel={() => setCreateVisible(false)}
+        visible={modalVisible}
+        role={editingRole}
+        onCancel={closeModal}
         onSuccess={() => fetchData(page, pageSize)}
       />
     </>

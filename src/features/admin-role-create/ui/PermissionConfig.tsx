@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Checkbox, Input } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
@@ -23,6 +23,7 @@ function matchKeyword(title: string, kw: string) {
 
 /**
  * 权限配置面板 — Figma 666:21515
+ * 层级勾选 / 搜索过滤 / 全选 / 全部展开收起
  */
 export default function PermissionConfig({
   value = [],
@@ -42,6 +43,15 @@ export default function PermissionConfig({
   const allChecked = allKeys.length > 0 && allKeys.every((k) => checked.has(k));
   const allIndeterminate =
     !allChecked && allKeys.some((k) => checked.has(k));
+
+  const expandableKeys = useMemo(
+    () =>
+      ROLE_PERM_MODULES.filter(
+        (m) => !m.leaf && (m.resources?.length || 0) > 0
+      ).map((m) => m.key),
+    []
+  );
+  const allExpanded = expandableKeys.every((k) => expanded[k] !== false);
 
   const setKeys = (next: Set<string>) => {
     onChange?.(Array.from(next));
@@ -86,9 +96,25 @@ export default function PermissionConfig({
     }).filter(Boolean) as PermModule[];
   }, [keyword, t]);
 
+  // 搜索时自动展开命中模块
+  useEffect(() => {
+    if (!keyword.trim()) return;
+    setExpanded((prev) => {
+      const next = { ...prev };
+      filterModules.forEach((mod) => {
+        if (!mod.leaf && (mod.resources?.length || 0) > 0) {
+          next[mod.key] = true;
+        }
+      });
+      return next;
+    });
+  }, [keyword, filterModules]);
+
   const renderResource = (res: PermResource) => {
     const actionKeys = (res.actions || []).map((a) => a.key);
-    const resKeys = [res.key, ...actionKeys];
+    const resKeys = res.leaf || !actionKeys.length
+      ? [res.key]
+      : [res.key, ...actionKeys];
     const resAll = resKeys.every((k) => checked.has(k));
     const resSome = !resAll && resKeys.some((k) => checked.has(k));
 
@@ -97,18 +123,18 @@ export default function PermissionConfig({
         key={res.key}
         className="flex items-start gap-3 border-0 border-b border-dashed border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)] py-2 pl-[46px] pr-4 last:border-b-0"
       >
-        <div className="flex w-[240px] shrink-0 items-center gap-3 border-0 border-r border-solid border-[rgba(0,0,0,0.08)]">
+        <div className="flex w-[240px] shrink-0 items-center gap-3 border-0 border-r border-solid border-[rgba(0,0,0,0.08)] pr-3">
           <Checkbox
             checked={resAll}
             indeterminate={resSome}
             onChange={(v) => toggleMany(resKeys, v)}
           />
-          <span className="text-[14px] leading-[21px] text-arco-text-2">
+          <span className="truncate text-[14px] leading-[21px] text-arco-text-2">
             {permTitle(res.key, res.title)}
           </span>
         </div>
         {res.actions?.length ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
             {res.actions.map((a) => (
               <Checkbox
                 key={a.key}
@@ -140,7 +166,7 @@ export default function PermissionConfig({
   };
 
   return (
-    <div className="use-role-perm-config overflow-hidden rounded-xl border border-solid border-[rgba(0,0,0,0.08)]">
+    <div className="use-role-perm-config overflow-hidden rounded-xl border border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)]">
       <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-[rgba(0,0,0,0.08)] px-4 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Input
@@ -161,69 +187,74 @@ export default function PermissionConfig({
         </div>
         <button
           type="button"
-          className="cursor-pointer border-0 bg-transparent p-0 text-[14px] font-medium leading-[21px] text-[rgb(var(--primary-6))]"
+          className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-[14px] font-medium leading-[21px] text-[rgb(var(--primary-6))]"
           onClick={() => {
-            const next = Object.fromEntries(
-              ROLE_PERM_MODULES.map((m) => [m.key, true])
+            const nextOpen = !allExpanded;
+            setExpanded(
+              Object.fromEntries(expandableKeys.map((k) => [k, nextOpen]))
             );
-            setExpanded(next);
           }}
         >
-          {t['createRole.perm.expandAll']}
+          {allExpanded
+            ? t['createRole.perm.collapseAll']
+            : t['createRole.perm.expandAll']}
         </button>
       </div>
 
       <div className="max-h-[360px] overflow-y-auto">
-        {filterModules.map((mod) => {
-          const keys = collectModuleKeys(mod);
-          const modAll = keys.every((k) => checked.has(k));
-          const modSome = !modAll && keys.some((k) => checked.has(k));
-          const open = expanded[mod.key] !== false;
-          const hasChildren = !mod.leaf && (mod.resources?.length || 0) > 0;
+        {filterModules.length === 0 ? (
+          <div className="px-4 py-8 text-center text-[14px] text-arco-text-3">
+            {t['common.empty']}
+          </div>
+        ) : (
+          filterModules.map((mod) => {
+            const keys = collectModuleKeys(mod);
+            const modAll = keys.every((k) => checked.has(k));
+            const modSome = !modAll && keys.some((k) => checked.has(k));
+            const open = expanded[mod.key] !== false;
+            const hasChildren = !mod.leaf && (mod.resources?.length || 0) > 0;
+            const selectedCount = keys.filter((k) => checked.has(k)).length;
 
-          return (
-            <div key={mod.key}>
-              <div
-                className={cs(
-                  'flex items-center justify-between border-0 border-b border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)] px-4 py-2'
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <Checkbox
-                    checked={modAll}
-                    indeterminate={modSome}
-                    onChange={(v) => toggleMany(keys, v)}
-                  />
-                  <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
-                    {permTitle(mod.key, mod.title)}
-                  </span>
-                </div>
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    className="inline-flex cursor-pointer items-center gap-4 border-0 bg-transparent p-0 text-[14px] font-medium text-arco-text-3"
-                    onClick={() =>
-                      setExpanded((s) => ({ ...s, [mod.key]: !open }))
-                    }
-                  >
-                    <span>
-                      {keys.filter((k) => checked.has(k)).length}/{keys.length}
-                    </span>
-                    <IconDown
-                      className={cs(
-                        'text-[16px] transition-transform',
-                        open && 'rotate-180'
-                      )}
+            return (
+              <div key={mod.key}>
+                <div className="flex items-center justify-between border-0 border-b border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)] px-4 py-2">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Checkbox
+                      checked={modAll}
+                      indeterminate={modSome}
+                      onChange={(v) => toggleMany(keys, v)}
                     />
-                  </button>
-                ) : null}
+                    <span className="truncate text-[14px] font-medium leading-[21px] text-arco-text-1">
+                      {permTitle(mod.key, mod.title)}
+                    </span>
+                  </div>
+                  {hasChildren ? (
+                    <button
+                      type="button"
+                      className="inline-flex shrink-0 cursor-pointer items-center gap-4 border-0 bg-transparent p-0 text-[14px] font-medium text-arco-text-3"
+                      onClick={() =>
+                        setExpanded((s) => ({ ...s, [mod.key]: !open }))
+                      }
+                    >
+                      <span>
+                        {selectedCount}/{keys.length}
+                      </span>
+                      <IconDown
+                        className={cs(
+                          'text-[16px] transition-transform',
+                          open && 'rotate-180'
+                        )}
+                      />
+                    </button>
+                  ) : null}
+                </div>
+                {hasChildren && open
+                  ? (mod.resources || []).map(renderResource)
+                  : null}
               </div>
-              {hasChildren && open
-                ? (mod.resources || []).map(renderResource)
-                : null}
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

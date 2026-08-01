@@ -184,3 +184,49 @@ body {
 .arco-switch.use-switch-success.arco-switch-checked {
   background-color: rgb(var(--success-6));
 }
+
+/**
+ * Modal：标题左对齐；底栏按钮 8px 圆角 + 取消描边（Figma 666:21515 等）
+ * 全局按钮圆角由 theme-tokens --border-radius-small 驱动（Arco size-* 依赖该变量）
+ */
+.arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
+  border-radius: var(--border-radius-small, 8px);
+}
+
+.arco-modal {
+  .arco-modal-header {
+    justify-content: flex-start;
+  }
+
+  .arco-modal-title {
+    flex: 1;
+    text-align: left;
+  }
+
+  .arco-modal-footer {
+    .arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
+      border-radius: var(--border-radius-small, 8px);
+    }
+
+    /* 取消 / 次要：白底描边，不用 Arco 默认灰底 */
+    .arco-btn-secondary,
+    .arco-btn-outline,
+    .arco-btn-default:not(.arco-btn-primary) {
+      background: var(--color-bg-2, #fff);
+      border: 1px solid var(--color-border-2, #e5e6eb);
+      color: var(--color-text-2, #4e5969);
+
+      &:hover {
+        background: var(--color-fill-1, #f7f8fa);
+        border-color: var(--color-border-2, #e5e6eb);
+        color: var(--color-text-1, #1d2129);
+      }
+    }
+  }
+}
+
+/* Modal.confirm / 简易弹窗标题也左对齐 */
+.arco-modal-simple .arco-modal-title,
+.arco-modal-confirm .arco-modal-title {
+  text-align: left;
+}
