@@ -97,6 +97,7 @@ function mapConversation(
     conversationId: c.conversation_id,
     name: c.title || peerId,
     avatar: c.avatar_url,
+    sub: isGroup ? `ID：${peerId}` : undefined,
     lastMessage: lastMessagePreview(c.last_message),
     time: formatDateTime(c.last_active_at) || undefined,
     kind: isGroup ? 'group' : 'session'

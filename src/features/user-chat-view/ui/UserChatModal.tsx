@@ -174,8 +174,8 @@ export type UserChatModalProps = {
   onClose: () => void;
   /**
    * 入口场景（参数区分单聊 / 群聊）
-   * - user：用户会话查询进入，默认通讯录空态
-   * - group：群组会话查询进入，默认打开 target 群聊
+   * - user：用户会话查询进入，默认会话列表
+   * - group：群组会话查询进入，默认通讯录群资料（进入群聊后再开消息）
    */
   scene: ChatModalScene;
   /** 被查看用户 ID（用户会话必填；群入口可用群主 ID 作通讯录上下文） */
@@ -221,7 +221,7 @@ type ChatMsg = {
  * 查聊天 Modal（单聊 / 群聊共用）
  * 用 scene + target 区分入口：
  * - scene=user：791:30435 / 791:36214 / 791:32208
- * - scene=group：791:30959 / 791:33221
+ * - scene=group：977:23441（群资料）→ 977:23565（进入群聊）
  */
 export default function UserChatModal({
   visible,
@@ -232,14 +232,15 @@ export default function UserChatModal({
   target = null,
   onClose
 }: UserChatModalProps) {
+  const isGroupScene = scene === 'group';
   const [nav, setNav] = useState<NavTab>(
-    scene === 'group' || target ? 'sessions' : 'contacts'
+    isGroupScene ? 'contacts' : target ? 'sessions' : 'contacts'
   );
   const [keyword, setKeyword] = useState('');
   const [bookLoading, setBookLoading] = useState(false);
   const [book, setBook] = useState<ChatBook | null>(null);
-  const [groupsOpen, setGroupsOpen] = useState(scene === 'group');
-  const [contactsOpen, setContactsOpen] = useState(true);
+  const [groupsOpen, setGroupsOpen] = useState(isGroupScene);
+  const [contactsOpen, setContactsOpen] = useState(!isGroupScene);
   /** 通讯录选中的好友/群（右侧资料卡） */
   const [profile, setProfile] = useState<ChatPeer | null>(null);
   /** 会话/发消息/进入群聊打开的聊天 */
@@ -250,6 +251,7 @@ export default function UserChatModal({
   const targetToPeer = (t: ChatModalTarget): ChatPeer => ({
     id: t.id,
     name: t.name || t.id,
+    sub: t.type === 'group' ? `ID：${t.id}` : undefined,
     memberCount: t.memberCount,
     onlineCount: t.onlineCount,
     online: t.online,
@@ -259,28 +261,76 @@ export default function UserChatModal({
   const viewerUserId = target?.viewerUserId || userId;
 
   useEffect(() => {
-    if (!visible || !viewerUserId) return;
-    const startNav: NavTab =
-      scene === 'group' || target ? 'sessions' : 'contacts';
+    if (!visible) return;
+    // 群组会话入口：通讯录 + 群资料卡（977:23441），不直接进聊天
+    const startNav: NavTab = isGroupScene
+      ? 'contacts'
+      : target
+        ? 'sessions'
+        : 'contacts';
     setNav(startNav);
     setKeyword('');
-    setGroupsOpen(scene === 'group');
-    setContactsOpen(true);
+    setGroupsOpen(isGroupScene);
+    setContactsOpen(!isGroupScene);
     setProfile(null);
-    setChat(target ? targetToPeer(target) : null);
+    setChat(null);
     setMessages([]);
+
+    // 无查看用户时仍可展示目标群资料（消息需 conversationId + userId）
+    if (!viewerUserId) {
+      if (isGroupScene && target?.type === 'group') {
+        const peer = targetToPeer(target);
+        setBook({
+          sessions: [],
+          groups: [peer],
+          starred: [],
+          contactSections: [],
+          groupCount: 1,
+          contactCount: 0
+        });
+        setProfile(peer);
+      } else {
+        setBook(null);
+      }
+      setBookLoading(false);
+      return;
+    }
+
     setBookLoading(true);
     getUserChatBook(viewerUserId)
       .then((res) => {
-        const data = res as unknown as ChatBook;
-        setBook(data);
-        if (target) {
-          if (target.type === 'group') {
-            // 必须带 conversationId；未命中则空消息（不可用 group_id 调消息接口）
-            const g = data.groups.find((x) => x.id === target.id);
-            setChat(g?.conversationId ? g : targetToPeer(target));
-            return;
+        let data = res as unknown as ChatBook;
+        if (target?.type === 'group') {
+          const hit = data.groups.find((x) => x.id === target.id);
+          const peer: ChatPeer = hit
+            ? {
+                ...hit,
+                name: target.name || hit.name,
+                memberCount: target.memberCount ?? hit.memberCount,
+                onlineCount: target.onlineCount ?? hit.onlineCount,
+                sub: hit.sub || `ID：${hit.id}`
+              }
+            : targetToPeer(target);
+          // 目标群不在群主会话列表时仍展示在左侧，便于对照稿面交互
+          if (!hit) {
+            data = {
+              ...data,
+              groups: [peer, ...data.groups],
+              groupCount: data.groupCount + 1
+            };
+          } else {
+            data = {
+              ...data,
+              groups: data.groups.map((g) => (g.id === peer.id ? peer : g))
+            };
           }
+          setBook(data);
+          setProfile(peer);
+          setChat(null);
+          return;
+        }
+        setBook(data);
+        if (target?.type === 'user') {
           const s = data.sessions.find((x) => x.id === target.id);
           setChat(s?.conversationId ? s : targetToPeer(target));
           return;
@@ -402,7 +452,7 @@ export default function UserChatModal({
     upsertSession(sessionPeer);
   };
 
-  /** 群详情「进入群聊」→ 切到会话 Tab 并打开群聊 */
+  /** 群详情「进入群聊」 */
   const enterGroupChat = (peer: ChatPeer) => {
     const sessionPeer: ChatPeer = {
       ...peer,
@@ -411,6 +461,13 @@ export default function UserChatModal({
       time: peer.time || '刚刚',
       unread: 0
     };
+    // 群组会话入口：留在通讯录群列表（977:23565），返回资料卡
+    if (isGroupScene) {
+      setProfile(peer);
+      setChat(sessionPeer);
+      return;
+    }
+    // 用户会话入口：切到会话 Tab
     setProfile(null);
     setNav('sessions');
     setKeyword('');
@@ -418,9 +475,18 @@ export default function UserChatModal({
     upsertSession(sessionPeer);
   };
 
-  /** Figma 977:23156 通讯录「搜索好友」；会话/通话「搜索」 */
-  const searchPlaceholder =
-    nav === 'contacts'
+  const leaveChat = () => {
+    // 群入口返回资料卡；用户入口清空聊天区
+    if (isGroupScene && chat) {
+      setProfile((prev) => prev || chat);
+    }
+    setChat(null);
+  };
+
+  /** Figma：群入口固定「搜索群」；通讯录「搜索好友」；会话/通话「搜索」 */
+  const searchPlaceholder = isGroupScene
+    ? '搜索群'
+    : nav === 'contacts'
       ? groupsOpen && !contactsOpen
         ? '搜索群'
         : '搜索好友'
@@ -466,24 +532,29 @@ export default function UserChatModal({
                   (userNickname || 'U').slice(0, 1)
                 )}
               </Avatar>
-              <NavIcon
-                active={nav === 'sessions'}
-                src={iconSession}
-                label="会话"
-                onClick={() => switchNav('sessions')}
-              />
-              <NavIcon
-                active={nav === 'contacts'}
-                src={iconContacts}
-                label="通讯录"
-                onClick={() => switchNav('contacts')}
-              />
-              <NavIcon
-                active={nav === 'calls'}
-                src={iconPhone}
-                label="通话"
-                onClick={() => switchNav('calls')}
-              />
+              {/* 群组会话入口仅关闭+头像（977:23441）；用户入口保留会话/通讯录/通话 */}
+              {!isGroupScene ? (
+                <>
+                  <NavIcon
+                    active={nav === 'sessions'}
+                    src={iconSession}
+                    label="会话"
+                    onClick={() => switchNav('sessions')}
+                  />
+                  <NavIcon
+                    active={nav === 'contacts'}
+                    src={iconContacts}
+                    label="通讯录"
+                    onClick={() => switchNav('contacts')}
+                  />
+                  <NavIcon
+                    active={nav === 'calls'}
+                    src={iconPhone}
+                    label="通话"
+                    onClick={() => switchNav('calls')}
+                  />
+                </>
+              ) : null}
             </div>
           </div>
         </aside>
@@ -498,7 +569,7 @@ export default function UserChatModal({
               prefix={<IconSearch className="text-arco-text-3" />}
               className="use-user-chat-search min-w-0 flex-1"
             />
-            {nav === 'contacts' ? (
+            {nav === 'contacts' && !isGroupScene ? (
               <button
                 type="button"
                 aria-label="添加"
@@ -525,6 +596,7 @@ export default function UserChatModal({
               </div>
             ) : (
               <ContactsPanel
+                groupsOnly={isGroupScene}
                 groupsOpen={groupsOpen}
                 contactsOpen={contactsOpen}
                 groupCount={book?.groupCount ?? filteredGroups.length}
@@ -547,7 +619,7 @@ export default function UserChatModal({
               peer={chat}
               loading={msgLoading}
               messages={messages}
-              onBack={() => setChat(null)}
+              onBack={leaveChat}
             />
           ) : profile?.kind === 'group' ? (
             <GroupProfile peer={profile} onEnterChat={enterGroupChat} />
@@ -729,7 +801,7 @@ function SectionHeader({
 }: {
   open: boolean;
   title: string;
-  count: number;
+  count?: number;
   onToggle: () => void;
 }) {
   return (
@@ -747,15 +819,18 @@ function SectionHeader({
         <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.5] text-arco-text-1">
           {title}
         </span>
-        <span className="shrink-0 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
-          {count}
-        </span>
+        {count != null ? (
+          <span className="shrink-0 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+            {count}
+          </span>
+        ) : null}
       </span>
     </button>
   );
 }
 
 function ContactsPanel({
+  groupsOnly = false,
   groupsOpen,
   contactsOpen,
   groupCount,
@@ -768,6 +843,8 @@ function ContactsPanel({
   onToggleContacts,
   onSelect
 }: {
+  /** 群组会话入口仅展示群聊分组（977:23441） */
+  groupsOnly?: boolean;
   groupsOpen: boolean;
   contactsOpen: boolean;
   groupCount: number;
@@ -785,7 +862,7 @@ function ContactsPanel({
       <SectionHeader
         open={groupsOpen}
         title="群聊"
-        count={groupCount}
+        count={groupsOnly ? undefined : groupCount}
         onToggle={onToggleGroups}
       />
       {groupsOpen
@@ -810,7 +887,7 @@ function ContactsPanel({
                     {g.sub || `ID：${g.id}`}
                   </div>
                 </div>
-                {g.unread ? (
+                {!groupsOnly && g.unread ? (
                   <span className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--danger-6))] px-1 text-[10px] font-semibold leading-none text-white">
                     {g.unread > 99 ? '99+' : g.unread}
                   </span>
@@ -820,47 +897,51 @@ function ContactsPanel({
           ))
         : null}
 
-      <SectionHeader
-        open={contactsOpen}
-        title="联系人"
-        count={contactCount}
-        onToggle={onToggleContacts}
-      />
-      {contactsOpen ? (
+      {groupsOnly ? null : (
         <>
-          {starred.length ? (
+          <SectionHeader
+            open={contactsOpen}
+            title="联系人"
+            count={contactCount}
+            onToggle={onToggleContacts}
+          />
+          {contactsOpen ? (
             <>
-              <div className="flex items-center gap-1 py-2 pl-9 pr-4">
-                <img src={iconStar} alt="" className="size-3" />
-                <span className="text-[14px] text-arco-text-2">星标</span>
-              </div>
-              {starred.map((c) => (
-                <ContactRow
-                  key={`star-${c.id}`}
-                  peer={c}
-                  selected={c.id === activeId}
-                  onSelect={onSelect}
-                />
+              {starred.length ? (
+                <>
+                  <div className="flex items-center gap-1 py-2 pl-9 pr-4">
+                    <img src={iconStar} alt="" className="size-3" />
+                    <span className="text-[14px] text-arco-text-2">星标</span>
+                  </div>
+                  {starred.map((c) => (
+                    <ContactRow
+                      key={`star-${c.id}`}
+                      peer={c}
+                      selected={c.id === activeId}
+                      onSelect={onSelect}
+                    />
+                  ))}
+                </>
+              ) : null}
+              {sections.map((sec) => (
+                <div key={sec.letter}>
+                  <div className="py-2 pl-9 pr-4 text-[14px] text-arco-text-2">
+                    {sec.letter}
+                  </div>
+                  {sec.items.map((c) => (
+                    <ContactRow
+                      key={c.id}
+                      peer={c}
+                      selected={c.id === activeId}
+                      onSelect={onSelect}
+                    />
+                  ))}
+                </div>
               ))}
             </>
           ) : null}
-          {sections.map((sec) => (
-            <div key={sec.letter}>
-              <div className="py-2 pl-9 pr-4 text-[14px] text-arco-text-2">
-                {sec.letter}
-              </div>
-              {sec.items.map((c) => (
-                <ContactRow
-                  key={c.id}
-                  peer={c}
-                  selected={c.id === activeId}
-                  onSelect={onSelect}
-                />
-              ))}
-            </div>
-          ))}
         </>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -961,7 +1042,7 @@ function FriendDetail({
   );
 }
 
-/** 通讯录群详情 — Figma 977:23257 */
+/** 通讯录群详情 — Figma 977:23441 / 977:23257 */
 function GroupProfile({
   peer,
   onEnterChat
@@ -970,9 +1051,9 @@ function GroupProfile({
   onEnterChat: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[#f3f3f3] px-4">
+    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[#f3f3f3] px-20">
       <div className="h-14 w-full shrink-0" />
-      <div className="flex w-full max-w-[400px] flex-col items-center pb-4">
+      <div className="flex w-full flex-col items-center pb-4">
         <div className="flex flex-col items-center gap-4">
           <GroupAvatar avatars={peer.avatars} name={peer.name} size={80} />
           <div className="flex flex-col items-center gap-2">
@@ -990,12 +1071,12 @@ function GroupProfile({
               <span className="text-[12px] leading-none text-[rgb(var(--link-6))]">
                 ID：{peer.id}
               </span>
-              <IconCopy className="text-[12px] text-[rgb(var(--link-6))]" />
+              <IconCopy className="text-[16px] text-[rgb(var(--link-6))]" />
             </button>
           </div>
         </div>
       </div>
-      <div className="w-full max-w-[400px] p-4">
+      <div className="w-full p-4">
         <Button
           type="primary"
           long

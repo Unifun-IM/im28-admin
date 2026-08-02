@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Form, Input } from '@arco-design/web-react';
-import { IconUserGroup } from '@arco-design/web-react/icon';
 import {
   ActionLinks,
   AvatarNameCell,
   BizListPage,
+  DoubleLineCell,
   FilterField,
   FilterKeywordInput,
   FilterSelect,
@@ -260,11 +260,12 @@ export default function UserSessionPage() {
               }
             />
           ),
+          /** 列顺序对齐 Figma 977:35189 */
           columns: [
             {
               title: t['userSession.col.user'],
               dataIndex: 'nickname',
-              width: 280,
+              width: 220,
               ellipsis: false,
               render: (
                 _: unknown,
@@ -281,16 +282,28 @@ export default function UserSessionPage() {
               )
             },
             {
-              title: t['userSession.col.friendGroup'],
-              dataIndex: 'user_id',
-              width: 160,
+              title: t['userSession.col.contact'],
+              dataIndex: 'phone',
+              width: 180,
               ellipsis: false,
-              render: () => (
-                <span className="inline-flex h-6 items-center gap-1 rounded bg-[var(--color-fill-2,#f2f3f5)] px-2 text-[12px] font-medium leading-[18px] text-arco-text-1">
-                  <IconUserGroup className="text-[12px] text-arco-text-2" />
-                  --/--
-                </span>
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => (
+                <DoubleLineCell
+                  primary={`${t['userSession.cell.phone']}：${row.phone || '--'}`}
+                  secondary={`${t['userSession.cell.email']}：${row.email || '--'}`}
+                />
               )
+            },
+            {
+              title: t['userSession.col.account'],
+              dataIndex: 'account',
+              width: 140,
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => row.account || '--'
             },
             {
               title: t['userSession.col.status'],
@@ -324,8 +337,25 @@ export default function UserSessionPage() {
               ) => formatDateTime(row.last_active_at)
             },
             {
+              title: t['userSession.col.registeredAt'],
+              dataIndex: 'registered_at',
+              width: 180,
+              sorter: (
+                a: AdminAPI.AdminUserConversationQueryItem,
+                b: AdminAPI.AdminUserConversationQueryItem
+              ) =>
+                String(a.registered_at || '').localeCompare(
+                  String(b.registered_at || '')
+                ),
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => formatDateTime(row.registered_at)
+            },
+            {
               title: t['common.action'],
               width: 80,
+              fixed: 'right' as const,
               render: (
                 _: unknown,
                 row: AdminAPI.AdminUserConversationQueryItem

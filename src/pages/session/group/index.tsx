@@ -50,7 +50,8 @@ function parseBatchIds(raw?: string) {
   return String(raw || '')
     .split(/[\s,，]+/)
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 100);
 }
 
 /**
@@ -122,11 +123,19 @@ export default function GroupSessionPage() {
             setTotal(0);
             return;
           }
+          const owner_user_id = values.owner_user_id?.trim() || undefined;
+          const statusRaw = values.status;
+          const status =
+            statusRaw === '' || statusRaw === undefined || statusRaw === null
+              ? undefined
+              : (Number(statusRaw) as AdminAPI.GroupStatus);
           const results = await Promise.all(
             ids.map((id) =>
               postV1AdminGroupsList({
                 keyword: id,
                 keyword_type: 'group_id',
+                owner_user_id,
+                status,
                 page: 1,
                 page_size: 1
               })
@@ -194,7 +203,9 @@ export default function GroupSessionPage() {
     <>
       <BizListPage
         form={form}
-        title={t['groupSession.title']}
+        title={
+          searched ? t['groupSession.listTitle'] : t['groupSession.title']
+        }
         filterCollapsible={false}
         filterDefaultCollapsed={false}
         filterResetText={common['common.reset']}
@@ -283,6 +294,7 @@ export default function GroupSessionPage() {
               }
             />
           ),
+          /** 列顺序对齐 Figma 977:35433 */
           columns: [
             {
               title: t['groupQuery.col.group'],
@@ -349,13 +361,18 @@ export default function GroupSessionPage() {
               title: t['groupQuery.col.createdAt'],
               dataIndex: 'group.created_at',
               width: 180,
+              sorter: (a: GroupListRow, b: GroupListRow) =>
+                String(a.group?.created_at || '').localeCompare(
+                  String(b.group?.created_at || '')
+                ),
               render: (_: unknown, row: GroupListRow) =>
                 formatDateTime(row.group?.created_at)
             },
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 100,
+              width: 80,
+              fixed: 'right' as const,
               render: (_: unknown, row: GroupListRow) => {
                 const group_id = row.group?.group_id || '';
                 return (
