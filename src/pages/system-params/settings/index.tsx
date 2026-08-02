@@ -112,6 +112,14 @@ function ReplaceTrigger({ label }: { label: string }) {
   );
 }
 
+/** 注册表单字段但不渲染 UI（供 logo_url 等自定义上传字段） */
+function FormSilentValue(_props: {
+  value?: string;
+  onChange?: (value?: string) => void;
+}) {
+  return null;
+}
+
 /**
  * 系统参数设置 — Figma 979:38548
  * 读写：postV1AdminSystemSettingsGet / Update
@@ -292,9 +300,9 @@ export default function SystemParamsPage() {
               <Input allowClear />
             </Form.Item>
 
-            {/* 隐藏注册 logo_url，保证 getFieldsValue / dirty 能读到上传结果 */}
-            <Form.Item field="logo_url" hidden>
-              <Input />
+            {/* 仅注册 logo_url，界面不展示 URL */}
+            <Form.Item field="logo_url" noStyle>
+              <FormSilentValue />
             </Form.Item>
             <Form.Item label={t['paramsSettings.field.logo']}>
               <div className="rounded-xl border border-solid border-[rgba(0,0,0,0.08)] px-3 py-2">
