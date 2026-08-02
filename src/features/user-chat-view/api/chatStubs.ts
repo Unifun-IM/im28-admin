@@ -101,16 +101,24 @@ function typeBracketLabel(type?: number): string {
 
 function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
   if (!msg) return '';
+  // 5=已删除；通常不会出现在列表中
+  if (msg.status === 5) return '';
   if (isHiddenMessageContentType(msg.type)) return '';
-  const parsed = parseOpenIMMessageBody(msg.type, msg.body || {});
-  const ui = mapMessageContentTypeToUi(msg.type);
-  if (ui === 'text' || ui === 'system') {
+  const body = msg.body || {};
+  const parsed = parseOpenIMMessageBody(msg.type, body);
+  const ui = mapMessageContentTypeToUi(msg.type, body);
+  if (ui === 'text' || ui === 'system' || ui === 'quote') {
     return parsed.content?.trim() || typeBracketLabel(msg.type);
+  }
+  if (ui === 'call') {
+    return parsed.content?.trim() || typeBracketLabel(msg.type) || '[通话]';
   }
   if (ui === 'file' && parsed.fileName) return parsed.fileName;
   if (ui === 'voice' && parsed.duration) {
     return `${typeBracketLabel(msg.type)} ${parsed.duration}`;
   }
+  if (ui === 'card' && parsed.cardName) return parsed.cardName;
+  if (ui === 'location' && parsed.locationName) return parsed.locationName;
   return typeBracketLabel(msg.type);
 }
 
@@ -241,10 +249,11 @@ export async function getChatMessages(params: {
     .map((row) => {
       const m = row.message;
       if (!m?.msg_id) return null;
+      if (m.status === 5) return null;
       if (isHiddenMessageContentType(m.type)) return null;
 
       const sender = users.get(m.sender_id || '');
-      const body = m.body || {};
+      const body = (m.body || {}) as Record<string, any>;
       const parsed = parseOpenIMMessageBody(m.type, body);
       const uiType = mapMessageContentTypeToUi(m.type, body);
       const fallback = typeBracketLabel(m.type);

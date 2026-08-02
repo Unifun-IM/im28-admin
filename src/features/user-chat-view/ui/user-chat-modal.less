@@ -1,10 +1,27 @@
 /* —— 用户查聊天 Modal（Figma 791:30433 / 977:23156，1024×768） —— */
 .use-user-chat-modal-wrap {
+  /*
+   * 用 grid 居中，避免 flex 子项默认 min-height:auto 被内容撑破固定高度，
+   * 导致会话/好友列表、消息区都无法出现内部滚动。
+   */
+  display: grid !important;
+  place-items: center;
+  /* Arco wrapper 默认 overflow:auto；弹窗近满屏时会出现页面级滚动条 */
+  overflow: hidden !important;
+
+  &::after {
+    display: none !important;
+  }
+
   .arco-modal.use-user-chat-modal {
+    top: 0 !important;
+    margin: 0 !important;
     width: min(1024px, 90vw) !important;
-    height: min(768px, 90vh) !important;
+    /* 锁死视口高度；min-height:0 防止被长列表撑开 */
+    height: min(768px, calc(100vh - 80px)) !important;
+    max-height: calc(100vh - 80px) !important;
+    min-height: 0 !important;
     max-width: 90vw;
-    max-height: 90vh;
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
@@ -15,11 +32,26 @@
     flex-direction: column;
   }
 
-  .arco-modal.use-user-chat-modal .arco-modal-content {
-    flex: 1 1 auto;
-    min-height: 0;
+  /*
+   * Arco Modal 在 .arco-modal-content 外包了一层匿名 div（display:block / flex:0 1 auto），
+   * 默认按内容高度收缩，导致三栏只占弹窗上半截、底部大块空白、内部滚动异常。
+   */
+  .arco-modal.use-user-chat-modal > div:has(.arco-modal-content) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     height: 100% !important;
-    display: flex;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .arco-modal.use-user-chat-modal .arco-modal-content {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
     flex-direction: column;
     padding: 0 !important;
     background: transparent;
@@ -28,10 +60,10 @@
   }
 
   .arco-modal.use-user-chat-modal .arco-modal-body {
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     height: 100% !important;
-    max-height: none !important;
+    max-height: 100% !important;
     padding: 0 !important;
     overflow: hidden;
   }
@@ -40,9 +72,36 @@
   .arco-modal.use-user-chat-modal .arco-modal-footer {
     display: none;
   }
+
+  /* 无 title/footer 时 children 直接在 content 下；有 body 时也要吃满 */
+  .arco-modal.use-user-chat-modal .arco-modal-content > div,
+  .arco-modal.use-user-chat-modal .arco-modal-body > div {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+  }
 }
 
 .arco-modal.use-user-chat-modal {
+  .use-user-chat-shell {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .use-user-chat-side {
+    position: relative;
+    min-height: 0;
+  }
+
+  .use-user-chat-side-scroll {
+    position: absolute;
+    top: 56px; /* h-14 搜索栏 */
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 
   .use-user-chat-search.arco-input-inner-wrapper {
     height: 32px;
@@ -189,49 +248,36 @@
     }
   }
 
-  .use-chat-virtual-list.arco-list {
-    height: 100%;
-    border: none;
+  /*
+   * 消息列表高度：host 占满顶栏/Alert 下方剩余区域，
+   * scroller absolute inset 铺满，避免 flex+% 高度算不准。
+   */
+  .use-chat-msg-list-host {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .use-chat-msg-list {
+    position: absolute;
+    inset: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: transparent;
+  }
 
-    /* 消息不足一屏时贴底（对齐 Figma 聊天区留白在上方） */
-    &:not(.arco-list-virtual) {
-      display: flex;
-      flex-direction: column;
+  .use-chat-msg-list-inner {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100%;
+    padding-top: 8px;
+  }
 
-      > .arco-list-content-wrapper,
-      > .arco-spin {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-
-      .arco-list-content {
-        margin-top: auto;
-        padding-top: 8px;
-        padding-bottom: 8px;
-      }
-    }
-
-    .arco-list-content,
-    .arco-list-content-wrapper {
-      border: none;
-      background: transparent;
-    }
-
-    .arco-list-item,
-    .arco-list-item-content {
-      padding: 0;
-      border: none;
-      background: transparent;
-      /* 气泡尾巴 / 群聊头像不被裁切 */
-      overflow: visible;
-    }
-
-    .arco-list-scroll-loading {
-      display: none;
-    }
+  .use-chat-msg-row--last {
+    padding-bottom: 16px;
   }
 }
 

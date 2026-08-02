@@ -29,6 +29,8 @@ export const MessageContentType = {
   CustomMsgNotTriggerConversation: 119,
   CustomMsgOnlineOnly: 120,
 
+  /** Admin MessageType：好友相关系统通知起点 */
+  FriendNotification: 1200,
   FriendApplicationApprovedNotification: 1201,
   FriendApplicationRejectedNotification: 1202,
   FriendApplicationNotification: 1203,
@@ -63,12 +65,31 @@ export const MessageContentType = {
   GroupInfoSetAnnouncementNotification: 1519,
   GroupInfoSetNameNotification: 1520,
 
+  /**
+   * Admin 通话过程系统通知（body.system.event_type = rtc.call.*）
+   * @see AdminAPI.MessageType 1601-1608 / SystemMessage
+   */
+  RtcCallInviteNotification: 1601,
+  RtcCallAcceptNotification: 1602,
+  RtcCallRejectNotification: 1603,
+  RtcCallCancelNotification: 1604,
+  RtcCallHangupNotification: 1605,
+  RtcCallEndedNotification: 1606,
+  RtcCallNotification1607: 1607,
+  RtcCallNotification1608: 1608,
+
   BurnAfterReadingNotification: 1701,
   BusinessNotification: 2001,
+  /** OpenIM 历史撤回通知 */
   RevokeMessageNotification: 2101,
+  /** Admin MessageType 撤回 / 系统删除类通知 */
+  AdminRevokeMessageNotification: 2102,
   SignalHasReadReceiptNotification: 2150,
   GroupHasReadReceiptNotification: 2155
 } as const;
+
+/** 通话历史自定义消息 key（type=110） */
+export const RTC_CALL_SUMMARY_KEY = 'rtc.call.summary';
 
 export type MessageContentTypeValue =
   (typeof MessageContentType)[keyof typeof MessageContentType];
@@ -124,14 +145,27 @@ export function isHiddenMessageContentType(type?: number): boolean {
   );
 }
 
-/** 通知 / 系统类（含撤回） */
+/** 通知 / 系统类（含撤回、Admin 1601-1608 通话过程通知） */
 export function isNotificationMessageContentType(type?: number): boolean {
   if (type == null) return false;
-  if (type === MessageContentType.RevokeMessageNotification) return true;
+  if (
+    type === MessageContentType.RevokeMessageNotification ||
+    type === MessageContentType.AdminRevokeMessageNotification
+  ) {
+    return true;
+  }
   if (type === MessageContentType.OANotification) return true;
   if (type === MessageContentType.BusinessNotification) return true;
   if (type === MessageContentType.BurnAfterReadingNotification) return true;
   return type >= 1200 && type < 2200 && !isHiddenMessageContentType(type);
+}
+
+export function isRtcCallProcessNotification(type?: number): boolean {
+  if (type == null) return false;
+  return (
+    type >= MessageContentType.RtcCallInviteNotification &&
+    type <= MessageContentType.RtcCallNotification1608
+  );
 }
 
 function pickStr(...vals: unknown[]): string | undefined {
@@ -179,6 +213,10 @@ function nested(body: Record<string, any>, ...keys: string[]) {
   return undefined;
 }
 
+/**
+ * 解析 type=110 custom 通话历史。
+ * Admin 约定：key=rtc.call.summary，data 为 JSON（含 status_text / duration_seconds / call_type）。
+ */
 function parseCustomCall(
   custom?: Record<string, any>
 ): ParsedChatMessageBody | null {
@@ -196,34 +234,95 @@ function parseCustomCall(
   const key = String(
     pickStr(custom.key, custom.Key, data.key, data.type, data.customType) || ''
   ).toLowerCase();
+  const isSummary = key === RTC_CALL_SUMMARY_KEY || key === 'rtc.call.summary';
   const looksCall =
+    isSummary ||
     /call|rtc|voip|音视频|通话/.test(key) ||
     data.duration != null ||
     data.duration_seconds != null ||
     data.callStatus != null ||
+    data.status_text != null ||
     data.status === 'rejected' ||
     data.status === 'refuse';
   if (!looksCall) return null;
 
+  const status = String(data.status || data.result || '').toLowerCase();
+  const statusText = pickStr(data.status_text, data.statusText);
+  const reason = pickStr(data.reason, data.reason_text);
   const rejected =
-    data.status === 'rejected' ||
-    data.status === 'refuse' ||
     data.rejected === true ||
-    /拒绝|reject|refuse/.test(String(data.status || data.result || ''));
+    status === 'rejected' ||
+    status === 'refuse' ||
+    status === 'reject' ||
+    /拒绝|reject|refuse/.test(`${status} ${statusText || ''}`);
+  const cancelled =
+    status === 'cancelled' ||
+    status === 'canceled' ||
+    status === 'cancel' ||
+    /取消|cancel/.test(`${status} ${statusText || ''}`);
+
+  const callType = String(
+    pickStr(data.call_type, data.callType, data.mediaType, data.type) || ''
+  ).toLowerCase();
   const isVideo =
-    data.mediaType === 'video' ||
-    data.type === 'video' ||
-    data.callType === 'video' ||
-    /video|视频/.test(key);
+    callType === 'video' ||
+    callType === '2' ||
+    /video|视频/.test(`${key} ${callType}`);
 
   const sec = pickNum(data.duration_seconds, data.duration, data.callDuration);
+  const durationLabel = sec != null && sec > 0 ? formatCallDuration(sec) : undefined;
+
+  let content: string;
+  if (rejected) {
+    content = statusText || '已拒绝';
+  } else if (cancelled) {
+    content = statusText || '已取消';
+  } else if (durationLabel) {
+    content = durationLabel;
+  } else {
+    content = statusText || reason || '通话';
+  }
+
   return {
-    content: rejected
-      ? '已拒绝'
-      : formatCallDuration(sec) || '通话',
-    callStatus: rejected ? '已拒绝' : undefined,
+    content,
+    callStatus: rejected
+      ? statusText || '已拒绝'
+      : cancelled
+        ? statusText || '已取消'
+        : statusText,
     callKind: isVideo ? 'video' : 'voice',
-    duration: sec != null ? formatCallDuration(sec) : undefined
+    duration: durationLabel
+  };
+}
+
+/** Admin body.system：event_type / text / extra.status_text */
+function parseSystemMessageBody(
+  system?: Record<string, any>,
+  body: Record<string, any> = {}
+): ParsedChatMessageBody {
+  const extra =
+    system?.extra && typeof system.extra === 'object' ? system.extra : {};
+  const eventType = pickStr(system?.event_type, system?.eventType, body.event_type);
+  const statusText = pickStr(
+    extra.status_text,
+    extra.statusText,
+    body.status_text
+  );
+  const reason = pickStr(extra.reason, body.reason);
+  return {
+    content: pickStr(
+      system?.text,
+      statusText,
+      reason,
+      system?.detail,
+      system?.defaultTips,
+      system?.default_tips,
+      body.detail,
+      body.content,
+      body.defaultTips,
+      body.default_tips,
+      eventType
+    )
   };
 }
 
@@ -294,10 +393,11 @@ export function parseOpenIMMessageBody(
   const locationElem = nested(body, 'location', 'locationElem', 'location_elem');
   const quoteElem = nested(body, 'quote', 'quoteElem', 'quote_elem');
   const mergeElem = nested(body, 'merge', 'mergeElem', 'merge_elem');
-  const faceElem = nested(body, 'faceElem', 'face_elem', 'emoji');
+  /** Admin：emoji；OpenIM 兼容 faceElem */
+  const faceElem = nested(body, 'emoji', 'faceElem', 'face_elem');
   const customElem = nested(body, 'custom', 'customElem', 'custom_elem');
-  const notificationElem =
-    nested(body, 'notificationElem', 'notification_elem', 'system');
+  /** Admin 系统通知统一为 body.system */
+  const systemElem = nested(body, 'system', 'notificationElem', 'notification_elem');
 
   switch (type) {
     case MessageContentType.Text:
@@ -327,24 +427,24 @@ export function parseOpenIMMessageBody(
       };
 
     case MessageContentType.Quote: {
+      // Admin QuoteMessage：{ msg_id, text, reply_text, sender_id }
       const quoteMsg =
         nested(quoteElem, 'quoteMessage', 'quote_message') || quoteElem;
       return {
         ...forward,
         content: pickStr(
           quoteElem?.reply_text,
-          quoteElem?.text,
           body.reply_text,
-          body.text,
           body.content
         ),
         quoteSender: pickStr(
-          quoteMsg?.sender_id,
           quoteElem?.sender_id,
+          quoteMsg?.sender_id,
           quoteElem?.nickname,
           body.quote_sender
         ),
         quoteText: pickStr(
+          quoteElem?.text,
           quoteMsg?.text,
           quoteMsg?.content,
           quoteElem?.quote_text,
@@ -530,7 +630,13 @@ export function parseOpenIMMessageBody(
     case MessageContentType.CustomFace:
       return {
         ...forward,
-        content: pickStr(faceElem?.data, faceElem?.url, body.data, '[表情]'),
+        content: pickStr(
+          faceElem?.emoji_id,
+          faceElem?.data,
+          faceElem?.url,
+          body.data,
+          '[表情]'
+        ),
         mediaUrl: pickStr(faceElem?.url, body.url)
       };
 
@@ -541,37 +647,31 @@ export function parseOpenIMMessageBody(
         ...forward,
         content: pickStr(
           customElem?.description,
-          customElem?.data,
+          typeof customElem?.data === 'string' ? customElem.data : undefined,
           body.description,
-          body.data,
+          typeof body.data === 'string' ? body.data : undefined,
           '[自定义消息]'
         )
       };
     }
 
     case MessageContentType.RevokeMessageNotification:
-      return { content: pickStr(body.detail, body.content, '消息已撤回') };
+    case MessageContentType.AdminRevokeMessageNotification:
+      return {
+        content:
+          parseSystemMessageBody(systemElem, body).content || '消息已撤回'
+      };
 
     default:
       if (isNotificationMessageContentType(type)) {
-        return {
-          content: pickStr(
-            notificationElem?.detail,
-            notificationElem?.defaultTips,
-            notificationElem?.default_tips,
-            notificationElem?.text,
-            body.detail,
-            body.content,
-            body.defaultTips,
-            body.default_tips
-          )
-        };
+        return parseSystemMessageBody(systemElem, body);
       }
       return {
         ...forward,
         content: pickStr(
           typeof textElem?.text === 'string' ? textElem.text : undefined,
-          body.text,
+          body.markdown?.text,
+          typeof body.text === 'string' ? body.text : undefined,
           body.content
         )
       };

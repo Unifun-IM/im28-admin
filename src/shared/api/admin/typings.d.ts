@@ -95,18 +95,26 @@ declare namespace AdminAPI {
     };
 
   type AdminConversationMessage = {
+    /** 消息唯一 ID。 */
     msg_id?: string;
+    /** 会话内消息序号，以字符串返回，列表按该字段倒序排列。 */
     msg_seq?: string;
+    /** 消息发送者用户 ID；使用该值关联 data.users[].user_id 获取昵称和头像。 */
     sender_id?: string;
-    type?: number;
-    body?: Record<string, any>;
+    type?: MessageType;
+    body?: MessageBody;
+    /** 消息状态。1=发送中，2=发送成功，3=发送失败，5=已删除；已删除消息通常不会出现在列表中。 */
     status?: number;
+    /** 消息发送时间，RFC3339 格式。 */
     sent_at?: string;
   };
 
   type AdminConversationUser = {
+    /** 用户 ID，用于关联 message.sender_id。 */
     user_id?: string;
+    /** 用户昵称。 */
     nickname?: string;
+    /** 用户头像 URL。 */
     avatar_url?: string;
   };
 
@@ -221,11 +229,13 @@ declare namespace AdminAPI {
     };
 
   type AdminListConversationMessageRequest = {
-    /** 会话所属的 C 端用户 ID，用于成员关系和消息可见性校验。 */
+    /** 要查看其消息视角的 C 端用户 ID，用于成员关系和消息可见性校验，不是发送者筛选条件。 */
     user_id: string;
+    /** 要查看的会话 ID，从 /v1/admin/conversations/list 返回结果中获取。 */
     conversation_id: string;
-    /** 向前翻页边界；0 或不传表示从该用户可见的最新消息开始。 */
+    /** 向更早消息翻页的游标。首次传 0 或省略；后续请求必须传上一页的 data.next_seq。结果按 msg_seq 倒序返回。 */
     before_seq?: string;
+    /** 单页最多返回的消息数量。 */
     limit?: number;
   };
 
@@ -938,8 +948,9 @@ declare namespace AdminAPI {
   };
 
   type CustomMessage = {
+    /** 自定义业务类型。通话历史消息使用 type=110、key=rtc.call.summary；1601-1608 通话过程通知改用 body.system。 */
     key: string;
-    /** 自定义 JSON 字符串，由业务方约定。 */
+    /** 自定义 JSON 字符串。rtc.call.summary 包含 call_id、conversation_id、call_type、room_name、caller_id、operator_id、status、status_text、reason_code、reason、e2ee_required、started_at、answered_at、ended_at、duration_seconds。 */
     data?: string;
   };
 
@@ -956,7 +967,7 @@ declare namespace AdminAPI {
   };
 
   type DeleteMessageOperation = {
-    /** self 仅当前用户隐藏；all 对会话所有成员删除且仅消息发送者可用。 */
+    /** self 仅当前用户隐藏，允许删除会话内任意消息；all 对会话相关用户全局删除。单聊双方均可删除任意一方消息；群聊中可删除自己的消息，群主可删除任意成员消息，管理员需具备清理消息权限才能删除其他成员消息。 */
     scope: "self" | "all";
     reason?: string;
   };
@@ -2239,8 +2250,11 @@ declare namespace AdminAPI {
   };
 
   type SystemMessage = {
+    /** 系统事件类型；通话实时通知使用 rtc.call.invite、rtc.call.accept、rtc.call.reject、rtc.call.cancel、rtc.call.hangup、rtc.call.ended。 */
     event_type?: string;
+    /** 给人阅读的系统通知文本。 */
     text?: string;
+    /** 系统事件业务字段；通话通知包含 call_id、conversation_id、call_type、room_name、caller_id、operator_id、status、status_text、reason_code、reason、e2ee_required。status 和 reason_code 是稳定协议码，status_text 和 reason 是中文展示文案。 */
     extra?: Record<string, any>;
   };
 

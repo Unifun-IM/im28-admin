@@ -3,14 +3,12 @@ import {
   Alert,
   Button,
   Input,
-  List,
   Message,
   Modal,
   Spin,
   Typography
 } from '@arco-design/web-react';
 import { UserAvatar } from '@shared/ui';
-import type { ListHandle } from '@arco-design/web-react/es/List/interface';
 import {
   IconCopy,
   IconDown,
@@ -45,7 +43,6 @@ import iconPhone from '../assets/icon-phone.svg';
 import iconSession from '../assets/icon-session.svg';
 import iconStar from '../assets/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
-import useElementHeight from './useElementHeight';
 import './user-chat-modal.less';
 
 const { Text } = Typography;
@@ -529,19 +526,17 @@ export default function UserChatModal({
       closable={false}
       unmountOnExit
       maskClosable
+      alignCenter
       className="use-user-chat-modal"
       wrapClassName="use-user-chat-modal-wrap"
       style={{
         width: 'min(1024px, 90vw)',
-        height: 'min(768px, 90vh)',
-        maxHeight: '90vh'
+        height: 'min(768px, calc(100vh - 80px))',
+        maxHeight: 'calc(100vh - 80px)'
       }}
     >
-      <div
-        className="flex min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]"
-        style={{ height: 'min(768px, 90vh)' }}
-      >
-        <aside className="flex h-full w-16 shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
+      <div className="use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
+        <aside className="flex h-full min-h-0 w-16 shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
@@ -586,7 +581,7 @@ export default function UserChatModal({
           </div>
         </aside>
 
-        <section className="flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#fafafa]">
+        <section className="use-user-chat-side flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#fafafa]">
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-2">
             <Input
               allowClear
@@ -606,7 +601,8 @@ export default function UserChatModal({
               </button>
             ) : null}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          {/* absolute 铺满，保证会话/好友列表可滚 */}
+          <div className="use-user-chat-side-scroll">
             {bookLoading ? (
               <div className="flex h-full min-h-40 items-center justify-center">
                 <Spin />
@@ -1151,11 +1147,9 @@ function ChatPane({
   onBack: () => void;
 }) {
   const [historyOpen, setHistoryOpen] = useState(false);
-  const listRef = useRef<ListHandle>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   /** 从聊天记录定位回来时优先滚到目标，避免被「滚到底」覆盖 */
-  const pendingScrollIndex = useRef<number | null>(null);
-  const { ref: listWrapRef, height: listHeight } =
-    useElementHeight<HTMLDivElement>();
+  const pendingScrollMsgId = useRef<string | null>(null);
   const isGroup = peer.kind === 'group';
   const title =
     isGroup && peer.memberCount
@@ -1163,23 +1157,40 @@ function ChatPane({
       : peer.name;
 
   useEffect(() => {
-    if (historyOpen || loading || !messages.length || listHeight <= 0) return;
-    const target =
-      pendingScrollIndex.current != null
-        ? pendingScrollIndex.current
-        : messages.length - 1;
-    pendingScrollIndex.current = null;
-    // 可变高虚拟列表：首屏测高后 Filler 总高会收敛，需二次贴底消除底部空白
-    const scrollToTarget = () => {
-      listRef.current?.scrollIntoView(target);
+    if (historyOpen || loading || !messages.length) return;
+    const locateId = pendingScrollMsgId.current;
+    pendingScrollMsgId.current = null;
+
+    const scrollToLatest = () => {
+      const el = scrollerRef.current;
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
     };
+
+    const scrollToTarget = () => {
+      if (locateId) {
+        const safeId =
+          typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+            ? CSS.escape(locateId)
+            : locateId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        const node = scrollerRef.current?.querySelector(
+          `[data-msg-id="${safeId}"]`
+        );
+        if (node instanceof HTMLElement) {
+          node.scrollIntoView({ block: 'center' });
+          return;
+        }
+      }
+      scrollToLatest();
+    };
+
     requestAnimationFrame(() => {
       scrollToTarget();
       requestAnimationFrame(scrollToTarget);
     });
     const t = window.setTimeout(scrollToTarget, 80);
     return () => window.clearTimeout(t);
-  }, [historyOpen, loading, messages.length, listHeight, peer.id]);
+  }, [historyOpen, loading, messages.length, peer.id]);
 
   if (historyOpen) {
     return (
@@ -1188,9 +1199,8 @@ function ChatPane({
         chatId={peer.id}
         onClose={() => setHistoryOpen(false)}
         onLocate={(messageId) => {
-          const idx = messages.findIndex((m) => m.id === messageId);
-          if (idx >= 0) {
-            pendingScrollIndex.current = idx;
+          if (messages.some((m) => m.id === messageId)) {
+            pendingScrollMsgId.current = messageId;
           } else {
             Message.success('已回到会话');
           }
@@ -1261,34 +1271,29 @@ function ChatPane({
         content="只读模式：您正在以管理员权限查看用户通讯记录。系统仅保留最近 180 天的消息内容。所有查阅操作均已记录在审计日志中，请遵守隐私合规规范。"
       />
 
-      <div ref={listWrapRef} className="min-h-0 flex-1 overflow-hidden">
+      {/* absolute 铺满剩余高度，避开 flex 百分比高度失效 */}
+      <div className="use-chat-msg-list-host">
         {loading ? (
-          <div className="flex h-40 items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <Spin />
           </div>
-        ) : listHeight > 0 ? (
-          <List
-            className="use-chat-virtual-list"
-            bordered={false}
-            split={false}
-            dataSource={messages}
-            listRef={listRef}
-            virtualListProps={{
-              height: listHeight,
-              // 可变高：不写死 itemHeight。Arco Filler 总高 = itemHeight×count，
-              // 偏大（如 72）会在滚到底时留下大块空白；省略后由首屏实测取平均。
-              isStaticItemHeight: false,
-              threshold: 50,
-              scrollOptions: { block: 'end' }
-            }}
-            render={(item: ChatMsg) => (
-              // 外层原生节点承接 VirtualList 的 ref 测高（FC 无法挂 ref）
-              <div key={item.id} className="use-chat-msg-row">
-                <MessageRow msg={item} isGroup={isGroup} />
-              </div>
-            )}
-          />
-        ) : null}
+        ) : (
+          <div ref={scrollerRef} className="use-chat-msg-list">
+            <div className="use-chat-msg-list-inner">
+              {messages.map((item, index) => (
+                <div
+                  key={item.id}
+                  data-msg-id={item.id}
+                  className={`use-chat-msg-row${
+                    index === messages.length - 1 ? ' use-chat-msg-row--last' : ''
+                  }`}
+                >
+                  <MessageRow msg={item} isGroup={isGroup} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
