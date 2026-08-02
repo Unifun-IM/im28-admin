@@ -50,6 +50,34 @@ export async function postV1AdminGroupsOperationLogsList(
   );
 }
 
+/** 获取群全局配置 获取创建群最少人数、普通群人数上限和群公告字数上限。当前三个配置仅保存和展示，尚未参与 C 端创建群、成员数量或公告长度校验。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/settings/get */
+export async function postV1AdminGroupsSettingsGet(options?: {
+  [key: string]: any;
+}) {
+  return request<AdminAPI.AdminGetGroupGlobalSettingEnvelope>(
+    "/v1/admin/groups/settings/get",
+    {
+      method: "POST",
+      ...(options || {}),
+    }
+  );
+}
+
+/** 更新群全局配置 完整保存创建群最少人数、普通群人数上限和群公告字数上限。当前三个配置仅保存和展示，尚未参与 C 端创建群、成员数量或公告长度校验。需要 `admin.groups.write` 权限。 POST /v1/admin/groups/settings/update */
+export async function postV1AdminGroupsSettingsUpdate(
+  body: AdminAPI.AdminUpdateGroupGlobalSettingRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/groups/settings/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 更新群状态 POST /v1/admin/groups/update-status */
 export async function postV1AdminGroupsUpdateStatus(
   body: AdminAPI.AdminUpdateGroupStatusRequest,

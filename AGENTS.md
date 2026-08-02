@@ -97,7 +97,8 @@ src/app | pages | widgets | features | entities | shared
 - 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉（Figma `602:34917`）；用户查询等可为 `variant="text"`
 - 批量操作（Figma `741:24735` / `804:19957`）：配置了 `batchActions` 时，表头点「批量操作」才进入选择列；勾选后工具栏右侧浅色 `TableBatchBar`（关闭 / 只显示已选 + Switch / 业务操作）；关闭或「取消批量」退出并清空选中
 - 页面打开记录快捷导航复用 `@widgets/page-tabs`（Figma `609:47633`），由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
-- 系统参数：`systemSettingsStore` 登录后与 `auth/me` 并行拉取；侧栏品牌用 `system_name` / `logo_url`；`formatDateTime` 未传 format 时跟随 `time_format`（`12h`/`24h`）；后台图片上传用 `@shared/lib/uploadAdminImage`（`upload-credential`）
+- 系统参数：`systemSettingsStore` 登录后与 `auth/me` 并行拉取；侧栏品牌用 `system_name` / `logo_url`；`formatDateTime` 未传 format 时跟随 `time_format`（`12h`/`24h`）
+- 后台图片上传：`@shared/lib/uploadAdminImage` → `upload-credential` 取凭证 → 浏览器 **PostObject 表单直传 OSS**（勿走业务 `request`，避免带 Bearer）→ 使用凭证返回的 `url`
 - UI 文案走 `src/shared/locale/*.ts` + `useLocale()`（zh-CN / en-US）
 
 ## API

@@ -10,7 +10,7 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { postV1AdminUsersList } from '@shared/api/admin/users';
+import { postV1AdminConversationsUsersList } from '@shared/api/admin/adminhuihuachaxun';
 import { UserDetailDrawer } from '@features/user-detail';
 import { UserChatModal } from '@features/user-chat-view';
 import { EmptyState } from '@shared/ui';
@@ -19,8 +19,9 @@ import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
 
-type UserSessionForm = AdminAPI.AdminListUserRequest & {
+type UserSessionForm = AdminAPI.AdminListUserConversationQueryRequest & {
   batchUserIds?: string;
+  status?: '' | 'active' | 'disabled';
 };
 
 function statusBadge(
@@ -35,12 +36,13 @@ function parseBatchIds(raw?: string) {
   return String(raw || '')
     .split(/[\s,，]+/)
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 100);
 }
 
 /**
  * 用户会话查询 — Figma 977:32512
- * 搜索优先空态；列表走 Admin users/list；会话场景操作以查聊天为主
+ * 搜索优先空态；列表走 Admin conversations/users/list；查聊天进 UserChatModal
  */
 export default function UserSessionPage() {
   const t = useLocale();
@@ -49,7 +51,9 @@ export default function UserSessionPage() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [batchMode, setBatchMode] = useState(false);
-  const [data, setData] = useState<AdminAPI.AdminUserWrap[]>([]);
+  const [data, setData] = useState<AdminAPI.AdminUserConversationQueryItem[]>(
+    []
+  );
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
@@ -85,11 +89,11 @@ export default function UserSessionPage() {
   };
 
   const buildBody = useCallback(
-    (p: number, size: number): AdminAPI.AdminListUserRequest => {
+    (p: number, size: number): AdminAPI.AdminListUserConversationQueryRequest => {
       const values = form.getFieldsValue();
       const keyword = values.keyword?.trim() || undefined;
       const statusRaw = values.status;
-      const body: AdminAPI.AdminListUserRequest = {
+      const body: AdminAPI.AdminListUserConversationQueryRequest = {
         page: p,
         page_size: size,
         keyword,
@@ -120,7 +124,7 @@ export default function UserSessionPage() {
             return;
           }
         }
-        const res = await postV1AdminUsersList(buildBody(p, size));
+        const res = await postV1AdminConversationsUsersList(buildBody(p, size));
         setData(res.data?.list || []);
         setTotal(res.data?.total || 0);
       } finally {
@@ -243,8 +247,8 @@ export default function UserSessionPage() {
         tableProps={{
           loading,
           data: searched ? data : [],
-          rowKey: (row: AdminAPI.AdminUserWrap) =>
-            row.user?.user_id || String(Math.random()),
+          rowKey: (row: AdminAPI.AdminUserConversationQueryItem) =>
+            row.user_id || String(Math.random()),
           noDataElement: (
             <EmptyState
               description={
@@ -255,25 +259,26 @@ export default function UserSessionPage() {
           columns: [
             {
               title: t['userSession.col.user'],
-              dataIndex: 'user.nickname',
+              dataIndex: 'nickname',
               width: 280,
               ellipsis: false,
-              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => (
                 <AvatarNameCell
-                  name={row.user?.nickname}
-                  sub={`${t['userSession.cell.userId']}：${row.user?.user_id || ''}`}
-                  copyText={row.user?.user_id || ''}
-                  avatar={row.user?.avatar_url}
+                  name={row.nickname}
+                  sub={`${t['userSession.cell.userId']}：${row.user_id || ''}`}
+                  copyText={row.user_id || ''}
+                  avatar={row.avatar_url}
                   nameClassName="!text-[rgb(var(--link-6))]"
-                  onNameClick={() =>
-                    setDetailUserId(row.user?.user_id || null)
-                  }
+                  onNameClick={() => setDetailUserId(row.user_id || null)}
                 />
               )
             },
             {
               title: t['userSession.col.friendGroup'],
-              dataIndex: 'user.user_id',
+              dataIndex: 'user_id',
               width: 160,
               ellipsis: false,
               render: () => (
@@ -285,31 +290,42 @@ export default function UserSessionPage() {
             },
             {
               title: t['userSession.col.status'],
-              dataIndex: 'user.status',
+              dataIndex: 'status',
               width: 120,
               ellipsis: false,
-              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => (
                 <StatusBadge
-                  status={statusBadge(row.user?.status)}
-                  text={statusLabel(row.user?.status)}
+                  status={statusBadge(row.status)}
+                  text={statusLabel(row.status)}
                 />
               )
             },
             {
               title: t['userSession.col.lastActive'],
-              dataIndex: 'user.last_login_at',
+              dataIndex: 'last_active_at',
               width: 180,
-              sorter: (a: AdminAPI.AdminUserWrap, b: AdminAPI.AdminUserWrap) =>
-                String(a.user?.last_login_at || '').localeCompare(
-                  String(b.user?.last_login_at || '')
+              sorter: (
+                a: AdminAPI.AdminUserConversationQueryItem,
+                b: AdminAPI.AdminUserConversationQueryItem
+              ) =>
+                String(a.last_active_at || '').localeCompare(
+                  String(b.last_active_at || '')
                 ),
-              render: (_: unknown, row: AdminAPI.AdminUserWrap) =>
-                formatDateTime(row.user?.last_login_at)
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => formatDateTime(row.last_active_at)
             },
             {
               title: t['common.action'],
               width: 80,
-              render: (_: unknown, row: AdminAPI.AdminUserWrap) => (
+              render: (
+                _: unknown,
+                row: AdminAPI.AdminUserConversationQueryItem
+              ) => (
                 <ActionLinks
                   variant="text"
                   items={[
@@ -318,9 +334,9 @@ export default function UserSessionPage() {
                       label: t['userChat.title'],
                       onClick: () =>
                         setChatUser({
-                          userId: row.user?.user_id || '',
-                          nickname: row.user?.nickname,
-                          avatar: row.user?.avatar_url
+                          userId: row.user_id || '',
+                          nickname: row.nickname,
+                          avatar: row.avatar_url
                         })
                     }
                   ]}

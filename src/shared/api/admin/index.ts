@@ -9,6 +9,8 @@ import * as rbac from "./rbac";
 import * as platform from "./platform";
 import * as users from "./users";
 import * as groups from "./groups";
+import * as adminhuihuachaxun from "./adminhuihuachaxun";
+import * as adminhuihuashezhi from "./adminhuihuashezhi";
 import * as messages from "./messages";
 import * as health from "./health";
 export default {
@@ -19,6 +21,8 @@ export default {
   platform,
   users,
   groups,
+  adminhuihuachaxun,
+  adminhuihuashezhi,
   messages,
   health,
 };

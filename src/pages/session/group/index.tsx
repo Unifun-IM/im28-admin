@@ -370,7 +370,11 @@ export default function GroupSessionPage() {
                             type: 'group',
                             id: group_id,
                             name: row.group?.title,
-                            memberCount: row.group?.member_count
+                            memberCount: row.group?.member_count,
+                            viewerUserId:
+                              row.owner?.user_id ||
+                              row.group?.owner_user_id ||
+                              undefined
                           })
                       }
                     ]}
@@ -403,7 +407,8 @@ export default function GroupSessionPage() {
             type: 'group',
             id: payload.groupId,
             name: payload.groupName,
-            memberCount: payload.memberCount
+            memberCount: payload.memberCount,
+            viewerUserId: payload.ownerId || undefined
           });
         }}
       />
@@ -411,7 +416,7 @@ export default function GroupSessionPage() {
         visible={!!chatTarget}
         onClose={() => setChatTarget(null)}
         scene="group"
-        userId={chatTarget?.id || null}
+        userId={chatTarget?.viewerUserId || null}
         target={chatTarget}
       />
     </>

@@ -140,10 +140,14 @@ export type ChatModalTarget = {
   memberCount?: number;
   onlineCount?: number;
   online?: boolean;
+  /** 群入口时用于会话/消息接口的 C 端用户（通常为群主） */
+  viewerUserId?: string;
 };
 
 type ChatPeer = {
   id: string;
+  /** Admin 会话 ID；拉消息必填 */
+  conversationId?: string;
   name: string;
   avatar?: string;
   avatars?: string[];
@@ -247,8 +251,10 @@ export default function UserChatModal({
     kind: t.type === 'group' ? 'group' : 'session'
   });
 
+  const viewerUserId = target?.viewerUserId || userId;
+
   useEffect(() => {
-    if (!visible || !userId) return;
+    if (!visible || !viewerUserId) return;
     const startNav: NavTab =
       scene === 'group' || target ? 'sessions' : 'contacts';
     setNav(startNav);
@@ -259,20 +265,19 @@ export default function UserChatModal({
     setChat(target ? targetToPeer(target) : null);
     setMessages([]);
     setBookLoading(true);
-    getUserChatBook(userId)
+    getUserChatBook(viewerUserId)
       .then((res) => {
         const data = res as unknown as ChatBook;
         setBook(data);
         if (target) {
           if (target.type === 'group') {
+            // 必须带 conversationId；未命中则空消息（不可用 group_id 调消息接口）
             const g = data.groups.find((x) => x.id === target.id);
-            if (g) setChat(g);
-            else setChat(targetToPeer(target));
+            setChat(g?.conversationId ? g : targetToPeer(target));
             return;
           }
           const s = data.sessions.find((x) => x.id === target.id);
-          if (s) setChat(s);
-          else setChat(targetToPeer(target));
+          setChat(s?.conversationId ? s : targetToPeer(target));
           return;
         }
         // 用户入口：默认打开会话列表第一项，避免右侧空白
@@ -283,10 +288,10 @@ export default function UserChatModal({
       })
       .finally(() => setBookLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, userId, scene, target?.id, target?.type]);
+  }, [visible, viewerUserId, scene, target?.id, target?.type]);
 
   useEffect(() => {
-    if (!visible || !chat) {
+    if (!visible || !chat?.conversationId || !viewerUserId) {
       setMessages([]);
       return;
     }
@@ -294,12 +299,14 @@ export default function UserChatModal({
     getChatMessages({
       type: chat.kind === 'group' ? 'group' : 'user',
       id: chat.id,
+      userId: viewerUserId,
+      conversationId: chat.conversationId,
       page: 1,
       pageSize: 80
     })
       .then((res) => setMessages((res.list || []) as unknown as ChatMsg[]))
       .finally(() => setMsgLoading(false));
-  }, [visible, chat]);
+  }, [visible, chat, viewerUserId]);
 
   const matchKw = (name: string, sub?: string) => {
     const q = keyword.trim().toLowerCase();

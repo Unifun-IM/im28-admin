@@ -60,16 +60,34 @@ function settingToForm(setting: AdminAPI.SystemSetting): ParamsForm {
   };
 }
 
+/**
+ * 对齐 UpdateSystemSettingRequest：system_name 必填；
+ * 其余字段可选，不传保留原值；logo_url 传空字符串表示清空。
+ */
 function formToUpdateBody(
-  values: ParamsForm
+  values: ParamsForm,
+  baseline: ParamsForm
 ): AdminAPI.UpdateSystemSettingRequest {
-  return {
-    system_name: values.system_name.trim(),
-    logo_url: values.logo_url?.trim() || '',
-    default_language: values.locale,
-    time_format: values.time_format === '24' ? '24h' : '12h',
-    ip_whitelist_enabled: values.ip_whitelist_enabled
+  const body: AdminAPI.UpdateSystemSettingRequest = {
+    system_name: values.system_name.trim()
   };
+  const nextLogo = values.logo_url?.trim() || '';
+  const prevLogo = baseline.logo_url?.trim() || '';
+  if (nextLogo !== prevLogo) {
+    body.logo_url = nextLogo;
+  }
+  if (values.locale !== baseline.locale) {
+    body.default_language = values.locale;
+  }
+  const nextTime = values.time_format === '24' ? '24h' : '12h';
+  const prevTime = baseline.time_format === '24' ? '24h' : '12h';
+  if (nextTime !== prevTime) {
+    body.time_format = nextTime;
+  }
+  if (values.ip_whitelist_enabled !== baseline.ip_whitelist_enabled) {
+    body.ip_whitelist_enabled = values.ip_whitelist_enabled;
+  }
+  return body;
 }
 
 function ReplaceTrigger({ label }: { label: string }) {
@@ -163,7 +181,7 @@ export default function SystemParamsPage() {
         ...DEFAULT_VALUES,
         ...form.getFieldsValue()
       } as ParamsForm;
-      await postV1AdminSystemSettingsUpdate(formToUpdateBody(values));
+      await postV1AdminSystemSettingsUpdate(formToUpdateBody(values, baseline));
       const setting = await systemSettingsStore.fetch();
       if (setting) {
         applyBaseline(settingToForm(setting));

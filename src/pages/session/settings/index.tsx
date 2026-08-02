@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Form, Message, Radio, Switch } from '@arco-design/web-react';
 import {
   SettingsPageShell,
@@ -8,44 +8,111 @@ import {
   UnsavedChangesModal,
   useUnsavedChangesGuard
 } from '@features/unsaved-changes';
+import {
+  postV1AdminConversationsSettingsGet,
+  postV1AdminConversationsSettingsUpdate
+} from '@shared/api/admin/adminhuihuashezhi';
 import useLocale from '@shared/lib/useLocale';
 
-/** Figma 977:33286 — 本地表单壳；Admin OpenAPI 暂无读写契约 */
-type SessionSettingsForm = {
-  enable_text: boolean;
-  enable_image: boolean;
-  enable_video: boolean;
-  enable_audio: boolean;
-  enable_file: boolean;
-  enable_voice: boolean;
-  enable_card: boolean;
-  text_max_length: 500 | 1000 | 2000;
-  image_max_mb: 5 | 10 | 20;
-  video_max_mb: 50 | 100 | 200;
-  audio_max_mb: 50 | 100 | 200;
-  file_max_mb: 50 | 100 | 200;
-  voice_min_sec: 1 | 2 | 3;
-  voice_max_sec: 30 | 60 | 120;
-  album_max: 9 | 12 | 20;
-};
+/** 与 AdminAPI.AdminUpdateConversationGlobalSettingRequest 对齐（Figma 977:33286） */
+type SessionSettingsForm = AdminAPI.AdminUpdateConversationGlobalSettingRequest;
+
+const MB = 1024 * 1024;
 
 const DEFAULT_VALUES: SessionSettingsForm = {
-  enable_text: true,
-  enable_image: true,
-  enable_video: true,
-  enable_audio: true,
-  enable_file: true,
-  enable_voice: true,
-  enable_card: true,
+  text_message_enabled: true,
+  image_message_enabled: true,
+  video_message_enabled: true,
+  audio_message_enabled: true,
+  file_message_enabled: true,
+  voice_message_enabled: true,
+  card_message_enabled: true,
   text_max_length: 1000,
-  image_max_mb: 10,
-  video_max_mb: 100,
-  audio_max_mb: 100,
-  file_max_mb: 100,
-  voice_min_sec: 2,
-  voice_max_sec: 60,
-  album_max: 12
+  image_max_size_bytes: 10 * MB,
+  video_max_size_bytes: 100 * MB,
+  audio_max_size_bytes: 100 * MB,
+  file_max_size_bytes: 100 * MB,
+  voice_min_duration_seconds: 2,
+  voice_max_duration_seconds: 60,
+  album_selection_limit: 12
 };
+
+function pickEnum<T extends number>(
+  value: number | undefined,
+  allowed: readonly T[],
+  fallback: T
+): T {
+  return (allowed as readonly number[]).includes(value as number)
+    ? (value as T)
+    : fallback;
+}
+
+function settingToForm(
+  setting?: AdminAPI.AdminConversationGlobalSetting | null
+): SessionSettingsForm {
+  return {
+    text_message_enabled:
+      setting?.text_message_enabled ?? DEFAULT_VALUES.text_message_enabled,
+    image_message_enabled:
+      setting?.image_message_enabled ?? DEFAULT_VALUES.image_message_enabled,
+    video_message_enabled:
+      setting?.video_message_enabled ?? DEFAULT_VALUES.video_message_enabled,
+    audio_message_enabled:
+      setting?.audio_message_enabled ?? DEFAULT_VALUES.audio_message_enabled,
+    file_message_enabled:
+      setting?.file_message_enabled ?? DEFAULT_VALUES.file_message_enabled,
+    voice_message_enabled:
+      setting?.voice_message_enabled ?? DEFAULT_VALUES.voice_message_enabled,
+    card_message_enabled:
+      setting?.card_message_enabled ?? DEFAULT_VALUES.card_message_enabled,
+    text_max_length: pickEnum(
+      setting?.text_max_length,
+      [500, 1000, 2000] as const,
+      DEFAULT_VALUES.text_max_length
+    ),
+    image_max_size_bytes: pickEnum(
+      setting?.image_max_size_bytes,
+      [5 * MB, 10 * MB, 20 * MB] as const,
+      DEFAULT_VALUES.image_max_size_bytes
+    ),
+    video_max_size_bytes: pickEnum(
+      setting?.video_max_size_bytes,
+      [50 * MB, 100 * MB, 200 * MB] as const,
+      DEFAULT_VALUES.video_max_size_bytes
+    ),
+    audio_max_size_bytes: pickEnum(
+      setting?.audio_max_size_bytes,
+      [50 * MB, 100 * MB, 200 * MB] as const,
+      DEFAULT_VALUES.audio_max_size_bytes
+    ),
+    file_max_size_bytes: pickEnum(
+      setting?.file_max_size_bytes,
+      [50 * MB, 100 * MB, 200 * MB] as const,
+      DEFAULT_VALUES.file_max_size_bytes
+    ),
+    voice_min_duration_seconds: pickEnum(
+      setting?.voice_min_duration_seconds,
+      [1, 2, 3] as const,
+      DEFAULT_VALUES.voice_min_duration_seconds
+    ),
+    voice_max_duration_seconds: pickEnum(
+      setting?.voice_max_duration_seconds,
+      [30, 60, 120] as const,
+      DEFAULT_VALUES.voice_max_duration_seconds
+    ),
+    album_selection_limit: pickEnum(
+      setting?.album_selection_limit,
+      [9, 12, 20] as const,
+      DEFAULT_VALUES.album_selection_limit
+    )
+  };
+}
+
+function formToUpdateBody(
+  values: SessionSettingsForm
+): AdminAPI.AdminUpdateConversationGlobalSettingRequest {
+  return { ...values };
+}
 
 function opt(t: Record<string, string>, key: string, n: number | string) {
   return t[key].replace('{n}', String(n));
@@ -53,7 +120,7 @@ function opt(t: Record<string, string>, key: string, n: number | string) {
 
 /**
  * 会话设置 — Figma 977:33286
- * 侧栏二级直达；Admin OpenAPI 暂无契约，保存仅更新本地基线
+ * 读写：postV1AdminConversationsSettingsGet / Update
  */
 export default function SessionSettingsPage() {
   const t = useLocale();
@@ -62,6 +129,7 @@ export default function SessionSettingsPage() {
   const [baseline, setBaseline] = useState<SessionSettingsForm>(DEFAULT_VALUES);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const guard = useUnsavedChangesGuard(dirty);
 
@@ -73,6 +141,34 @@ export default function SessionSettingsPage() {
     ],
     [t]
   );
+
+  const applyBaseline = useCallback(
+    (next: SessionSettingsForm) => {
+      setBaseline(next);
+      form.setFieldsValue(next);
+      setDirty(false);
+    },
+    [form]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    void postV1AdminConversationsSettingsGet()
+      .then((res) => {
+        if (cancelled) return;
+        applyBaseline(settingToForm(res.data?.setting));
+      })
+      .catch(() => {
+        // request
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyBaseline]);
 
   const syncDirty = useCallback(() => {
     const values = { ...DEFAULT_VALUES, ...form.getFieldsValue() };
@@ -90,13 +186,23 @@ export default function SessionSettingsPage() {
   };
 
   const handleSave = async () => {
+    try {
+      await form.validate();
+    } catch {
+      return;
+    }
     setSaving(true);
     try {
-      const values = await form.validate();
-      const next = { ...DEFAULT_VALUES, ...values };
-      setBaseline(next);
-      setDirty(false);
+      const values = {
+        ...DEFAULT_VALUES,
+        ...form.getFieldsValue()
+      } as SessionSettingsForm;
+      await postV1AdminConversationsSettingsUpdate(formToUpdateBody(values));
+      const res = await postV1AdminConversationsSettingsGet();
+      applyBaseline(settingToForm(res.data?.setting ?? values));
       Message.success(common['common.success']);
+    } catch {
+      // request
     } finally {
       setSaving(false);
     }
@@ -113,13 +219,13 @@ export default function SessionSettingsPage() {
     () =>
       (
         [
-          ['enable_text', 'sessionSettings.type.text'],
-          ['enable_image', 'sessionSettings.type.image'],
-          ['enable_video', 'sessionSettings.type.video'],
-          ['enable_audio', 'sessionSettings.type.audio'],
-          ['enable_file', 'sessionSettings.type.file'],
-          ['enable_voice', 'sessionSettings.type.voice'],
-          ['enable_card', 'sessionSettings.type.card']
+          ['text_message_enabled', 'sessionSettings.type.text'],
+          ['image_message_enabled', 'sessionSettings.type.image'],
+          ['video_message_enabled', 'sessionSettings.type.video'],
+          ['audio_message_enabled', 'sessionSettings.type.audio'],
+          ['file_message_enabled', 'sessionSettings.type.file'],
+          ['voice_message_enabled', 'sessionSettings.type.voice'],
+          ['card_message_enabled', 'sessionSettings.type.card']
         ] as const
       ).map(([field, labelKey]) => ({ field, label: t[labelKey] })),
     [t]
@@ -129,6 +235,7 @@ export default function SessionSettingsPage() {
     <>
       <SettingsPageShell
         title={t['sessionSettings.title']}
+        loading={loading}
         dirty={dirty}
         saving={saving}
         anchors={anchors}
@@ -183,63 +290,73 @@ export default function SessionSettingsPage() {
             </Form.Item>
 
             <Form.Item
-              field="image_max_mb"
+              field="image_max_size_bytes"
               label={t['sessionSettings.field.imageMax']}
             >
               <Radio.Group>
-                <Radio value={5}>{opt(t, 'sessionSettings.opt.mb', 5)}</Radio>
-                <Radio value={10}>{opt(t, 'sessionSettings.opt.mb', 10)}</Radio>
-                <Radio value={20}>{opt(t, 'sessionSettings.opt.mb', 20)}</Radio>
+                <Radio value={5 * MB}>{opt(t, 'sessionSettings.opt.mb', 5)}</Radio>
+                <Radio value={10 * MB}>
+                  {opt(t, 'sessionSettings.opt.mb', 10)}
+                </Radio>
+                <Radio value={20 * MB}>
+                  {opt(t, 'sessionSettings.opt.mb', 20)}
+                </Radio>
               </Radio.Group>
             </Form.Item>
 
             <Form.Item
-              field="video_max_mb"
+              field="video_max_size_bytes"
               label={t['sessionSettings.field.videoMax']}
             >
               <Radio.Group>
-                <Radio value={50}>{opt(t, 'sessionSettings.opt.mb', 50)}</Radio>
-                <Radio value={100}>
+                <Radio value={50 * MB}>
+                  {opt(t, 'sessionSettings.opt.mb', 50)}
+                </Radio>
+                <Radio value={100 * MB}>
                   {opt(t, 'sessionSettings.opt.mb', 100)}
                 </Radio>
-                <Radio value={200}>
+                <Radio value={200 * MB}>
                   {opt(t, 'sessionSettings.opt.mb', 200)}
                 </Radio>
               </Radio.Group>
             </Form.Item>
 
             <Form.Item
-              field="audio_max_mb"
+              field="audio_max_size_bytes"
               label={t['sessionSettings.field.audioMax']}
             >
               <Radio.Group>
-                <Radio value={50}>{opt(t, 'sessionSettings.opt.mb', 50)}</Radio>
-                <Radio value={100}>
+                <Radio value={50 * MB}>
+                  {opt(t, 'sessionSettings.opt.mb', 50)}
+                </Radio>
+                <Radio value={100 * MB}>
                   {opt(t, 'sessionSettings.opt.mb', 100)}
                 </Radio>
-                <Radio value={200}>
+                <Radio value={200 * MB}>
                   {opt(t, 'sessionSettings.opt.mb', 200)}
                 </Radio>
               </Radio.Group>
             </Form.Item>
 
             <Form.Item
-              field="file_max_mb"
+              field="file_max_size_bytes"
               label={t['sessionSettings.field.fileMax']}
             >
               <Radio.Group>
-                <Radio value={50}>{opt(t, 'sessionSettings.opt.mb', 50)}</Radio>
-                <Radio value={100}>
+                <Radio value={50 * MB}>
+                  {opt(t, 'sessionSettings.opt.mb', 50)}
+                </Radio>
+                <Radio value={100 * MB}>
                   {opt(t, 'sessionSettings.opt.mb', 100)}
                 </Radio>
-                <Radio value={200}>
+                <Radio value={200 * MB}>
                   {opt(t, 'sessionSettings.opt.mb', 200)}
                 </Radio>
               </Radio.Group>
             </Form.Item>
 
             <Form.Item
-              field="voice_min_sec"
+              field="voice_min_duration_seconds"
               label={t['sessionSettings.field.voiceMin']}
             >
               <Radio.Group>
@@ -250,7 +367,7 @@ export default function SessionSettingsPage() {
             </Form.Item>
 
             <Form.Item
-              field="voice_max_sec"
+              field="voice_max_duration_seconds"
               label={t['sessionSettings.field.voiceMax']}
             >
               <Radio.Group>
@@ -268,7 +385,7 @@ export default function SessionSettingsPage() {
             title={t['sessionSettings.section.select']}
           >
             <Form.Item
-              field="album_max"
+              field="album_selection_limit"
               label={t['sessionSettings.field.albumMax']}
             >
               <Radio.Group>

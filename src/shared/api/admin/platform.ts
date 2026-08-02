@@ -81,7 +81,7 @@ export async function postV1AdminSystemSettingsGet(options?: {
   );
 }
 
-/** 更新系统参数 需要 `admin.system_settings.write` 权限。该接口为完整更新，所有字段都必须传；成功只返回 code 和 message。IP 白名单策略在网关内最多缓存 3 秒，更新当前实例后立即生效，读取策略失败时默认继续校验白名单。 POST /v1/admin/system-settings/update */
+/** 更新系统参数 需要 `admin.system_settings.write` 权限。system_name 必填，其他字段可选；可选字段不传时保留原值。成功只返回 code 和 message。IP 白名单策略在网关内最多缓存 3 秒，更新当前实例后立即生效，读取策略失败时默认继续校验白名单。 POST /v1/admin/system-settings/update */
 export async function postV1AdminSystemSettingsUpdate(
   body: AdminAPI.UpdateSystemSettingRequest,
   options?: { [key: string]: any }

@@ -4,7 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import useLocale from '@shared/lib/useLocale';
 
 /**
- * 聊天记录页 — Admin OpenAPI 暂无消息契约：保留只读表格界面，列表为空
+ * 聊天记录页 — 独立路由占位。
+ * 消息契约见 postV1AdminConversationMessagesList（需 user_id + conversation_id）；
+ * 业务查聊天走 UserChatModal，本页暂不接线。
  */
 export default function ChatHistoryPage() {
   const t = useLocale();

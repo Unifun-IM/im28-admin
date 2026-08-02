@@ -88,6 +88,28 @@ declare namespace AdminAPI {
     two_factor_code: string;
   };
 
+  type AdminConversationGlobalSetting =
+    // #/components/schemas/AdminUpdateConversationGlobalSettingRequest
+    AdminUpdateConversationGlobalSettingRequest & {
+      updated_at?: RFC3339Time;
+    };
+
+  type AdminConversationMessage = {
+    msg_id?: string;
+    msg_seq?: string;
+    sender_id?: string;
+    type?: number;
+    body?: Record<string, any>;
+    status?: number;
+    sent_at?: string;
+  };
+
+  type AdminConversationUser = {
+    user_id?: string;
+    nickname?: string;
+    avatar_url?: string;
+  };
+
   type AdminDetailGroupEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -122,6 +144,28 @@ declare namespace AdminAPI {
 
   type AdminDetailUserRequest = {
     user_id: string;
+  };
+
+  type AdminGetConversationGlobalSettingEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { setting?: AdminConversationGlobalSetting };
+    };
+
+  type AdminGetGroupGlobalSettingEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { setting?: AdminGroupGlobalSetting };
+    };
+
+  type AdminGroupGlobalSetting = {
+    /** 创建群最少人数配置。 */
+    create_group_min_member_count?: number;
+    /** 普通群人数上限配置。 */
+    normal_group_member_limit?: number;
+    /** 群公告字数上限配置。 */
+    announcement_max_length?: 500 | 1000 | 2000;
+    updated_at?: RFC3339Time;
   };
 
   type AdminGroupOperationLog = {
@@ -165,6 +209,26 @@ declare namespace AdminAPI {
     page_size?: number;
   };
 
+  type AdminListConversationMessageEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: {
+        list?: { message?: AdminConversationMessage }[];
+        users?: AdminConversationUser[];
+        next_seq?: string;
+        has_more?: boolean;
+      };
+    };
+
+  type AdminListConversationMessageRequest = {
+    /** 会话所属的 C 端用户 ID，用于成员关系和消息可见性校验。 */
+    user_id: string;
+    conversation_id: string;
+    /** 向前翻页边界；0 或不传表示从该用户可见的最新消息开始。 */
+    before_seq?: string;
+    limit?: number;
+  };
+
   type AdminListGroupEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -206,6 +270,41 @@ declare namespace AdminAPI {
     sort_by?: "member_count" | "created_at";
     /** 排序方向；传此字段时必须同时传 `sort_by`，不传时默认 `desc`。 */
     sort_order?: "asc" | "desc";
+    page?: number;
+    page_size?: number;
+  };
+
+  type AdminListUserConversationEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: {
+        list?: { conversation?: AdminUserConversation }[];
+        total?: number;
+      };
+    };
+
+  type AdminListUserConversationQueryEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminUserConversationQueryItem[]; total?: number };
+    };
+
+  type AdminListUserConversationQueryRequest = {
+    /** 用户关键词类型；传 keyword 时必填。 */
+    keyword_type?: "user_id" | "nickname" | "phone" | "email" | "account";
+    /** 用户关键词。为空时固定返回空列表，不会默认查询全部用户。 */
+    keyword?: string;
+    /** 批量搜索的用户 ID，单次最多 100 个。keyword 和 user_ids 都为空时固定返回空列表。 */
+    user_ids?: string[];
+    /** 用户状态筛选。active=正常，disabled=黑名单；不传表示全部。当前系统没有独立的注销状态。 */
+    status?: "active" | "disabled";
+    page?: number;
+    page_size?: number;
+  };
+
+  type AdminListUserConversationRequest = {
+    /** 要查看会话的 C 端用户 ID。 */
+    user_id: string;
     page?: number;
     page_size?: number;
   };
@@ -346,6 +445,48 @@ declare namespace AdminAPI {
     two_factor_code: string;
   };
 
+  type AdminUpdateConversationGlobalSettingRequest = {
+    /** 是否启用文字消息。 */
+    text_message_enabled: boolean;
+    /** 是否启用图片消息。 */
+    image_message_enabled: boolean;
+    /** 是否启用视频消息。 */
+    video_message_enabled: boolean;
+    /** 是否启用音频消息。 */
+    audio_message_enabled: boolean;
+    /** 是否启用文件消息。 */
+    file_message_enabled: boolean;
+    /** 是否启用语音消息。 */
+    voice_message_enabled: boolean;
+    /** 是否启用名片消息。 */
+    card_message_enabled: boolean;
+    /** 文字消息字数上限。 */
+    text_max_length: 500 | 1000 | 2000;
+    /** 图片大小上限，单位为字节，对应 5M、10M、20M。 */
+    image_max_size_bytes: 5242880 | 10485760 | 20971520;
+    /** 视频大小上限，单位为字节，对应 50M、100M、200M。 */
+    video_max_size_bytes: 52428800 | 104857600 | 209715200;
+    /** 音频大小上限，单位为字节，对应 50M、100M、200M。 */
+    audio_max_size_bytes: 52428800 | 104857600 | 209715200;
+    /** 文件大小上限，单位为字节，对应 50M、100M、200M。 */
+    file_max_size_bytes: 52428800 | 104857600 | 209715200;
+    /** 语音最短时长，单位为秒。 */
+    voice_min_duration_seconds: 1 | 2 | 3;
+    /** 语音最长时长，单位为秒，对应 30 秒、1 分钟、2 分钟。 */
+    voice_max_duration_seconds: 30 | 60 | 120;
+    /** 相册单次选择数量上限。 */
+    album_selection_limit: 9 | 12 | 20;
+  };
+
+  type AdminUpdateGroupGlobalSettingRequest = {
+    /** 创建群最少人数配置。当前仅保存，不参与创建群校验。 */
+    create_group_min_member_count: number;
+    /** 普通群人数上限配置。当前仅保存，不参与邀请、申请或成员数量校验。 */
+    normal_group_member_limit: number;
+    /** 群公告字数上限配置。当前仅保存，不参与群公告长度校验。 */
+    announcement_max_length: 500 | 1000 | 2000;
+  };
+
   type AdminUpdateGroupStatusRequest = {
     group_id: string;
     status: AdminWritableGroupStatus;
@@ -383,6 +524,36 @@ declare namespace AdminAPI {
   type AdminUploadCredentialRequest = {
     /** 后台图片扩展名，可带或不带英文句点；不传默认 jpg。 */
     ext?: string;
+  };
+
+  type AdminUserConversation = {
+    conversation_id?: string;
+    /** 1=单聊，3=群聊，4=通知。 */
+    type?: number;
+    /** 单聊对端用户 ID；非单聊为空字符串。 */
+    peer_user_id?: string;
+    /** 群 ID；非群聊为空字符串。 */
+    group_id?: string;
+    /** 单聊为对端昵称，群聊为群名称。 */
+    title?: string;
+    /** 单聊为对端头像，群聊为群头像。 */
+    avatar_url?: string;
+    last_message?: AdminConversationMessage;
+    last_active_at?: string;
+  };
+
+  type AdminUserConversationQueryItem = {
+    user_id?: string;
+    nickname?: string;
+    avatar_url?: string;
+    phone?: string;
+    phone_area_code?: string;
+    email?: string;
+    account?: string;
+    status?: AccountStatus;
+    /** 当前使用用户最后登录时间作为最后活跃时间；从未登录时为空字符串。 */
+    last_active_at?: string;
+    registered_at?: RFC3339Time;
   };
 
   type AdminUserOperationClient = {
@@ -1155,10 +1326,6 @@ declare namespace AdminAPI {
     can_remove_member?: boolean;
     can_clear_message?: boolean;
     can_update_profile?: boolean;
-    /** 当前用户已读的群公告版本。 */
-    announcement_read_version?: Uint64String;
-    /** 当前群公告是否未读。 */
-    announcement_unread?: boolean;
   };
 
   type HandleFriendApplicationRequest = {
@@ -1603,6 +1770,31 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminConversationMessagesListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminConversationsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminConversationsSettingsGetParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminConversationsSettingsUpdateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminConversationsUsersListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminGroupsDetailParams = {
     ""?: any;
     ""?: any;
@@ -1614,6 +1806,16 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminGroupsOperationLogsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminGroupsSettingsGetParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminGroupsSettingsUpdateParams = {
     ""?: any;
     ""?: any;
   };
@@ -2304,13 +2506,14 @@ declare namespace AdminAPI {
   type UpdateSystemSettingRequest = {
     /** 系统名称，不能仅包含空白字符。 */
     system_name: string;
-    /** 系统 Logo URL；允许传空字符串清空。文件需先通过 `/v1/admin/common/upload-credential` 获取后台凭证并直传 OSS。 */
-    logo_url: string;
-    /** 默认语言标签，不能仅包含空白字符。 */
-    default_language: string;
-    time_format: "12h" | "24h";
-    /** 开启后，后台登录、改密、二步验证、刷新 token 和已登录请求均校验系统用户各自的 IPv4 白名单；关闭后跳过 IP 条件，其他鉴权不受影响。 */
-    ip_whitelist_enabled: boolean;
+    /** 可选。系统 Logo URL；传空字符串表示清空，不传表示保留原值。文件需先通过 `/v1/admin/common/upload-credential` 获取后台凭证并直传 OSS。 */
+    logo_url?: string;
+    /** 可选。默认语言标签，不能仅包含空白字符；不传表示保留原值。 */
+    default_language?: string;
+    /** 可选。不传表示保留原值。 */
+    time_format?: "12h" | "24h";
+    /** 可选。开启后，后台登录、改密、二步验证、刷新 token 和已登录请求均校验系统用户各自的 IPv4 白名单；关闭后跳过 IP 条件；不传表示保留原值。 */
+    ip_whitelist_enabled?: boolean;
   };
 
   type UpdateSysUserIPWhitelistRequest = {

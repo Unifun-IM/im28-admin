@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Form, InputNumber, Message, Radio } from '@arco-design/web-react';
 import {
   SettingsPageShell,
@@ -8,23 +8,56 @@ import {
   UnsavedChangesModal,
   useUnsavedChangesGuard
 } from '@features/unsaved-changes';
+import {
+  postV1AdminGroupsSettingsGet,
+  postV1AdminGroupsSettingsUpdate
+} from '@shared/api/admin/groups';
 import useLocale from '@shared/lib/useLocale';
 
-/** Figma 770:22608 — 本地表单壳；Admin OpenAPI 暂无读写契约 */
+/** 与 AdminAPI.AdminGroupGlobalSetting / AdminUpdateGroupGlobalSettingRequest 对齐（Figma 770:22608） */
 type GroupSettingsForm = {
-  min_group_members: number;
-  max_group_members: number;
-  announcement_max_len: 500 | 1000 | 2000;
+  create_group_min_member_count: number;
+  normal_group_member_limit: number;
+  announcement_max_length: 500 | 1000 | 2000;
 };
 
 const DEFAULT_VALUES: GroupSettingsForm = {
-  min_group_members: 3,
-  max_group_members: 30000,
-  announcement_max_len: 1000
+  create_group_min_member_count: 3,
+  normal_group_member_limit: 30000,
+  announcement_max_length: 1000
 };
+
+function settingToForm(
+  setting?: AdminAPI.AdminGroupGlobalSetting | null
+): GroupSettingsForm {
+  const len = setting?.announcement_max_length;
+  return {
+    create_group_min_member_count:
+      setting?.create_group_min_member_count ??
+      DEFAULT_VALUES.create_group_min_member_count,
+    normal_group_member_limit:
+      setting?.normal_group_member_limit ??
+      DEFAULT_VALUES.normal_group_member_limit,
+    announcement_max_length:
+      len === 500 || len === 1000 || len === 2000
+        ? len
+        : DEFAULT_VALUES.announcement_max_length
+  };
+}
+
+function formToUpdateBody(
+  values: GroupSettingsForm
+): AdminAPI.AdminUpdateGroupGlobalSettingRequest {
+  return {
+    create_group_min_member_count: values.create_group_min_member_count,
+    normal_group_member_limit: values.normal_group_member_limit,
+    announcement_max_length: values.announcement_max_length
+  };
+}
 
 /**
  * 群组设置 — Figma 770:22608
+ * 读写：postV1AdminGroupsSettingsGet / Update
  */
 export default function GroupSettingsPage() {
   const t = useLocale();
@@ -33,6 +66,7 @@ export default function GroupSettingsPage() {
   const [baseline, setBaseline] = useState<GroupSettingsForm>(DEFAULT_VALUES);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const guard = useUnsavedChangesGuard(dirty);
 
@@ -40,6 +74,34 @@ export default function GroupSettingsPage() {
     () => [{ key: 'basic', title: t['groupSettings.section.basic'] }],
     [t]
   );
+
+  const applyBaseline = useCallback(
+    (next: GroupSettingsForm) => {
+      setBaseline(next);
+      form.setFieldsValue(next);
+      setDirty(false);
+    },
+    [form]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    void postV1AdminGroupsSettingsGet()
+      .then((res) => {
+        if (cancelled) return;
+        applyBaseline(settingToForm(res.data?.setting));
+      })
+      .catch(() => {
+        // request
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyBaseline]);
 
   const syncDirty = useCallback(() => {
     const values = { ...DEFAULT_VALUES, ...form.getFieldsValue() };
@@ -57,13 +119,23 @@ export default function GroupSettingsPage() {
   };
 
   const handleSave = async () => {
+    try {
+      await form.validate();
+    } catch {
+      return;
+    }
     setSaving(true);
     try {
-      const values = await form.validate();
-      const next = { ...DEFAULT_VALUES, ...values };
-      setBaseline(next);
-      setDirty(false);
+      const values = {
+        ...DEFAULT_VALUES,
+        ...form.getFieldsValue()
+      } as GroupSettingsForm;
+      await postV1AdminGroupsSettingsUpdate(formToUpdateBody(values));
+      const res = await postV1AdminGroupsSettingsGet();
+      applyBaseline(settingToForm(res.data?.setting ?? values));
       Message.success(common['common.success']);
+    } catch {
+      // request
     } finally {
       setSaving(false);
     }
@@ -80,6 +152,7 @@ export default function GroupSettingsPage() {
     <>
       <SettingsPageShell
         title={t['groupSettings.title']}
+        loading={loading}
         dirty={dirty}
         saving={saving}
         anchors={anchors}
@@ -100,7 +173,7 @@ export default function GroupSettingsPage() {
           <div id="basic" className="flex scroll-mt-3 flex-col gap-3">
             <SettingsSectionCard title={t['groupSettings.section.limit']}>
               <Form.Item
-                field="min_group_members"
+                field="create_group_min_member_count"
                 label={t['groupSettings.field.minMembers']}
                 rules={[
                   {
@@ -112,7 +185,7 @@ export default function GroupSettingsPage() {
                 <InputNumber min={2} max={999} style={{ width: '100%' }} />
               </Form.Item>
               <Form.Item
-                field="max_group_members"
+                field="normal_group_member_limit"
                 label={t['groupSettings.field.maxMembers']}
                 rules={[
                   {
@@ -135,7 +208,7 @@ export default function GroupSettingsPage() {
 
             <SettingsSectionCard title={t['groupSettings.section.content']}>
               <Form.Item
-                field="announcement_max_len"
+                field="announcement_max_length"
                 label={t['groupSettings.field.announcementMax']}
                 rules={[
                   {

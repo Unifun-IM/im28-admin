@@ -294,7 +294,8 @@ export default function GroupQueryPage() {
             type: 'group',
             id: payload.groupId,
             name: payload.groupName,
-            memberCount: payload.memberCount
+            memberCount: payload.memberCount,
+            viewerUserId: payload.ownerId || undefined
           });
         }}
       />
@@ -302,7 +303,7 @@ export default function GroupQueryPage() {
         visible={!!chatTarget}
         onClose={() => setChatTarget(null)}
         scene="group"
-        userId={chatTarget?.id || null}
+        userId={chatTarget?.viewerUserId || null}
         target={chatTarget}
       />
     </>
