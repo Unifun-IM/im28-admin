@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Button,
+  Image,
   Input,
   Message,
   Modal,
@@ -35,8 +36,6 @@ import iconChatVideoOffPeer from '../assets/icon-chat-video-off-peer.svg';
 import iconChatVideoOffSelf from '../assets/icon-chat-video-off-self.svg';
 import iconChatVideoPeer from '../assets/icon-chat-video-peer.svg';
 import iconChatVideoSelf from '../assets/icon-chat-video-self.svg';
-import iconChatVoicePeer from '../assets/icon-chat-voice-peer.svg';
-import iconChatVoiceSelf from '../assets/icon-chat-voice-self.svg';
 import iconClose from '../assets/icon-close.svg';
 import iconContacts from '../assets/icon-contacts.svg';
 import iconPhone from '../assets/icon-phone.svg';
@@ -825,7 +824,7 @@ function SessionList({
   );
 }
 
-/** 通讯录分组头 — Figma 977:23156 Cell */
+/** 通讯录分组头 — Figma 977:23156 Cell（行高约 40，箭头与文案间距 4） */
 function SectionHeader({
   open,
   title,
@@ -840,7 +839,7 @@ function SectionHeader({
   return (
     <button
       type="button"
-      className="flex w-full cursor-pointer items-center gap-1 border-0 bg-transparent py-0 pl-4 text-left"
+      className="flex h-10 w-full cursor-pointer items-center gap-1 border-0 bg-transparent py-0 pl-4 text-left"
       onClick={onToggle}
     >
       {open ? (
@@ -848,7 +847,7 @@ function SectionHeader({
       ) : (
         <IconRight className="shrink-0 text-[16px] text-arco-text-2" />
       )}
-      <span className="flex min-w-0 flex-1 items-center gap-3 py-2 pr-4">
+      <span className="flex h-full min-w-0 flex-1 items-center gap-3 pr-4">
         <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.5] text-arco-text-1">
           {title}
         </span>
@@ -891,7 +890,7 @@ function ContactsPanel({
   onSelect: (p: ChatPeer) => void;
 }) {
   return (
-    <div>
+    <div className="flex flex-col pt-2">
       <SectionHeader
         open={groupsOpen}
         title="群聊"
@@ -932,12 +931,14 @@ function ContactsPanel({
 
       {groupsOnly ? null : (
         <>
-          <SectionHeader
-            open={contactsOpen}
-            title="联系人"
-            count={contactCount}
-            onToggle={onToggleContacts}
-          />
+          <div className="mt-1">
+            <SectionHeader
+              open={contactsOpen}
+              title="联系人"
+              count={contactCount}
+              onToggle={onToggleContacts}
+            />
+          </div>
           {contactsOpen ? (
             <>
               {starred.length ? (
@@ -1428,6 +1429,275 @@ function fileExtBadge(name?: string): { label: string; color: string } {
   return { label: (ext || 'FILE').slice(0, 4).toUpperCase(), color: '#546e7a' };
 }
 
+/** 同时只播一条语音 */
+let activeVoiceAudio: HTMLAudioElement | null = null;
+let activeVoiceStop: (() => void) | null = null;
+
+function stopActiveVoice() {
+  activeVoiceStop?.();
+  activeVoiceStop = null;
+  activeVoiceAudio = null;
+}
+
+/** 图片气泡：点击预览原图 */
+function ImageBubble({ msg }: { msg: ChatMsg }) {
+  const [preview, setPreview] = useState(false);
+  const thumb = msg.thumbnailUrl || msg.mediaUrl;
+  const full = msg.mediaUrl || msg.thumbnailUrl;
+
+  return (
+    <>
+      <button
+        type="button"
+        className="relative m-0 max-w-[180px] cursor-zoom-in overflow-hidden rounded-xl border-0 bg-[#eee] p-0"
+        disabled={!full}
+        onClick={() => full && setPreview(true)}
+        aria-label="预览图片"
+      >
+        {thumb ? (
+          <img
+            src={thumb}
+            alt=""
+            className="block max-h-[240px] w-full object-cover"
+          />
+        ) : (
+          <div className="flex size-[180px] items-center justify-center text-center text-[12px] text-arco-text-3">
+            图片
+          </div>
+        )}
+        <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-black/35 px-1">
+          <BubbleMeta time={msg.time} isSelf />
+        </span>
+      </button>
+      {full ? (
+        <Image.Preview
+          src={full}
+          visible={preview}
+          onVisibleChange={setPreview}
+          getPopupContainer={() => document.body}
+        />
+      ) : null}
+    </>
+  );
+}
+
+/** 视频气泡：点击弹层播放 */
+function VideoBubble({ msg }: { msg: ChatMsg }) {
+  const [open, setOpen] = useState(false);
+  const src = msg.mediaUrl;
+
+  return (
+    <>
+      <button
+        type="button"
+        className="relative m-0 flex size-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-0 bg-[rgba(0,0,0,0.45)] p-0 text-white"
+        disabled={!src}
+        onClick={() => {
+          if (!src) {
+            Message.warning('暂无视频地址');
+            return;
+          }
+          setOpen(true);
+        }}
+        aria-label="预览视频"
+      >
+        {msg.thumbnailUrl ? (
+          <img
+            src={msg.thumbnailUrl}
+            alt=""
+            className="absolute inset-0 size-full object-cover opacity-80"
+          />
+        ) : null}
+        <img src={iconChatPlay} alt="" className="relative z-[1] size-10" />
+        <span className="pointer-events-none absolute bottom-2 right-2">
+          <BubbleMeta time={msg.time} isSelf />
+        </span>
+      </button>
+      <Modal
+        visible={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        closable
+        unmountOnExit
+        maskClosable
+        className="use-chat-video-preview-modal"
+        wrapClassName="use-chat-video-preview-modal-wrap"
+        style={{ width: 'min(720px, 92vw)' }}
+      >
+        {src ? (
+          <video
+            key={src}
+            src={src}
+            controls
+            autoPlay
+            playsInline
+            className="block max-h-[70vh] w-full bg-black"
+          />
+        ) : null}
+      </Modal>
+    </>
+  );
+}
+
+/** 语音图标：基于设计稿 SVG，播放时两道声波由内向外依次亮起 */
+function VoiceWaveIcon({
+  isSelf,
+  playing
+}: {
+  isSelf: boolean;
+  playing: boolean;
+}) {
+  return (
+    <span
+      className={`use-chat-voice-wave${playing ? ' is-playing' : ''}${
+        isSelf ? ' is-self' : ''
+      }`}
+      aria-hidden
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+      >
+        {/* 圆点主体，始终显示 */}
+        <path
+          className="use-chat-voice-wave__body"
+          d="M3.96847 9.23703C3.35007 9.23703 2.84863 8.73575 2.84863 8.11711C2.84863 7.49839 3.34999 6.99719 3.96847 6.99719C4.58735 6.99719 5.08847 7.49839 5.08847 8.11711C5.08847 8.73575 4.58735 9.23703 3.96847 9.23703Z"
+        />
+        {/* 内弧 */}
+        <path
+          className="use-chat-voice-wave__arc use-chat-voice-wave__arc--1"
+          d="M7.44325 11.5961C7.17377 11.8328 6.77131 11.7907 6.51764 11.5371C6.16585 11.1853 6.25495 10.5902 6.6018 10.2336C7.19005 9.62877 7.55239 8.80353 7.55239 7.89303C7.55239 7.07078 7.25658 6.31808 6.76584 5.73438C6.4604 5.37108 6.40172 4.8131 6.73737 4.4775C7.00799 4.20692 7.44275 4.17603 7.71071 4.44925C8.58154 5.33716 9.12023 6.55117 9.12023 7.89303C9.12023 9.36888 8.47132 10.6928 7.44325 11.5961Z"
+        />
+        {/* 外弧 */}
+        <path
+          className="use-chat-voice-wave__arc use-chat-voice-wave__arc--2"
+          d="M10.4676 14.4595C10.1819 14.7517 9.71555 14.7343 9.42657 14.4453C9.107 14.1257 9.13034 13.6036 9.44084 13.2752C10.7682 11.8712 11.5845 9.97954 11.5845 7.89458C11.5845 5.91313 10.8451 4.10817 9.63216 2.72909C9.33951 2.39636 9.32656 1.88761 9.63989 1.57428C9.93818 1.27599 10.4222 1.26624 10.7059 1.57841C12.2229 3.24735 13.1518 5.45936 13.1518 7.89234C13.1518 10.4505 12.1256 12.7645 10.4676 14.4595Z"
+        />
+      </svg>
+    </span>
+  );
+}
+
+function VoiceBubble({
+  msg,
+  isSelf,
+  wrap
+}: {
+  msg: ChatMsg;
+  isSelf: boolean;
+  wrap: (inner: React.ReactNode, opts?: { stretch?: boolean }) => React.ReactNode;
+}) {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(
+    () => () => {
+      if (audioRef.current && activeVoiceAudio === audioRef.current) {
+        stopActiveVoice();
+      } else {
+        audioRef.current?.pause();
+      }
+    },
+    []
+  );
+
+  const togglePlay = () => {
+    const url = msg.mediaUrl;
+    if (!url) {
+      Message.warning('暂无语音地址');
+      return;
+    }
+
+    if (playing && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      if (activeVoiceAudio) {
+        activeVoiceAudio = null;
+        activeVoiceStop = null;
+      }
+      setPlaying(false);
+      return;
+    }
+
+    stopActiveVoice();
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    activeVoiceAudio = audio;
+    activeVoiceStop = () => {
+      audio.pause();
+      audioRef.current = null;
+      setPlaying(false);
+    };
+
+    audio.onended = () => {
+      setPlaying(false);
+      if (activeVoiceAudio === audio) {
+        activeVoiceAudio = null;
+        activeVoiceStop = null;
+      }
+      audioRef.current = null;
+    };
+    audio.onerror = () => {
+      Message.error('语音播放失败');
+      setPlaying(false);
+      if (activeVoiceAudio === audio) {
+        activeVoiceAudio = null;
+        activeVoiceStop = null;
+      }
+      audioRef.current = null;
+    };
+
+    void audio
+      .play()
+      .then(() => setPlaying(true))
+      .catch(() => {
+        Message.error('语音播放失败');
+        setPlaying(false);
+        if (activeVoiceAudio === audio) {
+          activeVoiceAudio = null;
+          activeVoiceStop = null;
+        }
+        audioRef.current = null;
+      });
+  };
+
+  const duration = (
+    <span className="tabular-nums">{msg.duration || msg.content || '1"'}</span>
+  );
+  const icon = <VoiceWaveIcon isSelf={isSelf} playing={playing} />;
+
+  return (
+    <>
+      {wrap(
+        <button
+          type="button"
+          className="use-chat-voice-btn m-0 inline-flex cursor-pointer items-end gap-2 border-0 bg-transparent p-0"
+          onClick={togglePlay}
+          aria-label={playing ? '暂停语音' : '播放语音'}
+        >
+          <span className="inline-flex items-center gap-2">
+            {isSelf ? (
+              <>
+                {duration}
+                {icon}
+              </>
+            ) : (
+              <>
+                {icon}
+                {duration}
+              </>
+            )}
+          </span>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </button>
+      )}
+    </>
+  );
+}
+
 function Bubble({
   msg,
   isSelf,
@@ -1464,63 +1734,15 @@ function Bubble({
   );
 
   if (msg.msgType === 'image') {
-    return (
-      <div className="relative max-w-[180px] overflow-hidden rounded-xl bg-[#eee]">
-        {msg.mediaUrl || msg.thumbnailUrl ? (
-          <img
-            src={msg.thumbnailUrl || msg.mediaUrl}
-            alt=""
-            className="block max-h-[240px] w-full object-cover"
-          />
-        ) : (
-          <div className="flex size-[180px] items-center justify-center text-center text-[12px] text-arco-text-3">
-            图片
-          </div>
-        )}
-        <span className="absolute bottom-2 right-2 rounded bg-black/35 px-1">
-          <BubbleMeta time={msg.time} isSelf />
-        </span>
-      </div>
-    );
+    return <ImageBubble msg={msg} />;
   }
 
   if (msg.msgType === 'video') {
-    return (
-      <div className="relative flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[rgba(0,0,0,0.45)] text-white">
-        {msg.thumbnailUrl ? (
-          <img
-            src={msg.thumbnailUrl}
-            alt=""
-            className="absolute inset-0 size-full object-cover opacity-80"
-          />
-        ) : null}
-        <img src={iconChatPlay} alt="" className="relative z-[1] size-10" />
-        <span className="absolute bottom-2 right-2">
-          <BubbleMeta time={msg.time} isSelf />
-        </span>
-      </div>
-    );
+    return <VideoBubble msg={msg} />;
   }
 
   if (msg.msgType === 'voice') {
-    return wrap(
-      <div className="inline-flex items-end gap-2">
-        <span className="inline-flex items-center gap-2">
-          {isSelf ? (
-            <>
-              <span>{msg.duration || msg.content || '1"'}</span>
-              <img src={iconChatVoiceSelf} alt="" className="h-4 w-auto" />
-            </>
-          ) : (
-            <>
-              <img src={iconChatVoicePeer} alt="" className="h-4 w-auto" />
-              <span>{msg.duration || msg.content || '1"'}</span>
-            </>
-          )}
-        </span>
-        <BubbleMeta time={msg.time} isSelf={isSelf} />
-      </div>
-    );
+    return <VoiceBubble msg={msg} isSelf={isSelf} wrap={wrap} />;
   }
 
   if (msg.msgType === 'file') {

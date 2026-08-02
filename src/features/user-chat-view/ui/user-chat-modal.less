@@ -285,3 +285,85 @@
   backdrop-filter: blur(3.5px);
   background: rgba(0, 0, 0, 0.4);
 }
+
+/* 聊天内视频预览：高于查聊天 Modal */
+.use-chat-video-preview-modal-wrap {
+  z-index: 1100 !important;
+}
+
+.use-chat-video-preview-modal {
+  .arco-modal-content {
+    padding: 0 !important;
+    background: #000;
+    overflow: hidden;
+  }
+
+  .arco-modal-body {
+    padding: 0 !important;
+  }
+}
+
+/* 图片预览叠在查聊天 Modal 之上 */
+.arco-image-preview {
+  z-index: 1100 !important;
+}
+
+/* 语音消息播放：设计稿 SVG 两道声波由内向外依次亮起 */
+.use-chat-voice-wave {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+  color: #000;
+
+  &.is-self {
+    color: #fff;
+    transform: scaleX(-1);
+  }
+
+  svg {
+    display: block;
+  }
+
+  .use-chat-voice-wave__body,
+  .use-chat-voice-wave__arc {
+    fill: currentColor;
+  }
+
+  .use-chat-voice-wave__arc {
+    opacity: 1;
+  }
+
+  &.is-playing {
+    .use-chat-voice-wave__arc--1 {
+      animation: use-chat-voice-arc1 1s steps(1, end) infinite;
+    }
+
+    .use-chat-voice-wave__arc--2 {
+      animation: use-chat-voice-arc2 1s steps(1, end) infinite;
+    }
+  }
+}
+
+/* 一周期 3 拍：仅圆点 → 圆点+内弧 → 完整图标 */
+@keyframes use-chat-voice-arc1 {
+  0%,
+  32.9% {
+    opacity: 0;
+  }
+  33%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes use-chat-voice-arc2 {
+  0%,
+  65.9% {
+    opacity: 0;
+  }
+  66%,
+  100% {
+    opacity: 1;
+  }
+}

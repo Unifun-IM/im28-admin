@@ -295,35 +295,184 @@ function parseCustomCall(
   };
 }
 
-/** Admin body.system：event_type / text / extra.status_text */
+/**
+ * Admin 约定使用 body.system 的 MessageType（与 OpenAPI MessageType 注释一致）。
+ * 1200-1202、1400、已定义的 1501-1520、1601-1608、1701、2102 → SystemMessageBody
+ */
+export function isAdminSystemMessageType(type?: number): boolean {
+  if (type == null) return false;
+  if (type === 1200 || type === 1201 || type === 1202) return true;
+  if (type === MessageContentType.OANotification) return true;
+  if (type === MessageContentType.BurnAfterReadingNotification) return true;
+  if (type === MessageContentType.AdminRevokeMessageNotification) return true;
+  if (isRtcCallProcessNotification(type)) return true;
+  // 群相关系统通知（Admin MessageType 子集 + 兼容 OpenIM 扩展码）
+  if (type >= 1501 && type <= 1520) return true;
+  return false;
+}
+
+/** rtc.call.* → 可读中文；call_type 区分音视频 */
+function formatRtcCallSystemText(
+  eventType: string,
+  extra: Record<string, any>
+): string {
+  const callType = String(
+    pickStr(extra.call_type, extra.callType) || ''
+  ).toLowerCase();
+  const isVideo = callType === 'video' || callType === '2';
+  const kind = isVideo ? '视频通话' : '语音通话';
+  switch (eventType) {
+    case 'rtc.call.invite':
+      return `发起${kind}`;
+    case 'rtc.call.accept':
+      return `已接听${kind}`;
+    case 'rtc.call.reject':
+      return `已拒绝${kind}`;
+    case 'rtc.call.cancel':
+      return `已取消${kind}`;
+    case 'rtc.call.hangup':
+      return `${kind}已挂断`;
+    case 'rtc.call.ended':
+      return `${kind}已结束`;
+    default:
+      return eventType;
+  }
+}
+
+/**
+ * 好友相关 system.event_type → 可读中文。
+ * 例：type=1201, event_type=friend_created, extra.application_msg 为申请附言（不作主文案）。
+ */
+function formatFriendSystemText(eventType: string): string | undefined {
+  const key = eventType.trim().toLowerCase().replace(/\./g, '_');
+  switch (key) {
+    case 'friend_created':
+    case 'friend_added':
+    case 'friend_application_approved':
+      return '你们已成为好友';
+    case 'friend_deleted':
+    case 'friend_removed':
+      return '好友关系已解除';
+    case 'friend_application':
+    case 'friend_application_created':
+      return '发来一条好友申请';
+    case 'friend_application_rejected':
+      return '好友申请已拒绝';
+    case 'friend_remark_set':
+      return '好友备注已更新';
+    default:
+      return undefined;
+  }
+}
+
+/** event_type → 展示文案；未识别时返回 undefined，由上层继续兜底 */
+function formatSystemEventText(
+  eventType: string,
+  extra: Record<string, any>
+): string | undefined {
+  if (eventType.startsWith('rtc.call.')) {
+    return formatRtcCallSystemText(eventType, extra);
+  }
+  if (
+    eventType.startsWith('friend') ||
+    eventType.includes('friend_') ||
+    eventType.includes('friend.')
+  ) {
+    return formatFriendSystemText(eventType);
+  }
+  return undefined;
+}
+
+/** MessageType 无 text/event 映射时的默认文案 */
+function defaultSystemTextByType(type?: number): string | undefined {
+  if (type == null) return undefined;
+  switch (type) {
+    case MessageContentType.FriendNotification:
+      return '好友通知';
+    case MessageContentType.FriendApplicationApprovedNotification:
+    case MessageContentType.FriendAddedNotification:
+      return '你们已成为好友';
+    case MessageContentType.FriendApplicationRejectedNotification:
+      return '好友申请已拒绝';
+    case MessageContentType.FriendApplicationNotification:
+      return '发来一条好友申请';
+    case MessageContentType.FriendDeletedNotification:
+      return '好友关系已解除';
+    case MessageContentType.RevokeMessageNotification:
+    case MessageContentType.AdminRevokeMessageNotification:
+      return '消息已撤回';
+    case MessageContentType.BurnAfterReadingNotification:
+      return '阅后即焚消息';
+    case MessageContentType.OANotification:
+      return '系统通知';
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * 解析 Admin SystemMessageBody。
+ * 结构：`{ system: { event_type?, text?, extra? } }`
+ * - text：给人阅读的主文案（优先）
+ * - extra.status_text / extra.reason：中文展示文案
+ * - extra.status / extra.reason_code：稳定协议码，不作主展示
+ * - event_type：无文案时的兜底（friend_* / rtc.call.* 转中文）
+ * @see AdminAPI.SystemMessage / SystemMessageBody
+ */
 function parseSystemMessageBody(
-  system?: Record<string, any>,
-  body: Record<string, any> = {}
+  system?: Record<string, any> | null,
+  body: Record<string, any> = {},
+  type?: number
 ): ParsedChatMessageBody {
+  // 1) body.system  2) 传入的 system  3) body 本身像 SystemMessage
+  const sys: Record<string, any> =
+    system && typeof system === 'object' && !Array.isArray(system)
+      ? system
+      : body.system && typeof body.system === 'object'
+        ? body.system
+        : pickStr(body.event_type, body.text)
+          ? body
+          : {};
+
   const extra =
-    system?.extra && typeof system.extra === 'object' ? system.extra : {};
-  const eventType = pickStr(system?.event_type, system?.eventType, body.event_type);
-  const statusText = pickStr(
-    extra.status_text,
-    extra.statusText,
-    body.status_text
-  );
-  const reason = pickStr(extra.reason, body.reason);
-  return {
-    content: pickStr(
-      system?.text,
-      statusText,
-      reason,
-      system?.detail,
-      system?.defaultTips,
-      system?.default_tips,
+    sys.extra && typeof sys.extra === 'object' && !Array.isArray(sys.extra)
+      ? sys.extra
+      : {};
+
+  const eventType = pickStr(sys.event_type, sys.eventType);
+  const text = pickStr(sys.text);
+  const statusText = pickStr(extra.status_text, extra.statusText);
+  const reason = pickStr(extra.reason);
+
+  let content = pickStr(text, statusText, reason);
+
+  if (!content && eventType) {
+    content = formatSystemEventText(eventType, extra);
+  }
+
+  if (!content) {
+    content = defaultSystemTextByType(type);
+  }
+
+  // OpenIM 历史 notificationElem 兼容
+  if (!content) {
+    content = pickStr(
+      sys.detail,
+      sys.defaultTips,
+      sys.default_tips,
       body.detail,
       body.content,
       body.defaultTips,
-      body.default_tips,
-      eventType
-    )
-  };
+      body.default_tips
+    );
+  }
+
+  // 仍无文案时不要露出裸 event_type（如 friend_created），用类型默认或通用提示
+  if (!content && eventType) {
+    content = defaultSystemTextByType(type) || '系统消息';
+  }
+
+  return { content: content || undefined };
 }
 
 function parseForwardOrigin(
@@ -657,14 +806,15 @@ export function parseOpenIMMessageBody(
 
     case MessageContentType.RevokeMessageNotification:
     case MessageContentType.AdminRevokeMessageNotification:
-      return {
-        content:
-          parseSystemMessageBody(systemElem, body).content || '消息已撤回'
-      };
+      return parseSystemMessageBody(systemElem, body, type);
 
     default:
-      if (isNotificationMessageContentType(type)) {
-        return parseSystemMessageBody(systemElem, body);
+      // Admin：1200+/1400/15xx/16xx/1701/2102 等均走 body.system
+      if (
+        isAdminSystemMessageType(type) ||
+        isNotificationMessageContentType(type)
+      ) {
+        return parseSystemMessageBody(systemElem, body, type);
       }
       return {
         ...forward,
