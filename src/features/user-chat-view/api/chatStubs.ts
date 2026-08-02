@@ -254,7 +254,14 @@ export async function getChatMessages(params: {
 
       const sender = users.get(m.sender_id || '');
       const body = (m.body || {}) as Record<string, any>;
-      const parsed = parseOpenIMMessageBody(m.type, body);
+      const parsed = parseOpenIMMessageBody(m.type, body, {
+        viewerUserId: userId,
+        // 只回传 nickname；无昵称时由解析层从 application_msg 兜底
+        resolveUserName: (id) => {
+          const nick = users.get(id)?.nickname?.trim();
+          return nick || undefined;
+        }
+      });
       const uiType = mapMessageContentTypeToUi(m.type, body);
       const fallback = typeBracketLabel(m.type);
       // 气泡内展示短时间；完整时间在 formatDateTime 里

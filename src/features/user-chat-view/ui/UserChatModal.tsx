@@ -38,8 +38,11 @@ import iconChatVideoPeer from '../assets/icon-chat-video-peer.svg';
 import iconChatVideoSelf from '../assets/icon-chat-video-self.svg';
 import iconClose from '../assets/icon-close.svg';
 import iconContacts from '../assets/icon-contacts.svg';
+import iconContactsActive from '../assets/icon-contacts-active.svg';
 import iconPhone from '../assets/icon-phone.svg';
+import iconPhoneActive from '../assets/icon-phone-active.svg';
 import iconSession from '../assets/icon-session.svg';
+import iconSessionActive from '../assets/icon-session-active.svg';
 import iconStar from '../assets/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
 import './user-chat-modal.less';
@@ -535,15 +538,15 @@ export default function UserChatModal({
       }}
     >
       <div className="use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
-        <aside className="flex h-full min-h-0 w-16 shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
+        <aside className="flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
               aria-label="关闭"
-              className="inline-flex size-10 cursor-pointer items-center justify-center rounded-lg border-0 bg-[#e5e6eb] p-0"
+              className="inline-flex h-[40px] w-[40px] min-h-[40px] min-w-[40px] cursor-pointer items-center justify-center rounded-[8px] border-0 bg-[#e5e6eb] p-0"
               onClick={onClose}
             >
-              <img src={iconClose} alt="" className="size-5" />
+              <img src={iconClose} alt="" className="h-[20px] w-[20px]" />
             </button>
             <div className="flex flex-col items-center gap-4">
               <UserAvatar
@@ -559,18 +562,21 @@ export default function UserChatModal({
                   <NavIcon
                     active={nav === 'sessions'}
                     src={iconSession}
+                    activeSrc={iconSessionActive}
                     label="会话"
                     onClick={() => switchNav('sessions')}
                   />
                   <NavIcon
                     active={nav === 'contacts'}
                     src={iconContacts}
+                    activeSrc={iconContactsActive}
                     label="通讯录"
                     onClick={() => switchNav('contacts')}
                   />
                   <NavIcon
                     active={nav === 'calls'}
                     src={iconPhone}
+                    activeSrc={iconPhoneActive}
                     label="通话"
                     onClick={() => switchNav('calls')}
                   />
@@ -666,28 +672,32 @@ export default function UserChatModal({
 function NavIcon({
   active,
   src,
+  activeSrc,
   label,
   onClick
 }: {
   active: boolean;
   src: string;
+  /** 选中态专用图标（线框→实心）；有则不再叠背景/透明度 */
+  activeSrc?: string;
   label: string;
   onClick: () => void;
 }) {
+  const iconSrc = active && activeSrc ? activeSrc : src;
   return (
     <button
       type="button"
       aria-label={label}
       aria-pressed={active}
-      className={`inline-flex size-10 cursor-pointer items-center justify-center rounded-full border-0 p-0 ${
-        active ? 'bg-[rgba(0,0,0,0.06)]' : 'bg-transparent'
-      }`}
+      className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0"
       onClick={onClick}
     >
       <img
-        src={src}
+        src={iconSrc}
         alt=""
-        className={`size-5 ${active ? 'opacity-100' : 'opacity-55'}`}
+        className={`h-[20px] w-[20px] ${
+          activeSrc ? 'opacity-100' : active ? 'opacity-100' : 'opacity-55'
+        }`}
       />
     </button>
   );

@@ -339,17 +339,80 @@ function formatRtcCallSystemText(
   }
 }
 
+/** 解析消息时可选上下文（用于好友系统文案里填对方昵称） */
+export type ParseMessageBodyOptions = {
+  /** 当前会话所属用户（管理端「查聊天」视角） */
+  viewerUserId?: string;
+  /** user_id → 展示名（昵称/账号） */
+  resolveUserName?: (userId: string) => string | undefined;
+};
+
+/**
+ * 从好友申请附言里猜自称名（非协议字段，仅兜底）。
+ * 例：「我是debian，请通过好友验证」→「debian」
+ */
+function guessNameFromApplicationMsg(msg?: string): string | undefined {
+  const s = String(msg || '').trim();
+  if (!s) return undefined;
+  const m =
+    s.match(/^我是\s*([^，,。！!？?\s]{1,32})/) ||
+    s.match(/^我叫\s*([^，,。！!？?\s]{1,32})/);
+  const name = m?.[1]?.trim();
+  if (!name || name.length > 20) return undefined;
+  return name;
+}
+
 /**
  * 好友相关 system.event_type → 可读中文。
- * 例：type=1201, event_type=friend_created, extra.application_msg 为申请附言（不作主文案）。
+ * friend_created 文案贴近客户端：
+ * 「你已添加了{昵称}通过了你的朋友验证请求，以上是打招呼的消息。」
+ * 名称：nickname → 解析 application_msg（我是/我叫）→ user_id / 对方
  */
-function formatFriendSystemText(eventType: string): string | undefined {
+function formatFriendSystemText(
+  eventType: string,
+  extra: Record<string, any>,
+  opts?: ParseMessageBodyOptions
+): string | undefined {
   const key = eventType.trim().toLowerCase().replace(/\./g, '_');
   switch (key) {
     case 'friend_created':
     case 'friend_added':
-    case 'friend_application_approved':
-      return '你们已成为好友';
+    case 'friend_application_approved': {
+      const fromId = pickStr(extra.from_user_id, extra.fromUserId);
+      const toId = pickStr(extra.to_user_id, extra.toUserId);
+      let peerId = toId || fromId;
+      const viewer = opts?.viewerUserId;
+      if (viewer && toId && viewer === toId) peerId = fromId;
+      else if (viewer && fromId && viewer === fromId) peerId = toId;
+
+      const applicationMsg = pickStr(
+        extra.application_msg,
+        extra.applicationMsg,
+        extra.req_msg,
+        extra.reqMsg
+      );
+
+      const nickname =
+        (peerId && opts?.resolveUserName?.(peerId)) ||
+        pickStr(
+          extra.peer_nickname,
+          extra.peerNickname,
+          extra.from_user_nickname,
+          extra.to_user_nickname,
+          extra.nickname
+        );
+
+      // 无昵称时再从附言「我是XXX / 我叫XXX」兜底
+      const name =
+        nickname ||
+        guessNameFromApplicationMsg(applicationMsg) ||
+        peerId ||
+        '对方';
+
+      return applicationMsg
+        ? `你已添加了${name}通过了你的朋友验证请求，以上是打招呼的消息。`
+        : `你已添加了${name}通过了你的朋友验证请求。`;
+    }
     case 'friend_deleted':
     case 'friend_removed':
       return '好友关系已解除';
@@ -368,7 +431,8 @@ function formatFriendSystemText(eventType: string): string | undefined {
 /** event_type → 展示文案；未识别时返回 undefined，由上层继续兜底 */
 function formatSystemEventText(
   eventType: string,
-  extra: Record<string, any>
+  extra: Record<string, any>,
+  opts?: ParseMessageBodyOptions
 ): string | undefined {
   if (eventType.startsWith('rtc.call.')) {
     return formatRtcCallSystemText(eventType, extra);
@@ -378,7 +442,7 @@ function formatSystemEventText(
     eventType.includes('friend_') ||
     eventType.includes('friend.')
   ) {
-    return formatFriendSystemText(eventType);
+    return formatFriendSystemText(eventType, extra, opts);
   }
   return undefined;
 }
@@ -391,7 +455,7 @@ function defaultSystemTextByType(type?: number): string | undefined {
       return '好友通知';
     case MessageContentType.FriendApplicationApprovedNotification:
     case MessageContentType.FriendAddedNotification:
-      return '你们已成为好友';
+      return '你已添加了对方通过了你的朋友验证请求。';
     case MessageContentType.FriendApplicationRejectedNotification:
       return '好友申请已拒绝';
     case MessageContentType.FriendApplicationNotification:
@@ -422,7 +486,8 @@ function defaultSystemTextByType(type?: number): string | undefined {
 function parseSystemMessageBody(
   system?: Record<string, any> | null,
   body: Record<string, any> = {},
-  type?: number
+  type?: number,
+  opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody {
   // 1) body.system  2) 传入的 system  3) body 本身像 SystemMessage
   const sys: Record<string, any> =
@@ -446,8 +511,26 @@ function parseSystemMessageBody(
 
   let content = pickStr(text, statusText, reason);
 
-  if (!content && eventType) {
-    content = formatSystemEventText(eventType, extra);
+  // 好友通过类：即使后端给了简短 text，也优先用带昵称/打招呼提示的完整文案
+  const friendEventKey = eventType
+    ? eventType.trim().toLowerCase().replace(/\./g, '_')
+    : '';
+  const isFriendCreatedEvent =
+    friendEventKey === 'friend_created' ||
+    friendEventKey === 'friend_added' ||
+    friendEventKey === 'friend_application_approved' ||
+    type === MessageContentType.FriendApplicationApprovedNotification ||
+    type === MessageContentType.FriendAddedNotification;
+
+  if (isFriendCreatedEvent) {
+    content =
+      formatFriendSystemText(
+        eventType || 'friend_created',
+        extra,
+        opts
+      ) || content;
+  } else if (!content && eventType) {
+    content = formatSystemEventText(eventType, extra, opts);
   }
 
   if (!content) {
@@ -528,7 +611,8 @@ export function mapMessageContentTypeToUi(
  */
 export function parseOpenIMMessageBody(
   type: number | undefined,
-  body: Record<string, any> = {}
+  body: Record<string, any> = {},
+  opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody {
   const forward = parseForwardOrigin(body);
 
@@ -806,7 +890,7 @@ export function parseOpenIMMessageBody(
 
     case MessageContentType.RevokeMessageNotification:
     case MessageContentType.AdminRevokeMessageNotification:
-      return parseSystemMessageBody(systemElem, body, type);
+      return parseSystemMessageBody(systemElem, body, type, opts);
 
     default:
       // Admin：1200+/1400/15xx/16xx/1701/2102 等均走 body.system
@@ -814,7 +898,7 @@ export function parseOpenIMMessageBody(
         isAdminSystemMessageType(type) ||
         isNotificationMessageContentType(type)
       ) {
-        return parseSystemMessageBody(systemElem, body, type);
+        return parseSystemMessageBody(systemElem, body, type, opts);
       }
       return {
         ...forward,
