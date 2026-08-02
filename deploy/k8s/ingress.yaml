@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: im28-admin
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-http01
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - im-admin.djftech.app
+      secretName: im28-admin-tls
+  rules:
+    - host: im-admin.djftech.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: im28-admin
+                port:
+                  name: http

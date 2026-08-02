@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: im28-admin
+  labels:
+    app.kubernetes.io/name: im28-admin
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: im28-admin
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

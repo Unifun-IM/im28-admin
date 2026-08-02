@@ -27,7 +27,7 @@ npm test
 
 联调账号以网关环境为准。登录后默认进入 **用户查询** `/user/query`。
 
-**环境变量：** 复制 `.env.example` → `.env`（已 gitignore，勿提交）。生产构建在 CI 注入 `VITE_API_BASE_URL` 等 `VITE_*`（Vite 构建期打进产物），**不要**提交 `.env.production`。
+**环境变量：** 本地开发复制 `.env.example` → `.env`（已 gitignore，勿提交），通过 `VITE_API_BASE_URL` 指定网关。生产容器通过运行时环境变量 `BACKEND_URL` 指定上游，默认值为 `http://im28-api-gateway:8080`。Nginx 只将 `/v1/admin/*` 原路径转发到该地址，其他 `/v1/*` 路径返回 404。
 
 ## 业务菜单（Figma 业务1.0）
 
@@ -87,7 +87,7 @@ const res = await postV1AdminAuthLogin({ username: 'admin', password: '***' });
 | `shared/api/admin/*` | **Admin OpenAPI 生成物**，不要手改 |
 | `shared/ui/api-not-ready` | 无 OpenAPI 页面空态「接口未就绪」 |
 
-联调时复制 `cp .env.example .env`，按需改 `VITE_API_BASE_URL`。正式部署在构建流水线设置同名变量，勿把 `.env.production` 提交进仓库。
+联调时复制 `cp .env.example .env`，按需改 `VITE_API_BASE_URL`。正式部署通过 Deployment 的 `BACKEND_URL` 指定后端服务，不需要为后端地址重新构建前端镜像。
 
 ## 脚本
 
