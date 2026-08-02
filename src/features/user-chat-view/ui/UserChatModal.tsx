@@ -51,7 +51,7 @@ import './user-chat-modal.less';
 
 const { Text } = Typography;
 
-/** 气泡内时间 + 已读（Figma 791:31980） */
+/** 气泡内时间 + 已读（Figma 977:24119 / 977:24120） */
 function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
   if (!time) return null;
   return (
@@ -62,23 +62,26 @@ function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
     >
       {time}
       {isSelf ? (
-        <img
-          src={iconChatRead}
-          alt=""
-          className="h-[6px] w-[11px] shrink-0"
-        />
+        <span className="relative inline-flex size-3 shrink-0 items-center justify-center overflow-hidden">
+          <img
+            src={iconChatRead}
+            alt=""
+            className="h-[6px] w-[11px] max-w-none"
+          />
+        </span>
       ) : null}
     </span>
   );
 }
 
-/** 气泡外壳；群聊对方带昵称时改为纵向（Figma 791:33286）
- * 尾巴一侧圆角去掉，避免与尾巴 SVG 在圆角处形成尖刺断层（稿里文件/视频气泡同理）。
+/**
+ * 气泡外壳（Figma 977:24124 / 977:24119 / 977:24120）
+ * 四角统一 12px；尾巴叠在圆角外侧，勿裁掉尾巴侧圆角（否则会出现尖刺断层）。
  */
 function bubbleShell(isSelf: boolean, withSenderName = false) {
   const base = isSelf
-    ? 'relative max-w-full rounded-xl rounded-br-none bg-[#7b61ff] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
-    : 'relative max-w-full rounded-xl rounded-bl-none border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] leading-[1.3] text-black';
+    ? 'relative max-w-full rounded-xl bg-[#7b61ff] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
+    : 'relative max-w-full rounded-xl border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] leading-[1.3] text-black';
   if (withSenderName) {
     return `${base} inline-flex flex-col items-start gap-1`;
   }
@@ -86,9 +89,9 @@ function bubbleShell(isSelf: boolean, withSenderName = false) {
 }
 
 /**
- * 气泡尾巴（Figma 791:32260 / 791:32267）
- * 资源尖角在顶部，埋进气泡圆角；底部柔和弯角外露。
- * 对方仅用水平翻转（-scale-x-100）。勿用 rotate(180)/scaleY 组合，实测会露出尖刺。
+ * 气泡尾巴（Figma 977:24124 对方 / 977:24120 自己）
+ * 对方：bottom-[-1px] left-[-7px]；稿面为 -scale-y-100+rotate-180，这里用等效的 -scale-x-100
+ * 自己：bottom-0 right-[-6px]；尖角埋进圆角，弯角外露
  */
 function BubbleTail({ isSelf }: { isSelf: boolean }) {
   if (isSelf) {
@@ -97,7 +100,7 @@ function BubbleTail({ isSelf }: { isSelf: boolean }) {
         aria-hidden
         className="pointer-events-none absolute bottom-0 right-[-6px] block h-[15px] w-3 overflow-visible"
       >
-        <span className="absolute inset-[10.78%_5.83%_0_1.09%]">
+        <span className="absolute inset-[10.78%_8.83%_0_-8.09%]">
           <img
             src={iconChatBubbleTailSelf}
             alt=""
@@ -114,7 +117,7 @@ function BubbleTail({ isSelf }: { isSelf: boolean }) {
     >
       <span className="-scale-x-100 flex-none">
         <span className="relative block h-[15px] w-3">
-          <span className="absolute inset-[0_0_0_-8.33%]">
+          <span className="absolute inset-[0_0_0_-18.33%]">
             <img
               src={iconChatBubbleTailPeer}
               alt=""
@@ -201,6 +204,8 @@ type ChatMsg = {
   id: string;
   side: 'self' | 'peer';
   msgType: 'text' | 'voice' | 'file' | 'call' | 'date' | 'system' | 'image' | 'video';
+  /** OpenIM MessageContentType */
+  contentType?: number;
   content?: string;
   senderName?: string;
   senderAvatar?: string;
@@ -1340,7 +1345,7 @@ function Bubble({
     );
   }
 
-  /* 短文：文案与时间并排；长文：时间贴右下角（Figma 791:32260 / 32261） */
+  /* 短文：文案与时间并排；长文：时间贴右下角（Figma 977:24119 / 977:24120） */
   const longText = (msg.content || '').length > 40;
   if (longText) {
     return (
@@ -1350,10 +1355,10 @@ function Bubble({
         } relative w-fit max-w-full`}
       >
         <BubbleSenderName name={senderName} />
-        <p className="m-0 whitespace-pre-wrap break-words pr-[52px]">
+        <p className="m-0 whitespace-pre-wrap break-words pr-[52px] pb-0">
           {msg.content}
         </p>
-        <span className="absolute bottom-1.5 right-2">
+        <span className="absolute bottom-2 right-2">
           <BubbleMeta time={msg.time} isSelf={isSelf} />
         </span>
         <BubbleTail isSelf={isSelf} />

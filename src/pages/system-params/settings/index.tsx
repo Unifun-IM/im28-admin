@@ -64,6 +64,17 @@ function settingToForm(setting: AdminAPI.SystemSetting): ParamsForm {
  * 对齐 UpdateSystemSettingRequest：system_name 必填；
  * 其余字段可选，不传保留原值；logo_url 传空字符串表示清空。
  */
+/** 统一空 Logo，避免 undefined / '' 导致 dirty 对比失真 */
+function normalizeParamsForm(values: ParamsForm): ParamsForm {
+  return {
+    system_name: values.system_name?.trim() || '',
+    logo_url: values.logo_url?.trim() || undefined,
+    locale: values.locale === 'en-US' ? 'en-US' : 'zh-CN',
+    time_format: values.time_format === '24' ? '24' : '12',
+    ip_whitelist_enabled: Boolean(values.ip_whitelist_enabled)
+  };
+}
+
 function formToUpdateBody(
   values: ParamsForm,
   baseline: ParamsForm
@@ -155,8 +166,15 @@ export default function SystemParamsPage() {
   }, [applyBaseline]);
 
   const syncDirty = useCallback(() => {
-    const values = { ...DEFAULT_VALUES, ...form.getFieldsValue() };
-    setDirty(JSON.stringify(values) !== JSON.stringify(baseline));
+    const values = normalizeParamsForm({
+      ...DEFAULT_VALUES,
+      ...form.getFieldsValue(),
+      // Logo 用自定义上传，须显式读取（仅靠 getFieldsValue 可能丢未注册字段）
+      logo_url: form.getFieldValue('logo_url')
+    });
+    setDirty(
+      JSON.stringify(values) !== JSON.stringify(normalizeParamsForm(baseline))
+    );
   }, [baseline, form]);
 
   const resetToBaseline = useCallback(() => {
@@ -177,10 +195,11 @@ export default function SystemParamsPage() {
     }
     setSaving(true);
     try {
-      const values = {
+      const values = normalizeParamsForm({
         ...DEFAULT_VALUES,
-        ...form.getFieldsValue()
-      } as ParamsForm;
+        ...form.getFieldsValue(),
+        logo_url: form.getFieldValue('logo_url')
+      });
       await postV1AdminSystemSettingsUpdate(formToUpdateBody(values, baseline));
       const setting = await systemSettingsStore.fetch();
       if (setting) {
@@ -220,7 +239,8 @@ export default function SystemParamsPage() {
       try {
         setLogoUploading(true);
         const url = await uploadAdminImage(file);
-        form.setFieldValue('logo_url', url);
+        form.setFieldsValue({ logo_url: url });
+        // setFieldsValue 不触发 onValuesChange，需手动同步 dirty
         syncDirty();
       } catch {
         Message.error(common['common.upload.failed']);
@@ -259,11 +279,23 @@ export default function SystemParamsPage() {
             <Form.Item
               field="system_name"
               label={t['paramsSettings.field.systemName']}
-              rules={[{ required: true }]}
+              rules={[
+                {
+                  required: true,
+                  message: common['common.form.required'].replace(
+                    '{label}',
+                    t['paramsSettings.field.systemName']
+                  )
+                }
+              ]}
             >
               <Input allowClear />
             </Form.Item>
 
+            {/* 隐藏注册 logo_url，保证 getFieldsValue / dirty 能读到上传结果 */}
+            <Form.Item field="logo_url" hidden>
+              <Input />
+            </Form.Item>
             <Form.Item label={t['paramsSettings.field.logo']}>
               <div className="rounded-xl border border-solid border-[rgba(0,0,0,0.08)] px-3 py-2">
                 <p className="m-0 mb-2 text-[12px] leading-3 text-arco-text-3">

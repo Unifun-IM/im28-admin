@@ -1,12 +1,21 @@
 /**
  * 查聊天 — 对接 Admin 会话查询 API
  * @see postV1AdminConversationsList / postV1AdminConversationMessagesList
+ * 消息类型对齐 OpenIM MessageContentType
+ * @see https://docs.openim.io/sdks/enum/messageContentType
  */
 import {
   postV1AdminConversationMessagesList,
   postV1AdminConversationsList
 } from '@shared/api/admin/adminhuihuachaxun';
 import { formatDateTime } from '@shared/lib/formatTime';
+import {
+  isHiddenMessageContentType,
+  mapMessageContentTypeToUi,
+  parseOpenIMMessageBody
+} from '@shared/lib/openimMessageContentType';
+import { openimLabel } from '@shared/lib/openimLabels';
+import openimLocale from '@shared/locale/openim';
 
 export type ChatBookPeer = {
   id: string;
@@ -37,6 +46,8 @@ export type ChatMsg = {
   id: string;
   side: 'self' | 'peer';
   msgType: 'text' | 'voice' | 'file' | 'call' | 'date' | 'system' | 'image' | 'video';
+  /** OpenIM MessageContentType 原始值 */
+  contentType?: number;
   content?: string;
   senderName?: string;
   senderAvatar?: string;
@@ -50,14 +61,28 @@ const LIST_PAGE_SIZE = 100;
 /** 防止异常 total 导致死循环 */
 const LIST_PAGE_MAX = 20;
 
+/** 会话列表预览用中文 locale（列表层无 React hook） */
+const zhOpenim = openimLocale['zh-CN'] as Record<string, string>;
+
+function typeBracketLabel(type?: number): string {
+  if (type == null) return '';
+  const label = openimLabel(zhOpenim, 'messageType', type, '');
+  return label ? `[${label}]` : `[消息 ${type}]`;
+}
+
 function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
   if (!msg) return '';
-  const body = msg.body || {};
-  if (typeof body.text === 'string') return body.text;
-  if (typeof body.content === 'string') return body.content;
-  if (typeof body.file_name === 'string') return body.file_name;
-  if (body.url || body.image_url) return '[图片]';
-  return msg.type != null ? `[消息 ${msg.type}]` : '';
+  if (isHiddenMessageContentType(msg.type)) return '';
+  const parsed = parseOpenIMMessageBody(msg.type, msg.body || {});
+  const ui = mapMessageContentTypeToUi(msg.type);
+  if (ui === 'text' || ui === 'system') {
+    return parsed.content?.trim() || typeBracketLabel(msg.type);
+  }
+  if (ui === 'file' && parsed.fileName) return parsed.fileName;
+  if (ui === 'voice' && parsed.duration) {
+    return `${typeBracketLabel(msg.type)} ${parsed.duration}`;
+  }
+  return typeBracketLabel(msg.type);
 }
 
 function mapConversation(
@@ -76,34 +101,6 @@ function mapConversation(
     time: formatDateTime(c.last_active_at) || undefined,
     kind: isGroup ? 'group' : 'session'
   };
-}
-
-function mapMsgType(type?: number): ChatMsg['msgType'] {
-  // OpenIM 常见：101 文本 / 102 图片 / 103 语音 / 104 视频 / 105 文件 …
-  if (type === 102) return 'image';
-  if (type === 103) return 'voice';
-  if (type === 104) return 'video';
-  if (type === 105) return 'file';
-  return 'text';
-}
-
-function mapMessageContent(msg?: AdminAPI.AdminConversationMessage): {
-  content?: string;
-  fileName?: string;
-  duration?: string;
-} {
-  const body = msg?.body || {};
-  if (typeof body.text === 'string') return { content: body.text };
-  if (typeof body.content === 'string') return { content: body.content };
-  if (typeof body.file_name === 'string') {
-    return {
-      content: body.file_name,
-      fileName: body.file_name,
-      duration: body.duration != null ? String(body.duration) : undefined
-    };
-  }
-  if (body.url || body.image_url) return { content: '' };
-  return { content: msg?.type != null ? `[消息 ${msg.type}]` : '' };
 }
 
 async function listAllConversations(
@@ -214,15 +211,24 @@ export async function getChatMessages(params: {
     .map((row) => {
       const m = row.message;
       if (!m?.msg_id) return null;
+      if (isHiddenMessageContentType(m.type)) return null;
+
       const sender = users.get(m.sender_id || '');
-      const mapped = mapMessageContent(m);
+      const parsed = parseOpenIMMessageBody(m.type, m.body || {});
+      const uiType = mapMessageContentTypeToUi(m.type);
+      const fallback = typeBracketLabel(m.type);
+
       return {
         id: m.msg_id,
         side: m.sender_id === userId ? 'self' : 'peer',
-        msgType: mapMsgType(m.type),
-        content: mapped.content,
-        fileName: mapped.fileName,
-        duration: mapped.duration,
+        msgType: uiType,
+        contentType: m.type,
+        content:
+          parsed.content?.trim() ||
+          (uiType === 'text' || uiType === 'system' ? fallback : ''),
+        fileName: parsed.fileName,
+        fileSize: parsed.fileSize,
+        duration: parsed.duration,
         senderName: sender?.nickname,
         senderAvatar: sender?.avatar_url,
         time: formatDateTime(m.sent_at) || undefined
