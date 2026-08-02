@@ -418,14 +418,13 @@ export default function UserChatModal({
     upsertSession(sessionPeer);
   };
 
+  /** Figma 977:23156 通讯录「搜索好友」；会话/通话「搜索」 */
   const searchPlaceholder =
-    nav === 'sessions'
-      ? '搜索好友'
-      : nav === 'contacts'
-        ? groupsOpen && !contactsOpen
-          ? '搜索群'
-          : '搜索好友'
-        : '搜索';
+    nav === 'contacts'
+      ? groupsOpen && !contactsOpen
+        ? '搜索群'
+        : '搜索好友'
+      : '搜索';
 
   const listActiveId = chat?.id || profile?.id;
 
@@ -445,7 +444,10 @@ export default function UserChatModal({
         maxHeight: '90vh'
       }}
     >
-      <div className="flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
+      <div
+        className="flex min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]"
+        style={{ height: 'min(768px, 90vh)' }}
+      >
         <aside className="flex h-full w-16 shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
@@ -552,8 +554,13 @@ export default function UserChatModal({
           ) : profile ? (
             <FriendDetail peer={profile} onSendMessage={sendMessage} />
           ) : (
-            <div className="flex h-full min-h-0 items-center justify-center">
-              <img src={emptyLogo} alt="" className="size-20" />
+            /* 通讯录/通话空态 — Figma 977:23156 右侧灰底居中 Logo */
+            <div className="flex min-h-0 flex-1 items-center justify-center bg-[#f3f3f3]">
+              <img
+                src={emptyLogo}
+                alt=""
+                className="pointer-events-none size-20 select-none"
+              />
             </div>
           )}
         </section>
@@ -713,6 +720,7 @@ function SessionList({
   );
 }
 
+/** 通讯录分组头 — Figma 977:23156 Cell */
 function SectionHeader({
   open,
   title,
@@ -727,16 +735,22 @@ function SectionHeader({
   return (
     <button
       type="button"
-      className="flex w-full cursor-pointer items-center gap-1 border-0 bg-transparent py-2 pl-4 pr-4 text-left"
+      className="flex w-full cursor-pointer items-center gap-1 border-0 bg-transparent py-0 pl-4 text-left"
       onClick={onToggle}
     >
       {open ? (
-        <IconDown className="text-[16px] text-arco-text-2" />
+        <IconDown className="shrink-0 text-[16px] text-arco-text-2" />
       ) : (
-        <IconRight className="text-[16px] text-arco-text-2" />
+        <IconRight className="shrink-0 text-[16px] text-arco-text-2" />
       )}
-      <span className="flex-1 text-[16px] text-arco-text-1">{title}</span>
-      <span className="text-[12px] text-arco-text-3">{count}</span>
+      <span className="flex min-w-0 flex-1 items-center gap-3 py-2 pr-4">
+        <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.5] text-arco-text-1">
+          {title}
+        </span>
+        <span className="shrink-0 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+          {count}
+        </span>
+      </span>
     </button>
   );
 }
@@ -878,7 +892,7 @@ function ContactRow({
   );
 }
 
-/** 通讯录好友详情 — Figma 791:36214 */
+/** 通讯录好友详情 — Figma 977:24413 */
 function FriendDetail({
   peer,
   onSendMessage
@@ -914,23 +928,21 @@ function FriendDetail({
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !text-[14px]"
+          className="!h-12 !rounded-xl !bg-[#7b61ff] !text-[14px] hover:!bg-[#6a52e6]"
           onClick={() => onSendMessage(peer)}
         >
           发消息
         </Button>
       </div>
 
-      <div className="flex flex-col gap-4 px-4 pb-6">
-        <div className="overflow-hidden rounded-xl bg-[var(--color-bg-2,#fff)]">
-          <div className="flex items-center px-4 py-4">
+      <div className="px-4 pb-6">
+        <div className="overflow-hidden rounded-xl bg-white">
+          <div className="flex items-center border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-4">
             <span className="flex-1 text-[14px] text-arco-text-1">备注名</span>
-            <span className="text-[14px] text-arco-text-3">
+            <span className="text-[14px] text-[rgba(0,0,0,0.4)]">
               {peer.remark || '添加备注'}
             </span>
           </div>
-        </div>
-        <div className="overflow-hidden rounded-xl bg-[var(--color-bg-2,#fff)]">
           <div className="flex items-center border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-4">
             <span className="flex-1 text-[14px] text-arco-text-1">来源</span>
             <span className="text-[14px] text-arco-text-2">
@@ -940,7 +952,7 @@ function FriendDetail({
           <div className="flex items-center px-4 py-4">
             <span className="flex-1 text-[14px] text-arco-text-1">添加时间</span>
             <span className="text-[14px] text-arco-text-2">
-              {peer.addedAt || '2025年11月'}
+              {peer.addedAt || '--'}
             </span>
           </div>
         </div>
@@ -949,7 +961,7 @@ function FriendDetail({
   );
 }
 
-/** 通讯录群详情 — Figma 791:31168 */
+/** 通讯录群详情 — Figma 977:23257 */
 function GroupProfile({
   peer,
   onEnterChat
@@ -958,10 +970,9 @@ function GroupProfile({
   onEnterChat: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[#f3f3f3] px-20">
-      {/* NavBar 占位 56px */}
+    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[#f3f3f3] px-4">
       <div className="h-14 w-full shrink-0" />
-      <div className="flex w-full flex-col items-center pb-4 pl-4">
+      <div className="flex w-full max-w-[400px] flex-col items-center pb-4">
         <div className="flex flex-col items-center gap-4">
           <GroupAvatar avatars={peer.avatars} name={peer.name} size={80} />
           <div className="flex flex-col items-center gap-2">
@@ -979,16 +990,16 @@ function GroupProfile({
               <span className="text-[12px] leading-none text-[rgb(var(--link-6))]">
                 ID：{peer.id}
               </span>
-              <IconCopy className="text-[16px] text-[rgb(var(--link-6))]" />
+              <IconCopy className="text-[12px] text-[rgb(var(--link-6))]" />
             </button>
           </div>
         </div>
       </div>
-      <div className="w-full p-4">
+      <div className="w-full max-w-[400px] p-4">
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !text-[14px] !font-medium"
+          className="!h-12 !rounded-xl !bg-[#7b61ff] !text-[14px] !font-medium hover:!bg-[#6a52e6]"
           onClick={() => onEnterChat(peer)}
         >
           进入群聊

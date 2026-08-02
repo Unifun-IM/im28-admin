@@ -1,39 +1,48 @@
-/* —— 用户查聊天 Modal（Figma 791:30433，1024×768 / 圆角 24，上限 90vw×90vh） —— */
-.arco-modal.use-user-chat-modal {
-  width: min(1024px, 90vw);
-  height: min(768px, 90vh);
-  max-width: 90vw;
-  max-height: 90vh;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  border: none;
-  /* 高度链：modal → content → body → 三栏，避免底栏大块空白 */
-  display: flex;
-  flex-direction: column;
-
-  .arco-modal-content {
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+/* —— 用户查聊天 Modal（Figma 791:30433 / 977:23156，1024×768） —— */
+.use-user-chat-modal-wrap {
+  .arco-modal.use-user-chat-modal {
+    width: min(1024px, 90vw) !important;
+    height: min(768px, 90vh) !important;
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    border: none;
     padding: 0;
-    background: transparent;
+    /* 高度链：modal → content → body → 三栏 */
+    display: flex !important;
+    flex-direction: column;
   }
 
-  .arco-modal-body {
-    flex: 1;
+  .arco-modal.use-user-chat-modal .arco-modal-content {
+    flex: 1 1 auto;
     min-height: 0;
-    height: 100%;
+    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    background: transparent;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+
+  .arco-modal.use-user-chat-modal .arco-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100% !important;
+    max-height: none !important;
     padding: 0 !important;
     overflow: hidden;
   }
 
-  .arco-modal-header,
-  .arco-modal-footer {
+  .arco-modal.use-user-chat-modal .arco-modal-header,
+  .arco-modal.use-user-chat-modal .arco-modal-footer {
     display: none;
   }
+}
+
+.arco-modal.use-user-chat-modal {
 
   .use-user-chat-search.arco-input-inner-wrapper {
     height: 32px;

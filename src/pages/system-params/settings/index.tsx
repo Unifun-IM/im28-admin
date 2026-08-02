@@ -174,11 +174,12 @@ export default function SystemParamsPage() {
   }, [applyBaseline]);
 
   const syncDirty = useCallback(() => {
+    const logoRaw = form.getFieldValue('logo_url');
     const values = normalizeParamsForm({
       ...DEFAULT_VALUES,
       ...form.getFieldsValue(),
       // Logo 用自定义上传，须显式读取（仅靠 getFieldsValue 可能丢未注册字段）
-      logo_url: form.getFieldValue('logo_url')
+      logo_url: typeof logoRaw === 'string' ? logoRaw : undefined
     });
     setDirty(
       JSON.stringify(values) !== JSON.stringify(normalizeParamsForm(baseline))
@@ -203,10 +204,11 @@ export default function SystemParamsPage() {
     }
     setSaving(true);
     try {
+      const logoRaw = form.getFieldValue('logo_url');
       const values = normalizeParamsForm({
         ...DEFAULT_VALUES,
         ...form.getFieldsValue(),
-        logo_url: form.getFieldValue('logo_url')
+        logo_url: typeof logoRaw === 'string' ? logoRaw : undefined
       });
       await postV1AdminSystemSettingsUpdate(formToUpdateBody(values, baseline));
       const setting = await systemSettingsStore.fetch();

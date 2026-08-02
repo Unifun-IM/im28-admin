@@ -19,8 +19,12 @@ import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
 
-type UserSessionForm = AdminAPI.AdminListUserConversationQueryRequest & {
+type UserSessionForm = Omit<
+  AdminAPI.AdminListUserConversationQueryRequest,
+  'status'
+> & {
   batchUserIds?: string;
+  /** 表单「全部」用空串，提交时再转成 undefined */
   status?: '' | 'active' | 'disabled';
 };
 
@@ -32,8 +36,8 @@ function statusBadge(
   return 'default';
 }
 
-function parseBatchIds(raw?: string) {
-  return String(raw || '')
+function parseBatchIds(raw?: unknown) {
+  return String(raw ?? '')
     .split(/[\s,，]+/)
     .map((s) => s.trim())
     .filter(Boolean)
