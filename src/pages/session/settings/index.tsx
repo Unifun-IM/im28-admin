@@ -17,7 +17,17 @@ import useLocale from '@shared/lib/useLocale';
 /** 与 AdminAPI.AdminUpdateConversationGlobalSettingRequest 对齐（Figma 977:33286） */
 type SessionSettingsForm = AdminAPI.AdminUpdateConversationGlobalSettingRequest;
 
-const MB = 1024 * 1024;
+/** 字面量字节值，保持与 AdminUpdateConversationGlobalSettingRequest 联合类型一致 */
+const IMAGE_SIZE = {
+  5: 5_242_880,
+  10: 10_485_760,
+  20: 20_971_520
+} as const;
+const MEDIA_SIZE = {
+  50: 52_428_800,
+  100: 104_857_600,
+  200: 209_715_200
+} as const;
 
 const DEFAULT_VALUES: SessionSettingsForm = {
   text_message_enabled: true,
@@ -28,10 +38,10 @@ const DEFAULT_VALUES: SessionSettingsForm = {
   voice_message_enabled: true,
   card_message_enabled: true,
   text_max_length: 1000,
-  image_max_size_bytes: 10 * MB,
-  video_max_size_bytes: 100 * MB,
-  audio_max_size_bytes: 100 * MB,
-  file_max_size_bytes: 100 * MB,
+  image_max_size_bytes: IMAGE_SIZE[10],
+  video_max_size_bytes: MEDIA_SIZE[100],
+  audio_max_size_bytes: MEDIA_SIZE[100],
+  file_max_size_bytes: MEDIA_SIZE[100],
   voice_min_duration_seconds: 2,
   voice_max_duration_seconds: 60,
   album_selection_limit: 12
@@ -72,22 +82,22 @@ function settingToForm(
     ),
     image_max_size_bytes: pickEnum(
       setting?.image_max_size_bytes,
-      [5 * MB, 10 * MB, 20 * MB] as const,
+      [IMAGE_SIZE[5], IMAGE_SIZE[10], IMAGE_SIZE[20]] as const,
       DEFAULT_VALUES.image_max_size_bytes
     ),
     video_max_size_bytes: pickEnum(
       setting?.video_max_size_bytes,
-      [50 * MB, 100 * MB, 200 * MB] as const,
+      [MEDIA_SIZE[50], MEDIA_SIZE[100], MEDIA_SIZE[200]] as const,
       DEFAULT_VALUES.video_max_size_bytes
     ),
     audio_max_size_bytes: pickEnum(
       setting?.audio_max_size_bytes,
-      [50 * MB, 100 * MB, 200 * MB] as const,
+      [MEDIA_SIZE[50], MEDIA_SIZE[100], MEDIA_SIZE[200]] as const,
       DEFAULT_VALUES.audio_max_size_bytes
     ),
     file_max_size_bytes: pickEnum(
       setting?.file_max_size_bytes,
-      [50 * MB, 100 * MB, 200 * MB] as const,
+      [MEDIA_SIZE[50], MEDIA_SIZE[100], MEDIA_SIZE[200]] as const,
       DEFAULT_VALUES.file_max_size_bytes
     ),
     voice_min_duration_seconds: pickEnum(
@@ -294,11 +304,13 @@ export default function SessionSettingsPage() {
               label={t['sessionSettings.field.imageMax']}
             >
               <Radio.Group>
-                <Radio value={5 * MB}>{opt(t, 'sessionSettings.opt.mb', 5)}</Radio>
-                <Radio value={10 * MB}>
+                <Radio value={IMAGE_SIZE[5]}>
+                  {opt(t, 'sessionSettings.opt.mb', 5)}
+                </Radio>
+                <Radio value={IMAGE_SIZE[10]}>
                   {opt(t, 'sessionSettings.opt.mb', 10)}
                 </Radio>
-                <Radio value={20 * MB}>
+                <Radio value={IMAGE_SIZE[20]}>
                   {opt(t, 'sessionSettings.opt.mb', 20)}
                 </Radio>
               </Radio.Group>
@@ -309,13 +321,13 @@ export default function SessionSettingsPage() {
               label={t['sessionSettings.field.videoMax']}
             >
               <Radio.Group>
-                <Radio value={50 * MB}>
+                <Radio value={MEDIA_SIZE[50]}>
                   {opt(t, 'sessionSettings.opt.mb', 50)}
                 </Radio>
-                <Radio value={100 * MB}>
+                <Radio value={MEDIA_SIZE[100]}>
                   {opt(t, 'sessionSettings.opt.mb', 100)}
                 </Radio>
-                <Radio value={200 * MB}>
+                <Radio value={MEDIA_SIZE[200]}>
                   {opt(t, 'sessionSettings.opt.mb', 200)}
                 </Radio>
               </Radio.Group>
@@ -326,13 +338,13 @@ export default function SessionSettingsPage() {
               label={t['sessionSettings.field.audioMax']}
             >
               <Radio.Group>
-                <Radio value={50 * MB}>
+                <Radio value={MEDIA_SIZE[50]}>
                   {opt(t, 'sessionSettings.opt.mb', 50)}
                 </Radio>
-                <Radio value={100 * MB}>
+                <Radio value={MEDIA_SIZE[100]}>
                   {opt(t, 'sessionSettings.opt.mb', 100)}
                 </Radio>
-                <Radio value={200 * MB}>
+                <Radio value={MEDIA_SIZE[200]}>
                   {opt(t, 'sessionSettings.opt.mb', 200)}
                 </Radio>
               </Radio.Group>
@@ -343,13 +355,13 @@ export default function SessionSettingsPage() {
               label={t['sessionSettings.field.fileMax']}
             >
               <Radio.Group>
-                <Radio value={50 * MB}>
+                <Radio value={MEDIA_SIZE[50]}>
                   {opt(t, 'sessionSettings.opt.mb', 50)}
                 </Radio>
-                <Radio value={100 * MB}>
+                <Radio value={MEDIA_SIZE[100]}>
                   {opt(t, 'sessionSettings.opt.mb', 100)}
                 </Radio>
-                <Radio value={200 * MB}>
+                <Radio value={MEDIA_SIZE[200]}>
                   {opt(t, 'sessionSettings.opt.mb', 200)}
                 </Radio>
               </Radio.Group>

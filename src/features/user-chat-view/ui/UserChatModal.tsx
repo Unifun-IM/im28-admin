@@ -445,8 +445,8 @@ export default function UserChatModal({
         maxHeight: '90vh'
       }}
     >
-      <div className="flex h-full max-h-[90vh] w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
-        <aside className="flex w-16 shrink-0 flex-col items-center justify-between border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
+      <div className="flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
+        <aside className="flex h-full w-16 shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-2 py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
@@ -486,7 +486,7 @@ export default function UserChatModal({
           </div>
         </aside>
 
-        <section className="flex w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#fafafa]">
+        <section className="flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#fafafa]">
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-2">
             <Input
               allowClear
@@ -508,7 +508,7 @@ export default function UserChatModal({
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             {bookLoading ? (
-              <div className="flex h-40 items-center justify-center">
+              <div className="flex h-full min-h-40 items-center justify-center">
                 <Spin />
               </div>
             ) : nav === 'sessions' ? (
@@ -518,7 +518,7 @@ export default function UserChatModal({
                 onSelect={onSelectSession}
               />
             ) : nav === 'calls' ? (
-              <div className="px-4 py-10 text-center text-[14px] text-arco-text-3">
+              <div className="flex h-full items-center justify-center px-4 text-center text-[14px] text-arco-text-3">
                 暂无通话记录
               </div>
             ) : (
@@ -539,7 +539,7 @@ export default function UserChatModal({
           </div>
         </section>
 
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f3f3f3]">
+        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#f3f3f3]">
           {chat ? (
             <ChatPane
               peer={chat}
@@ -552,7 +552,7 @@ export default function UserChatModal({
           ) : profile ? (
             <FriendDetail peer={profile} onSendMessage={sendMessage} />
           ) : (
-            <div className="flex h-full items-center justify-center">
+            <div className="flex h-full min-h-0 items-center justify-center">
               <img src={emptyLogo} alt="" className="size-20" />
             </div>
           )}

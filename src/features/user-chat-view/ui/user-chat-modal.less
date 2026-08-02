@@ -8,11 +8,26 @@
   overflow: hidden;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   border: none;
+  /* 高度链：modal → content → body → 三栏，避免底栏大块空白 */
+  display: flex;
+  flex-direction: column;
 
   .arco-modal-content {
+    flex: 1;
+    min-height: 0;
     height: 100%;
+    display: flex;
+    flex-direction: column;
     padding: 0;
     background: transparent;
+  }
+
+  .arco-modal-body {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    padding: 0 !important;
+    overflow: hidden;
   }
 
   .arco-modal-header,
