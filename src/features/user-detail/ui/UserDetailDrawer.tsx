@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar,
   Descriptions,
   Drawer,
   Message,
@@ -14,7 +13,7 @@ import {
   postV1AdminUsersDetail,
   postV1AdminUsersOperationLogsList
 } from '@shared/api/admin/users';
-import { StatusBadge } from '@shared/ui';
+import { StatusBadge, UserAvatar } from '@shared/ui';
 import useLocale from '@shared/lib/useLocale';
 import { openimLabel } from '@shared/lib/openimLabels';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -28,15 +27,6 @@ export type UserDetailDrawerProps = {
   defaultTab?: 'basic' | 'logs';
   onClose: () => void;
 };
-
-function initials(name?: string) {
-  const text = (name || '').trim();
-  if (!text) return '?';
-  if (/^[a-zA-Z]/.test(text)) {
-    return text.slice(0, 2).toUpperCase();
-  }
-  return text.slice(0, 1);
-}
 
 function formatPhone(
   phone?: string | null,
@@ -213,13 +203,13 @@ export default function UserDetailDrawer({
       <Spin loading={loading} className="block w-full">
         <div className="flex flex-col gap-[12px]">
           <div className="flex h-[56px] items-center gap-[16px]">
-            <Avatar size={56} className="use-user-detail-avatar shrink-0">
-              {user?.avatar_url ? (
-                <img alt="" src={user.avatar_url} />
-              ) : (
-                initials(nickname === '--' ? '' : nickname)
-              )}
-            </Avatar>
+            <UserAvatar
+              size={56}
+              className="use-user-detail-avatar shrink-0"
+              userId={user?.user_id || userId}
+              name={nickname === '--' ? '' : nickname}
+              src={user?.avatar_url}
+            />
             <div className="min-w-0">
               <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
                 {nickname}

@@ -45,16 +45,45 @@ export type ChatBook = {
 export type ChatMsg = {
   id: string;
   side: 'self' | 'peer';
-  msgType: 'text' | 'voice' | 'file' | 'call' | 'date' | 'system' | 'image' | 'video';
-  /** OpenIM MessageContentType 原始值 */
+  msgType:
+    | 'text'
+    | 'voice'
+    | 'file'
+    | 'call'
+    | 'date'
+    | 'system'
+    | 'image'
+    | 'video'
+    | 'card'
+    | 'location'
+    | 'quote'
+    | 'merger';
+  /** OpenIM / Admin MessageContentType 原始值 */
   contentType?: number;
   content?: string;
+  senderId?: string;
   senderName?: string;
   senderAvatar?: string;
   time?: string;
   duration?: string;
   fileName?: string;
   fileSize?: string;
+  mediaUrl?: string;
+  thumbnailUrl?: string;
+  callStatus?: string;
+  callKind?: 'voice' | 'video';
+  quoteSender?: string;
+  quoteText?: string;
+  cardKind?: 'user' | 'group';
+  cardId?: string;
+  cardName?: string;
+  cardAvatar?: string;
+  cardDesc?: string;
+  cardMemberCount?: number;
+  locationName?: string;
+  locationAddress?: string;
+  forwardFromName?: string;
+  forwardFromAvatar?: string;
 };
 
 const LIST_PAGE_SIZE = 100;
@@ -215,9 +244,15 @@ export async function getChatMessages(params: {
       if (isHiddenMessageContentType(m.type)) return null;
 
       const sender = users.get(m.sender_id || '');
-      const parsed = parseOpenIMMessageBody(m.type, m.body || {});
-      const uiType = mapMessageContentTypeToUi(m.type);
+      const body = m.body || {};
+      const parsed = parseOpenIMMessageBody(m.type, body);
+      const uiType = mapMessageContentTypeToUi(m.type, body);
       const fallback = typeBracketLabel(m.type);
+      // 气泡内展示短时间；完整时间在 formatDateTime 里
+      const fullTime = formatDateTime(m.sent_at) || undefined;
+      const shortTime = fullTime
+        ? fullTime.replace(/^\d{4}-\d{2}-\d{2}\s*/, '').slice(0, 5) || fullTime
+        : undefined;
 
       return {
         id: m.msg_id,
@@ -226,13 +261,32 @@ export async function getChatMessages(params: {
         contentType: m.type,
         content:
           parsed.content?.trim() ||
-          (uiType === 'text' || uiType === 'system' ? fallback : ''),
+          (uiType === 'text' || uiType === 'system' || uiType === 'quote'
+            ? fallback
+            : ''),
         fileName: parsed.fileName,
         fileSize: parsed.fileSize,
         duration: parsed.duration,
+        mediaUrl: parsed.mediaUrl,
+        thumbnailUrl: parsed.thumbnailUrl,
+        callStatus: parsed.callStatus,
+        callKind: parsed.callKind,
+        quoteSender: parsed.quoteSender,
+        quoteText: parsed.quoteText,
+        cardKind: parsed.cardKind,
+        cardId: parsed.cardId,
+        cardName: parsed.cardName,
+        cardAvatar: parsed.cardAvatar,
+        cardDesc: parsed.cardDesc,
+        cardMemberCount: parsed.cardMemberCount,
+        locationName: parsed.locationName,
+        locationAddress: parsed.locationAddress,
+        forwardFromName: parsed.forwardFromName,
+        forwardFromAvatar: parsed.forwardFromAvatar,
+        senderId: m.sender_id,
         senderName: sender?.nickname,
         senderAvatar: sender?.avatar_url,
-        time: formatDateTime(m.sent_at) || undefined
+        time: shortTime
       } satisfies ChatMsg;
     })
     .filter(Boolean) as ChatMsg[];

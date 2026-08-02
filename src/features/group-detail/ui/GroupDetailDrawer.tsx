@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar,
   Button,
   Descriptions,
   Drawer,
@@ -19,7 +18,12 @@ import {
   postV1AdminGroupsOperationLogsList
 } from '@shared/api/admin/groups';
 import { postV1AdminUsersDetail } from '@shared/api/admin/users';
-import { StatusBadge } from '@shared/ui';
+import {
+  GroupRoleTag,
+  groupRoleNameStyle,
+  StatusBadge,
+  UserAvatar
+} from '@shared/ui';
 import { openimLabel } from '@shared/lib/openimLabels';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -61,13 +65,6 @@ type LogItem = {
 };
 
 type View = 'main' | 'members' | 'member';
-
-function initials(name?: string) {
-  const text = (name || '').trim();
-  if (!text) return '?';
-  if (/^[a-zA-Z]/.test(text)) return text.slice(0, 2).toUpperCase();
-  return text.slice(0, 1);
-}
 
 function formatPhone(phone?: string | null, areaCode?: string | null) {
   const raw = String(phone || '').trim();
@@ -712,19 +709,25 @@ export default function GroupDetailDrawer({
                   onClick={() => openMember(m)}
                 >
                   <div className="flex items-center gap-[16px]">
-                    <Avatar
+                    <UserAvatar
                       size={40}
                       className="use-user-detail-avatar shrink-0 !text-[14px]"
-                    >
-                      {m.avatar ? (
-                        <img alt="" src={m.avatar} />
-                      ) : (
-                        initials(m.nickname)
-                      )}
-                    </Avatar>
+                      userId={m.userId}
+                      name={m.nickname}
+                      src={m.avatar}
+                    />
                     <div>
-                      <div className="text-[14px] font-medium leading-[21px] text-arco-text-2">
-                        {m.nickname || '-'}
+                      <div className="flex items-center gap-1">
+                        <span
+                          className="text-[14px] font-medium leading-[21px] text-arco-text-2"
+                          style={groupRoleNameStyle(m.userId, m.roleLevel)}
+                        >
+                          {m.nickname || '-'}
+                        </span>
+                        <GroupRoleTag
+                          userId={m.userId}
+                          roleLevel={m.roleLevel}
+                        />
                       </div>
                       <div className="text-[12px] leading-[20px] text-arco-text-3">
                         ID：{m.userId || '-'}
@@ -746,25 +749,38 @@ export default function GroupDetailDrawer({
         {view === 'member' && activeMember && (
           <div className="flex flex-col gap-[12px]">
             <div className="flex h-[56px] items-center gap-[16px]">
-              <Avatar size={56} className="use-user-detail-avatar shrink-0">
-                {memberProfile?.avatar_url || activeMember.avatar ? (
-                  <img
-                    alt=""
-                    src={
-                      memberProfile?.avatar_url || activeMember.avatar || ''
-                    }
-                  />
-                ) : (
-                  initials(
-                    memberProfile?.nickname || activeMember.nickname
-                  )
-                )}
-              </Avatar>
+              <UserAvatar
+                size={56}
+                className="use-user-detail-avatar shrink-0"
+                userId={
+                  memberProfile?.user_id || activeMember.userId
+                }
+                name={
+                  memberProfile?.nickname || activeMember.nickname
+                }
+                src={
+                  memberProfile?.avatar_url || activeMember.avatar
+                }
+              />
               <div className="min-w-0">
-                <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
-                  {memberProfile?.nickname ||
-                    activeMember.nickname ||
-                    '-'}
+                <div className="flex min-w-0 items-center gap-1">
+                  <span
+                    className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]"
+                    style={groupRoleNameStyle(
+                      memberProfile?.user_id || activeMember.userId,
+                      activeMember.roleLevel
+                    )}
+                  >
+                    {memberProfile?.nickname ||
+                      activeMember.nickname ||
+                      '-'}
+                  </span>
+                  <GroupRoleTag
+                    userId={
+                      memberProfile?.user_id || activeMember.userId
+                    }
+                    roleLevel={activeMember.roleLevel}
+                  />
                 </div>
                 <div className="mt-[2px]">
                   <StatusBadge

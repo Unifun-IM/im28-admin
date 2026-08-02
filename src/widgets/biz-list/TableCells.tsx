@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Dropdown, Menu, Message, Tooltip } from '@arco-design/web-react';
+import { Dropdown, Menu, Message, Tooltip } from '@arco-design/web-react';
 import {
   IconCopy,
   IconDelete,
@@ -11,6 +11,7 @@ import {
 import cs from 'classnames';
 import copy from 'copy-to-clipboard';
 import useLocale from '@shared/lib/useLocale';
+import { UserAvatar } from '@shared/ui';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
@@ -44,6 +45,8 @@ export type AvatarNameCellProps = {
   name: React.ReactNode;
   sub?: React.ReactNode;
   avatar?: string;
+  /** 用户 ID，无头像时用于稳定配色哈希 */
+  userId?: string;
   size?: number;
   /** 不展示头像（邀请人列等） */
   hideAvatar?: boolean;
@@ -59,6 +62,7 @@ export function AvatarNameCell({
   name,
   sub,
   avatar,
+  userId,
   size = 24,
   hideAvatar,
   copyText,
@@ -66,12 +70,20 @@ export function AvatarNameCell({
   onNameClick
 }: AvatarNameCellProps) {
   const t = useLocale();
+  const displayName =
+    typeof name === 'string' || typeof name === 'number'
+      ? String(name)
+      : undefined;
   return (
     <div className="flex min-w-0 items-center gap-[8px]">
       {!hideAvatar && (
-        <Avatar size={size} className="shrink-0">
-          {avatar ? <img alt="" src={avatar} /> : String(name || '?').slice(0, 1)}
-        </Avatar>
+        <UserAvatar
+          size={size}
+          className="shrink-0"
+          userId={userId || copyText}
+          name={displayName}
+          src={avatar}
+        />
       )}
       <div className="min-w-0 flex-1">
         <div

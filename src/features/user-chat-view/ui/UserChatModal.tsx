@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  Avatar,
   Button,
   Input,
   List,
@@ -10,11 +9,11 @@ import {
   Spin,
   Typography
 } from '@arco-design/web-react';
+import { UserAvatar } from '@shared/ui';
 import type { ListHandle } from '@arco-design/web-react/es/List/interface';
 import {
   IconCopy,
   IconDown,
-  IconFile,
   IconMute,
   IconPlus,
   IconRight,
@@ -203,17 +202,45 @@ type ChatBook = {
 type ChatMsg = {
   id: string;
   side: 'self' | 'peer';
-  msgType: 'text' | 'voice' | 'file' | 'call' | 'date' | 'system' | 'image' | 'video';
-  /** OpenIM MessageContentType */
+  msgType:
+    | 'text'
+    | 'voice'
+    | 'file'
+    | 'call'
+    | 'date'
+    | 'system'
+    | 'image'
+    | 'video'
+    | 'card'
+    | 'location'
+    | 'quote'
+    | 'merger';
+  /** OpenIM / Admin MessageContentType */
   contentType?: number;
   content?: string;
+  senderId?: string;
   senderName?: string;
   senderAvatar?: string;
   time?: string;
   duration?: string;
   fileName?: string;
   fileSize?: string;
+  mediaUrl?: string;
+  thumbnailUrl?: string;
   callStatus?: string;
+  callKind?: 'voice' | 'video';
+  quoteSender?: string;
+  quoteText?: string;
+  cardKind?: 'user' | 'group';
+  cardId?: string;
+  cardName?: string;
+  cardAvatar?: string;
+  cardDesc?: string;
+  cardMemberCount?: number;
+  locationName?: string;
+  locationAddress?: string;
+  forwardFromName?: string;
+  forwardFromAvatar?: string;
   dateLabel?: string;
 };
 
@@ -525,13 +552,13 @@ export default function UserChatModal({
               <img src={iconClose} alt="" className="size-5" />
             </button>
             <div className="flex flex-col items-center gap-4">
-              <Avatar size={40} className="shrink-0">
-                {userAvatar ? (
-                  <img alt="" src={userAvatar} />
-                ) : (
-                  (userNickname || 'U').slice(0, 1)
-                )}
-              </Avatar>
+              <UserAvatar
+                size={40}
+                className="shrink-0"
+                userId={userId}
+                name={userNickname}
+                src={userAvatar}
+              />
               {/* 群组会话入口仅关闭+头像（977:23441）；用户入口保留会话/通讯录/通话 */}
               {!isGroupScene ? (
                 <>
@@ -709,17 +736,21 @@ function GroupAvatar({
 }
 
 function OnlineAvatar({
+  id,
   name,
+  src,
   size,
   online
 }: {
+  id?: string;
   name: string;
+  src?: string;
   size: number;
   online?: boolean;
 }) {
   return (
     <span className="relative shrink-0">
-      <Avatar size={size}>{name.slice(0, 1)}</Avatar>
+      <UserAvatar userId={id} name={name} src={src} size={size} />
       {online ? (
         <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-solid border-white bg-[rgb(var(--success-6))]" />
       ) : null}
@@ -762,7 +793,13 @@ function SessionList({
               {item.kind === 'group' ? (
                 <GroupAvatar avatars={item.avatars} name={item.name} size={40} />
               ) : (
-                <OnlineAvatar name={item.name} size={40} online={item.online} />
+                <OnlineAvatar
+                  id={item.id}
+                  name={item.name}
+                  src={item.avatar}
+                  size={40}
+                  online={item.online}
+                />
               )}
               <div className="flex min-w-0 flex-1 items-center border-b border-solid border-[rgba(120,120,128,0.12)] py-4 pr-4">
                 <div className="min-w-0 flex-1">
@@ -965,7 +1002,13 @@ function ContactRow({
       }`}
       onClick={() => onSelect(peer)}
     >
-      <OnlineAvatar name={peer.name} size={32} online={peer.online} />
+      <OnlineAvatar
+        id={peer.id}
+        name={peer.name}
+        src={peer.avatar}
+        size={32}
+        online={peer.online}
+      />
       <div className="flex min-h-14 min-w-0 flex-1 items-center border-b border-solid border-[rgba(120,120,128,0.12)] pr-4">
         <span className="truncate text-[16px] text-arco-text-1">{peer.name}</span>
       </div>
@@ -984,7 +1027,12 @@ function FriendDetail({
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[#f3f3f3]">
       <div className="flex flex-col items-center gap-4 px-4 pb-4 pt-6">
-        <Avatar size={80}>{peer.name.slice(0, 1)}</Avatar>
+        <UserAvatar
+          size={80}
+          userId={peer.id}
+          name={peer.name}
+          src={peer.avatar}
+        />
         <div className="flex flex-col items-center gap-2">
           <p className="m-0 text-center text-[18px] font-medium leading-[1.5] text-arco-text-1">
             {peer.name}
@@ -1166,7 +1214,12 @@ function ChatPane({
         {isGroup ? (
           <GroupAvatar avatars={peer.avatars} name={peer.name} size={32} />
         ) : (
-          <Avatar size={32}>{peer.name.slice(0, 1)}</Avatar>
+          <UserAvatar
+            size={32}
+            userId={peer.id}
+            name={peer.name}
+            src={peer.avatar}
+          />
         )}
         <div className="min-w-0 flex-1">
           <div className="truncate text-[16px] font-medium leading-[18px] text-arco-text-1">
@@ -1290,17 +1343,13 @@ function MessageRow({
       }`}
     >
       {showPeerAvatar ? (
-        <Avatar size={24} className="shrink-0 overflow-hidden">
-          {msg.senderAvatar ? (
-            <img
-              src={msg.senderAvatar}
-              alt=""
-              className="size-full object-cover"
-            />
-          ) : (
-            (msg.senderName || '?').slice(0, 1)
-          )}
-        </Avatar>
+        <UserAvatar
+          size={24}
+          className="shrink-0"
+          userId={msg.senderId}
+          name={msg.senderName}
+          src={msg.senderAvatar}
+        />
       ) : null}
       <Bubble msg={msg} isSelf={isSelf} senderName={senderName} />
     </div>
@@ -1310,10 +1359,68 @@ function MessageRow({
 function BubbleSenderName({ name }: { name?: string }) {
   if (!name) return null;
   return (
-    <p className="m-0 text-[10px] leading-none text-[rgba(0,0,0,0.6)]">
+    <p className="m-0 text-[10px] font-medium leading-[1.5] text-[rgba(0,0,0,0.6)]">
       {name}
     </p>
   );
+}
+
+/** 转发头 — Figma 1092:34877 */
+function ForwardHeader({
+  name,
+  avatar,
+  isSelf
+}: {
+  name?: string;
+  avatar?: string;
+  isSelf: boolean;
+}) {
+  if (!name) return null;
+  return (
+    <div
+      className={`mb-1 flex items-center gap-1 text-[10px] leading-none ${
+        isSelf ? 'text-white' : 'text-[rgba(0,0,0,0.6)]'
+      }`}
+    >
+      <span>转发自</span>
+      <UserAvatar size={12} className="shrink-0" name={name} src={avatar} />
+      <span className="truncate">{name}</span>
+    </div>
+  );
+}
+
+/** 链接高亮：己方浅蓝 #b5c7ff（Figma 1092:35131） */
+function BubbleText({ text, isSelf }: { text?: string; isSelf: boolean }) {
+  const raw = text || '';
+  const parts = raw.split(/(https?:\/\/[^\s]+|www\.[^\s]+)/gi);
+  return (
+    <span className="whitespace-pre-wrap break-words">
+      {parts.map((part, i) =>
+        /^(https?:\/\/|www\.)/i.test(part) ? (
+          <span
+            key={i}
+            className={isSelf ? 'text-[#b5c7ff]' : 'text-[rgb(var(--link-6))]'}
+          >
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </span>
+  );
+}
+
+function fileExtBadge(name?: string): { label: string; color: string } {
+  const ext = (name || '').split('.').pop()?.toLowerCase() || '';
+  if (['doc', 'docx'].includes(ext)) return { label: 'DOC', color: '#0072a2' };
+  if (['xls', 'xlsx', 'csv'].includes(ext))
+    return { label: 'XLS', color: '#1d6f42' };
+  if (ext === 'pdf') return { label: 'PDF', color: '#c62828' };
+  if (['ppt', 'pptx'].includes(ext)) return { label: 'PPT', color: '#d24726' };
+  if (['zip', 'rar', '7z'].includes(ext))
+    return { label: 'ZIP', color: '#6a1b9a' };
+  return { label: (ext || 'FILE').slice(0, 4).toUpperCase(), color: '#546e7a' };
 }
 
 function Bubble({
@@ -1330,16 +1437,43 @@ function Bubble({
   const shell = bubbleShell(isSelf, withName);
   const rejected = Boolean(msg.callStatus?.includes('拒绝'));
   const isVideo =
-    msg.content?.includes('视频') || msg.callStatus?.includes('视频');
+    msg.callKind === 'video' ||
+    msg.content?.includes('视频') ||
+    msg.callStatus?.includes('视频');
+
+  const wrap = (inner: React.ReactNode, opts?: { stretch?: boolean }) => (
+    <div
+      className={`${bubbleShell(isSelf, true)} ${
+        opts?.stretch ? 'min-w-[100px] items-stretch' : ''
+      } relative w-fit max-w-full`}
+    >
+      <BubbleSenderName name={senderName} />
+      <ForwardHeader
+        name={msg.forwardFromName}
+        avatar={msg.forwardFromAvatar}
+        isSelf={isSelf}
+      />
+      {inner}
+      <BubbleTail isSelf={isSelf} />
+    </div>
+  );
 
   if (msg.msgType === 'image') {
     return (
-      <div className="relative flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[#eee] text-center text-[12px] leading-[1.4] text-arco-text-3">
-        图片
-        <br />
-        最大宽 180px
-        <span className="absolute bottom-2 right-2">
-          <BubbleMeta time={msg.time} isSelf={isSelf} />
+      <div className="relative max-w-[180px] overflow-hidden rounded-xl bg-[#eee]">
+        {msg.mediaUrl || msg.thumbnailUrl ? (
+          <img
+            src={msg.thumbnailUrl || msg.mediaUrl}
+            alt=""
+            className="block max-h-[240px] w-full object-cover"
+          />
+        ) : (
+          <div className="flex size-[180px] items-center justify-center text-center text-[12px] text-arco-text-3">
+            图片
+          </div>
+        )}
+        <span className="absolute bottom-2 right-2 rounded bg-black/35 px-1">
+          <BubbleMeta time={msg.time} isSelf />
         </span>
       </div>
     );
@@ -1347,50 +1481,60 @@ function Bubble({
 
   if (msg.msgType === 'video') {
     return (
-      <div className="relative flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[rgba(0,0,0,0.45)] text-center text-[12px] leading-[1.4] text-white">
-        <img src={iconChatPlay} alt="" className="absolute size-10" />
-        <span className="mt-16">视频</span>
+      <div className="relative flex size-[180px] items-center justify-center overflow-hidden rounded-xl bg-[rgba(0,0,0,0.45)] text-white">
+        {msg.thumbnailUrl ? (
+          <img
+            src={msg.thumbnailUrl}
+            alt=""
+            className="absolute inset-0 size-full object-cover opacity-80"
+          />
+        ) : null}
+        <img src={iconChatPlay} alt="" className="relative z-[1] size-10" />
         <span className="absolute bottom-2 right-2">
-          <BubbleMeta time={msg.time} isSelf={isSelf} />
+          <BubbleMeta time={msg.time} isSelf />
         </span>
       </div>
     );
   }
 
   if (msg.msgType === 'voice') {
-    return (
-      <div className={shell}>
-        <BubbleSenderName name={senderName} />
-        <div className="inline-flex items-end gap-2">
-          <span className="inline-flex items-center gap-2">
-            <img
-              src={isSelf ? iconChatVoiceSelf : iconChatVoicePeer}
-              alt=""
-              className="h-4 w-auto"
-            />
-            <span>{msg.duration || msg.content || "1\""}</span>
-          </span>
-          <BubbleMeta time={msg.time} isSelf={isSelf} />
-        </div>
-        <BubbleTail isSelf={isSelf} />
+    return wrap(
+      <div className="inline-flex items-end gap-2">
+        <span className="inline-flex items-center gap-2">
+          {isSelf ? (
+            <>
+              <span>{msg.duration || msg.content || '1"'}</span>
+              <img src={iconChatVoiceSelf} alt="" className="h-4 w-auto" />
+            </>
+          ) : (
+            <>
+              <img src={iconChatVoicePeer} alt="" className="h-4 w-auto" />
+              <span>{msg.duration || msg.content || '1"'}</span>
+            </>
+          )}
+        </span>
+        <BubbleMeta time={msg.time} isSelf={isSelf} />
       </div>
     );
   }
 
   if (msg.msgType === 'file') {
-    return (
-      <div
-        className={`${bubbleShell(isSelf, true)} min-w-[100px] items-stretch`}
-      >
-        <BubbleSenderName name={senderName} />
-        <div className="flex items-center gap-2">
-          <IconFile className="text-[20px]" />
+    const badge = fileExtBadge(msg.fileName || msg.content);
+    return wrap(
+      <>
+        <div className="flex items-center gap-1">
+          <span
+            className="inline-flex size-6 shrink-0 items-center justify-center rounded-[3px] text-[8px] font-semibold text-white"
+            style={{ background: badge.color }}
+          >
+            {badge.label}
+          </span>
           <div className="min-w-0 flex-1">
             <div className="truncate text-[14px] leading-[1.3]">
               {msg.fileName || msg.content}
             </div>
             <div
-              className={`text-[12px] ${
+              className={`text-[12px] leading-[1.3] ${
                 isSelf ? 'text-white/40' : 'text-[rgba(0,0,0,0.4)]'
               }`}
             >
@@ -1401,15 +1545,15 @@ function Bubble({
         <div className={`flex ${isSelf ? 'justify-end' : 'justify-start'}`}>
           <BubbleMeta time={msg.time} isSelf={isSelf} />
         </div>
-        <BubbleTail isSelf={isSelf} />
-      </div>
+      </>,
+      { stretch: true }
     );
   }
 
   if (msg.msgType === 'call') {
     const label = rejected
       ? msg.callStatus || '已拒绝'
-      : msg.content || '通话';
+      : msg.duration || msg.content || '通话';
     let iconSrc = isSelf ? iconChatPhoneSelf : iconChatPhonePeer;
     if (rejected) {
       iconSrc = isVideo
@@ -1422,22 +1566,158 @@ function Bubble({
     } else if (isVideo) {
       iconSrc = isSelf ? iconChatVideoSelf : iconChatVideoPeer;
     }
-    return (
-      <div className={shell}>
-        <BubbleSenderName name={senderName} />
-        <div className="inline-flex items-end gap-2">
-          <span className="inline-flex items-center gap-2">
-            <span>{label}</span>
-            <img src={iconSrc} alt="" className="size-4" />
-          </span>
-          <BubbleMeta time={msg.time} isSelf={isSelf} />
-        </div>
-        <BubbleTail isSelf={isSelf} />
+    return wrap(
+      <div className="inline-flex items-end gap-2">
+        <span className="inline-flex items-center gap-2">
+          {isSelf ? (
+            <>
+              <span>{label}</span>
+              <img src={iconSrc} alt="" className="size-4" />
+            </>
+          ) : (
+            <>
+              <img src={iconSrc} alt="" className="size-4" />
+              <span>{label}</span>
+            </>
+          )}
+        </span>
+        <BubbleMeta time={msg.time} isSelf={isSelf} />
       </div>
     );
   }
 
-  /* 短文：文案与时间并排；长文：时间贴右下角（Figma 977:24119 / 977:24120） */
+  if (msg.msgType === 'location') {
+    return wrap(
+      <>
+        <div className="w-[200px] overflow-hidden rounded-lg bg-[rgba(0,0,0,0.06)]">
+          <div className="flex h-[88px] items-center justify-center bg-gradient-to-b from-[#dfe9f5] to-[#c5d4e8] text-[12px] text-arco-text-3">
+            地图
+          </div>
+          <div className="border-t border-solid border-[rgba(120,120,128,0.12)] px-2 py-1.5">
+            <div className="truncate text-[14px] leading-[1.3] text-arco-text-1">
+              {msg.locationName || msg.content || '位置'}
+            </div>
+            {msg.locationAddress ? (
+              <div className="truncate text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+                {msg.locationAddress}
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <BubbleMeta time={msg.time} isSelf={isSelf} />
+      </>
+    );
+  }
+
+  if (msg.msgType === 'card') {
+    const isGroup = msg.cardKind === 'group';
+    const action = isSelf ? '去聊天' : isGroup ? '加入群' : '发消息';
+    return wrap(
+      <>
+        <div className="w-[232px] overflow-hidden rounded-lg bg-[rgba(0,0,0,0.06)]">
+          <div className="flex flex-col gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] px-2 py-2">
+            <div className="flex items-start gap-2">
+              {isGroup ? (
+                <GroupAvatar
+                  name={msg.cardName || msg.content || '群'}
+                  size={32}
+                />
+              ) : (
+                <UserAvatar
+                  size={32}
+                  userId={msg.cardId}
+                  name={msg.cardName}
+                  src={msg.cardAvatar}
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[14px] leading-none text-arco-text-1">
+                  {msg.cardName || msg.content || '--'}
+                </div>
+                <div className="mt-1 truncate text-[12px] leading-none text-[rgba(0,0,0,0.4)]">
+                  ID：{msg.cardId || '--'}
+                </div>
+              </div>
+            </div>
+            {msg.cardDesc ? (
+              <p className="m-0 line-clamp-3 text-[12px] leading-[1.5] text-[rgba(0,0,0,0.6)]">
+                {msg.cardDesc}
+              </p>
+            ) : null}
+          </div>
+          <div className="py-2 text-center text-[12px] leading-none text-arco-text-1">
+            {action}
+          </div>
+        </div>
+        <BubbleMeta time={msg.time} isSelf={isSelf} />
+      </>
+    );
+  }
+
+  if (msg.msgType === 'quote') {
+    return wrap(
+      <>
+        <div
+          className={`mb-0.5 w-full rounded border-l-2 px-1 text-[12px] leading-[1.5] ${
+            isSelf
+              ? 'border-[#b5c7ff] bg-white/20'
+              : 'border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.06)]'
+          }`}
+        >
+          {msg.quoteSender ? (
+            <div
+              className={`truncate ${
+                isSelf ? 'text-[#b5c7ff]' : 'text-[rgba(0,0,0,0.4)]'
+              }`}
+            >
+              {msg.quoteSender}
+            </div>
+          ) : null}
+          <div
+            className={`truncate ${
+              isSelf ? 'text-white' : 'text-[rgba(0,0,0,0.6)]'
+            }`}
+          >
+            {msg.quoteText || '引用消息'}
+          </div>
+        </div>
+        <div className="flex items-end justify-between gap-2">
+          <p className="m-0 min-w-0">
+            <BubbleText text={msg.content} isSelf={isSelf} />
+          </p>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </div>
+      </>,
+      { stretch: true }
+    );
+  }
+
+  if (msg.msgType === 'merger') {
+    return wrap(
+      <>
+        <div className="min-w-[160px]">
+          <div className="text-[14px] font-medium leading-[1.3]">
+            {msg.content || '合并消息'}
+          </div>
+          {msg.quoteText ? (
+            <pre
+              className={`m-0 mt-1 whitespace-pre-wrap text-[12px] leading-[1.4] ${
+                isSelf ? 'text-white/70' : 'text-[rgba(0,0,0,0.4)]'
+              }`}
+            >
+              {msg.quoteText}
+            </pre>
+          ) : null}
+        </div>
+        <div className={`flex ${isSelf ? 'justify-end' : 'justify-start'}`}>
+          <BubbleMeta time={msg.time} isSelf={isSelf} />
+        </div>
+      </>,
+      { stretch: true }
+    );
+  }
+
+  /* 短文：文案与时间并排；长文：时间贴右下角（Figma 977:24119 / 1092:33280） */
   const longText = (msg.content || '').length > 40;
   if (longText) {
     return (
@@ -1447,8 +1727,13 @@ function Bubble({
         } relative w-fit max-w-full`}
       >
         <BubbleSenderName name={senderName} />
-        <p className="m-0 whitespace-pre-wrap break-words pr-[52px] pb-0">
-          {msg.content}
+        <ForwardHeader
+          name={msg.forwardFromName}
+          avatar={msg.forwardFromAvatar}
+          isSelf={isSelf}
+        />
+        <p className="m-0 pr-[52px] pb-0">
+          <BubbleText text={msg.content} isSelf={isSelf} />
         </p>
         <span className="absolute bottom-2 right-2">
           <BubbleMeta time={msg.time} isSelf={isSelf} />
@@ -1461,17 +1746,22 @@ function Bubble({
   return (
     <div className={shell}>
       <BubbleSenderName name={senderName} />
-      {withName ? (
+      <ForwardHeader
+        name={msg.forwardFromName}
+        avatar={msg.forwardFromAvatar}
+        isSelf={isSelf}
+      />
+      {withName || msg.forwardFromName ? (
         <div className="inline-flex max-w-full items-end gap-2">
-          <p className="m-0 min-w-0 whitespace-pre-wrap break-words">
-            {msg.content}
+          <p className="m-0 min-w-0">
+            <BubbleText text={msg.content} isSelf={isSelf} />
           </p>
           <BubbleMeta time={msg.time} isSelf={isSelf} />
         </div>
       ) : (
         <>
-          <p className="m-0 min-w-0 whitespace-pre-wrap break-words">
-            {msg.content}
+          <p className="m-0 min-w-0">
+            <BubbleText text={msg.content} isSelf={isSelf} />
           </p>
           <BubbleMeta time={msg.time} isSelf={isSelf} />
         </>
