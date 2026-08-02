@@ -18,6 +18,7 @@ describe('PageLayout', () => {
         >
           <PageLayout
             Exception403={() => null}
+            Exception404={() => null}
             getFlattenRoutes={() => []}
           />
         </GlobalContext.Provider>

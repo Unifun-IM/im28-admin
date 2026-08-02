@@ -3,7 +3,11 @@ import { useState } from 'react';
 import { UserCenterModal } from '@features/user-center';
 import { PageLayout } from '@widgets/admin-shell';
 
-import { Exception403, getFlattenRoutes } from './get-flatten-routes';
+import {
+  Exception403,
+  Exception404,
+  getFlattenRoutes
+} from './get-flatten-routes';
 
 /** app 组合层：注入页面路由发现，并挂载用户中心 Modal */
 export function AdminLayout() {
@@ -13,6 +17,7 @@ export function AdminLayout() {
     <>
       <PageLayout
         Exception403={Exception403}
+        Exception404={Exception404}
         getFlattenRoutes={getFlattenRoutes}
         onOpenUserCenter={() => setUserCenterVisible(true)}
       />

@@ -2,20 +2,16 @@ import type { IRoute } from '@shared/config/routes';
 import { isArray } from '@shared/lib/is';
 import lazyload from '@shared/lib/lazyload';
 
-/** 页面模块发现（仅允许在 app 层引用 @pages） */
+/** 页面模块发现（仅允许在 app 层引用 @pages；按 route.key 映射 pages/{key}/index.tsx） */
 const pageModules = import.meta.glob([
-  '../../pages/dashboard/index.tsx',
-  '../../pages/user/**/index.tsx',
-  '../../pages/group/**/index.tsx',
-  '../../pages/system/**/index.tsx',
-  '../../pages/system-params/**/index.tsx',
-  '../../pages/trade/**/index.tsx',
-  '../../pages/session/**/index.tsx',
-  '../../pages/risk/**/index.tsx',
-  '../../pages/exception/**/index.tsx'
+  '../../pages/**/index.tsx',
+  '!../../pages/login/**'
 ]);
 
+/** 无权限（对接权限后按需渲染） */
 export const Exception403 = lazyload(() => import('@pages/exception/403'));
+/** 路由未匹配 */
+export const Exception404 = lazyload(() => import('@pages/exception/404'));
 
 /** 将路由树扁平化为带懒加载组件的叶子路由 */
 export function getFlattenRoutes(routeList: IRoute[]) {

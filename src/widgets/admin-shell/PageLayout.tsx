@@ -45,8 +45,13 @@ const COLLAPSED_WIDTH = 56;
 export type PageLayoutProps = {
   /** 由 app 注入：页面模块发现与懒加载 */
   getFlattenRoutes: (routeList: IRoute[]) => IRoute[];
-  /** 由 app 注入：403 页面（避免 widgets → pages） */
+  /**
+   * 由 app 注入：403（无权限，对接权限后使用）
+   * 当前未挂路由，预留注入以免 widgets → pages
+   */
   Exception403: React.ComponentType;
+  /** 由 app 注入：404（路由未匹配） */
+  Exception404: React.ComponentType;
   /** 打开用户中心（由 app 挂载 Modal） */
   onOpenUserCenter?: () => void;
 };
@@ -75,8 +80,11 @@ function getIconFromKey(key: string) {
 export const PageLayout = observer(function PageLayout({
   getFlattenRoutes,
   Exception403,
+  Exception404,
   onOpenUserCenter
 }: PageLayoutProps) {
+  // 对接权限后：无权限叶子路由渲染 <Exception403 />
+  void Exception403;
   const urlParams = getUrlParams();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -433,7 +441,7 @@ export const PageLayout = observer(function PageLayout({
                     element={<Navigate replace to={`/${defaultRoute}`} />}
                     path="/"
                   />
-                  <Route element={<Exception403 />} path="*" />
+                  <Route element={<Exception404 />} path="*" />
                 </Routes>
               </Content>
             </div>
