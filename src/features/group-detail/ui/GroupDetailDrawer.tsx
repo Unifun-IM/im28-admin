@@ -25,6 +25,7 @@ import {
   UserAvatar
 } from '@shared/ui';
 import { openimLabel } from '@shared/lib/openimLabels';
+import { getAvatarLetter } from '@shared/lib/userAvatar';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 import '@features/user-detail/ui/user-detail-drawer.less';
@@ -173,9 +174,12 @@ function GroupAvatar({
 }) {
   if (!members.length && avatarUrl) {
     return (
-      <Avatar size={56} className="use-user-detail-avatar shrink-0">
-        <img alt="" src={avatarUrl} />
-      </Avatar>
+      <UserAvatar
+        size={56}
+        className="use-user-detail-avatar shrink-0"
+        name={name}
+        src={avatarUrl}
+      />
     );
   }
   const cells = Array.from({ length: 9 }, (_, i) => members[i]);
@@ -189,7 +193,7 @@ function GroupAvatar({
           {m?.avatar ? (
             <img alt="" src={m.avatar} className="size-full object-cover" />
           ) : (
-            initials(m?.nickname || name)
+            getAvatarLetter(m?.nickname || name)
           )}
         </div>
       ))}
