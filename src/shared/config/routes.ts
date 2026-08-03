@@ -108,7 +108,7 @@ export const routes: IRoute[] = [
   }
 ];
 
-export const DEFAULT_ROUTE = 'user/query';
+export const DEFAULT_ROUTE = 'dashboard';
 
 export const getName = (path: string, routeList: IRoute[] = routes): string | undefined => {
   for (const item of routeList) {
