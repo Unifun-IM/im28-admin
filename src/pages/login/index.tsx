@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import checkLogin from '@shared/lib/checkLogin';
 import loginBannerBg from './assets/login-banner-bg.svg';
 import loginLogo from './assets/login-logo.svg';
 import LoginForm from './form';
@@ -12,6 +14,11 @@ function Login() {
   useEffect(() => {
     document.body.setAttribute('arco-theme', 'light');
   }, []);
+
+  // 已登录访问 /login → 回首页
+  if (checkLogin()) {
+    return <Navigate replace to="/dashboard" />;
+  }
 
   return (
     <div className="use-login-page flex h-screen bg-[var(--color-bg-1,#f7f8fa)]">

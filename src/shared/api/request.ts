@@ -75,8 +75,25 @@ let onUnauthorized: (() => void) | undefined;
 /** 并发 401 共用同一次 refresh */
 let refreshPromise: Promise<string | null> | null = null;
 
+/** 鉴权失效只提示 / 跳转一次，避免并发请求叠多个「未登录」 */
+let unauthorizedHandled = false;
+
 export function setUnauthorizedHandler(fn: () => void) {
   onUnauthorized = fn;
+}
+
+/** 是否视为未登录 / token 失效（业务码、HTTP 状态或文案） */
+function isAuthFailure(
+  bizCode?: number,
+  status?: number,
+  message?: string
+): boolean {
+  if (bizCode === 401 || status === 401) return true;
+  const m = String(message || '').trim();
+  if (!m) return false;
+  return /未登录|登录失效|登录已失效|未认证|token\s*(expired|invalid)|unauthorized|unauthenticated/i.test(
+    m
+  );
 }
 
 export function setAccessToken(token: string | null) {
@@ -124,6 +141,8 @@ export function setAuthTokens(
     clearAuthSession();
     return;
   }
+  // 新登录态允许下次失效时再提示一次
+  unauthorizedHandled = false;
   if (token.access_token) {
     setAccessToken(token.access_token);
   }
@@ -217,10 +236,15 @@ function failUnauthorized(
   error: RequestFailedError,
   silent: boolean
 ): Promise<never> {
-  if (!silent) {
-    Message.error('登录已失效，请重新登录');
+  if (!unauthorizedHandled) {
+    unauthorizedHandled = true;
+    if (!silent) {
+      // 清掉已叠出来的同类提示，只留一条
+      Message.clear?.();
+      Message.error(error.message || '未登录');
+    }
+    onUnauthorized?.();
   }
-  onUnauthorized?.();
   return Promise.reject(error);
 }
 
@@ -229,6 +253,11 @@ async function retryAfterRefresh(
   error: RequestFailedError
 ): Promise<unknown> {
   const silent = config.skipErrorHandler === true;
+
+  // 已判定失效并处理过：后续并发请求直接失败，不再重复 refresh / 弹窗
+  if (unauthorizedHandled) {
+    return Promise.reject(error);
+  }
 
   if (shouldSkipAuthRefresh(config)) {
     return failUnauthorized(error, silent);
@@ -297,7 +326,7 @@ instance.interceptors.response.use(
         original: data
       };
 
-      if (bizCode === 401) {
+      if (isAuthFailure(bizCode, undefined, msg)) {
         return retryAfterRefresh(cfg, failed);
       }
 
@@ -320,7 +349,7 @@ instance.interceptors.response.use(
       original: error
     };
 
-    if (status === 401) {
+    if (isAuthFailure(undefined, status, message)) {
       return retryAfterRefresh(cfg, failed);
     }
 

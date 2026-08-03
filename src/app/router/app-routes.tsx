@@ -18,7 +18,7 @@ export function appRoutes(): RouteObject[] {
     },
     {
       path: '/',
-      element: <Navigate replace to="/user/query" />
+      element: <Navigate replace to="/dashboard" />
     }
   ];
 }

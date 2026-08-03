@@ -64,7 +64,7 @@ export default function LoginForm() {
     setAuthTokens(token);
     Message.success(t['login.msg.loginSuccess']);
     window.setTimeout(() => {
-      window.location.href = '/user/query';
+      window.location.href = '/dashboard';
     }, 400);
   }
 

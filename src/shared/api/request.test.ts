@@ -1,4 +1,5 @@
 import { AxiosHeaders, type AxiosAdapter } from 'axios';
+import { vi } from 'vitest';
 
 import request, {
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
@@ -134,5 +135,41 @@ describe('request', () => {
     clearAuthSession();
     expect(localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBeNull();
     expect(localStorage.getItem(AUTH_REFRESH_TOKEN_STORAGE_KEY)).toBeNull();
+  });
+
+  it('shows unauthorized toast only once for concurrent auth failures', async () => {
+    const { Message } = await import('@arco-design/web-react');
+    const errorSpy = vi.spyOn(Message, 'error').mockImplementation(() => {});
+    const clearSpy = vi
+      .spyOn(Message, 'clear')
+      .mockImplementation(() => {});
+
+    setAccessToken('expired');
+    // 无 refresh_token → refresh 直接失败
+
+    const previous = request.defaults.adapter;
+    request.defaults.baseURL = '/';
+    request.defaults.adapter = async (config) => ({
+      config,
+      data: { code: 100003, message: '未登录' },
+      headers: {},
+      status: 200,
+      statusText: 'OK'
+    });
+
+    try {
+      const results = await Promise.allSettled([
+        request.post('/v1/admin/users/list', {}),
+        request.post('/v1/admin/groups/list', {}),
+        request.post('/v1/admin/platform/settings/get', {})
+      ]);
+      expect(results.every((r) => r.status === 'rejected')).toBe(true);
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith('未登录');
+    } finally {
+      request.defaults.adapter = previous;
+      errorSpy.mockRestore();
+      clearSpy.mockRestore();
+    }
   });
 });
