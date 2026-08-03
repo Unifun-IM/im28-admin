@@ -3,7 +3,7 @@
 .use-biz-summary,
 .use-biz-table-card.arco-card {
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border-2);
   background-color: var(--color-bg-2, #fff);
   box-shadow: none;
 }
@@ -597,7 +597,7 @@
     gap: 8px;
     height: 56px;
     padding: 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--color-border-2);
 
     /* 批量操作 / 新建等与筛选「查询」同为 8px 圆角 */
     .arco-btn {
@@ -617,7 +617,7 @@
     height: 32px;
     min-width: 32px;
     padding: 0;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-border-2);
     border-radius: 8px;
     background: transparent;
     color: var(--color-text-2, #4e5969);
@@ -631,7 +631,7 @@
   .use-biz-table-secondary-btn.arco-btn {
     height: 32px;
     padding: 0 12px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-border-2);
     border-radius: 8px;
     background: var(--color-fill-2, #f2f3f5);
     color: var(--color-text-2, #4e5969);
@@ -681,8 +681,8 @@
     font-weight: 400;
     line-height: 22px;
     color: var(--color-text-3, #86909c);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--color-border-2) !important;
+    border-right: 1px solid var(--color-border-2);
     border-radius: 0;
     vertical-align: middle;
   }
@@ -775,7 +775,7 @@
     /* 单元格无上下边框，仅保留列分隔 */
     border-top: none !important;
     border-bottom: none !important;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid var(--color-border-2);
     vertical-align: middle;
     overflow: hidden;
   }
@@ -786,7 +786,7 @@
     tbody
     > .arco-table-tr:last-child
     > .arco-table-td {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid var(--color-border-2) !important;
   }
 
   &.is-no-pagination {

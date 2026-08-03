@@ -142,9 +142,9 @@ export default function PermissionConfig({
     return (
       <div
         key={res.key}
-        className="flex items-start gap-3 border-0 border-b border-dashed border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)] py-2 pl-[46px] pr-4 last:border-b-0"
+        className="flex items-start gap-3 border-0 border-b border-dashed border-[var(--color-border-2)] bg-[var(--color-fill-1,#f7f8fa)] py-2 pl-[46px] pr-4 last:border-b-0"
       >
-        <div className="flex w-[240px] shrink-0 items-center gap-3 border-0 border-r border-solid border-[rgba(0,0,0,0.08)] pr-3">
+        <div className="flex w-[240px] shrink-0 items-center gap-3 border-0 border-r border-solid border-[var(--color-border-2)] pr-3">
           <Checkbox
             checked={resAll}
             indeterminate={resSome}
@@ -190,8 +190,8 @@ export default function PermissionConfig({
   };
 
   return (
-    <div className="use-role-perm-config overflow-hidden rounded-xl border border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)]">
-      <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-[rgba(0,0,0,0.08)] px-4 py-2">
+    <div className="use-role-perm-config overflow-hidden rounded-xl border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)]">
+      <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-[var(--color-border-2)] px-4 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Input
             allowClear
@@ -249,7 +249,7 @@ export default function PermissionConfig({
 
             return (
               <div key={mod.key}>
-                <div className="flex items-center justify-between border-0 border-b border-solid border-[rgba(0,0,0,0.08)] bg-[var(--color-bg-2,#fff)] px-4 py-2">
+                <div className="flex items-center justify-between border-0 border-b border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)] px-4 py-2">
                   <div className="flex min-w-0 items-center gap-3">
                     <Checkbox
                       checked={modAll}

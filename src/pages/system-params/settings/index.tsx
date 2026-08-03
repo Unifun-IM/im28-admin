@@ -103,7 +103,7 @@ function formToUpdateBody(
 
 function ReplaceTrigger({ label }: { label: string }) {
   return (
-    <div className="box-border flex size-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-[rgba(0,0,0,0.08)] bg-[var(--color-fill-1,#f7f8fa)]">
+    <div className="box-border flex size-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-[var(--color-border-2)] bg-[var(--color-fill-1,#f7f8fa)]">
       <IconPlus className="text-[12px] text-arco-text-2" />
       <span className="text-[10px] font-medium leading-none text-arco-text-2">
         {label}
@@ -307,7 +307,7 @@ export default function SystemParamsPage() {
               <FormSilentValue />
             </Form.Item>
             <Form.Item label={t['paramsSettings.field.logo']}>
-              <div className="rounded-xl border border-solid border-[rgba(0,0,0,0.08)] px-3 py-2">
+              <div className="rounded-xl border border-solid border-[var(--color-border-2)] px-3 py-2">
                 <p className="m-0 mb-2 text-[12px] leading-3 text-arco-text-3">
                   {t['paramsSettings.logo.tip']}
                 </p>

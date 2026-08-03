@@ -190,7 +190,7 @@ export default function UserCenterModal({
 
         <div className="flex min-w-0 flex-1 flex-col gap-6 pr-8">
           <div className="flex flex-col gap-3">
-            <div className="border-0 border-b border-solid border-[rgba(0,0,0,0.08)] py-3">
+            <div className="border-0 border-b border-solid border-[var(--color-border-2)] py-3">
               <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
                 {t['userCenter.name']}
               </span>
@@ -245,7 +245,7 @@ export default function UserCenterModal({
             )}
           </div>
 
-          <div className="border-0 border-b border-solid border-[rgba(0,0,0,0.08)] py-3">
+          <div className="border-0 border-b border-solid border-[var(--color-border-2)] py-3">
             <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
               {t['userCenter.security']}
             </span>

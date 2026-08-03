@@ -94,7 +94,7 @@ export default function SlideCaptcha({
     <div
       ref={trackRef}
       className={cs(
-        'use-login-slide relative box-border flex h-[32px] w-full select-none items-center overflow-hidden rounded-[8px] border border-solid border-[rgba(0,0,0,0.08)]',
+        'use-login-slide relative box-border flex h-[32px] w-full select-none items-center overflow-hidden rounded-[8px] border border-solid border-[var(--color-border-2)]',
         verified
           ? 'is-verified bg-[rgb(var(--success-1,#f7fff9))]'
           : 'bg-[var(--color-fill-2,#f2f3f5)]',

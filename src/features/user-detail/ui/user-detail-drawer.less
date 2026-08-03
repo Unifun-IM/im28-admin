@@ -1,9 +1,9 @@
-/* 用户 / 群详情 Drawer — 标准 title；内容区视觉 token */
+/* 用户 / 群详情 Drawer — Figma 1125:26019；暗色边框走 token */
 .use-user-detail-drawer,
 .use-group-detail-drawer {
   .arco-drawer-header {
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
   }
 
   .arco-drawer-header-title {
@@ -19,57 +19,105 @@
 
   .arco-drawer-footer {
     padding: 16px 21px 21px;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
   }
 
   .use-user-detail-avatar.arco-avatar {
-    background: rgba(123, 97, 255, 0.1) !important;
-    color: #7b61ff !important;
+    background: var(--color-primary-light) !important;
+    color: rgb(var(--primary-6)) !important;
     font-size: 17.5px !important;
     font-weight: 700 !important;
     line-height: 56px !important;
   }
 
+  /* Tabs/line — Figma 750:23400；下划线贴文字宽，不用 Arco ink（易左偏/过宽） */
   .use-user-detail-tabs.arco-tabs {
+    .arco-tabs-header,
+    .arco-tabs-header-nav,
+    .arco-tabs-header-scroll {
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: 0;
+    }
+
+    .arco-tabs-header {
+      align-items: flex-end;
+    }
+
     .arco-tabs-header-nav {
       &::before {
         height: 1px;
-        background-color: rgba(0, 0, 0, 0.08);
+        background-color: var(--color-border-2, rgba(0, 0, 0, 0.08));
       }
     }
 
     .arco-tabs-header-title {
+      position: relative;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       margin: 0 24px 0 0;
       padding: 9px 0;
       font-size: 14px;
+      font-weight: 400;
       line-height: 22px;
-      color: var(--color-text-2);
-      background-color: transparent;
+      color: var(--color-text-2, #4e5969);
+      background-color: transparent !important;
+
+      /* 与文字等宽的 2px 指示条 */
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: transparent;
+        transition: background-color 0.15s ease;
+      }
     }
 
-    .arco-tabs-header-title:hover {
-      background-color: transparent;
-      color: rgb(var(--primary-6));
+    .arco-tabs-header-title:first-child {
+      margin-left: 0;
+      padding-left: 0;
     }
 
     .arco-tabs-header-title:last-child {
       margin-right: 0;
     }
 
+    .arco-tabs-header-title:hover {
+      background-color: transparent !important;
+      color: rgb(var(--primary-6));
+    }
+
+    .arco-tabs-header-title-text {
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+      color: inherit;
+    }
+
     .arco-tabs-header-title-active,
     .arco-tabs-header-title-active:hover {
-      background-color: transparent;
+      background-color: transparent !important;
       color: rgb(var(--primary-6));
       font-weight: 500;
+
+      &::after {
+        background: rgb(var(--primary-6));
+      }
     }
 
     .arco-tabs-header-ink {
-      height: 2px;
-      background-color: rgb(var(--primary-6));
+      display: none !important;
     }
 
     .arco-tabs-content {
       padding-top: 0;
+      padding-left: 0;
+      padding-right: 0;
     }
 
     .arco-tabs-content-item {
@@ -77,11 +125,19 @@
     }
   }
 
-  /* Descriptions — 对齐原 InfoGrid：标签 120 / 行高 32 / 圆角边框
-   * 边框在 .arco-descriptions-body 上；勿在根节点 overflow:hidden，否则顶边会被裁切 */
+  .use-user-detail-section-title {
+    margin: 0 0 12px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21px;
+    color: var(--color-text-1, #1d2129);
+  }
+
+  /* Descriptions — 标签 120 / 行高 32 / 圆角边框；左边与区块标题对齐 */
   .use-user-detail-descriptions.arco-descriptions {
     .arco-descriptions-body {
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
       border-radius: 8px;
       overflow: hidden;
     }
@@ -89,7 +145,7 @@
     .arco-descriptions-item-label,
     .arco-descriptions-item-value {
       padding: 5px 12px;
-      border-color: rgba(0, 0, 0, 0.08);
+      border-color: var(--color-border-2, rgba(0, 0, 0, 0.08));
     }
 
     .arco-descriptions-item-label {
@@ -109,9 +165,7 @@
     }
   }
 
-  /* 操作日志 Timeline — Figma 750:23153
-   * 行高 44（pt12 + lh20 + pb12）；7px 圆点对齐首行（top≈18）；竖线点心相连无断口
-   */
+  /* 操作日志 Timeline — Figma 750:23153 */
   .use-user-detail-timeline.arco-timeline,
   .use-group-detail-timeline.arco-timeline {
     margin: 0;
@@ -151,7 +205,6 @@
       border-radius: 50%;
     }
 
-    /* 点心 → 下一项点心 */
     .arco-timeline-item-dot-line {
       position: absolute;
       left: 50%;
@@ -159,7 +212,7 @@
       bottom: -21.5px;
       width: 0;
       border: none;
-      border-left: 1px solid rgba(0, 0, 0, 0.08);
+      border-left: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
       background: transparent !important;
       transform: translateX(-50%);
       box-sizing: border-box;
@@ -172,7 +225,7 @@
     }
 
     .arco-timeline-item-content-wrapper {
-      margin-left: 17px; /* 7px 点 + 10px 间距 */
+      margin-left: 17px;
       margin-bottom: 0;
       padding-top: 12px;
       padding-bottom: 12px;

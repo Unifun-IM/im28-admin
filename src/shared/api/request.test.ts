@@ -139,7 +139,9 @@ describe('request', () => {
 
   it('shows unauthorized toast only once for concurrent auth failures', async () => {
     const { Message } = await import('@arco-design/web-react');
-    const errorSpy = vi.spyOn(Message, 'error').mockImplementation(() => {});
+    const errorSpy = vi
+      .spyOn(Message, 'error')
+      .mockImplementation(() => () => {});
     const clearSpy = vi
       .spyOn(Message, 'clear')
       .mockImplementation(() => {});

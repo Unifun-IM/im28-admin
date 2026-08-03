@@ -14,7 +14,7 @@ import {
 } from '@shared/api/admin/groups';
 import useLocale from '@shared/lib/useLocale';
 
-/** 与 AdminAPI.AdminGroupGlobalSetting / AdminUpdateGroupGlobalSettingRequest 对齐（Figma 770:22608） */
+/** 与 AdminAPI.AdminGroupGlobalSetting / AdminUpdateGroupGlobalSettingRequest 对齐（Figma 1125:26470） */
 type GroupSettingsForm = {
   create_group_min_member_count: number;
   normal_group_member_limit: number;
@@ -56,7 +56,7 @@ function formToUpdateBody(
 }
 
 /**
- * 群组设置 — Figma 770:22608
+ * 群设置 — Figma 1125:26470
  * 读写：postV1AdminGroupsSettingsGet / Update
  */
 export default function GroupSettingsPage() {
@@ -182,7 +182,12 @@ export default function GroupSettingsPage() {
                   }
                 ]}
               >
-                <InputNumber min={2} max={999} style={{ width: '100%' }} />
+                <InputNumber
+                  hideControl
+                  min={2}
+                  max={999}
+                  style={{ width: '100%' }}
+                />
               </Form.Item>
               <Form.Item
                 field="normal_group_member_limit"
@@ -195,6 +200,7 @@ export default function GroupSettingsPage() {
                 ]}
               >
                 <InputNumber
+                  hideControl
                   min={3}
                   max={100000}
                   style={{ width: '100%' }}

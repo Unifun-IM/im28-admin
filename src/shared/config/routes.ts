@@ -30,7 +30,6 @@ export const routes: IRoute[] = [
       {
         name: 'menu.user.manage',
         key: 'user/manage',
-        breadcrumb: false,
         children: [
           { name: 'menu.user.query', key: 'user/query' },
           { name: 'menu.user.blacklist', key: 'user/blacklist' },
@@ -55,7 +54,6 @@ export const routes: IRoute[] = [
       {
         name: 'menu.session.query',
         key: 'session/query',
-        breadcrumb: false,
         children: [
           { name: 'menu.session.user', key: 'session/user' },
           { name: 'menu.session.group', key: 'session/group' }

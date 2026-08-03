@@ -15,7 +15,7 @@ import {
 } from '@arco-design/web-react/icon';
 import dayjs, { Dayjs } from 'dayjs';
 import { searchChatHistory } from '../api/chatStubs';
-import iconChatHistorySearch from '../assets/icon-chat-history-search.svg';
+import ChatIconHistorySearch from '../assets/icon-chat-history-search.svg?react';
 import useElementHeight from './useElementHeight';
 
 export type ChatHistoryTab = 'all' | 'media' | 'file' | 'date';
@@ -153,7 +153,7 @@ export default function ChatHistoryPanel({
         >
           <IconClose className="text-[16px]" />
         </button>
-        <h3 className="m-0 text-[18px] font-medium leading-[1.5] text-black">
+        <h3 className="m-0 text-[18px] font-medium leading-[1.5] text-[var(--color-text-1)]">
           查看聊天记录
         </h3>
       </header>
@@ -167,10 +167,9 @@ export default function ChatHistoryPanel({
             onChange={setKeyword}
             placeholder="搜索"
             prefix={
-              <img
-                src={iconChatHistorySearch}
-                alt=""
-                className="size-6 shrink-0"
+              <ChatIconHistorySearch
+                className="use-chat-history-search-icon size-6 shrink-0"
+                aria-hidden
               />
             }
             className="use-chat-history-search min-w-0 flex-1"
@@ -180,7 +179,7 @@ export default function ChatHistoryPanel({
           />
           <Button
             type="primary"
-            className="use-chat-history-search-btn !h-10 !min-w-0 !rounded-md !border-0 !bg-[#7b61ff] !px-3 !text-[16px] !font-normal !leading-[1.5] !text-white hover:!bg-[#6a52e6]"
+            className="use-chat-history-search-btn !h-10 !min-w-0 !rounded-md !border-0 !bg-[rgb(var(--primary-6))] !px-3 !text-[16px] !font-normal !leading-[1.5] !text-white hover:!bg-[rgb(var(--primary-7))]"
             onClick={() => {
               if (tab === 'date') setTab('all');
               runSearch(keyword, tab === 'date' ? 'all' : tab);

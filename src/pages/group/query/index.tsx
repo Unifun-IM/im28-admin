@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Form } from '@arco-design/web-react';
+import { Button, Form, Input } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
@@ -27,6 +27,15 @@ type GroupListRow = {
   owner?: AdminAPI.User;
 };
 
+type GroupListForm = {
+  keyword?: string;
+  keyword_type?: AdminAPI.AdminListGroupRequest['keyword_type'];
+  owner_user_id?: string;
+  /** Select 用字符串，请求时再转 GroupStatus */
+  status?: '' | '0' | '1' | '2' | '3';
+  batchGroupIds?: string;
+};
+
 /** OpenIM GroupStatus：0 正常 / 1 封禁 / 2 解散 / 3 禁言 */
 function groupStatusBadge(
   status?: AdminAPI.GroupStatus
@@ -37,21 +46,26 @@ function groupStatusBadge(
   return 'default';
 }
 
-/** 群组查询 — Figma 977:33806；AdminAPI.AdminListGroupRequest */
+/** 逗号 / 中文逗号 / 空格 / 换行（Excel 列粘贴） */
+function parseBatchIds(raw?: string) {
+  return String(raw || '')
+    .split(/[\s,，]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 100);
+}
+
+/**
+ * 群组查询 — Figma 977:33806；批量搜索 1125:26762
+ * AdminAPI.AdminListGroupRequest（无 group_ids，批量按 ID 精确查后合并）
+ */
 export default function GroupQueryPage() {
   const t = useLocale();
   const common = t;
 
-  type GroupListForm = {
-    keyword?: string;
-    keyword_type?: AdminAPI.AdminListGroupRequest['keyword_type'];
-    owner_user_id?: string;
-    /** Select 用字符串，请求时再转 GroupStatus */
-    status?: '' | '0' | '1' | '2' | '3';
-  };
-
   const [form] = Form.useForm<GroupListForm>();
   const [loading, setLoading] = useState(false);
+  const [batchMode, setBatchMode] = useState(false);
   const [data, setData] = useState<GroupListRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -77,22 +91,23 @@ export default function GroupQueryPage() {
     [t]
   );
 
+  const resolveStatus = (statusRaw: GroupListForm['status']) =>
+    statusRaw === '' || statusRaw === undefined || statusRaw === null
+      ? undefined
+      : (Number(statusRaw) as AdminAPI.GroupStatus);
+
   const buildBody = useCallback(
     (p: number, size: number): AdminAPI.AdminListGroupRequest => {
       const values = form.getFieldsValue();
       const keyword = values.keyword?.trim() || undefined;
       const owner_user_id = values.owner_user_id?.trim() || undefined;
-      const statusRaw = values.status;
       return {
         page: p,
         page_size: size,
         keyword,
         keyword_type: keyword ? values.keyword_type || undefined : undefined,
         owner_user_id,
-        status:
-          statusRaw === '' || statusRaw === undefined || statusRaw === null
-            ? undefined
-            : (Number(statusRaw) as AdminAPI.GroupStatus)
+        status: resolveStatus(values.status)
       };
     },
     [form]
@@ -102,6 +117,42 @@ export default function GroupQueryPage() {
     async (p = page, size = pageSize) => {
       setLoading(true);
       try {
+        const values = form.getFieldsValue();
+        if (batchMode) {
+          const ids = parseBatchIds(values.batchGroupIds);
+          if (!ids.length) {
+            setData([]);
+            setTotal(0);
+            return;
+          }
+          const owner_user_id = values.owner_user_id?.trim() || undefined;
+          const status = resolveStatus(values.status);
+          const results = await Promise.all(
+            ids.map((id) =>
+              postV1AdminGroupsList({
+                keyword: id,
+                keyword_type: 'group_id',
+                owner_user_id,
+                status,
+                page: 1,
+                page_size: 1
+              })
+            )
+          );
+          const list: GroupListRow[] = [];
+          const seen = new Set<string>();
+          results.forEach((res) => {
+            (res.data?.list || []).forEach((row) => {
+              const gid = row.group?.group_id;
+              if (!gid || seen.has(gid)) return;
+              seen.add(gid);
+              list.push(row);
+            });
+          });
+          setData(list);
+          setTotal(list.length);
+          return;
+        }
         const res = await postV1AdminGroupsList(buildBody(p, size));
         setData(res.data?.list || []);
         setTotal(res.data?.total || 0);
@@ -109,7 +160,7 @@ export default function GroupQueryPage() {
         setLoading(false);
       }
     },
-    [buildBody, page, pageSize]
+    [batchMode, buildBody, form, page, pageSize]
   );
 
   useEffect(() => {
@@ -118,6 +169,39 @@ export default function GroupQueryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const sharedFilters = (
+    <>
+      <FilterField>
+        <FormItem
+          field="owner_user_id"
+          label={t['groupQuery.filter.ownerUserId']}
+        >
+          <FilterInput
+            showSearchIcon
+            placeholder={t['groupQuery.filter.ownerPlaceholder']}
+          />
+        </FormItem>
+      </FilterField>
+      <FilterField>
+        <FormItem field="status" label={t['groupQuery.filter.status']}>
+          <FilterSelect
+            placeholder={t['groupQuery.filter.status']}
+            options={[
+              { label: common['common.all'], value: '' },
+              ...statusOptions
+            ]}
+            allowClear
+          />
+        </FormItem>
+      </FilterField>
+    </>
+  );
+
+  const exitBatchMode = () => {
+    setBatchMode(false);
+    form.setFieldValue('batchGroupIds', undefined);
+  };
+
   return (
     <>
       <BizListPage
@@ -125,47 +209,68 @@ export default function GroupQueryPage() {
         title={t['groupQuery.title']}
         filterCollapsible={false}
         filterDefaultCollapsed={false}
-        filterResetText={common['common.clearAll']}
+        filterResetText={common['common.reset']}
+        filterExtraActions={
+          batchMode ? (
+            <Button
+              type="text"
+              className="use-biz-filter-action-text is-danger"
+              onClick={exitBatchMode}
+            >
+              {t['groupQuery.action.cancelBatchSearch']}
+            </Button>
+          ) : (
+            <Button
+              type="text"
+              className="use-biz-filter-action-text"
+              onClick={() => setBatchMode(true)}
+            >
+              {t['groupQuery.action.batchSearch']}
+            </Button>
+          )
+        }
         filter={
-          <>
-            <FilterField>
-              <FormItem
-                field="keyword"
-                label={t['groupQuery.filter.keyword']}
-              >
-                <FilterKeywordInput
-                  typeField="keyword_type"
-                  typeOptions={keywordTypeOptions}
-                  typeInitialValue="group_id"
-                  typeWidth={88}
-                  placeholder={t['groupQuery.filter.keywordPlaceholder']}
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem
-                field="owner_user_id"
-                label={t['groupQuery.filter.ownerUserId']}
-              >
-                <FilterInput
-                  showSearchIcon
-                  placeholder={t['groupQuery.filter.ownerPlaceholder']}
-                />
-              </FormItem>
-            </FilterField>
-            <FilterField>
-              <FormItem field="status" label={t['groupQuery.filter.status']}>
-                <FilterSelect
-                  placeholder={t['groupQuery.filter.status']}
-                  options={[
-                    { label: common['common.all'], value: '' },
-                    ...statusOptions
-                  ]}
-                  allowClear
-                />
-              </FormItem>
-            </FilterField>
-          </>
+          batchMode ? (
+            <>
+              <FilterField span="full">
+                <FormItem
+                  field="batchGroupIds"
+                  label={
+                    <span className="inline-flex flex-wrap items-center gap-1">
+                      <span>{t['groupQuery.filter.groupIds']}</span>
+                      <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                        {t['groupQuery.filter.groupIdsHint']}
+                      </span>
+                    </span>
+                  }
+                >
+                  <Input.TextArea
+                    placeholder={common['common.placeholder']}
+                    autoSize={{ minRows: 2, maxRows: 6 }}
+                  />
+                </FormItem>
+              </FilterField>
+              {sharedFilters}
+            </>
+          ) : (
+            <>
+              <FilterField>
+                <FormItem
+                  field="keyword"
+                  label={t['groupQuery.filter.keyword']}
+                >
+                  <FilterKeywordInput
+                    typeField="keyword_type"
+                    typeOptions={keywordTypeOptions}
+                    typeInitialValue="group_id"
+                    typeWidth={88}
+                    placeholder={t['groupQuery.filter.keywordPlaceholder']}
+                  />
+                </FormItem>
+              </FilterField>
+              {sharedFilters}
+            </>
+          )
         }
         onSearch={() => {
           setPage(1);
@@ -173,6 +278,7 @@ export default function GroupQueryPage() {
         }}
         onReset={() => {
           form.resetFields();
+          setBatchMode(false);
           setPage(1);
           fetchData(1, pageSize);
         }}
@@ -272,16 +378,18 @@ export default function GroupQueryPage() {
               }
             }
           ],
-          pagination: {
-            current: page,
-            pageSize,
-            total,
-            onChange: (p, s) => {
-              setPage(p);
-              setPageSize(s);
-              fetchData(p, s);
-            }
-          }
+          pagination: batchMode
+            ? false
+            : {
+                current: page,
+                pageSize,
+                total,
+                onChange: (p, s) => {
+                  setPage(p);
+                  setPageSize(s);
+                  fetchData(p, s);
+                }
+              }
         }}
       />
       <GroupDetailDrawer

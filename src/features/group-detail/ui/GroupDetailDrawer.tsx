@@ -184,11 +184,11 @@ function GroupAvatar({
   }
   const cells = Array.from({ length: 9 }, (_, i) => members[i]);
   return (
-    <div className="box-border grid size-[56px] shrink-0 grid-cols-3 grid-rows-3 gap-[1.4px] overflow-hidden rounded-[8.4px] bg-[#e7e7e7]">
+    <div className="box-border grid size-[56px] shrink-0 grid-cols-3 grid-rows-3 gap-[1.4px] overflow-hidden rounded-[8.4px] bg-[var(--color-fill-3)]">
       {cells.map((m, i) => (
         <div
           key={m?.id || i}
-          className="flex items-center justify-center overflow-hidden bg-[rgba(123,97,255,0.12)] text-[8px] font-bold text-[#7b61ff]"
+          className="flex items-center justify-center overflow-hidden bg-[var(--color-primary-light)] text-[8px] font-bold text-[rgb(var(--primary-6))]"
         >
           {m?.avatar ? (
             <img alt="" src={m.avatar} className="size-full object-cover" />
@@ -443,7 +443,7 @@ export default function GroupDetailDrawer({
       maskClosable
       onCancel={onClose}
       maskStyle={{
-        background: 'rgba(0,0,0,0.4)',
+        background: 'var(--color-mask-1)',
         backdropFilter: 'blur(3.5px)'
       }}
     >
@@ -460,7 +460,7 @@ export default function GroupDetailDrawer({
                 members={members}
               />
               <div className="min-w-0">
-                <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
+                <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-arco-text-1">
                   {name}
                 </div>
                 <div className="mt-[2px]">
@@ -482,6 +482,7 @@ export default function GroupDetailDrawer({
             </div>
 
             <Tabs
+              type="line"
               activeTab={tab}
               onChange={setTab}
               className="use-user-detail-tabs"
@@ -769,7 +770,7 @@ export default function GroupDetailDrawer({
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1">
                   <span
-                    className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]"
+                    className="truncate text-[17.5px] font-bold leading-[24.5px] text-arco-text-1"
                     style={groupRoleNameStyle(
                       memberProfile?.user_id || activeMember.userId,
                       activeMember.roleLevel

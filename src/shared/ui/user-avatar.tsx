@@ -43,7 +43,7 @@ export function UserAvatar({
       className={className}
       style={{
         background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-        color: '#fff',
+        color: 'var(--color-text-white)',
         fontWeight: 500,
         ...style
       }}

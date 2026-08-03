@@ -1,9 +1,9 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- ??? Figma 791:35484 ?? Vector ?? -->
   <g transform="translate(3, 3)">
-    <path d="M0.75 8.75C0.75 13.1683 4.33172 16.75 8.75 16.75C10.963 16.75 12.9661 15.8515 14.4144 14.3993C15.8577 12.9522 16.75 10.9553 16.75 8.75C16.75 4.33172 13.1683 0.75 8.75 0.75C4.33172 0.75 0.75 4.33172 0.75 8.75Z" stroke="black" stroke-opacity="0.4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0.75 8.75C0.75 13.1683 4.33172 16.75 8.75 16.75C10.963 16.75 12.9661 15.8515 14.4144 14.3993C15.8577 12.9522 16.75 10.9553 16.75 8.75C16.75 4.33172 13.1683 0.75 8.75 0.75C4.33172 0.75 0.75 4.33172 0.75 8.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
   <g transform="translate(17, 17)">
-    <path d="M0.75 0.75L4.75 4.75" stroke="black" stroke-opacity="0.4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0.75 0.75L4.75 4.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>

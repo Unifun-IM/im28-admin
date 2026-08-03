@@ -1,13 +1,14 @@
-/* —— 通用 GA 验证码弹窗（Figma 602:35395 / 921:44417） —— */
-.arco-modal.use-ga-verify-modal {
+/* —— 通用 GA 验证 / 绑定弹窗；颜色一律走主题语义 token —— */
+.arco-modal.use-ga-verify-modal,
+.arco-modal.use-login-ga-modal {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-border-1, #f2f3f5);
+  border: 1px solid var(--color-border-2);
 
   .arco-modal-content {
     padding: 0;
-    background: var(--color-bg-1, #f7f8fa);
+    background: var(--color-bg-popup);
   }
 
   .arco-modal-header,
@@ -15,16 +16,143 @@
     display: none;
   }
 
+  .use-ga-header {
+    box-sizing: border-box;
+    padding: 24px 24px 12px;
+  }
+
+  .use-ga-title {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 28px;
+    color: var(--color-text-1);
+  }
+
+  .use-ga-desc {
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-text-3);
+  }
+
+  .use-ga-body {
+    box-sizing: border-box;
+    padding: 12px 24px;
+  }
+
+  .use-ga-body-bind {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .use-ga-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .use-ga-label {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    color: var(--color-text-1);
+  }
+
+  .use-ga-footer {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 24px 24px;
+  }
+
   .arco-btn {
     border-radius: 6px;
     height: 32px;
+    min-width: 80px;
   }
 
   .arco-btn-secondary,
   .arco-btn-outline,
   .arco-btn-default {
-    border-color: rgba(0, 0, 0, 0.08);
-    color: var(--color-text-2, #4e5969);
+    border: 1px solid var(--color-border-2);
+    color: var(--color-text-2);
+    background: var(--color-fill-2);
+  }
+
+  .arco-btn-secondary:hover,
+  .arco-btn-outline:hover,
+  .arco-btn-default:hover {
+    border-color: var(--color-border-3);
+    color: var(--color-text-1);
+    background: var(--color-fill-3);
+  }
+}
+
+/* 绑定 GA：二维码区域 */
+.use-ga-qr-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.use-ga-qr {
+  box-sizing: border-box;
+  width: 142px;
+  height: 142px;
+  padding: 15px;
+  border-radius: 11px;
+  border: 1px solid var(--color-border-2);
+  background: var(--color-bg-1);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.use-ga-qr-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 112px;
+  border: 1px dashed var(--color-border-3);
+  background: var(--color-fill-3);
+  font-size: 10.5px;
+  line-height: 14px;
+  color: var(--color-text-3);
+}
+
+.use-ga-secret-copy {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.use-login-secret.arco-input-inner-wrapper {
+  border: none;
+  background: var(--color-fill-2);
+  border-radius: 6px;
+  justify-content: center;
+  padding: 7px 16px;
+  min-height: 36px;
+
+  .arco-input {
+    text-align: center;
+    color: var(--color-text-1);
+    font-size: 14px;
   }
 }
 
@@ -44,18 +172,31 @@
     font-weight: 700;
     line-height: 28px;
     border-radius: 6px;
-    border-color: rgba(0, 0, 0, 0.08);
-    background: transparent;
-    color: var(--color-text-1, #1d2129);
+    border: 1px solid var(--color-border-2) !important;
+    background: var(--color-fill-2) !important;
+    color: var(--color-text-1) !important;
+    box-shadow: none !important;
+  }
+
+  .arco-input:hover {
+    border-color: var(--color-border-3) !important;
+    background: var(--color-fill-3) !important;
+  }
+
+  .arco-input:focus,
+  .arco-input.arco-input-focus {
+    border-color: rgb(var(--primary-6)) !important;
+    background: var(--color-fill-2) !important;
   }
 
   &.arco-verification-code-error .arco-input,
   .arco-input.arco-input-error {
-    border-color: rgb(var(--danger-6));
+    border-color: rgb(var(--danger-6)) !important;
   }
 }
 
-.use-ga-verify-modal-wrap .arco-modal-mask {
+.use-ga-verify-modal-wrap .arco-modal-mask,
+.use-login-ga-modal-wrap .arco-modal-mask {
   backdrop-filter: blur(3.5px);
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-mask-1);
 }

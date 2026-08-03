@@ -143,6 +143,11 @@ export default function Page() {
                   sub={`${t['blacklist.cell.userId']}：${row.user?.user_id || ''}`}
                   copyText={row.user?.user_id || ''}
                   avatar={row.user?.avatar_url}
+                  userId={row.user?.user_id}
+                  nameClassName="!text-[rgb(var(--link-6))]"
+                  onNameClick={() =>
+                    setDetailUserId(row.user?.user_id || null)
+                  }
                 />
               )
             },

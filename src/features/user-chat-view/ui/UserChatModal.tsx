@@ -23,31 +23,33 @@ import {
   getChatMessages,
   getUserChatBook
 } from '../api/chatStubs';
-import emptyLogo from '../assets/chat-empty-logo.svg';
-import iconChatBubbleTailPeer from '../assets/icon-chat-bubble-tail-peer.svg';
-import iconChatBubbleTailSelf from '../assets/icon-chat-bubble-tail-self.svg';
-import iconChatPhoneDisabledPeer from '../assets/icon-chat-phone-disabled-peer.svg';
-import iconChatPhoneDisabledSelf from '../assets/icon-chat-phone-disabled-self.svg';
-import iconChatPhonePeer from '../assets/icon-chat-phone-peer.svg';
-import iconChatPhoneSelf from '../assets/icon-chat-phone-self.svg';
-import iconChatPlay from '../assets/icon-chat-play.svg';
-import iconChatRead from '../assets/icon-chat-read.svg';
-import iconChatVideoOffPeer from '../assets/icon-chat-video-off-peer.svg';
-import iconChatVideoOffSelf from '../assets/icon-chat-video-off-self.svg';
-import iconChatVideoPeer from '../assets/icon-chat-video-peer.svg';
-import iconChatVideoSelf from '../assets/icon-chat-video-self.svg';
-import iconClose from '../assets/icon-close.svg';
-import iconContacts from '../assets/icon-contacts.svg';
-import iconContactsActive from '../assets/icon-contacts-active.svg';
-import iconPhone from '../assets/icon-phone.svg';
-import iconPhoneActive from '../assets/icon-phone-active.svg';
-import iconSession from '../assets/icon-session.svg';
-import iconSessionActive from '../assets/icon-session-active.svg';
+import ChatEmptyLogo from '../assets/chat-empty-logo.svg?react';
+import ChatIconBubbleTailPeer from '../assets/icon-chat-bubble-tail-peer.svg?react';
+import ChatIconBubbleTailSelf from '../assets/icon-chat-bubble-tail-self.svg?react';
+import ChatIconPhoneDisabledPeer from '../assets/icon-chat-phone-disabled-peer.svg?react';
+import ChatIconPhoneDisabledSelf from '../assets/icon-chat-phone-disabled-self.svg?react';
+import ChatIconPhonePeer from '../assets/icon-chat-phone-peer.svg?react';
+import ChatIconPhoneSelf from '../assets/icon-chat-phone-self.svg?react';
+import ChatIconPlay from '../assets/icon-chat-play.svg?react';
+import ChatIconRead from '../assets/icon-chat-read.svg?react';
+import ChatIconVideoOffPeer from '../assets/icon-chat-video-off-peer.svg?react';
+import ChatIconVideoOffSelf from '../assets/icon-chat-video-off-self.svg?react';
+import ChatIconVideoPeer from '../assets/icon-chat-video-peer.svg?react';
+import ChatIconVideoSelf from '../assets/icon-chat-video-self.svg?react';
+import ChatIconClose from '../assets/icon-close.svg?react';
+import ChatIconContacts from '../assets/icon-contacts.svg?react';
+import ChatIconContactsActive from '../assets/icon-contacts-active.svg?react';
+import ChatIconPhone from '../assets/icon-phone.svg?react';
+import ChatIconPhoneActive from '../assets/icon-phone-active.svg?react';
+import ChatIconSession from '../assets/icon-session.svg?react';
+import ChatIconSessionActive from '../assets/icon-session-active.svg?react';
 import iconStar from '../assets/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
 import './user-chat-modal.less';
 
 const { Text } = Typography;
+
+type ChatSvgIcon = React.FC<React.SVGProps<SVGSVGElement>>;
 
 /** 气泡内时间 + 已读（Figma 977:24119 / 977:24120） */
 function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
@@ -55,17 +57,13 @@ function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
   return (
     <span
       className={`inline-flex shrink-0 items-center gap-0.5 text-[10px] leading-[1.3] ${
-        isSelf ? 'text-white/40' : 'text-[rgba(0,0,0,0.4)]'
+        isSelf ? 'text-white/40' : 'text-[var(--color-text-3)]'
       }`}
     >
       {time}
       {isSelf ? (
-        <span className="relative inline-flex size-3 shrink-0 items-center justify-center overflow-hidden">
-          <img
-            src={iconChatRead}
-            alt=""
-            className="h-[6px] w-[11px] max-w-none"
-          />
+        <span className="relative inline-flex size-3 shrink-0 items-center justify-center overflow-hidden text-white">
+          <ChatIconRead className="h-[6px] w-[11px] max-w-none" aria-hidden />
         </span>
       ) : null}
     </span>
@@ -78,8 +76,8 @@ function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
  */
 function bubbleShell(isSelf: boolean, withSenderName = false) {
   const base = isSelf
-    ? 'relative max-w-full rounded-xl bg-[#7b61ff] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
-    : 'relative max-w-full rounded-xl border border-solid border-[rgba(120,120,128,0.12)] bg-white px-2 py-1.5 text-[14px] leading-[1.3] text-black';
+    ? 'relative max-w-full rounded-xl bg-[rgb(var(--primary-6))] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
+    : 'relative max-w-full rounded-xl border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] px-2 py-1.5 text-[14px] leading-[1.3] text-[var(--color-text-1)]';
   if (withSenderName) {
     return `${base} inline-flex flex-col items-start gap-1`;
   }
@@ -96,14 +94,10 @@ function BubbleTail({ isSelf }: { isSelf: boolean }) {
     return (
       <span
         aria-hidden
-        className="pointer-events-none absolute bottom-0 right-[-6px] block h-[15px] w-3 overflow-visible"
+        className="use-chat-bubble-tail use-chat-bubble-tail--self pointer-events-none absolute bottom-0 right-[-6px] block h-[15px] w-3 overflow-visible"
       >
         <span className="absolute inset-[10.78%_8.83%_0_-8.09%]">
-          <img
-            src={iconChatBubbleTailSelf}
-            alt=""
-            className="block size-full max-w-none"
-          />
+          <ChatIconBubbleTailSelf className="block size-full max-w-none" />
         </span>
       </span>
     );
@@ -111,16 +105,12 @@ function BubbleTail({ isSelf }: { isSelf: boolean }) {
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute bottom-[-1px] left-[-7px] flex h-[15px] w-3 items-center justify-center overflow-visible"
+      className="use-chat-bubble-tail use-chat-bubble-tail--peer pointer-events-none absolute bottom-[-1px] left-[-7px] flex h-[15px] w-3 items-center justify-center overflow-visible"
     >
       <span className="-scale-x-100 flex-none">
         <span className="relative block h-[15px] w-3">
           <span className="absolute inset-[0_0_0_-18.33%]">
-            <img
-              src={iconChatBubbleTailPeer}
-              alt=""
-              className="block size-full max-w-none"
-            />
+            <ChatIconBubbleTailPeer className="block size-full max-w-none" />
           </span>
         </span>
       </span>
@@ -537,16 +527,16 @@ export default function UserChatModal({
         maxHeight: 'calc(100vh - 80px)'
       }}
     >
-      <div className="use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[#f3f3f3]">
-        <aside className="flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] py-3">
+      <div className="use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[var(--color-bg-1)]">
+        <aside className="flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-[var(--color-border-2)] bg-[var(--color-bg-1)] py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
               aria-label="关闭"
-              className="inline-flex h-[40px] w-[40px] min-h-[40px] min-w-[40px] cursor-pointer items-center justify-center rounded-[8px] border-0 bg-[#e5e6eb] p-0"
+              className="use-chat-nav-close inline-flex h-[40px] w-[40px] min-h-[40px] min-w-[40px] cursor-pointer items-center justify-center rounded-[8px] border-0 bg-[var(--color-fill-3)] p-0"
               onClick={onClose}
             >
-              <img src={iconClose} alt="" className="h-[20px] w-[20px]" />
+              <ChatIconClose className="h-[20px] w-[20px]" aria-hidden />
             </button>
             <div className="flex flex-col items-center gap-4">
               <UserAvatar
@@ -561,22 +551,22 @@ export default function UserChatModal({
                 <>
                   <NavIcon
                     active={nav === 'sessions'}
-                    src={iconSession}
-                    activeSrc={iconSessionActive}
+                    Icon={ChatIconSession}
+                    ActiveIcon={ChatIconSessionActive}
                     label="会话"
                     onClick={() => switchNav('sessions')}
                   />
                   <NavIcon
                     active={nav === 'contacts'}
-                    src={iconContacts}
-                    activeSrc={iconContactsActive}
+                    Icon={ChatIconContacts}
+                    ActiveIcon={ChatIconContactsActive}
                     label="通讯录"
                     onClick={() => switchNav('contacts')}
                   />
                   <NavIcon
                     active={nav === 'calls'}
-                    src={iconPhone}
-                    activeSrc={iconPhoneActive}
+                    Icon={ChatIconPhone}
+                    ActiveIcon={ChatIconPhoneActive}
                     label="通话"
                     onClick={() => switchNav('calls')}
                   />
@@ -586,8 +576,8 @@ export default function UserChatModal({
           </div>
         </aside>
 
-        <section className="use-user-chat-side flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[rgba(120,120,128,0.12)] bg-[#fafafa]">
-          <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-2">
+        <section className="use-user-chat-side flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]">
+          <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-[var(--color-border-2)] px-4 py-2">
             <Input
               allowClear
               value={keyword}
@@ -600,7 +590,7 @@ export default function UserChatModal({
               <button
                 type="button"
                 aria-label="添加"
-                className="inline-flex size-8 shrink-0 cursor-default items-center justify-center rounded-md border-0 bg-[#f0f0f0] p-0 text-arco-text-2"
+                className="inline-flex size-8 shrink-0 cursor-default items-center justify-center rounded-md border-0 bg-[var(--color-fill-2)] p-0 text-arco-text-2"
               >
                 <IconPlus className="text-[16px]" />
               </button>
@@ -641,7 +631,7 @@ export default function UserChatModal({
           </div>
         </section>
 
-        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#f3f3f3]">
+        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-bg-1)]">
           {chat ? (
             <ChatPane
               peer={chat}
@@ -655,11 +645,10 @@ export default function UserChatModal({
             <FriendDetail peer={profile} onSendMessage={sendMessage} />
           ) : (
             /* 通讯录/通话空态 — Figma 977:23156 右侧灰底居中 Logo */
-            <div className="flex min-h-0 flex-1 items-center justify-center bg-[#f3f3f3]">
-              <img
-                src={emptyLogo}
-                alt=""
-                className="pointer-events-none size-20 select-none"
+            <div className="flex min-h-0 flex-1 items-center justify-center bg-[var(--color-bg-1)]">
+              <ChatEmptyLogo
+                className="use-chat-empty-logo pointer-events-none size-20 select-none"
+                aria-hidden
               />
             </div>
           )}
@@ -671,34 +660,30 @@ export default function UserChatModal({
 
 function NavIcon({
   active,
-  src,
-  activeSrc,
+  Icon,
+  ActiveIcon,
   label,
   onClick
 }: {
   active: boolean;
-  src: string;
-  /** 选中态专用图标（线框→实心）；有则不再叠背景/透明度 */
-  activeSrc?: string;
+  Icon: ChatSvgIcon;
+  /** 选中态专用图标（线框→实心） */
+  ActiveIcon?: ChatSvgIcon;
   label: string;
   onClick: () => void;
 }) {
-  const iconSrc = active && activeSrc ? activeSrc : src;
+  const Comp = active && ActiveIcon ? ActiveIcon : Icon;
   return (
     <button
       type="button"
       aria-label={label}
       aria-pressed={active}
-      className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0"
+      className={`use-chat-nav-icon inline-flex size-10 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0${
+        active ? ' is-active' : ''
+      }`}
       onClick={onClick}
     >
-      <img
-        src={iconSrc}
-        alt=""
-        className={`h-[20px] w-[20px] ${
-          activeSrc ? 'opacity-100' : active ? 'opacity-100' : 'opacity-55'
-        }`}
-      />
+      <Comp className="use-chat-nav-icon__svg" aria-hidden />
     </button>
   );
 }
@@ -790,8 +775,8 @@ function SessionList({
               type="button"
               className={`flex w-full cursor-pointer items-center gap-4 border-0 pl-4 text-left ${
                 selected
-                  ? 'bg-[rgba(0,0,0,0.06)]'
-                  : 'bg-transparent hover:bg-[rgba(0,0,0,0.03)]'
+                  ? 'bg-[var(--color-fill-2)]'
+                  : 'bg-transparent hover:bg-[var(--color-fill-1)]'
               }`}
               onClick={() => onSelect(item)}
             >
@@ -806,7 +791,7 @@ function SessionList({
                   online={item.online}
                 />
               )}
-              <div className="flex min-w-0 flex-1 items-center border-b border-solid border-[rgba(120,120,128,0.12)] py-4 pr-4">
+              <div className="flex min-w-0 flex-1 items-center border-b border-solid border-[var(--color-border-2)] py-4 pr-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <Text className="!m-0 min-w-0 flex-1 truncate text-[16px] leading-[1.5] !text-arco-text-1">
@@ -816,12 +801,12 @@ function SessionList({
                       {item.muted ? (
                         <IconMute className="text-[12px] text-arco-text-3" />
                       ) : null}
-                      <span className="text-[10px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+                      <span className="text-[10px] leading-[1.3] text-[var(--color-text-3)]">
                         {item.time}
                       </span>
                     </div>
                   </div>
-                  <p className="m-0 truncate text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+                  <p className="m-0 truncate text-[12px] leading-[1.3] text-[var(--color-text-3)]">
                     {item.lastMessage}
                   </p>
                 </div>
@@ -862,7 +847,7 @@ function SectionHeader({
           {title}
         </span>
         {count != null ? (
-          <span className="shrink-0 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+          <span className="shrink-0 text-[12px] leading-[1.3] text-[var(--color-text-3)]">
             {count}
           </span>
         ) : null}
@@ -914,13 +899,13 @@ function ContactsPanel({
               type="button"
               className={`flex w-full cursor-pointer items-center gap-4 border-0 py-0 pl-9 pr-0 text-left ${
                 g.id === activeId
-                  ? 'bg-[rgba(0,0,0,0.06)]'
-                  : 'bg-transparent hover:bg-[rgba(0,0,0,0.03)]'
+                  ? 'bg-[var(--color-fill-2)]'
+                  : 'bg-transparent hover:bg-[var(--color-fill-1)]'
               }`}
               onClick={() => onSelect(g)}
             >
               <GroupAvatar avatars={g.avatars} name={g.name} size={32} />
-              <div className="flex min-h-[72px] min-w-0 flex-1 items-center gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] pr-4">
+              <div className="flex min-h-[72px] min-w-0 flex-1 items-center gap-2 border-b border-solid border-[var(--color-border-2)] pr-4">
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[16px] text-arco-text-1">
                     {g.name}
@@ -1004,8 +989,8 @@ function ContactRow({
       type="button"
       className={`flex w-full cursor-pointer items-center gap-4 border-0 py-0 pl-9 pr-0 text-left ${
         selected
-          ? 'bg-[rgba(0,0,0,0.06)]'
-          : 'bg-transparent hover:bg-[rgba(0,0,0,0.03)]'
+          ? 'bg-[var(--color-fill-2)]'
+          : 'bg-transparent hover:bg-[var(--color-fill-1)]'
       }`}
       onClick={() => onSelect(peer)}
     >
@@ -1016,7 +1001,7 @@ function ContactRow({
         size={32}
         online={peer.online}
       />
-      <div className="flex min-h-14 min-w-0 flex-1 items-center border-b border-solid border-[rgba(120,120,128,0.12)] pr-4">
+      <div className="flex min-h-14 min-w-0 flex-1 items-center border-b border-solid border-[var(--color-border-2)] pr-4">
         <span className="truncate text-[16px] text-arco-text-1">{peer.name}</span>
       </div>
     </button>
@@ -1032,7 +1017,7 @@ function FriendDetail({
   onSendMessage: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[#f3f3f3]">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-bg-1)]">
       <div className="flex flex-col items-center gap-4 px-4 pb-4 pt-6">
         <UserAvatar
           size={80}
@@ -1046,7 +1031,7 @@ function FriendDetail({
           </p>
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[#eee] px-2 py-1"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[var(--color-fill-2)] px-2 py-1"
             onClick={() => {
               copy(peer.id);
               Message.success('已复制');
@@ -1064,7 +1049,7 @@ function FriendDetail({
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !bg-[#7b61ff] !text-[14px] hover:!bg-[#6a52e6]"
+          className="!h-12 !rounded-xl !bg-[rgb(var(--primary-6))] !text-[14px] hover:!bg-[rgb(var(--primary-7))]"
           onClick={() => onSendMessage(peer)}
         >
           发消息
@@ -1072,14 +1057,14 @@ function FriendDetail({
       </div>
 
       <div className="px-4 pb-6">
-        <div className="overflow-hidden rounded-xl bg-white">
-          <div className="flex items-center border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-4">
+        <div className="overflow-hidden rounded-xl bg-[var(--color-bg-2)]">
+          <div className="flex items-center border-b border-solid border-[var(--color-border-2)] px-4 py-4">
             <span className="flex-1 text-[14px] text-arco-text-1">备注名</span>
-            <span className="text-[14px] text-[rgba(0,0,0,0.4)]">
+            <span className="text-[14px] text-[var(--color-text-3)]">
               {peer.remark || '添加备注'}
             </span>
           </div>
-          <div className="flex items-center border-b border-solid border-[rgba(120,120,128,0.12)] px-4 py-4">
+          <div className="flex items-center border-b border-solid border-[var(--color-border-2)] px-4 py-4">
             <span className="flex-1 text-[14px] text-arco-text-1">来源</span>
             <span className="text-[14px] text-arco-text-2">
               {peer.source || '通过ID添加'}
@@ -1106,7 +1091,7 @@ function GroupProfile({
   onEnterChat: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[#f3f3f3] px-20">
+    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[var(--color-bg-1)] px-20">
       <div className="h-14 w-full shrink-0" />
       <div className="flex w-full flex-col items-center pb-4">
         <div className="flex flex-col items-center gap-4">
@@ -1117,7 +1102,7 @@ function GroupProfile({
             </p>
             <button
               type="button"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[#eee] px-2 py-1"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[var(--color-fill-2)] px-2 py-1"
               onClick={() => {
                 copy(peer.id);
                 Message.success('已复制');
@@ -1135,7 +1120,7 @@ function GroupProfile({
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !bg-[#7b61ff] !text-[14px] !font-medium hover:!bg-[#6a52e6]"
+          className="!h-12 !rounded-xl !bg-[rgb(var(--primary-6))] !text-[14px] !font-medium hover:!bg-[rgb(var(--primary-7))]"
           onClick={() => onEnterChat(peer)}
         >
           进入群聊
@@ -1222,8 +1207,8 @@ function ChatPane({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#f3f3f3]">
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-solid border-[rgba(120,120,128,0.12)] bg-[#f3f3f3] px-4">
+    <div className="flex h-full min-h-0 flex-col bg-[var(--color-bg-1)]">
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-solid border-[var(--color-border-2)] bg-[var(--color-bg-1)] px-4">
         <button
           type="button"
           aria-label="返回"
@@ -1323,7 +1308,7 @@ function MessageRow({
     return (
       <div className="flex justify-center px-4 py-1">
         {relative ? (
-          <span className="rounded-xl px-1 text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+          <span className="rounded-xl px-1 text-[12px] leading-[1.3] text-[var(--color-text-3)]">
             {label}
           </span>
         ) : (
@@ -1337,7 +1322,7 @@ function MessageRow({
 
   if (msg.msgType === 'system') {
     return (
-      <div className="px-4 py-1 text-center text-[12px] leading-4 text-[rgba(0,0,0,0.4)]">
+      <div className="px-4 py-1 text-center text-[12px] leading-4 text-[var(--color-text-3)]">
         {msg.content}
       </div>
     );
@@ -1375,7 +1360,7 @@ function MessageRow({
 function BubbleSenderName({ name }: { name?: string }) {
   if (!name) return null;
   return (
-    <p className="m-0 text-[10px] font-medium leading-[1.5] text-[rgba(0,0,0,0.6)]">
+    <p className="m-0 text-[10px] font-medium leading-[1.5] text-[var(--color-text-2)]">
       {name}
     </p>
   );
@@ -1395,7 +1380,7 @@ function ForwardHeader({
   return (
     <div
       className={`mb-1 flex items-center gap-1 text-[10px] leading-none ${
-        isSelf ? 'text-white' : 'text-[rgba(0,0,0,0.6)]'
+        isSelf ? 'text-white' : 'text-[var(--color-text-2)]'
       }`}
     >
       <span>转发自</span>
@@ -1459,7 +1444,7 @@ function ImageBubble({ msg }: { msg: ChatMsg }) {
     <>
       <button
         type="button"
-        className="relative m-0 max-w-[180px] cursor-zoom-in overflow-hidden rounded-xl border-0 bg-[#eee] p-0"
+        className="relative m-0 max-w-[180px] cursor-zoom-in overflow-hidden rounded-xl border-0 bg-[var(--color-fill-2)] p-0"
         disabled={!full}
         onClick={() => full && setPreview(true)}
         aria-label="预览图片"
@@ -1518,7 +1503,10 @@ function VideoBubble({ msg }: { msg: ChatMsg }) {
             className="absolute inset-0 size-full object-cover opacity-80"
           />
         ) : null}
-        <img src={iconChatPlay} alt="" className="relative z-[1] size-10" />
+        <ChatIconPlay
+          className="relative z-[1] size-10 text-white"
+          aria-hidden
+        />
         <span className="pointer-events-none absolute bottom-2 right-2">
           <BubbleMeta time={msg.time} isSelf />
         </span>
@@ -1772,7 +1760,7 @@ function Bubble({
             </div>
             <div
               className={`text-[12px] leading-[1.3] ${
-                isSelf ? 'text-white/40' : 'text-[rgba(0,0,0,0.4)]'
+                isSelf ? 'text-white/40' : 'text-[var(--color-text-3)]'
               }`}
             >
               {msg.fileSize || ''}
@@ -1791,17 +1779,19 @@ function Bubble({
     const label = rejected
       ? msg.callStatus || '已拒绝'
       : msg.duration || msg.content || '通话';
-    let iconSrc = isSelf ? iconChatPhoneSelf : iconChatPhonePeer;
+    let CallIcon: ChatSvgIcon = isSelf
+      ? ChatIconPhoneSelf
+      : ChatIconPhonePeer;
     if (rejected) {
-      iconSrc = isVideo
+      CallIcon = isVideo
         ? isSelf
-          ? iconChatVideoOffSelf
-          : iconChatVideoOffPeer
+          ? ChatIconVideoOffSelf
+          : ChatIconVideoOffPeer
         : isSelf
-          ? iconChatPhoneDisabledSelf
-          : iconChatPhoneDisabledPeer;
+          ? ChatIconPhoneDisabledSelf
+          : ChatIconPhoneDisabledPeer;
     } else if (isVideo) {
-      iconSrc = isSelf ? iconChatVideoSelf : iconChatVideoPeer;
+      CallIcon = isSelf ? ChatIconVideoSelf : ChatIconVideoPeer;
     }
     return wrap(
       <div className="inline-flex items-end gap-2">
@@ -1809,11 +1799,11 @@ function Bubble({
           {isSelf ? (
             <>
               <span>{label}</span>
-              <img src={iconSrc} alt="" className="size-4" />
+              <CallIcon className="size-4 shrink-0" aria-hidden />
             </>
           ) : (
             <>
-              <img src={iconSrc} alt="" className="size-4" />
+              <CallIcon className="size-4 shrink-0" aria-hidden />
               <span>{label}</span>
             </>
           )}
@@ -1826,16 +1816,16 @@ function Bubble({
   if (msg.msgType === 'location') {
     return wrap(
       <>
-        <div className="w-[200px] overflow-hidden rounded-lg bg-[rgba(0,0,0,0.06)]">
+        <div className="w-[200px] overflow-hidden rounded-lg bg-[var(--color-fill-2)]">
           <div className="flex h-[88px] items-center justify-center bg-gradient-to-b from-[#dfe9f5] to-[#c5d4e8] text-[12px] text-arco-text-3">
             地图
           </div>
-          <div className="border-t border-solid border-[rgba(120,120,128,0.12)] px-2 py-1.5">
+          <div className="border-t border-solid border-[var(--color-border-2)] px-2 py-1.5">
             <div className="truncate text-[14px] leading-[1.3] text-arco-text-1">
               {msg.locationName || msg.content || '位置'}
             </div>
             {msg.locationAddress ? (
-              <div className="truncate text-[12px] leading-[1.3] text-[rgba(0,0,0,0.4)]">
+              <div className="truncate text-[12px] leading-[1.3] text-[var(--color-text-3)]">
                 {msg.locationAddress}
               </div>
             ) : null}
@@ -1851,8 +1841,8 @@ function Bubble({
     const action = isSelf ? '去聊天' : isGroup ? '加入群' : '发消息';
     return wrap(
       <>
-        <div className="w-[232px] overflow-hidden rounded-lg bg-[rgba(0,0,0,0.06)]">
-          <div className="flex flex-col gap-2 border-b border-solid border-[rgba(120,120,128,0.12)] px-2 py-2">
+        <div className="w-[232px] overflow-hidden rounded-lg bg-[var(--color-fill-2)]">
+          <div className="flex flex-col gap-2 border-b border-solid border-[var(--color-border-2)] px-2 py-2">
             <div className="flex items-start gap-2">
               {isGroup ? (
                 <GroupAvatar
@@ -1871,13 +1861,13 @@ function Bubble({
                 <div className="truncate text-[14px] leading-none text-arco-text-1">
                   {msg.cardName || msg.content || '--'}
                 </div>
-                <div className="mt-1 truncate text-[12px] leading-none text-[rgba(0,0,0,0.4)]">
+                <div className="mt-1 truncate text-[12px] leading-none text-[var(--color-text-3)]">
                   ID：{msg.cardId || '--'}
                 </div>
               </div>
             </div>
             {msg.cardDesc ? (
-              <p className="m-0 line-clamp-3 text-[12px] leading-[1.5] text-[rgba(0,0,0,0.6)]">
+              <p className="m-0 line-clamp-3 text-[12px] leading-[1.5] text-[var(--color-text-2)]">
                 {msg.cardDesc}
               </p>
             ) : null}
@@ -1898,13 +1888,13 @@ function Bubble({
           className={`mb-0.5 w-full rounded border-l-2 px-1 text-[12px] leading-[1.5] ${
             isSelf
               ? 'border-[#b5c7ff] bg-white/20'
-              : 'border-[rgba(0,0,0,0.2)] bg-[rgba(0,0,0,0.06)]'
+              : 'border-[var(--color-border-3)] bg-[var(--color-fill-2)]'
           }`}
         >
           {msg.quoteSender ? (
             <div
               className={`truncate ${
-                isSelf ? 'text-[#b5c7ff]' : 'text-[rgba(0,0,0,0.4)]'
+                isSelf ? 'text-[#b5c7ff]' : 'text-[var(--color-text-3)]'
               }`}
             >
               {msg.quoteSender}
@@ -1912,7 +1902,7 @@ function Bubble({
           ) : null}
           <div
             className={`truncate ${
-              isSelf ? 'text-white' : 'text-[rgba(0,0,0,0.6)]'
+              isSelf ? 'text-white' : 'text-[var(--color-text-2)]'
             }`}
           >
             {msg.quoteText || '引用消息'}
@@ -1939,7 +1929,7 @@ function Bubble({
           {msg.quoteText ? (
             <pre
               className={`m-0 mt-1 whitespace-pre-wrap text-[12px] leading-[1.4] ${
-                isSelf ? 'text-white/70' : 'text-[rgba(0,0,0,0.4)]'
+                isSelf ? 'text-white/70' : 'text-[var(--color-text-3)]'
               }`}
             >
               {msg.quoteText}

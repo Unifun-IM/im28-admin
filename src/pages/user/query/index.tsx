@@ -212,10 +212,17 @@ export default function UserQueryPage() {
               <FilterField span="full">
                 <FormItem
                   field="batchUserIds"
-                  label={t['userQuery.filter.userIds']}
+                  label={
+                    <span className="inline-flex flex-wrap items-center gap-1">
+                      <span>{t['userQuery.filter.userIds']}</span>
+                      <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                        {t['userQuery.filter.userIdsHint']}
+                      </span>
+                    </span>
+                  }
                 >
                   <Input.TextArea
-                    placeholder={t['userQuery.filter.userIds']}
+                    placeholder={common['common.placeholder']}
                     autoSize={{ minRows: 2, maxRows: 6 }}
                   />
                 </FormItem>
@@ -302,6 +309,11 @@ export default function UserQueryPage() {
                   sub={`${t['userQuery.cell.userId']}：${row.user?.user_id || ''}`}
                   copyText={row.user?.user_id || ''}
                   avatar={row.user?.avatar_url}
+                  userId={row.user?.user_id}
+                  nameClassName="!text-[rgb(var(--link-6))]"
+                  onNameClick={() =>
+                    setDetailUserId(row.user?.user_id || null)
+                  }
                 />
               )
             },

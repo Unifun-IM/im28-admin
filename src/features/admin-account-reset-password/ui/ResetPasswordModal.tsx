@@ -202,7 +202,7 @@ export default function ResetPasswordModal({
               </span>
             }
           />
-          <div className="use-reset-password-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[rgba(0,0,0,0.08)] p-3 text-[12px] leading-[1.5] text-arco-text-1">
+          <div className="use-reset-password-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[var(--color-border-2)] p-3 text-[12px] leading-[1.5] text-arco-text-1">
             <div className="flex items-center gap-6">
               <span className="w-[120px] shrink-0">
                 {t['resetPassword.success.username']}
@@ -220,7 +220,7 @@ export default function ResetPasswordModal({
                 </button>
               </div>
             </div>
-            <div className="my-3 h-px w-full bg-[rgba(0,0,0,0.08)]" />
+            <div className="my-3 h-px w-full bg-[var(--color-border-2)]" />
             <div className="flex items-center gap-6">
               <span className="w-[120px] shrink-0">
                 {t['resetPassword.success.tempPassword']}

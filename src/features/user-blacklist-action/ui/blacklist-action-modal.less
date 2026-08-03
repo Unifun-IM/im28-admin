@@ -1,9 +1,9 @@
-/* 加入 / 解除黑名单弹窗 — Figma 804:19981 → GaVerifyModal */
+/* 加入 / 解除黑名单弹窗 — Figma 1125:25942 */
 .arco-modal.use-blacklist-action-modal {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-border-1, #f2f3f5);
+  border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
 
   .arco-modal-content {
     padding: 0;
@@ -22,7 +22,7 @@
     gap: 8px;
     height: 48px;
     padding: 0 24px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
     background: var(--color-bg-1, #f7f8fa);
   }
 
@@ -40,7 +40,7 @@
     gap: 8px;
     height: 48px;
     padding: 0 24px;
-    border-top: 1px solid var(--color-border-1, #f2f3f5);
+    border-top: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
     background: var(--color-bg-1, #f7f8fa);
   }
 
@@ -52,8 +52,9 @@
   .arco-btn-secondary,
   .arco-btn-outline,
   .arco-btn-default {
-    border-color: rgba(0, 0, 0, 0.08);
+    border-color: var(--color-border-2, rgba(0, 0, 0, 0.08));
     color: var(--color-text-2, #4e5969);
+    background: transparent;
   }
 
   .arco-btn-primary.arco-btn-status-danger {
@@ -84,12 +85,25 @@
       margin-top: 0;
     }
 
+    /* 暗色下勿写死白底，否则占位符/文字不可见（Figma 卡片底 #232832） */
     .arco-select-view,
     .arco-textarea-wrapper,
     .arco-picker {
-      background: #fff;
+      background: var(--color-fill-2, #f2f3f5);
       border: none;
       border-radius: 8px;
+      color: var(--color-text-1, #1d2129);
+    }
+
+    .arco-select-view-value,
+    .arco-select-view-value-mirror {
+      color: var(--color-text-1, #1d2129);
+    }
+
+    .arco-select-view-placeholder,
+    .arco-textarea::placeholder,
+    .arco-picker input::placeholder {
+      color: var(--color-text-3, #86909c);
     }
 
     .arco-select-view,
@@ -98,11 +112,21 @@
       padding: 4px 12px;
     }
 
+    .arco-select-suffix {
+      color: var(--color-text-3, #86909c);
+    }
+
+    .arco-textarea-wrapper {
+      min-height: 50px;
+      padding: 4px 12px;
+    }
+
     .arco-textarea {
       min-height: 42px;
-      padding: 4px 0;
+      padding: 0;
       font-size: 14px;
       line-height: 21px;
+      color: var(--color-text-1, #1d2129);
       background: transparent;
     }
 
@@ -131,5 +155,5 @@
 
 .use-blacklist-action-modal-wrap .arco-modal-mask {
   backdrop-filter: blur(3.5px);
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-mask-1);
 }

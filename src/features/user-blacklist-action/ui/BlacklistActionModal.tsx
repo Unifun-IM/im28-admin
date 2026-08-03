@@ -71,7 +71,7 @@ function toRfc3339(value: unknown): string | undefined {
 
 /**
  * 拉黑 / 解禁
- * 单人拉黑 750:16425；单人解禁 750:16440；批量拉黑 804:19981；批量解禁 804:20090
+ * 单人拉黑 Figma 1125:25942；批量保留期限选项
  * → GaVerifyModal
  */
 export default function BlacklistActionModal({

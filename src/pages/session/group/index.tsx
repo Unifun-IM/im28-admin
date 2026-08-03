@@ -237,10 +237,17 @@ export default function GroupSessionPage() {
               <FilterField span="full">
                 <FormItem
                   field="batchGroupIds"
-                  label={t['groupSession.filter.groupIds']}
+                  label={
+                    <span className="inline-flex flex-wrap items-center gap-1">
+                      <span>{t['groupSession.filter.groupIds']}</span>
+                      <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                        {t['groupSession.filter.groupIdsPlaceholder']}
+                      </span>
+                    </span>
+                  }
                 >
                   <Input.TextArea
-                    placeholder={t['groupSession.filter.groupIdsPlaceholder']}
+                    placeholder={common['common.placeholder']}
                     autoSize={{ minRows: 2, maxRows: 6 }}
                   />
                 </FormItem>

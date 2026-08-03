@@ -48,7 +48,7 @@ export function BatchBarAction({
         isDark
           ? 'border-[#262828] text-[rgba(255,255,255,0.9)] hover:bg-[rgba(255,255,255,0.08)]'
           : cs(
-              'border-[rgba(0,0,0,0.08)] hover:opacity-80',
+              'border-[var(--color-border-2)] hover:opacity-80',
               STATUS_COLOR[status]
             ),
         className

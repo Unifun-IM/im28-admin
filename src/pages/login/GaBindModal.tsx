@@ -100,30 +100,25 @@ export default function GaBindModal({
       }}
       style={{ width: 480 }}
     >
-      <div className="box-border px-[24px] pb-[12px] pt-[24px]">
-        <div className="text-[20px] font-medium leading-[28px] text-[var(--color-text-1,#1d2129)]">
-          {t['login.gaBind.title']}
-        </div>
-        <div className="text-[12px] leading-[20px] text-[var(--color-text-3,#86909c)]">
-          {t['login.gaBind.desc']}
-        </div>
+      <div className="use-ga-header">
+        <div className="use-ga-title">{t['login.gaBind.title']}</div>
+        <div className="use-ga-desc">{t['login.gaBind.desc']}</div>
       </div>
 
-      <div className="box-border flex flex-col gap-[24px] px-[24px] py-[12px]">
-        <div className="flex justify-center">
-          <div className="box-border size-[142px] rounded-[11px] border border-solid border-[#e5e7eb] bg-[#f7f8fa] p-[15px]">
+      <div className="use-ga-body use-ga-body-bind">
+        <div className="use-ga-qr-wrap">
+          <div className="use-ga-qr">
             {qrUrl && !qrFailed ? (
               <img
                 src={qrUrl}
                 alt="GA QR"
-                className="size-full object-contain"
                 onError={() => {
                   setQrFailed(true);
                   Message.error(t['login.msg.qrLoadFail']);
                 }}
               />
             ) : (
-              <div className="flex h-[112px] w-full items-center justify-center border border-dashed border-[#99a1af] bg-[#e5e7eb] text-[10.5px] leading-[14px] text-[#6b7280]">
+              <div className="use-ga-qr-fallback">
                 {qrFailed
                   ? t['login.gaBind.qrFail']
                   : t['login.gaBind.qrLoading']}
@@ -132,10 +127,8 @@ export default function GaBindModal({
           </div>
         </div>
 
-        <div className="flex flex-col gap-[8px]">
-          <div className="text-[12px] font-medium leading-[18px] text-[var(--color-text-1,#1d2129)]">
-            {t['login.gaBind.manual']}
-          </div>
+        <div className="use-ga-section">
+          <div className="use-ga-label">{t['login.gaBind.manual']}</div>
           <Input
             className="use-login-secret"
             readOnly
@@ -143,20 +136,18 @@ export default function GaBindModal({
             suffix={
               <button
                 type="button"
-                className="inline-flex size-[14px] cursor-pointer border-0 bg-transparent p-0"
+                className="use-ga-secret-copy"
                 onClick={copySecret}
                 aria-label={t['login.gaBind.copySecret']}
               >
-                <img src={copyIcon} alt="" className="block size-[14px]" />
+                <img src={copyIcon} alt="" />
               </button>
             }
           />
         </div>
 
-        <div className="flex flex-col gap-[8px]">
-          <div className="text-[12px] font-medium leading-[18px] text-[var(--color-text-1,#1d2129)]">
-            {t['login.gaBind.codeAfter']}
-          </div>
+        <div className="use-ga-section">
+          <div className="use-ga-label">{t['login.gaBind.codeAfter']}</div>
           <VerificationCode
             className="use-ga-otp"
             length={6}
@@ -173,20 +164,14 @@ export default function GaBindModal({
         </div>
       </div>
 
-      <div className="box-border flex justify-end gap-[8px] px-[24px] pb-[24px] pt-[12px]">
-        <Button className="min-w-[80px]" disabled={loading} onClick={onCancel}>
+      <div className="use-ga-footer">
+        <Button type="secondary" disabled={loading} onClick={onCancel}>
           {mandatory ? t['navbar.logout'] : t['common.cancel']}
         </Button>
-        <Button
-          className="min-w-[80px]"
-          type="primary"
-          loading={loading}
-          onClick={() => submit(code)}
-        >
+        <Button type="primary" loading={loading} onClick={() => submit(code)}>
           {t['common.confirm']}
         </Button>
       </div>
     </Modal>
   );
 }
-

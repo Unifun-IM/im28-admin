@@ -70,15 +70,11 @@ export default function GaVerifyModal({
       }}
       style={{ width: 480 }}
     >
-      <div className="box-border px-[24px] pb-[12px] pt-[24px]">
-        <div className="text-[20px] font-medium leading-[28px] text-[var(--color-text-1,#1d2129)]">
-          {t['gaVerify.title']}
-        </div>
-        <div className="text-[12px] leading-[20px] text-[var(--color-text-3,#86909c)]">
-          {t['gaVerify.desc']}
-        </div>
+      <div className="use-ga-header">
+        <div className="use-ga-title">{t['gaVerify.title']}</div>
+        <div className="use-ga-desc">{t['gaVerify.desc']}</div>
       </div>
-      <div className="box-border px-[24px] py-[12px]">
+      <div className="use-ga-body">
         <VerificationCode
           className="use-ga-otp"
           length={6}
@@ -93,16 +89,11 @@ export default function GaVerifyModal({
           onFinish={submit}
         />
       </div>
-      <div className="box-border flex justify-end gap-[8px] px-[24px] pb-[24px] pt-[12px]">
-        <Button className="min-w-[80px]" disabled={loading} onClick={onCancel}>
+      <div className="use-ga-footer">
+        <Button type="secondary" disabled={loading} onClick={onCancel}>
           {t['common.cancel']}
         </Button>
-        <Button
-          className="min-w-[80px]"
-          type="primary"
-          loading={loading}
-          onClick={() => submit(code)}
-        >
+        <Button type="primary" loading={loading} onClick={() => submit(code)}>
           {t['common.confirm']}
         </Button>
       </div>

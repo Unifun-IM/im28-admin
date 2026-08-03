@@ -15,7 +15,6 @@ import {
 } from '@shared/api/admin/users';
 import { StatusBadge, UserAvatar } from '@shared/ui';
 import useLocale from '@shared/lib/useLocale';
-import { openimLabel } from '@shared/lib/openimLabels';
 import { formatDateTime } from '@shared/lib/formatTime';
 import './user-detail-drawer.less';
 import '@shared/ui/biz-detail-table.less';
@@ -107,7 +106,7 @@ function logDetailText(
 }
 
 /**
- * 用户详情抽屉 — Figma 666:21862（基本信息）/ 750:23153（操作日志 Timeline）
+ * 用户详情抽屉 — Figma 1125:26019（基本信息）/ 750:23153（操作日志 Timeline）
  * 宽 640；对接 AdminAPI，交互按稿面保留
  */
 export default function UserDetailDrawer({
@@ -158,8 +157,17 @@ export default function UserDetailDrawer({
 
   const user = detail?.user;
   const nickname = user?.nickname || '--';
-  const onlineLabel = openimLabel(t, 'online', detail?.online_status);
-  const onlineOk = detail?.online_status === 'online';
+  /** 头像旁展示账号态（正常/已拉黑），不展示 online unknown「未知」 */
+  const accountStatus = user?.status;
+  const accountStatusOk = accountStatus === 'active';
+  const accountStatusBanned = accountStatus === 'disabled';
+  const accountStatusLabel = accountStatusBanned
+    ? t['userQuery.status.disabled']
+    : accountStatusOk
+      ? t['userQuery.status.active']
+      : '--';
+  const accountStatusBadge: 'success' | 'error' | 'default' =
+    accountStatusOk ? 'success' : accountStatusBanned ? 'error' : 'default';
 
   const timelineItems = useMemo(
     () =>
@@ -196,7 +204,7 @@ export default function UserDetailDrawer({
       maskClosable
       onCancel={onClose}
       maskStyle={{
-        background: 'rgba(0,0,0,0.4)',
+        background: 'var(--color-mask-1)',
         backdropFilter: 'blur(3.5px)'
       }}
     >
@@ -211,13 +219,13 @@ export default function UserDetailDrawer({
               src={user?.avatar_url}
             />
             <div className="min-w-0">
-              <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-[#111418]">
+              <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-arco-text-1">
                 {nickname}
               </div>
               <div className="mt-[2px]">
                 <StatusBadge
-                  status={onlineOk ? 'success' : 'default'}
-                  text={onlineLabel}
+                  status={accountStatusBadge}
+                  text={accountStatusLabel}
                   className="!text-[14px] !leading-[21px] !text-arco-text-2"
                 />
               </div>
@@ -225,6 +233,7 @@ export default function UserDetailDrawer({
           </div>
 
           <Tabs
+            type="line"
             activeTab={tab}
             onChange={setTab}
             className="use-user-detail-tabs"
@@ -232,7 +241,7 @@ export default function UserDetailDrawer({
             <Tabs.TabPane key="basic" title={t['userDetail.tab.basic']}>
               <div className="flex flex-col gap-[12px] pt-[12px]">
                 <div>
-                  <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                  <div className="use-user-detail-section-title">
                     {t['userDetail.section.basic']}
                   </div>
                   <Descriptions
@@ -276,7 +285,7 @@ export default function UserDetailDrawer({
                 </div>
 
                 <div>
-                  <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                  <div className="use-user-detail-section-title">
                     {t['userDetail.section.social']}
                   </div>
                   <Descriptions

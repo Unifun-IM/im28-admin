@@ -30,7 +30,7 @@ export default function ForcePasswordNoticeModal({
       unmountOnExit
       style={{ width: 480 }}
     >
-      <div className="box-border flex h-[48px] items-center border-0 border-b border-solid border-[rgba(0,0,0,0.08)] px-[24px]">
+      <div className="box-border flex h-[48px] items-center border-0 border-b border-solid border-[var(--color-border-2)] px-[24px]">
         <span className="text-[16px] font-medium leading-6 text-[var(--color-text-1,#1d2129)]">
           {t['login.forceNotice.title']}
         </span>
