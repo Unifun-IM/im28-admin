@@ -238,12 +238,14 @@ export default function GroupSessionPage() {
                 <FormItem
                   field="batchGroupIds"
                   label={
-                    <span className="inline-flex flex-wrap items-center gap-1">
-                      <span>{t['groupSession.filter.groupIds']}</span>
-                      <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                    <>
+                      <span className="use-biz-filter-label-title">
+                        {t['groupSession.filter.groupIds']}
+                      </span>
+                      <span className="use-biz-filter-label-hint">
                         {t['groupSession.filter.groupIdsPlaceholder']}
                       </span>
-                    </span>
+                    </>
                   }
                 >
                   <Input.TextArea

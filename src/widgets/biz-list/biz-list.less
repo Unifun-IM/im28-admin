@@ -55,13 +55,18 @@
     line-height: 12px;
   }
 
-  /* 带 hint 的标签允许换行增高 */
+  /* 带 hint 的标签（Figma 811:22055：标题 text/1 14 + 提示 text/3 12） */
   .arco-form-label-item:has(.use-biz-filter-label-hint) {
     height: auto;
-    line-height: 18px;
+    line-height: 21px;
+    min-height: 21px;
 
     > label {
-      line-height: 18px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      line-height: 21px;
     }
   }
 
@@ -97,11 +102,18 @@
     width: 100%;
   }
 
+  .use-biz-filter-label-title {
+    font-size: 14px;
+    line-height: 21px;
+    font-weight: 400;
+    color: var(--color-text-1);
+  }
+
   .use-biz-filter-label-hint {
     font-size: 12px;
     line-height: 18px;
     font-weight: 400;
-    color: var(--color-text-3, #86909c);
+    color: var(--color-text-3);
   }
 
   .use-biz-filter-label-row .arco-form-label-item > label {

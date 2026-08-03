@@ -236,12 +236,14 @@ export default function GroupQueryPage() {
                 <FormItem
                   field="batchGroupIds"
                   label={
-                    <span className="inline-flex flex-wrap items-center gap-1">
-                      <span>{t['groupQuery.filter.groupIds']}</span>
-                      <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                    <>
+                      <span className="use-biz-filter-label-title">
+                        {t['groupQuery.filter.groupIds']}
+                      </span>
+                      <span className="use-biz-filter-label-hint">
                         {t['groupQuery.filter.groupIdsHint']}
                       </span>
-                    </span>
+                    </>
                   }
                 >
                   <Input.TextArea

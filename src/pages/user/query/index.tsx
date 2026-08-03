@@ -213,12 +213,14 @@ export default function UserQueryPage() {
                 <FormItem
                   field="batchUserIds"
                   label={
-                    <span className="inline-flex flex-wrap items-center gap-1">
-                      <span>{t['userQuery.filter.userIds']}</span>
-                      <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                    <>
+                      <span className="use-biz-filter-label-title">
+                        {t['userQuery.filter.userIds']}
+                      </span>
+                      <span className="use-biz-filter-label-hint">
                         {t['userQuery.filter.userIdsHint']}
                       </span>
-                    </span>
+                    </>
                   }
                 >
                   <Input.TextArea
