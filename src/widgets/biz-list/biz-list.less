@@ -137,22 +137,27 @@
     width: 100%;
   }
 
-  /* 填充型控件 — 高 32 / 圆角 8 / fill-1 */
+  /*
+   * 填充型控件 — Figma 1130:27303 / 1145:69705
+   * 底色：--bg/搜索筛选 → color-bg-1（亮色灰底；暗色比卡片更深）
+   * 聚焦：primary/6 描边（标注「无论点击搜索还是输入都要紫色描边」；红色为稿面标注勿实现）
+   */
   .arco-input-inner-wrapper,
   .arco-select-view,
   .arco-picker,
   .arco-input-group-addbefore,
   .arco-input-group-addafter {
-    background-color: var(--color-fill-1, #f7f8fa);
-    border: none;
+    background-color: var(--color-bg-1);
+    border: 1px solid transparent;
     border-radius: 8px;
     min-height: 32px;
     box-shadow: none;
+    caret-color: rgb(var(--primary-6));
   }
 
   .arco-input-group-addbefore + .arco-input-inner-wrapper,
   .arco-input-group:has(.arco-input-group-addbefore) > .arco-input-inner-wrapper {
-    background-color: var(--color-fill-1, #f7f8fa);
+    background-color: transparent;
     border: none;
     border-radius: 0 8px 8px 0;
     min-height: 32px;
@@ -183,7 +188,8 @@
   .arco-picker-input input {
     font-size: 14px;
     line-height: 32px;
-    color: var(--color-text-1, #1d2129);
+    color: var(--color-text-1);
+    caret-color: rgb(var(--primary-6));
   }
 
   .arco-input {
@@ -191,31 +197,31 @@
     line-height: 32px;
     height: 100%;
     padding: 0;
-    color: var(--color-text-1, #1d2129);
+    color: var(--color-text-1);
+    caret-color: rgb(var(--primary-6));
   }
 
   .arco-input::placeholder,
   .arco-select-view-selector .arco-select-view-input::placeholder,
   .arco-picker-input input::placeholder,
   .arco-select-view-placeholder {
-    color: var(--color-text-3, #86909c);
+    color: var(--color-text-3);
   }
 
-  .arco-input-inner-wrapper:hover,
-  .arco-select-view:hover,
-  .arco-picker:hover,
+  .arco-input-inner-wrapper:hover:not(:focus-within),
+  .arco-select:not(.arco-select-focused) .arco-select-view:hover,
+  .arco-picker:not(.arco-picker-focused):hover {
+    background-color: var(--color-fill-2);
+  }
+
   .arco-input-inner-wrapper:focus-within,
   .arco-select-view-focus,
-  .arco-select-focused .arco-select-view {
-    background-color: var(--color-fill-2, #f2f3f5);
-  }
-
-  /* RangePicker focus：保持 fill-1，去掉 Arco 默认的 active 浅紫底 */
+  .arco-select-focused .arco-select-view,
   .arco-picker-focused,
   .arco-picker-focused:hover {
-    background-color: var(--color-fill-1, #f7f8fa);
-    border-color: transparent;
-    box-shadow: none;
+    background-color: var(--color-bg-1) !important;
+    border-color: rgb(var(--primary-6)) !important;
+    box-shadow: none !important;
   }
 
   .arco-picker-focused .arco-picker-input-active input,
@@ -229,21 +235,35 @@
     width: 100%;
   }
 
+  /* 带前缀类型的关键词框：整组共用底色与聚焦描边 */
   .arco-input-group-wrapper {
     width: 100%;
-    background: transparent;
-    border: none;
+    background: var(--color-bg-1);
+    border: 1px solid transparent;
+    border-radius: 8px;
     padding: 0;
+    overflow: hidden;
+    box-shadow: none;
+  }
+
+  .arco-input-group-wrapper:hover:not(:focus-within) {
+    background: var(--color-fill-2);
+  }
+
+  .arco-input-group-wrapper:focus-within {
+    background: var(--color-bg-1);
+    border-color: rgb(var(--primary-6));
   }
 
   .arco-input-group-addbefore {
     width: auto;
     white-space: nowrap;
     border-radius: 8px 0 0 8px;
-    border-right: 1px solid var(--color-border-2, #e5e6eb);
+    border: none;
+    border-right: 1px solid var(--color-border-2);
     padding: 0 11px;
-    color: var(--color-text-1, #1d2129);
-    background-color: var(--color-fill-1, #f7f8fa);
+    color: var(--color-text-1);
+    background-color: transparent;
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -254,6 +274,7 @@
 
     .arco-select-view {
       background: transparent;
+      border: none;
       padding: 0 4px 0 0;
       min-height: 32px;
       height: 32px;
@@ -265,13 +286,15 @@
     .arco-select-view-placeholder {
       font-size: 14px;
       line-height: 32px;
-      color: var(--color-text-1, #1d2129);
+      color: var(--color-text-1);
     }
   }
 
   .arco-input-group > .arco-input-inner-wrapper {
     flex: 1 1 auto;
     min-width: 0;
+    background: transparent;
+    border: none;
   }
 
   .arco-input-group-addbefore + .arco-input-inner-wrapper {
@@ -288,38 +311,49 @@
   }
 
   .arco-textarea {
-    background-color: var(--color-fill-1, #f7f8fa);
-    border: none;
+    background-color: var(--color-bg-1);
+    border: 1px solid transparent;
     border-radius: 8px;
     box-shadow: none;
     min-height: 32px;
     padding: 5px 12px;
     font-size: 14px;
     line-height: 22px;
-    color: var(--color-text-1, #1d2129);
+    color: var(--color-text-1);
     resize: vertical;
+    caret-color: rgb(var(--primary-6));
   }
 
-  .arco-textarea:hover {
-    background-color: var(--color-fill-2, #f2f3f5);
+  .arco-textarea:hover:not(:focus) {
+    background-color: var(--color-fill-2);
   }
 
   .arco-textarea:focus,
   .arco-textarea-focus {
-    background-color: var(--color-fill-2, #f2f3f5);
-    border: none;
+    background-color: var(--color-bg-1);
+    border-color: rgb(var(--primary-6));
     box-shadow: none;
   }
 
   .arco-textarea::placeholder {
-    color: var(--color-text-3, #86909c);
+    color: var(--color-text-3);
   }
 
   .arco-input-search-btn {
     background: transparent !important;
     border: none !important;
-    color: var(--color-text-3, #86909c) !important;
+    color: var(--color-text-3) !important;
     width: 28px;
+  }
+
+  .use-biz-filter-search-icon {
+    color: var(--color-text-3);
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .use-biz-filter-search-icon:hover {
+    color: rgb(var(--primary-6));
   }
 
   .arco-select-view-multiple {
@@ -470,13 +504,13 @@
 
   .arco-select-option:hover,
   .arco-select-option-hover {
-    background-color: var(--color-fill-2, #f2f3f5) !important;
+    background-color: var(--color-primary-light) !important;
   }
 
-  /* 单选：选中行浅底 */
+  /* 单选：选中行品牌浅底 */
   .arco-select-option-selected {
-    background-color: var(--color-fill-2, #f2f3f5) !important;
-    color: var(--color-text-1, #1d2129);
+    background-color: var(--color-primary-light) !important;
+    color: var(--color-text-1);
     font-weight: 400;
   }
 

@@ -110,9 +110,9 @@ const i18n = {
     'userSession.action.cancelBatchSearch': 'Cancel batch',
     'userSession.filter.keyword': 'User keyword',
     'userSession.filter.keywordPlaceholder': 'Enter ID',
-    'userSession.filter.userIds': 'User IDs',
+    'userSession.filter.userIds': 'Batch User IDs',
     'userSession.filter.userIdsPlaceholder':
-      'Enter user IDs, separated by spaces or commas',
+      'Enter user IDs; supports commas, spaces, or a column from Excel',
     'userSession.filter.status': 'User status',
     'userSession.col.user': 'User',
     'userSession.col.contact': 'Contact',
@@ -244,9 +244,9 @@ const i18n = {
     'userSession.action.cancelBatchSearch': '取消批量',
     'userSession.filter.keyword': '用户关键词搜索',
     'userSession.filter.keywordPlaceholder': '请输入ID',
-    'userSession.filter.userIds': '用户 ID',
+    'userSession.filter.userIds': '批量用户ID',
     'userSession.filter.userIdsPlaceholder':
-      '请输入用户 ID，多个用空格或逗号分隔',
+      '可输入用户ID，支持逗号、空格或从Excel复制一列',
     'userSession.filter.status': '用户状态',
     'userSession.col.user': '用户信息',
     'userSession.col.contact': '联系方式',

@@ -8,6 +8,7 @@ import {
 import { IconSearch } from '@arco-design/web-react/icon';
 import useLocale from '@shared/lib/useLocale';
 import FilterSelect from './FilterSelect';
+import { useFilterSearch } from './FilterSearchContext';
 
 function firstOptionValue(
   options: SelectProps['options']
@@ -31,7 +32,7 @@ export type FilterKeywordInputProps = Omit<InputProps, 'addBefore'> & {
 
 /**
  * 关键词搜索：Input + addBefore(类型 Select) + 搜索图标
- * 超出 Arco 单控件能力，故抽成业务组件；前缀下拉复用 FilterSelect 样式
+ * 回车 / 点搜索图标触发筛选区 onSearch（Figma：点击可直接搜索）
  */
 export default function FilterKeywordInput({
   typeField,
@@ -41,9 +42,16 @@ export default function FilterKeywordInput({
   allowClear = true,
   placeholder,
   suffix,
+  onPressEnter,
   ...rest
 }: FilterKeywordInputProps) {
   const t = useLocale();
+  const { onSearch } = useFilterSearch();
+
+  const triggerSearch = () => {
+    onSearch?.();
+  };
+
   return (
     <Input
       allowClear={allowClear}
@@ -57,7 +65,18 @@ export default function FilterKeywordInput({
           <FilterSelect options={typeOptions} style={{ width: typeWidth }} />
         </Form.Item>
       }
-      suffix={suffix ?? <IconSearch className="text-arco-text-3" />}
+      suffix={
+        suffix ?? (
+          <IconSearch
+            className="use-biz-filter-search-icon"
+            onClick={triggerSearch}
+          />
+        )
+      }
+      onPressEnter={(e) => {
+        onPressEnter?.(e);
+        triggerSearch();
+      }}
       {...rest}
     />
   );

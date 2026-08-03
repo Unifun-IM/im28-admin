@@ -180,10 +180,19 @@ export default function UserSessionPage() {
               <FilterField span="full">
                 <FormItem
                   field="batchUserIds"
-                  label={t['userSession.filter.userIds']}
+                  label={
+                    <>
+                      <span className="use-biz-filter-label-title">
+                        {t['userSession.filter.userIds']}
+                      </span>
+                      <span className="use-biz-filter-label-hint">
+                        {t['userSession.filter.userIdsPlaceholder']}
+                      </span>
+                    </>
+                  }
                 >
                   <Input.TextArea
-                    placeholder={t['userSession.filter.userIdsPlaceholder']}
+                    placeholder={common['common.placeholder']}
                     autoSize={{ minRows: 2, maxRows: 6 }}
                   />
                 </FormItem>

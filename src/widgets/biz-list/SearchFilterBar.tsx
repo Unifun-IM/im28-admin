@@ -10,6 +10,8 @@ import {
 import { IconDown, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import useLocale from '@shared/lib/useLocale';
+import { FilterSearchContext } from './FilterSearchContext';
+import './biz-list.less';
 
 const { Row, Col } = Grid;
 
@@ -160,53 +162,55 @@ export default function SearchFilterBar({
       className={cs('use-biz-filter-bar', className)}
       bodyStyle={{ padding: 12 }}
     >
-      <Form form={form} layout="vertical" requiredSymbol={false} size="default">
-        {/* Pro：横向 24 / 上下行 16 */}
-        <Row gutter={[24, 16]}>
-          {visibleChildren.map((child, index) => {
-            const key = child.key ?? index;
-            if (isFilterFieldElement(child)) {
-              return React.cloneElement(child, { key });
-            }
-            return <FilterField key={key}>{child}</FilterField>;
-          })}
-          <Col
-            className="use-biz-filter-actions"
-            span={actionsSpan}
-            xs={24}
-            sm={actionsSpan === 24 ? 24 : Math.max(actionsSpan, 12)}
-            md={actionsSpan}
-          >
-            <Space size={8}>
-              {showToggle && (
+      <FilterSearchContext.Provider value={{ onSearch }}>
+        <Form form={form} layout="vertical" requiredSymbol={false} size="default">
+          {/* Pro：横向 24 / 上下行 16 */}
+          <Row gutter={[24, 16]}>
+            {visibleChildren.map((child, index) => {
+              const key = child.key ?? index;
+              if (isFilterFieldElement(child)) {
+                return React.cloneElement(child, { key });
+              }
+              return <FilterField key={key}>{child}</FilterField>;
+            })}
+            <Col
+              className="use-biz-filter-actions"
+              span={actionsSpan}
+              xs={24}
+              sm={actionsSpan === 24 ? 24 : Math.max(actionsSpan, 12)}
+              md={actionsSpan}
+            >
+              <Space size={8}>
+                {showToggle && (
+                  <Button
+                    type="text"
+                    className="use-biz-filter-action-text"
+                    icon={collapsed ? <IconDown /> : <IconUp />}
+                    onClick={() => setCollapsed((v) => !v)}
+                  >
+                    {collapsed ? resolvedExpandText : resolvedCollapseText}
+                  </Button>
+                )}
+                {extraActions}
                 <Button
                   type="text"
                   className="use-biz-filter-action-text"
-                  icon={collapsed ? <IconDown /> : <IconUp />}
-                  onClick={() => setCollapsed((v) => !v)}
+                  onClick={onReset}
                 >
-                  {collapsed ? resolvedExpandText : resolvedCollapseText}
+                  {resolvedResetText}
                 </Button>
-              )}
-              {extraActions}
-              <Button
-                type="text"
-                className="use-biz-filter-action-text"
-                onClick={onReset}
-              >
-                {resolvedResetText}
-              </Button>
-              <Button
-                type="primary"
-                className="use-biz-filter-action-search"
-                onClick={onSearch}
-              >
-                {resolvedSearchText}
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-      </Form>
+                <Button
+                  type="primary"
+                  className="use-biz-filter-action-search"
+                  onClick={onSearch}
+                >
+                  {resolvedSearchText}
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+        </Form>
+      </FilterSearchContext.Provider>
     </Card>
   );
 }
