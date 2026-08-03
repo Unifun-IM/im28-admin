@@ -65,10 +65,208 @@
   }
 }
 
-/* 滑块：成功态对齐 Figma success/1 + success/6 */
+/* 滑块验证 — Figma 602:35197 */
 .use-login-slide {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  overflow: hidden;
+  user-select: none;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-2);
+  background: var(--color-fill-2);
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+
   &.is-verified {
     background: rgb(var(--success-1));
+    border-color: transparent;
+  }
+
+  .use-login-slide__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: rgb(var(--primary-6));
+    pointer-events: none;
+    transition: none;
+  }
+
+  &:not(.is-dragging) .use-login-slide__fill {
+    transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.35s ease, opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &.is-verified .use-login-slide__fill {
+    width: 100% !important;
+    background: rgb(var(--success-6));
+    opacity: 1 !important;
+  }
+
+  /*
+   * Art Design Pro：渐变 + background-clip 扫光
+   * linear-gradient(textColor → 高光白 → textColor) + position 循环位移
+   */
+  .use-login-slide__tip {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-size: 14px;
+    line-height: 21px;
+    user-select: none;
+  }
+
+  .use-login-slide__tip.is-shimmer {
+    color: transparent;
+    background-image: linear-gradient(
+      to right,
+      var(--color-text-2) 0%,
+      var(--color-text-2) 40%,
+      #fff 50%,
+      var(--color-text-2) 60%,
+      var(--color-text-2) 100%
+    );
+    background-size: auto 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: use-login-slide-shimmer 2s cubic-bezier(0, 0.2, 1, 1) infinite;
+  }
+
+  .use-login-slide__tip.is-success {
+    color: var(--color-text-white);
+    -webkit-text-fill-color: var(--color-text-white);
+    background: none;
+    animation: use-login-slide-tip-in 0.4s ease both;
+  }
+
+  .use-login-slide__handle {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 8px;
+    cursor: grab;
+    background: rgb(var(--primary-6));
+    box-shadow: 0 2px 8px rgba(99, 92, 255, 0.28);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.3s ease, box-shadow 0.3s ease, margin 0.32s ease;
+
+    &:active,
+    &.is-dragging {
+      cursor: grabbing;
+      transition: none;
+      box-shadow: 0 4px 12px rgba(99, 92, 255, 0.36);
+    }
+
+    &.is-verified {
+      margin-left: auto;
+      background: rgb(var(--success-6));
+      box-shadow: 0 2px 8px rgba(77, 181, 130, 0.28);
+      animation: use-login-slide-handle-settle 0.45s
+        cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+
+  .use-login-slide__icon {
+    display: block;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+  }
+
+  .use-login-slide__icon.is-arrow {
+    transform: rotate(-90deg);
+  }
+
+  &:not(.is-verified):not(.is-dragging) .use-login-slide__icon.is-arrow {
+    animation: use-login-slide-nudge 1.6s ease-in-out infinite;
+  }
+
+  &.is-just-verified .use-login-slide__icon.is-check {
+    animation: use-login-slide-check-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1)
+      both;
+  }
+}
+
+/* 与 Art slidetounlock 一致：背景位从 -半宽 扫到 +半宽 */
+@keyframes use-login-slide-shimmer {
+  0% {
+    background-position: var(--slide-shimmer-pw, -130px) 0;
+  }
+
+  100% {
+    background-position: var(--slide-shimmer-w, 130px) 0;
+  }
+}
+
+@keyframes use-login-slide-nudge {
+  0%,
+  100% {
+    transform: rotate(-90deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-90deg) translateY(3px);
+  }
+}
+
+@keyframes use-login-slide-check-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes use-login-slide-handle-settle {
+  0% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes use-login-slide-tip-in {
+  0% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .use-login-slide,
+  .use-login-slide .use-login-slide__fill,
+  .use-login-slide .use-login-slide__handle,
+  .use-login-slide .use-login-slide__tip,
+  .use-login-slide .use-login-slide__icon {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .use-login-slide .use-login-slide__tip.is-shimmer {
+    color: var(--color-text-2);
+    -webkit-text-fill-color: var(--color-text-2);
+    background: none;
   }
 }
 

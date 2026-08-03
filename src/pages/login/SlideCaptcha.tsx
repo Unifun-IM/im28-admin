@@ -3,6 +3,7 @@ import cs from 'classnames';
 import useLocale from '@shared/lib/useLocale';
 import arrowIcon from './assets/icon-arrow.svg';
 import checkIcon from './assets/icon-check.svg';
+import './login.less';
 
 export type SlideCaptchaProps = {
   value?: boolean;
@@ -11,8 +12,7 @@ export type SlideCaptchaProps = {
 };
 
 /**
- * 滑块验证 — Figma 602:35197 / 602:35261
- * 轨道高 32、圆角 8；手柄 primary / success；文案居中
+ * 滑块验证 — Figma 602:35197
  */
 export default function SlideCaptcha({
   value,
@@ -21,10 +21,23 @@ export default function SlideCaptcha({
 }: SlideCaptchaProps) {
   const t = useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
-  const dragging = useRef(false);
+  const draggingRef = useRef(false);
   const offsetRef = useRef(0);
   const [offset, setOffset] = useState(0);
   const [verified, setVerified] = useState(!!value);
+  const [dragging, setDragging] = useState(false);
+  const [justVerified, setJustVerified] = useState(false);
+  const [trackWidth, setTrackWidth] = useState(0);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const sync = () => setTrackWidth(el.clientWidth);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (value == null) return;
@@ -32,6 +45,7 @@ export default function SlideCaptcha({
     if (!value) {
       offsetRef.current = 0;
       setOffset(0);
+      setJustVerified(false);
     }
   }, [value]);
 
@@ -43,6 +57,13 @@ export default function SlideCaptcha({
     return Math.max(0, track.clientWidth - handleW);
   }, []);
 
+  const handleWidth = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return 46;
+    const handle = track.querySelector('[data-handle]') as HTMLElement | null;
+    return handle?.offsetWidth ?? 46;
+  }, []);
+
   const finish = useCallback(
     (next: boolean) => {
       setVerified(next);
@@ -51,9 +72,11 @@ export default function SlideCaptcha({
         const end = maxOffset();
         offsetRef.current = end;
         setOffset(end);
+        setJustVerified(true);
       } else {
         offsetRef.current = 0;
         setOffset(0);
+        setJustVerified(false);
       }
     },
     [maxOffset, onChange]
@@ -61,17 +84,17 @@ export default function SlideCaptcha({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (verified) return;
-    dragging.current = true;
+    draggingRef.current = true;
+    setDragging(true);
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
-    if (!dragging.current || verified) return;
+    if (!draggingRef.current || verified) return;
     const track = trackRef.current;
     if (!track) return;
     const rect = track.getBoundingClientRect();
-    const handle = track.querySelector('[data-handle]') as HTMLElement | null;
-    const handleW = handle?.offsetWidth ?? 46;
+    const handleW = handleWidth();
     const x = e.clientX - rect.left - handleW / 2;
     const next = Math.min(Math.max(0, x), maxOffset());
     offsetRef.current = next;
@@ -79,8 +102,9 @@ export default function SlideCaptcha({
   };
 
   const onPointerUp = () => {
-    if (!dragging.current) return;
-    dragging.current = false;
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    setDragging(false);
     const limit = maxOffset();
     if (offsetRef.current >= limit * 0.92) {
       finish(true);
@@ -90,21 +114,47 @@ export default function SlideCaptcha({
     }
   };
 
+  const limit = Math.max(maxOffset(), 1);
+  const progress = verified ? 1 : Math.min(1, offset / limit);
+  const fillWidth = verified
+    ? '100%'
+    : `${Math.max(0, offset + handleWidth() * 0.5)}px`;
+  /** 拖动中底色随进度变实：约 0.35 → 0.85 */
+  const fillOpacity = verified ? 1 : 0.35 + progress * 0.5;
+  /** Art：扫光位移用半宽 */
+  const shimmerHalf = Math.floor((trackWidth || 260) / 2);
+
   return (
     <div
       ref={trackRef}
       className={cs(
-        'use-login-slide relative box-border flex h-[32px] w-full select-none items-center overflow-hidden rounded-[8px] border border-solid border-[var(--color-border-2)]',
-        verified
-          ? 'is-verified bg-[rgb(var(--success-1,#f7fff9))]'
-          : 'bg-[var(--color-fill-2,#f2f3f5)]',
+        'use-login-slide',
+        verified && 'is-verified',
+        dragging && 'is-dragging',
+        justVerified && 'is-just-verified',
         className
       )}
+      style={
+        {
+          ['--slide-shimmer-w' as string]: `${shimmerHalf}px`,
+          ['--slide-shimmer-pw' as string]: `${-shimmerHalf}px`
+        } as React.CSSProperties
+      }
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
-      <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[14px] leading-[21px] text-arco-text-2">
+      <div
+        className="use-login-slide__fill"
+        style={{ width: fillWidth, opacity: fillOpacity }}
+        aria-hidden
+      />
+      <span
+        className={cs(
+          'use-login-slide__tip',
+          verified ? 'is-success' : 'is-shimmer'
+        )}
+      >
         {verified ? t['login.slider.success'] : t['login.slider.tip']}
       </span>
       <div
@@ -113,13 +163,22 @@ export default function SlideCaptcha({
         aria-label={t['login.slider.aria']}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={verified ? 100 : Math.round((offset / Math.max(maxOffset(), 1)) * 100)}
+        aria-valuenow={verified ? 100 : Math.round(progress * 100)}
         tabIndex={0}
         className={cs(
-          'relative z-[1] flex h-[32px] cursor-grab items-center justify-center rounded-[8px] px-[16px] active:cursor-grabbing',
-          verified ? 'ml-auto bg-[rgb(var(--success-6,#4db582))]' : 'bg-[rgb(var(--primary-6))]'
+          'use-login-slide__handle',
+          verified && 'is-verified',
+          dragging && 'is-dragging'
         )}
-        style={verified ? undefined : { transform: `translateX(${offset}px)` }}
+        style={
+          verified
+            ? undefined
+            : {
+                transform: dragging
+                  ? `translateX(${offset}px) scale(1.04)`
+                  : `translateX(${offset}px)`
+              }
+        }
         onPointerDown={onPointerDown}
         onKeyDown={(e) => {
           if (verified) return;
@@ -132,7 +191,10 @@ export default function SlideCaptcha({
         <img
           src={verified ? checkIcon : arrowIcon}
           alt=""
-          className={cs('block size-[14px]', !verified && '-rotate-90')}
+          className={cs(
+            'use-login-slide__icon',
+            verified ? 'is-check' : 'is-arrow'
+          )}
           draggable={false}
         />
       </div>
