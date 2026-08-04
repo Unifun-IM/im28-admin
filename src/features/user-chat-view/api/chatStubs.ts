@@ -10,12 +10,10 @@ import {
   postV1AdminConversationMessagesList,
   postV1AdminConversationsList
 } from '@shared/api/admin/adminhuihuachaxun';
-import {
-  postV1AdminUsersContactsList,
-  postV1AdminUsersOnlineStatusList
-} from '@shared/api/admin/users';
+import { postV1AdminUsersContactsList } from '@shared/api/admin/users';
 import { postV1AdminGroupsListByUser } from '@shared/api/admin/groups';
 import { formatDateTime } from '@shared/lib/formatTime';
+import { fetchUserOnlineStatusMap } from '@shared/lib/userOnlineStatus';
 import {
   isHiddenMessageContentType,
   mapMessageContentTypeToUi,
@@ -277,34 +275,22 @@ async function listAllUserGroups(userId: string): Promise<ChatBookPeer[]> {
   return peers;
 }
 
-/** 批量补齐单聊/联系人在线状态（单次最多 30） */
+/** 批量补齐单聊/联系人在线状态（Presence） */
 async function fillUserOnlineStatus(
   peers: ChatBookPeer[]
 ): Promise<ChatBookPeer[]> {
-  const userIds = Array.from(
-    new Set(
-      peers
-        .filter((p) => p.kind === 'session' || p.kind === 'contact')
-        .map((p) => p.id)
-        .filter(Boolean)
-    )
-  );
+  const userIds = peers
+    .filter((p) => p.kind === 'session' || p.kind === 'contact')
+    .map((p) => p.id)
+    .filter(Boolean);
   if (!userIds.length) return peers;
-  const onlineMap = new Map<string, boolean>();
-  for (let i = 0; i < userIds.length; i += 30) {
-    const chunk = userIds.slice(i, i + 30);
-    try {
-      const res = await postV1AdminUsersOnlineStatusList({ user_ids: chunk });
-      (res.data?.list || []).forEach((item) => {
-        if (item.user_id) onlineMap.set(item.user_id, !!item.online);
-      });
-    } catch {
-      // Presence 失败不影响通讯录主体
-    }
-  }
+  const onlineMap = await fetchUserOnlineStatusMap(userIds);
   return peers.map((p) =>
     p.kind === 'session' || p.kind === 'contact'
-      ? { ...p, online: onlineMap.get(p.id) ?? p.online }
+      ? {
+          ...p,
+          online: onlineMap.has(p.id) ? onlineMap.get(p.id) : p.online
+        }
       : p
   );
 }

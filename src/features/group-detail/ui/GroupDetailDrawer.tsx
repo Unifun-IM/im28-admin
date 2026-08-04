@@ -28,6 +28,7 @@ import { openimLabel } from '@shared/lib/openimLabels';
 import { getAvatarLetter } from '@shared/lib/userAvatar';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
+import { fetchUserOnlineStatus } from '@shared/lib/userOnlineStatus';
 import '@features/user-detail/ui/user-detail-drawer.less';
 import '@shared/ui/biz-detail-table.less';
 
@@ -230,6 +231,8 @@ export default function GroupDetailDrawer({
   const [memberFrom, setMemberFrom] = useState<'main' | 'members'>('members');
   const [memberUser, setMemberUser] =
     useState<AdminAPI.AdminDetailUserEnvelope['data']>();
+  const [memberOnline, setMemberOnline] =
+    useState<AdminAPI.OnlineStatus>('unknown');
 
   useEffect(() => {
     if (!visible) return;
@@ -239,6 +242,7 @@ export default function GroupDetailDrawer({
     setActiveMember(null);
     setMemberFrom('members');
     setMemberUser(undefined);
+    setMemberOnline('unknown');
   }, [visible, defaultTab, groupId]);
 
   useEffect(() => {
@@ -269,16 +273,24 @@ export default function GroupDetailDrawer({
   useEffect(() => {
     if (view !== 'member' || !activeMember?.userId) {
       setMemberUser(undefined);
+      setMemberOnline('unknown');
       return;
     }
     let cancelled = false;
     setMemberLoading(true);
-    postV1AdminUsersDetail({ user_id: activeMember.userId })
-      .then((res) => {
-        if (!cancelled) setMemberUser(res.data);
+    Promise.all([
+      postV1AdminUsersDetail({ user_id: activeMember.userId }),
+      fetchUserOnlineStatus(activeMember.userId)
+    ])
+      .then(([res, online]) => {
+        if (cancelled) return;
+        setMemberUser(res.data);
+        setMemberOnline(online);
       })
       .catch(() => {
-        if (!cancelled) setMemberUser(undefined);
+        if (cancelled) return;
+        setMemberUser(undefined);
+        setMemberOnline('unknown');
       })
       .finally(() => {
         if (!cancelled) setMemberLoading(false);
@@ -389,6 +401,7 @@ export default function GroupDetailDrawer({
     if (view === 'member') {
       setActiveMember(null);
       setMemberUser(undefined);
+      setMemberOnline('unknown');
       setView(memberFrom);
       return;
     }
@@ -426,7 +439,6 @@ export default function GroupDetailDrawer({
   );
 
   const memberProfile = memberUser?.user;
-  const memberOnline = memberUser?.online_status;
   const memberOnlineOk = memberOnline === 'online';
 
   return (

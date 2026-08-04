@@ -21,6 +21,7 @@ import { UserDetailDrawer } from '@features/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { openimLabel } from '@shared/lib/openimLabels';
 import { formatDateTime } from '@shared/lib/formatTime';
+import { attachUsersOnlineStatus } from '@shared/lib/userOnlineStatus';
 
 
 const FormItem = Form.Item;
@@ -83,7 +84,7 @@ export default function UserQueryPage() {
         keyword,
         keyword_type: keyword ? values.keyword_type || undefined : undefined,
         status: values.status || undefined,
-        online_status: values.online_status || undefined,
+        // 在线状态统一走 Presence，不传 list 的 online_status
         registered_start_at: values.registered_start_at,
         registered_end_at: values.registered_end_at,
         last_operated_start_at: values.last_operated_start_at,
@@ -106,14 +107,28 @@ export default function UserQueryPage() {
     async (p = page, size = pageSize) => {
       setLoading(true);
       try {
+        const values = form.getFieldsValue();
+        const onlineFilter = values.online_status as
+          | AdminAPI.OnlineStatus
+          | ''
+          | undefined;
         const res = await postV1AdminUsersList(buildBody(p, size));
-        setData(res.data?.list || []);
+        let list = await attachUsersOnlineStatus(res.data?.list || []);
+        if (
+          onlineFilter === 'online' ||
+          onlineFilter === 'offline' ||
+          onlineFilter === 'unknown'
+        ) {
+          list = list.filter((row) => row.online_status === onlineFilter);
+        }
+        setData(list);
+        // 有在线筛选时仅过滤当前页展示；总数仍用列表接口（Presence 无分页筛选）
         setTotal(res.data?.total || 0);
       } finally {
         setLoading(false);
       }
     },
-    [buildBody, page, pageSize]
+    [buildBody, form, page, pageSize]
   );
 
   useEffect(() => {
@@ -368,15 +383,18 @@ export default function UserQueryPage() {
               title: t['userQuery.col.onlineStatus'],
               dataIndex: 'online_status',
               width: 120,
-              render: (v: AdminAPI.OnlineStatus) => (
-                <Tag
-                  color={v === 'online' ? 'green' : 'gray'}
-                  size="small"
-                  className="!m-0"
-                >
-                  {openimLabel(t, 'online', v)}
-                </Tag>
-              )
+              render: (_: unknown, row: AdminAPI.AdminUserWrap) => {
+                const v = row.online_status;
+                return (
+                  <Tag
+                    color={v === 'online' ? 'green' : 'gray'}
+                    size="small"
+                    className="!m-0"
+                  >
+                    {openimLabel(t, 'online', v)}
+                  </Tag>
+                );
+              }
             },
             {
               title: common['common.action'],
