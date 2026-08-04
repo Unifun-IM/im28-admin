@@ -6,7 +6,6 @@ import {
 } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import {
   postV1AdminAuthLogin,
@@ -57,7 +56,6 @@ export default function LoginForm() {
   const [gaErrorTick, setGaErrorTick] = useState(0);
 
   const t = useLocale();
-  const navigate = useNavigate();
 
   function finishLogin(token?: AdminAPI.Token) {
     const access = token?.access_token;
@@ -143,10 +141,8 @@ export default function LoginForm() {
         await applyLoginData(res.data);
       }
     } catch (error) {
-      if (isIpAccessDeniedError(error)) {
-        navigate('/ip-denied', { replace: true });
-        return;
-      }
+      // 100031 由 request 全局拦截跳转 /ip-denied；此处仅避免再弹登录错误 Toast
+      if (isIpAccessDeniedError(error)) return;
       Message.error(mapLoginToast(error, 'login', t));
       setSliderOk(false);
     } finally {

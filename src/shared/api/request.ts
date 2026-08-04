@@ -331,13 +331,14 @@ instance.interceptors.response.use(
         original: data
       };
 
-      if (isAuthFailure(bizCode, undefined, msg)) {
-        return retryAfterRefresh(cfg, failed);
-      }
-
+      // 100031：全站 IP 白名单拦截（任意接口，优先于登录态处理）
       if (isIpAccessDeniedError(failed)) {
         redirectToIpAccessDenied();
         return Promise.reject(failed);
+      }
+
+      if (isAuthFailure(bizCode, undefined, msg)) {
+        return retryAfterRefresh(cfg, failed);
       }
 
       if (!silent) {
@@ -353,19 +354,23 @@ instance.interceptors.response.use(
     const cfg = (error.config || {}) as RequestConfig;
     const silent = cfg.skipErrorHandler === true;
     const { status, message } = resolveFailMessage(error);
+    const body = error.response?.data;
+    const bizCode = isApiBasePayload(body) ? body.code : undefined;
     const failed: RequestFailedError = {
       status,
+      bizCode,
       message,
       original: error
     };
 
-    if (isAuthFailure(undefined, status, message)) {
-      return retryAfterRefresh(cfg, failed);
-    }
-
+    // 100031：全站 IP 白名单拦截（HTTP 错误体里也可能带业务码）
     if (isIpAccessDeniedError(failed)) {
       redirectToIpAccessDenied();
       return Promise.reject(failed);
+    }
+
+    if (isAuthFailure(bizCode, status, message)) {
+      return retryAfterRefresh(cfg, failed);
     }
 
     if (!silent) {

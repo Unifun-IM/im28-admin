@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 /**
  * IP 非白名单非法访问拦截页 — Figma 1050:22903
- * 触发：登录 / 接口业务码 100031；页面错误码固定展示 403
+ * 触发：任意接口业务码 100031（axios 全局拦截）；页面错误码固定展示 403
  * IP 一律由 ipify 获取展示
  */
 function IpDeniedPage() {
