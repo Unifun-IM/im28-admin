@@ -185,19 +185,21 @@ body {
   }
 
   /**
-   * Modal 内表单控件统一：白底 + border/2 描边 + 圆角 8
-   * Arco 默认是 transparent border + fill 底，叠在白色弹窗内容上会「看不见输入框」
-   * TextArea 的描边在 .arco-textarea 上，不在 wrapper
+   * Modal 内表单控件统一 — Figma 800:25390（原因说明）等
+   * 亮色：bg-2 白底 + border/2；暗色：bg-2 #232832 卡片底（叠在 bg-1 页面底上）
+   * 一律走 theme-tokens，勿写死 #fff
+   * TextArea：描边/底色在 .arco-textarea，wrapper 仅作布局壳
    */
   .arco-input-inner-wrapper,
   .arco-textarea,
   .arco-select-view,
   .arco-picker {
-    background-color: var(--color-bg-2, #fff);
-    border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
+    background-color: var(--color-bg-2);
+    border: 1px solid var(--color-border-2);
     border-radius: 8px;
     min-height: 32px;
     box-shadow: none;
+    color: var(--color-text-1);
   }
 
   .arco-textarea-wrapper {
@@ -208,16 +210,44 @@ body {
   }
 
   .arco-textarea {
-    min-height: auto;
-    padding: 5px 12px;
+    box-sizing: border-box;
+    min-height: 50px;
+    padding: 4px 12px;
+    font-size: 14px;
+    line-height: 21px;
+    color: var(--color-text-1);
+    caret-color: rgb(var(--primary-6));
+    resize: vertical;
+  }
+
+  .arco-input {
+    color: var(--color-text-1);
+    caret-color: rgb(var(--primary-6));
+  }
+
+  .arco-select-view-value,
+  .arco-select-view-value-mirror {
+    color: var(--color-text-1);
+  }
+
+  .arco-select-suffix,
+  .arco-picker-suffix {
+    color: var(--color-text-3);
+  }
+
+  .arco-input::placeholder,
+  .arco-textarea::placeholder,
+  .arco-select-view-placeholder,
+  .arco-picker input::placeholder {
+    color: var(--color-text-3);
   }
 
   .arco-input-inner-wrapper:hover,
   .arco-textarea:hover,
   .arco-select-view:hover,
   .arco-picker:hover {
-    background-color: var(--color-bg-2, #fff);
-    border-color: var(--color-border-3, #c9cdd4);
+    background-color: var(--color-bg-2);
+    border-color: var(--color-border-3);
   }
 
   .arco-input-inner-wrapper:focus-within,
@@ -226,8 +256,9 @@ body {
   .arco-select-view-focus,
   .arco-select-focused .arco-select-view,
   .arco-picker-focused {
-    background-color: var(--color-bg-2, #fff);
+    background-color: var(--color-bg-2);
     border-color: rgb(var(--primary-6));
+    box-shadow: none;
   }
 
   .arco-modal-footer {
@@ -235,18 +266,18 @@ body {
       border-radius: var(--border-radius-small, 8px);
     }
 
-    /* 取消 / 次要：白底描边，不用 Arco 默认灰底 */
+    /* 取消 / 次要：卡片底 + 描边（亮/暗均走 token） */
     .arco-btn-secondary,
     .arco-btn-outline,
     .arco-btn-default:not(.arco-btn-primary) {
-      background: var(--color-bg-2, #fff);
-      border: 1px solid var(--color-border-2, #e5e6eb);
-      color: var(--color-text-2, #4e5969);
+      background: var(--color-bg-2);
+      border: 1px solid var(--color-border-2);
+      color: var(--color-text-2);
 
       &:hover {
-        background: var(--color-fill-1, #f7f8fa);
-        border-color: var(--color-border-2, #e5e6eb);
-        color: var(--color-text-1, #1d2129);
+        background: var(--color-fill-1);
+        border-color: var(--color-border-2);
+        color: var(--color-text-1);
       }
     }
   }

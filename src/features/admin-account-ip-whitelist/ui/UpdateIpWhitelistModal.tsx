@@ -110,6 +110,7 @@ export default function UpdateIpWhitelistModal({
         visible={visible && step === 'form'}
         onCancel={onCancel}
         unmountOnExit
+        closable={false}
         maskClosable={false}
         className="use-update-ip-whitelist-modal"
         wrapClassName="use-update-ip-whitelist-modal-wrap"

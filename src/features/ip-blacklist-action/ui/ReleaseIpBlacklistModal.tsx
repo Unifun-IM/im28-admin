@@ -87,6 +87,7 @@ export default function ReleaseIpBlacklistModal({
         visible={visible && step === 'form'}
         onCancel={onCancel}
         unmountOnExit
+        closable={false}
         maskClosable={false}
         style={{ width: 780 }}
         title={

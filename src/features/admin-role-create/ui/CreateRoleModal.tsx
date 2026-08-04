@@ -211,6 +211,7 @@ export default function CreateRoleModal({
       visible={visible}
       onCancel={onCancel}
       unmountOnExit
+      closable={false}
       maskClosable={false}
       style={{ width: 780 }}
       footer={

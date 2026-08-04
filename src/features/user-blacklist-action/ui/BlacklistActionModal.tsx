@@ -71,7 +71,7 @@ function toRfc3339(value: unknown): string | undefined {
 
 /**
  * 拉黑 / 解禁
- * 单人拉黑 Figma 1125:25942；批量保留期限选项
+ * 单人加入黑名单 Figma 750:16425；批量保留期限选项
  * → GaVerifyModal
  */
 export default function BlacklistActionModal({
@@ -235,20 +235,14 @@ export default function BlacklistActionModal({
         footer={null}
       >
         <div className="use-blacklist-action-header">
-          <img
-            alt=""
-            src={isAdd ? iconWarning : iconSuccess}
-            className="size-5 shrink-0"
-          />
+          <img alt="" src={isAdd ? iconWarning : iconSuccess} />
           <span className="text-[16px] font-medium leading-6 text-arco-text-1">
             {titleText}
           </span>
         </div>
 
         <div className="use-blacklist-action-body">
-          <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
-            {descText}
-          </p>
+          <p className="use-blacklist-action-desc">{descText}</p>
 
           <Form
             form={form}
@@ -344,6 +338,7 @@ export default function BlacklistActionModal({
                     : t['blacklistAction.placeholder.unbanReasonDescription']
                 }
                 autoSize={{ minRows: 2, maxRows: 4 }}
+                maxLength={500}
               />
             </FormItem>
           </Form>

@@ -158,7 +158,7 @@ export default function CreateAccountModal({
         )
       }
       unmountOnExit
-      closable={step === 'form'}
+      closable={false}
       maskClosable={false}
       className={cs('use-create-account-modal', {
         'is-success': step === 'success'

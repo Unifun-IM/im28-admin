@@ -81,10 +81,17 @@ const SEARCH_TYPES: SearchType[] = [
   'account'
 ];
 
+const REMOVE_REASON_KEYS = [
+  'mistaken',
+  'expired',
+  'policy',
+  'other'
+] as const;
+
 /**
- * 白名单操作 — Figma 805:20062 / 966:19453 / 966:19304 / 966:19968 / 966:20131
- * 添加：选对象 →（已注册）模糊搜索选人 → 原因 → GaVerifyModal →（未注册 create）成功页
- * 移除：原因 → GaVerifyModal
+ * 白名单操作 — Figma 805:20062 / 966:19453 / 805:20148
+ * 添加：选对象 →（已注册）模糊搜索选人 → 原因说明 → GaVerifyModal →（未注册 create）成功页
+ * 移除：操作原因 Select + 原因说明 → GaVerifyModal
  */
 export default function WhitelistActionModal({
   visible,
@@ -124,6 +131,15 @@ export default function WhitelistActionModal({
       SEARCH_TYPES.map((value) => ({
         label: t[`whitelist.keywordType.${value}`],
         value
+      })),
+    [t]
+  );
+
+  const removeReasonOptions = useMemo(
+    () =>
+      REMOVE_REASON_KEYS.map((key) => ({
+        label: t[`whitelistAction.reason.${key}`],
+        value: t[`whitelistAction.reason.${key}`]
       })),
     [t]
   );
@@ -359,7 +375,7 @@ export default function WhitelistActionModal({
     ? targetType === 'unregistered'
       ? t['whitelistAction.action.createAndAdd']
       : t['whitelistAction.action.confirmAdd']
-    : common['common.confirm'];
+    : t['whitelistAction.action.confirmRemove'];
 
   const renderSearchField = () => (
     <div className="use-whitelist-search-block">
@@ -368,59 +384,62 @@ export default function WhitelistActionModal({
         required
         className="use-whitelist-search-item"
       >
-        <div className="use-whitelist-search-wrap relative">
-          <Input
-            value={searchKeyword}
-            allowClear
-            placeholder={searchPlaceholder}
-            addBefore={
-              <Select
-                value={searchType}
-                options={searchTypeOptions}
-                style={{ width: 100 }}
-                onChange={(v) => {
-                  const next = v as SearchType;
-                  setSearchType(next);
-                  setSearchResults([]);
-                  setDropdownOpen(false);
-                  if (searchKeyword.trim()) scheduleSearch(next, searchKeyword);
-                }}
-              />
-            }
-            suffix={
-              searchLoading ? (
-                <Spin size={14} />
-              ) : (
-                <IconSearch
-                  className="cursor-pointer text-arco-text-3"
-                  onClick={() => runSearch(searchType, searchKeyword)}
-                />
-              )
-            }
-            onChange={(v) => {
-              setSearchKeyword(v);
-              if (selectedUser) setSelectedUser(null);
-              scheduleSearch(searchType, v);
-            }}
-            onFocus={() => {
-              if (searchResults.length) setDropdownOpen(true);
-            }}
-            onBlur={() => {
-              // 延迟关闭，便于点击下拉项
-              setTimeout(() => setDropdownOpen(false), 180);
-            }}
-            onPressEnter={() => runSearch(searchType, searchKeyword)}
-          />
+        <div className="use-whitelist-search-wrap">
+          <div className="use-whitelist-search-combo">
+            <Select
+              className="use-whitelist-search-type"
+              value={searchType}
+              options={searchTypeOptions}
+              triggerProps={{ autoAlignPopupWidth: false }}
+              onChange={(v) => {
+                const next = v as SearchType;
+                setSearchType(next);
+                setSearchResults([]);
+                setDropdownOpen(false);
+                if (searchKeyword.trim()) scheduleSearch(next, searchKeyword);
+              }}
+            />
+            <Input
+              className="use-whitelist-search-keyword"
+              value={searchKeyword}
+              allowClear
+              placeholder={searchPlaceholder}
+              suffix={
+                searchLoading ? (
+                  <Spin size={14} />
+                ) : (
+                  <IconSearch
+                    className="cursor-pointer text-arco-text-3"
+                    onClick={() => runSearch(searchType, searchKeyword)}
+                  />
+                )
+              }
+              onChange={(v) => {
+                setSearchKeyword(v);
+                if (selectedUser) setSelectedUser(null);
+                scheduleSearch(searchType, v);
+              }}
+              onFocus={() => {
+                if (searchResults.length) setDropdownOpen(true);
+              }}
+              onBlur={() => {
+                setTimeout(() => setDropdownOpen(false), 180);
+              }}
+              onPressEnter={() => runSearch(searchType, searchKeyword)}
+            />
+          </div>
           {dropdownOpen ? (
             <div className="use-whitelist-search-dropdown">
               {searchResults.length ? (
-                searchResults.map((user) => {
+                searchResults.map((user, index) => {
                   const uid = user.user_id || '';
                   return (
                     <button
-                      key={uid}
+                      key={uid || index}
                       type="button"
-                      className="use-whitelist-search-option"
+                      className={cs('use-whitelist-search-option', {
+                        'is-active': index === 0
+                      })}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handleSelectUser(user)}
                     >
@@ -544,15 +563,7 @@ export default function WhitelistActionModal({
   const renderRemoveForm = () => (
     <>
       <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
-        {isBatch
-          ? t['whitelistAction.hint.removeBatch'].replace(
-              '{count}',
-              String(count)
-            )
-          : t['whitelistAction.hint.removeSingle'].replace(
-              '{id}',
-              ids[0] || ''
-            )}
+        {t['whitelistAction.desc.remove']}
       </p>
       <Form
         form={form}
@@ -566,14 +577,14 @@ export default function WhitelistActionModal({
           rules={[
             {
               required: true,
-              message: t['whitelistAction.msg.reasonRequired']
+              message: t['whitelistAction.msg.removeReasonRequired']
             }
           ]}
         >
-          <TextArea
+          <Select
+            allowClear
             placeholder={t['whitelistAction.placeholder.removeReason']}
-            autoSize={{ minRows: 2, maxRows: 4 }}
-            maxLength={500}
+            options={removeReasonOptions}
           />
         </FormItem>
         <FormItem
@@ -581,7 +592,9 @@ export default function WhitelistActionModal({
           label={t['whitelistAction.field.reasonDescription']}
         >
           <TextArea
-            placeholder={t['whitelistAction.placeholder.reasonDescription']}
+            placeholder={
+              t['whitelistAction.placeholder.removeReasonDescription']
+            }
             autoSize={{ minRows: 2, maxRows: 4 }}
             maxLength={500}
           />
@@ -695,12 +708,7 @@ export default function WhitelistActionModal({
               <span className="text-[16px] font-medium leading-6 text-arco-text-1">
                 {isAdd
                   ? t['whitelistAction.title.add']
-                  : isBatch
-                    ? t['whitelistAction.title.removeBatch'].replace(
-                        '{count}',
-                        String(count)
-                      )
-                    : t['whitelistAction.title.removeSingle']}
+                  : t['whitelistAction.title.remove']}
               </span>
             </div>
 
