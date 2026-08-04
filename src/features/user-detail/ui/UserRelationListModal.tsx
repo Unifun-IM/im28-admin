@@ -181,30 +181,47 @@ export default function UserRelationListModal({
       footer={null}
       unmountOnExit
     >
-      <Table
-        loading={loading}
-        rowKey={(row) =>
-          isFriends
-            ? (row as AdminAPI.AdminUserContactWrap).user?.user_id ||
-              (row as AdminAPI.AdminUserContactWrap).friend?.friend_user_id ||
-              String(Math.random())
-            : (row as AdminAPI.AdminUserGroupWrap).group?.group_id ||
-              String(Math.random())
-        }
-        data={isFriends ? friends : groups}
-        columns={isFriends ? friendColumns : groupColumns}
-        pagination={{
-          current: page,
-          pageSize,
-          total,
-          showTotal: true,
-          onChange: (p, s) => {
-            setPage(p);
-            setPageSize(s);
-            fetchData(p, s);
+      {isFriends ? (
+        <Table
+          loading={loading}
+          rowKey={(row) =>
+            row.user?.user_id ||
+            row.friend?.friend_user_id ||
+            String(Math.random())
           }
-        }}
-      />
+          data={friends}
+          columns={friendColumns}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showTotal: true,
+            onChange: (p, s) => {
+              setPage(p);
+              setPageSize(s);
+              fetchData(p, s);
+            }
+          }}
+        />
+      ) : (
+        <Table
+          loading={loading}
+          rowKey={(row) => row.group?.group_id || String(Math.random())}
+          data={groups}
+          columns={groupColumns}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showTotal: true,
+            onChange: (p, s) => {
+              setPage(p);
+              setPageSize(s);
+              fetchData(p, s);
+            }
+          }}
+        />
+      )}
     </Drawer>
   );
 }
