@@ -10,7 +10,7 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { postV1AdminGroupsList } from '@shared/api/admin/groups';
+import { postV1AdminConversationsGroupsList } from '@shared/api/admin/adminhuihuachaxun';
 import { GroupDetailDrawer } from '@features/group-detail';
 import {
   UserChatModal,
@@ -23,14 +23,11 @@ import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
 
-type GroupListRow = {
-  group?: AdminAPI.Group;
-  owner?: AdminAPI.User;
-};
+type GroupListRow = AdminAPI.AdminGroupConversationWrap;
 
 type GroupSessionForm = {
   keyword?: string;
-  keyword_type?: AdminAPI.AdminListGroupRequest['keyword_type'];
+  keyword_type?: 'group_id' | 'title';
   owner_user_id?: string;
   status?: '' | '0' | '1' | '2' | '3';
   batchGroupIds?: string;
@@ -56,7 +53,7 @@ function parseBatchIds(raw?: string) {
 
 /**
  * 群组会话查询 — Figma 977:32954 / 菜单 1032:25514
- * 搜索优先空态；列表走 Admin groups/list；会话场景操作以查聊天为主
+ * @see postV1AdminConversationsGroupsList
  */
 export default function GroupSessionPage() {
   const t = useLocale();
@@ -90,22 +87,25 @@ export default function GroupSessionPage() {
     [t]
   );
 
+  const resolveStatus = (statusRaw: GroupSessionForm['status']) =>
+    statusRaw === '' || statusRaw === undefined || statusRaw === null
+      ? undefined
+      : (Number(statusRaw) as AdminAPI.GroupStatus);
+
   const buildBody = useCallback(
-    (p: number, size: number): AdminAPI.AdminListGroupRequest => {
+    (p: number, size: number): AdminAPI.AdminListGroupConversationRequest => {
       const values = form.getFieldsValue();
       const keyword = values.keyword?.trim() || undefined;
+      const keywordType = values.keyword_type || 'group_id';
       const owner_user_id = values.owner_user_id?.trim() || undefined;
-      const statusRaw = values.status;
       return {
         page: p,
         page_size: size,
-        keyword,
-        keyword_type: keyword ? values.keyword_type || undefined : undefined,
+        group_ids:
+          keyword && keywordType === 'group_id' ? [keyword] : undefined,
+        title: keyword && keywordType === 'title' ? keyword : undefined,
         owner_user_id,
-        status:
-          statusRaw === '' || statusRaw === undefined || statusRaw === null
-            ? undefined
-            : (Number(statusRaw) as AdminAPI.GroupStatus)
+        status: resolveStatus(values.status)
       };
     },
     [form]
@@ -123,39 +123,18 @@ export default function GroupSessionPage() {
             setTotal(0);
             return;
           }
-          const owner_user_id = values.owner_user_id?.trim() || undefined;
-          const statusRaw = values.status;
-          const status =
-            statusRaw === '' || statusRaw === undefined || statusRaw === null
-              ? undefined
-              : (Number(statusRaw) as AdminAPI.GroupStatus);
-          const results = await Promise.all(
-            ids.map((id) =>
-              postV1AdminGroupsList({
-                keyword: id,
-                keyword_type: 'group_id',
-                owner_user_id,
-                status,
-                page: 1,
-                page_size: 1
-              })
-            )
-          );
-          const list: GroupListRow[] = [];
-          const seen = new Set<string>();
-          results.forEach((res) => {
-            (res.data?.list || []).forEach((row) => {
-              const gid = row.group?.group_id;
-              if (!gid || seen.has(gid)) return;
-              seen.add(gid);
-              list.push(row);
-            });
+          const res = await postV1AdminConversationsGroupsList({
+            group_ids: ids,
+            owner_user_id: values.owner_user_id?.trim() || undefined,
+            status: resolveStatus(values.status),
+            page: 1,
+            page_size: Math.min(100, ids.length)
           });
-          setData(list);
-          setTotal(list.length);
+          setData(res.data?.list || []);
+          setTotal(res.data?.total || 0);
           return;
         }
-        const res = await postV1AdminGroupsList(buildBody(p, size));
+        const res = await postV1AdminConversationsGroupsList(buildBody(p, size));
         setData(res.data?.list || []);
         setTotal(res.data?.total || 0);
       } finally {
@@ -303,7 +282,6 @@ export default function GroupSessionPage() {
               }
             />
           ),
-          /** 列顺序对齐 Figma 977:35433 */
           columns: [
             {
               title: t['groupQuery.col.group'],
@@ -329,16 +307,10 @@ export default function GroupSessionPage() {
               width: 200,
               ellipsis: false,
               render: (_: unknown, row: GroupListRow) => {
-                const ownerId =
-                  row.owner?.user_id || row.group?.owner_user_id || '';
+                const ownerId = row.owner?.user_id || '';
                 return (
                   <AvatarNameCell
-                    name={
-                      row.owner?.nickname ||
-                      row.owner?.account ||
-                      ownerId ||
-                      '--'
-                    }
+                    name={row.owner?.nickname || ownerId || '--'}
                     sub={`${t['groupQuery.cell.userId']}：${ownerId || '--'}`}
                     copyText={ownerId}
                     avatar={row.owner?.avatar_url}
@@ -397,10 +369,8 @@ export default function GroupSessionPage() {
                             id: group_id,
                             name: row.group?.title,
                             memberCount: row.group?.member_count,
-                            viewerUserId:
-                              row.owner?.user_id ||
-                              row.group?.owner_user_id ||
-                              undefined
+                            conversationId: row.group?.conversation_id,
+                            viewerUserId: row.owner?.user_id || undefined
                           })
                       }
                     ]}

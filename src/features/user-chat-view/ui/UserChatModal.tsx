@@ -131,6 +131,8 @@ export type ChatModalTarget = {
   memberCount?: number;
   onlineCount?: number;
   online?: boolean;
+  /** Admin 会话 ID；群会话列表返回时可直接用于拉消息 */
+  conversationId?: string;
   /** 群入口时用于会话/消息接口的 C 端用户（通常为群主） */
   viewerUserId?: string;
 };
@@ -266,6 +268,7 @@ export default function UserChatModal({
 
   const targetToPeer = (t: ChatModalTarget): ChatPeer => ({
     id: t.id,
+    conversationId: t.conversationId,
     name: t.name || t.id,
     sub: t.type === 'group' ? `ID：${t.id}` : undefined,
     memberCount: t.memberCount,

@@ -30,8 +30,8 @@ declare namespace AdminAPI {
   type AdminAddWhitelistUserRequest = {
     /** 已注册的 C 端用户 ID。 */
     user_id: string;
-    /** 可选的加入白名单原因；传入时不能仅包含空白字符。 */
-    reason?: string;
+    /** 加入白名单原因，不能仅包含空白字符。 */
+    reason: string;
     /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
     two_factor_code: string;
   };
@@ -93,6 +93,10 @@ declare namespace AdminAPI {
   type AdminBatchRemoveWhitelistUserRequest = {
     /** 需要移出白名单的用户 ID，单次最多 100 个。 */
     user_ids: string[];
+    /** 本批次统一使用的移除原因，不能仅包含空白字符。 */
+    reason: string;
+    /** 本批次统一使用的可选原因说明；传入时不能仅包含空白字符。 */
+    reason_description?: string;
     /** 当前管理员的 Google Authenticator 6 位动态验证码；整批操作成功后不可重复使用。 */
     two_factor_code: string;
   };
@@ -136,6 +140,19 @@ declare namespace AdminAPI {
     nickname?: string;
     /** 用户头像 URL。 */
     avatar_url?: string;
+  };
+
+  type AdminCreateWhitelistUserEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { user_id: string; account: string; temporary_password: string };
+    };
+
+  type AdminCreateWhitelistUserRequest = {
+    /** 创建账号并加入白名单的原因，不能仅包含空白字符。 */
+    reason: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminDetailGroupEnvelope =
@@ -185,6 +202,28 @@ declare namespace AdminAPI {
     ResponseBase & {
       data?: { setting?: AdminGroupGlobalSetting };
     };
+
+  type AdminGroupConversationOwner = {
+    user_id?: string;
+    nickname?: string;
+    avatar_url?: string;
+  };
+
+  type AdminGroupConversationSummary = {
+    group_id?: string;
+    /** 群对应的会话 ID，用于进入聊天记录查询。 */
+    conversation_id?: string;
+    title?: string;
+    avatar_url?: string;
+    member_count?: number;
+    status?: GroupStatus;
+    created_at?: RFC3339Time;
+  };
+
+  type AdminGroupConversationWrap = {
+    group?: AdminGroupConversationSummary;
+    owner?: AdminGroupConversationOwner;
+  };
 
   type AdminGroupGlobalSetting = {
     /** 创建群最少人数配置。 */
@@ -272,6 +311,37 @@ declare namespace AdminAPI {
     limit?: number;
   };
 
+  type AdminListGroupByUserEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminUserGroupWrap[]; total?: number };
+    };
+
+  type AdminListGroupByUserRequest = {
+    /** 需要查询当前群聊列表的 C 端用户 ID。 */
+    user_id: string;
+    page?: number;
+    page_size?: number;
+  };
+
+  type AdminListGroupConversationEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminGroupConversationWrap[]; total?: number };
+    };
+
+  type AdminListGroupConversationRequest = {
+    /** 精确匹配的群 ID，支持一次提交多个，单次最多 100 个。 */
+    group_ids?: string[];
+    /** 单个群名称关键词，模糊匹配且不能仅包含空白字符。 */
+    title?: string;
+    /** 群主用户 ID，精确匹配。 */
+    owner_user_id?: string;
+    status?: GroupStatus;
+    page?: number;
+    page_size?: number;
+  };
+
   type AdminListGroupEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -333,6 +403,42 @@ declare namespace AdminAPI {
     page_size?: number;
   };
 
+  type AdminListSystemOperationLogEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminSystemOperationLogWrap[]; total?: number };
+    };
+
+  type AdminListSystemOperationLogRequest = {
+    /** 操作后台账号，支持模糊匹配；传入时不能仅包含空白字符。 */
+    operator_account?: string;
+    /** 操作类型。依次表示登录与安全、后台账号管理、角色管理、用户查询、用户拉黑、白名单管理、群聊查询、聊天记录查看、系统参数设置、操作日志查看、权限与安全拦截、访问记录。 */
+    operation_type?:
+      | "login_security"
+      | "system_user_management"
+      | "role_management"
+      | "user_query"
+      | "user_ban"
+      | "whitelist_management"
+      | "group_query"
+      | "message_query"
+      | "system_setting"
+      | "operation_log_query"
+      | "permission_security"
+      | "access_record";
+    /** 操作来源 IPv4 或 IPv6 地址，精确匹配。 */
+    ip_address?: string;
+    /** 页面操作路径，精确匹配；传入时不能仅包含空白字符。 */
+    operation_path?: string;
+    /** 操作内容关键词，支持模糊匹配；传入时不能仅包含空白字符。 */
+    content_keyword?: string;
+    /** 操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
+    operated_start_at?: RFC3339Time;
+    operated_end_at?: RFC3339Time;
+    page?: number;
+    page_size?: number;
+  };
+
   type AdminListUserContactEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -385,6 +491,17 @@ declare namespace AdminAPI {
     ResponseBase & {
       data?: { list?: AdminUserGroupWrap[]; total?: number };
     };
+
+  type AdminListUserOnlineStatusEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminUserOnlineStatus[] };
+    };
+
+  type AdminListUserOnlineStatusRequest = {
+    /** 需要查询在线状态的用户 ID，单次最多 30 个。 */
+    user_ids: string[];
+  };
 
   type AdminListUserOperationLogEnvelope =
     // #/components/schemas/ResponseBase
@@ -489,6 +606,10 @@ declare namespace AdminAPI {
 
   type AdminRemoveWhitelistUserRequest = {
     user_id: string;
+    /** 移除原因，不能仅包含空白字符。 */
+    reason: string;
+    /** 可选的原因说明；传入时不能仅包含空白字符。 */
+    reason_description?: string;
     /** 当前管理员的 Google Authenticator 6 位动态验证码；操作成功后不可重复使用。 */
     two_factor_code: string;
   };
@@ -500,10 +621,30 @@ declare namespace AdminAPI {
     };
 
   type AdminSearchUserRequest = {
-    /** 搜索字段类型。用户 ID、手机号、邮箱和用户账号使用精确匹配，用户昵称使用不区分大小写的包含匹配。 */
+    /** 搜索字段类型。五种类型都使用不区分大小写的包含匹配，输入的 `%` 和 `_` 按普通字符处理。 */
     type: "user_id" | "phone" | "email" | "account" | "nickname";
     /** 搜索内容，不能仅包含空白字符。 */
     keyword: string;
+  };
+
+  type AdminSystemOperationLog = {
+    /** 系统操作日志唯一 ID。 */
+    log_id: string;
+    /** 操作发生时的后台账号快照。 */
+    operator_account: string;
+    /** 操作类型机器标识，取值和请求 operation_type 一致。 */
+    operation_type: string;
+    /** 操作来源 IP。 */
+    ip_address: string;
+    /** 后台页面或功能路径。 */
+    operation_path: string;
+    /** 具体操作内容。 */
+    operation_content: string;
+    operated_at: RFC3339Time;
+  };
+
+  type AdminSystemOperationLogWrap = {
+    log: AdminSystemOperationLog;
   };
 
   type AdminTraceMessageEnvelope =
@@ -651,6 +792,13 @@ declare namespace AdminAPI {
   type AdminUserGroupWrap = {
     group?: Group;
     member?: GroupMember;
+  };
+
+  type AdminUserOnlineStatus = {
+    /** 用户 ID。 */
+    user_id: string;
+    /** true 表示当前在线，false 表示离线或没有在线记录。 */
+    online: boolean;
   };
 
   type AdminUserOperationClient = {
@@ -1734,6 +1882,7 @@ declare namespace AdminAPI {
     | 1515
     | 1519
     | 1520
+    | 1521
     | 1601
     | 1602
     | 1603
@@ -1887,6 +2036,11 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminConversationsGroupsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminConversationsListParams = {
     ""?: any;
     ""?: any;
@@ -1908,6 +2062,11 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminGroupsDetailParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminGroupsListByUserParams = {
     ""?: any;
     ""?: any;
   };
@@ -2022,6 +2181,11 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminSystemOperationLogsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminSystemSettingsGetParams = {
     ""?: any;
     ""?: any;
@@ -2132,6 +2296,11 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminUsersOnlineStatusListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminUsersOperationLogsListParams = {
     ""?: any;
     ""?: any;
@@ -2153,6 +2322,11 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminUsersWhitelistBatchRemoveParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersWhitelistCreateParams = {
     ""?: any;
     ""?: any;
   };
@@ -2383,7 +2557,7 @@ declare namespace AdminAPI {
   type SystemMessage = {
     /** 系统事件类型；通话实时通知使用 rtc.call.invite、rtc.call.accept、rtc.call.reject、rtc.call.cancel、rtc.call.hangup、rtc.call.ended。 */
     event_type?: string;
-    /** 给人阅读的系统通知文本。 */
+    /** 兼容兜底文本，不动态拼接昵称或配置值；前端不得用它做业务判断。 */
     text?: string;
     /** 系统事件业务字段；通话通知包含 call_id、conversation_id、call_type、room_name、caller_id、operator_id、status、status_text、reason_code、reason、e2ee_required。status 和 reason_code 是稳定协议码，status_text 和 reason 是中文展示文案。 */
     extra?: Record<string, any>;

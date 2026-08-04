@@ -64,6 +64,8 @@ export const MessageContentType = {
   GroupMemberSetToOrdinaryUserNotification: 1518,
   GroupInfoSetAnnouncementNotification: 1519,
   GroupInfoSetNameNotification: 1520,
+  /** Admin OpenAPI MessageContentType 1521（系统类） */
+  GroupSystemNotification1521: 1521,
 
   /**
    * Admin 通话过程系统通知（body.system.event_type = rtc.call.*）
@@ -297,7 +299,7 @@ function parseCustomCall(
 
 /**
  * Admin 约定使用 body.system 的 MessageType（与 OpenAPI MessageType 注释一致）。
- * 1200-1202、1400、已定义的 1501-1520、1601-1608、1701、2102 → SystemMessageBody
+ * 1200-1202、1400、已定义的 1501-1521、1601-1608、1701、2102 → SystemMessageBody
  */
 export function isAdminSystemMessageType(type?: number): boolean {
   if (type == null) return false;
@@ -307,7 +309,7 @@ export function isAdminSystemMessageType(type?: number): boolean {
   if (type === MessageContentType.AdminRevokeMessageNotification) return true;
   if (isRtcCallProcessNotification(type)) return true;
   // 群相关系统通知（Admin MessageType 子集 + 兼容 OpenIM 扩展码）
-  if (type >= 1501 && type <= 1520) return true;
+  if (type >= 1501 && type <= 1521) return true;
   return false;
 }
 
@@ -469,6 +471,8 @@ function defaultSystemTextByType(type?: number): string | undefined {
       return '阅后即焚消息';
     case MessageContentType.OANotification:
       return '系统通知';
+    case MessageContentType.GroupSystemNotification1521:
+      return '系统通知';
     default:
       return undefined;
   }
@@ -477,10 +481,10 @@ function defaultSystemTextByType(type?: number): string | undefined {
 /**
  * 解析 Admin SystemMessageBody。
  * 结构：`{ system: { event_type?, text?, extra? } }`
- * - text：给人阅读的主文案（优先）
+ * - event_type / extra：结构化业务与展示优先
+ * - text：兼容兜底，禁止用于业务判断
  * - extra.status_text / extra.reason：中文展示文案
  * - extra.status / extra.reason_code：稳定协议码，不作主展示
- * - event_type：无文案时的兜底（friend_* / rtc.call.* 转中文）
  * @see AdminAPI.SystemMessage / SystemMessageBody
  */
 function parseSystemMessageBody(
@@ -505,13 +509,14 @@ function parseSystemMessageBody(
       : {};
 
   const eventType = pickStr(sys.event_type, sys.eventType);
-  const text = pickStr(sys.text);
+  /** 兼容兜底文本，禁止用于业务分支 */
+  const fallbackText = pickStr(sys.text);
   const statusText = pickStr(extra.status_text, extra.statusText);
   const reason = pickStr(extra.reason);
 
-  let content = pickStr(text, statusText, reason);
+  let content = '';
 
-  // 好友通过类：即使后端给了简短 text，也优先用带昵称/打招呼提示的完整文案
+  // 好友通过类：用 event_type / type + extra 拼完整文案
   const friendEventKey = eventType
     ? eventType.trim().toLowerCase().replace(/\./g, '_')
     : '';
@@ -528,9 +533,18 @@ function parseSystemMessageBody(
         eventType || 'friend_created',
         extra,
         opts
-      ) || content;
-  } else if (!content && eventType) {
-    content = formatSystemEventText(eventType, extra, opts);
+      ) || '';
+  } else if (eventType) {
+    content = formatSystemEventText(eventType, extra, opts) || '';
+  }
+
+  if (!content) {
+    content = pickStr(statusText, reason);
+  }
+
+  // text 仅兜底展示
+  if (!content) {
+    content = fallbackText;
   }
 
   if (!content) {

@@ -22,6 +22,7 @@ import {
   postV1AdminUsersSearch,
   postV1AdminUsersWhitelistAdd,
   postV1AdminUsersWhitelistBatchRemove,
+  postV1AdminUsersWhitelistCreate,
   postV1AdminUsersWhitelistRemove
 } from '@shared/api/admin/users';
 import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
@@ -49,6 +50,7 @@ export type WhitelistActionModalProps = {
 
 type FormValues = {
   reason?: string;
+  reason_description?: string;
 };
 
 type PendingPayload = FormValues & {
@@ -81,8 +83,8 @@ const SEARCH_TYPES: SearchType[] = [
 
 /**
  * 白名单操作 — Figma 805:20062 / 966:19453 / 966:19304 / 966:19968 / 966:20131
- * 添加：选对象 →（已注册）模糊搜索选人 → 原因 → GaVerifyModal →（未注册）成功页
- * 移除：确认 → GaVerifyModal
+ * 添加：选对象 →（已注册）模糊搜索选人 → 原因 → GaVerifyModal →（未注册 create）成功页
+ * 移除：原因 → GaVerifyModal
  */
 export default function WhitelistActionModal({
   visible,
@@ -281,26 +283,38 @@ export default function WhitelistActionModal({
     if (submitting || !pending) return;
     try {
       setSubmitting(true);
+      const reason = String(pending.reason || '').trim();
+      const reasonDescription =
+        String(pending.reason_description || '').trim() || undefined;
+
       if (isAdd && pending.targetType === 'unregistered') {
-        // OpenAPI 仅有 whitelist/add（已注册）；创建账号并加白接口尚未就绪
-        Message.error(common['common.apiNotReady']);
-        setStep('form');
+        const res = await postV1AdminUsersWhitelistCreate({
+          reason,
+          two_factor_code: code
+        });
+        setCreated({
+          user_id: res.data?.user_id || '',
+          account: res.data?.account || '',
+          password: res.data?.temporary_password || ''
+        });
+        setStep('success');
         return;
       }
       if (isAdd) {
         const userId = (pending.ids[0] || '').trim();
-        const body: AdminAPI.AdminAddWhitelistUserRequest = {
+        await postV1AdminUsersWhitelistAdd({
           user_id: userId,
-          reason: pending.reason?.trim() || undefined,
+          reason,
           two_factor_code: code
-        };
-        await postV1AdminUsersWhitelistAdd(body);
+        });
         Message.success(t['whitelistAction.msg.addSuccess']);
         onSuccess?.();
         onCancel();
       } else if (isBatch) {
         await postV1AdminUsersWhitelistBatchRemove({
           user_ids: pending.ids,
+          reason,
+          reason_description: reasonDescription,
           two_factor_code: code
         });
         Message.success(t['whitelistAction.msg.removeSuccess']);
@@ -309,6 +323,8 @@ export default function WhitelistActionModal({
       } else {
         await postV1AdminUsersWhitelistRemove({
           user_id: pending.ids[0],
+          reason,
+          reason_description: reasonDescription,
           two_factor_code: code
         });
         Message.success(t['whitelistAction.msg.removeSuccess']);
@@ -508,6 +524,12 @@ export default function WhitelistActionModal({
         <FormItem
           field="reason"
           label={t['whitelistAction.field.reason']}
+          rules={[
+            {
+              required: true,
+              message: t['whitelistAction.msg.reasonRequired']
+            }
+          ]}
         >
           <TextArea
             placeholder={t['whitelistAction.placeholder.reason']}
@@ -520,17 +542,52 @@ export default function WhitelistActionModal({
   );
 
   const renderRemoveForm = () => (
-    <div className="text-[14px] leading-[22px] text-arco-text-2">
-      {isBatch
-        ? t['whitelistAction.hint.removeBatch'].replace(
-            '{count}',
-            String(count)
-          )
-        : t['whitelistAction.hint.removeSingle'].replace(
-            '{id}',
-            ids[0] || ''
-          )}
-    </div>
+    <>
+      <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+        {isBatch
+          ? t['whitelistAction.hint.removeBatch'].replace(
+              '{count}',
+              String(count)
+            )
+          : t['whitelistAction.hint.removeSingle'].replace(
+              '{id}',
+              ids[0] || ''
+            )}
+      </p>
+      <Form
+        form={form}
+        layout="vertical"
+        requiredSymbol={{ position: 'end' }}
+        className="use-whitelist-action-form mt-3 flex flex-col gap-3"
+      >
+        <FormItem
+          field="reason"
+          label={t['whitelistAction.field.removeReason']}
+          rules={[
+            {
+              required: true,
+              message: t['whitelistAction.msg.reasonRequired']
+            }
+          ]}
+        >
+          <TextArea
+            placeholder={t['whitelistAction.placeholder.removeReason']}
+            autoSize={{ minRows: 2, maxRows: 4 }}
+            maxLength={500}
+          />
+        </FormItem>
+        <FormItem
+          field="reason_description"
+          label={t['whitelistAction.field.reasonDescription']}
+        >
+          <TextArea
+            placeholder={t['whitelistAction.placeholder.reasonDescription']}
+            autoSize={{ minRows: 2, maxRows: 4 }}
+            maxLength={500}
+          />
+        </FormItem>
+      </Form>
+    </>
   );
 
   const renderSuccess = () => (

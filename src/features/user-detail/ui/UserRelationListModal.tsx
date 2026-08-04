@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Drawer, Table } from '@arco-design/web-react';
 import {
-  postV1AdminUsersContactsList,
-  postV1AdminUsersGroupsList
+  postV1AdminUsersContactsList
 } from '@shared/api/admin/users';
+import { postV1AdminGroupsListByUser } from '@shared/api/admin/groups';
 import { AvatarNameCell } from '@widgets/biz-list';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -18,7 +18,7 @@ export type UserRelationListModalProps = {
 
 /**
  * 用户详情 · 好友 / 群聊列表
- * @see postV1AdminUsersContactsList / postV1AdminUsersGroupsList
+ * @see postV1AdminUsersContactsList / postV1AdminGroupsListByUser
  */
 export default function UserRelationListModal({
   visible,
@@ -55,7 +55,7 @@ export default function UserRelationListModal({
           setFriends(res.data?.list || []);
           setTotal(res.data?.total || 0);
         } else {
-          const res = await postV1AdminUsersGroupsList({
+          const res = await postV1AdminGroupsListByUser({
             user_id: userId,
             page: p,
             page_size: size

@@ -131,6 +131,24 @@ export async function postV1AdminUsersList(
   });
 }
 
+/** 批量查询用户在线状态 需要 `admin.users.read` 权限。单次查询 1 至 30 个用户；状态来自 Push Gateway Presence 读模型，不验证用户是否存在。不存在或没有在线记录的用户返回 `online=false`。 POST /v1/admin/users/online-status/list */
+export async function postV1AdminUsersOnlineStatusList(
+  body: AdminAPI.AdminListUserOnlineStatusRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListUserOnlineStatusEnvelope>(
+    "/v1/admin/users/online-status/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** 查询用户操作日志 需要 `admin.users.read` 权限；支持按用户、行为类型、客户端类型和操作时间筛选，并按操作时间排序及分页。当前用户行为采集与数据库查询尚未接入，因此固定返回空列表和总数 0。 POST /v1/admin/users/operation-logs/list */
 export async function postV1AdminUsersOperationLogsList(
   body: AdminAPI.AdminListUserOperationLogRequest,
@@ -149,7 +167,7 @@ export async function postV1AdminUsersOperationLogsList(
   );
 }
 
-/** 搜索用户 需要 `admin.users.read` 权限。根据指定字段搜索 C 端用户，固定最多返回 20 条；用户 ID、手机号、邮箱和用户账号精确匹配，用户昵称包含匹配。 POST /v1/admin/users/search */
+/** 搜索用户 需要 `admin.users.read` 权限。根据指定字段对 C 端用户执行不区分大小写的模糊搜索，固定最多返回 20 条；可直接用于添加白名单时选择已注册用户。 POST /v1/admin/users/search */
 export async function postV1AdminUsersSearch(
   body: AdminAPI.AdminSearchUserRequest,
   options?: { [key: string]: any }
@@ -201,6 +219,24 @@ export async function postV1AdminUsersWhitelistBatchRemove(
 ) {
   return request<AdminAPI.ResponseBase>(
     "/v1/admin/users/whitelist/batch-remove",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** 创建未注册用户并加入白名单 需要 `admin.users.write` 权限并验证当前管理员的 GA 动态码。服务端自动生成 C 端用户 ID、账号和临时密码，在同一事务中创建账号并加入白名单；临时密码只在本次成功响应中返回，新用户登录后必须立即修改。 POST /v1/admin/users/whitelist/create */
+export async function postV1AdminUsersWhitelistCreate(
+  body: AdminAPI.AdminCreateWhitelistUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminCreateWhitelistUserEnvelope>(
+    "/v1/admin/users/whitelist/create",
     {
       method: "POST",
       headers: {

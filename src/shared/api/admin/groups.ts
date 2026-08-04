@@ -32,6 +32,24 @@ export async function postV1AdminGroupsList(
   });
 }
 
+/** 按用户 ID 查询群聊列表 根据一个 C 端用户 ID 分页查询该用户当前仍有效加入的群聊，按入群时间倒序返回。列表包含群资料及该用户在群内的角色、群昵称、入群时间和禁言状态；已退出或被移除的群不返回。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/list-by-user */
+export async function postV1AdminGroupsListByUser(
+  body: AdminAPI.AdminListGroupByUserRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListGroupByUserEnvelope>(
+    "/v1/admin/groups/list-by-user",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** 查询群操作日志 按群分页查询操作时间线，可按动作和时间范围筛选。操作日志在群业务提交成功后尽力写入，不作为群业务事务的一部分。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/operation-logs/list */
 export async function postV1AdminGroupsOperationLogsList(
   body: AdminAPI.AdminListGroupOperationLogRequest,

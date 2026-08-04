@@ -1,7 +1,8 @@
 /**
  * 查聊天 — 对接 Admin 会话查询 API
  * @see postV1AdminConversationsList / postV1AdminConversationMessagesList
- * 通讯录 / 所属群：postV1AdminUsersContactsList / postV1AdminUsersGroupsList
+ * 通讯录 / 所属群：postV1AdminUsersContactsList / postV1AdminGroupsListByUser
+ * 在线状态：postV1AdminUsersOnlineStatusList
  * 消息类型对齐 OpenIM MessageContentType
  * @see https://docs.openim.io/sdks/enum/messageContentType
  */
@@ -11,8 +12,9 @@ import {
 } from '@shared/api/admin/adminhuihuachaxun';
 import {
   postV1AdminUsersContactsList,
-  postV1AdminUsersGroupsList
+  postV1AdminUsersOnlineStatusList
 } from '@shared/api/admin/users';
+import { postV1AdminGroupsListByUser } from '@shared/api/admin/groups';
 import { formatDateTime } from '@shared/lib/formatTime';
 import {
   isHiddenMessageContentType,
@@ -259,7 +261,7 @@ async function listAllUserGroups(userId: string): Promise<ChatBookPeer[]> {
   let page = 1;
   let total = Infinity;
   while ((page - 1) * LIST_PAGE_SIZE < total && page <= LIST_PAGE_MAX) {
-    const res = await postV1AdminUsersGroupsList({
+    const res = await postV1AdminGroupsListByUser({
       user_id: userId,
       page,
       page_size: LIST_PAGE_SIZE
@@ -275,6 +277,38 @@ async function listAllUserGroups(userId: string): Promise<ChatBookPeer[]> {
   return peers;
 }
 
+/** 批量补齐单聊/联系人在线状态（单次最多 30） */
+async function fillUserOnlineStatus(
+  peers: ChatBookPeer[]
+): Promise<ChatBookPeer[]> {
+  const userIds = Array.from(
+    new Set(
+      peers
+        .filter((p) => p.kind === 'session' || p.kind === 'contact')
+        .map((p) => p.id)
+        .filter(Boolean)
+    )
+  );
+  if (!userIds.length) return peers;
+  const onlineMap = new Map<string, boolean>();
+  for (let i = 0; i < userIds.length; i += 30) {
+    const chunk = userIds.slice(i, i + 30);
+    try {
+      const res = await postV1AdminUsersOnlineStatusList({ user_ids: chunk });
+      (res.data?.list || []).forEach((item) => {
+        if (item.user_id) onlineMap.set(item.user_id, !!item.online);
+      });
+    } catch {
+      // Presence 失败不影响通讯录主体
+    }
+  }
+  return peers.map((p) =>
+    p.kind === 'session' || p.kind === 'contact'
+      ? { ...p, online: onlineMap.get(p.id) ?? p.online }
+      : p
+  );
+}
+
 /** 拉取指定用户的会话列表，拆成单聊 / 群聊；通讯录接 contacts/groups 接口 */
 export async function getUserChatBook(userId: string): Promise<ChatBook> {
   if (!userId) {
@@ -288,12 +322,15 @@ export async function getUserChatBook(userId: string): Promise<ChatBook> {
       contactCount: 0
     };
   }
-  const [peers, contacts, memberGroups] = await Promise.all([
+  const [peers, contactsRaw, memberGroups] = await Promise.all([
     listAllConversations(userId),
     listAllContacts(userId),
     listAllUserGroups(userId)
   ]);
-  const sessions = peers.filter((p) => p.kind === 'session');
+  const [sessionsFilled, contacts] = await Promise.all([
+    fillUserOnlineStatus(peers.filter((p) => p.kind === 'session')),
+    fillUserOnlineStatus(contactsRaw)
+  ]);
   const conversationGroups = peers.filter((p) => p.kind === 'group');
   const convById = new Map(conversationGroups.map((g) => [g.id, g]));
   const groups = memberGroups.map((g) => {
@@ -314,7 +351,7 @@ export async function getUserChatBook(userId: string): Promise<ChatBook> {
   });
   const starred = contacts.filter((c) => c.starred);
   return {
-    sessions,
+    sessions: sessionsFilled,
     groups,
     contacts,
     starred,
