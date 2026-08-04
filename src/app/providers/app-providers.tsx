@@ -69,6 +69,9 @@ export function AppProviders({ children }: PropsWithChildren) {
       // 登录后并行：当前用户 + 系统参数（品牌 / 默认语言 / 时间格式）
       void systemSettingsStore.fetch().then((setting) => {
         if (!setting) return;
+        // 顶栏语言是个人偏好（arco-lang）；已有本地值时不强制覆盖
+        const stored = localStorage.getItem('arco-lang');
+        if (stored === 'zh-CN' || stored === 'en-US') return;
         const nextLang = systemSettingsStore.defaultLanguage;
         if (nextLang === 'zh-CN' || nextLang === 'en-US') {
           setLang(nextLang);
@@ -92,7 +95,9 @@ export function AppProviders({ children }: PropsWithChildren) {
     } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
       window.location.pathname = '/login';
     }
-  }, [setLang]);
+    // 仅启动时拉一次；勿依赖 setLang（历史实现每次渲染都会变，导致切语言被系统默认打回）
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- bootstrap once
+  }, []);
 
   useEffect(() => {
     changeTheme(theme, globalStore.settings.themeColor);

@@ -116,6 +116,32 @@ export const getName = (path: string, routeList: IRoute[] = routes): string | un
   return undefined;
 };
 
+/**
+ * 按 pathname 取最长匹配路由的 locale key（支持 /trade/redpacket-detail/:id 等前缀路径）
+ */
+export const getRouteNameByPath = (
+  path: string,
+  routeList: IRoute[] = routes
+): string | undefined => {
+  const exact = getName(path, routeList);
+  if (exact) return exact;
+
+  let best: { name: string; len: number } | undefined;
+  const walk = (list: IRoute[]) => {
+    for (const item of list) {
+      const itemPath = `/${item.key}`;
+      if (path === itemPath || path.startsWith(`${itemPath}/`)) {
+        if (!best || item.key.length > best.len) {
+          best = { name: item.name, len: item.key.length };
+        }
+      }
+      if (item.children?.length) walk(item.children);
+    }
+  };
+  walk(routeList);
+  return best?.name;
+};
+
 export const generatePermission = (role: string) => {
   const actions = role === 'admin' ? ['*'] : ['read'];
   const result: Record<string, string[]> = {};

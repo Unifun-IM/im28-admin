@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Dropdown, Menu, Message, Tabs, Tooltip } from '@arco-design/web-react';
 import {
   IconClose,
@@ -12,6 +12,8 @@ import cs from 'classnames';
 import './page-tabs.less';
 
 import { MAX_PINNED_TABS, pageTabsStore } from '@entities/page-tabs';
+import { getRouteNameByPath } from '@shared/config/routes';
+import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
 
 const TabPane = Tabs.TabPane;
@@ -35,6 +37,16 @@ type ContextAction =
   | 'pin'
   | 'unpin';
 
+function resolveTabTitle(
+  path: string,
+  locale: Record<string, string>,
+  fallback?: string
+) {
+  const key = getRouteNameByPath(path);
+  if (key && locale[key]) return locale[key];
+  return fallback || path;
+}
+
 /**
  * 页面打开记录快捷导航 — Figma 741:29115
  * 支持固定标签（默认最多 3）、右键菜单与壳层全屏（隐藏侧栏/Navbar，保留本栏）
@@ -46,6 +58,7 @@ function PageTabs({
   className
 }: PageTabsProps) {
   const t = useLocale();
+  const { lang } = useContext(GlobalContext);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const fullscreen = pageTabsStore.chromeFullscreen;
@@ -58,10 +71,17 @@ function PageTabs({
     if (!pathname || pathname === '/login') return;
     pageTabsStore.open({
       path: pathname,
-      title: title || pathname,
+      title: title || resolveTabTitle(pathname, t) || pathname,
       closable
     });
-  }, [pathname, title, closable]);
+  }, [pathname, title, closable, t]);
+
+  // 切换语言后同步所有已打开标签标题
+  useEffect(() => {
+    pageTabsStore.relocalizeTitles((path, prev) =>
+      resolveTabTitle(path, t, prev)
+    );
+  }, [lang, t]);
 
   const tabs = pageTabsStore.tabs;
 
@@ -184,6 +204,7 @@ function PageTabs({
     >
       {tabs.map((tab) => {
         const showCloseSlot = tabs.length > 1;
+        const label = resolveTabTitle(tab.path, t, tab.title);
         const titleNode = (
           <Dropdown
             trigger="contextMenu"
@@ -199,7 +220,7 @@ function PageTabs({
               {tab.pinned ? (
                 <IconPushpin className="use-page-tab-pin" />
               ) : null}
-              <span className="use-page-tab-title-text">{tab.title}</span>
+              <span className="use-page-tab-title-text">{label}</span>
             </span>
           </Dropdown>
         );

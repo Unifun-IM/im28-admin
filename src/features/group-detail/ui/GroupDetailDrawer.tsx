@@ -120,7 +120,10 @@ function logDetailText(item: AdminAPI.AdminGroupOperationLogWrap): string {
     (item.operator_sys_user?.id != null
       ? String(item.operator_sys_user.id)
       : undefined) ||
-    log.operator_id;
+    log.operator_user_id ||
+    (log.operator_sys_user_id != null
+      ? String(log.operator_sys_user_id)
+      : undefined);
   if (operator) parts.push(String(operator));
   if (log.target_user_ids?.length) {
     parts.push(log.target_user_ids.join(', '));

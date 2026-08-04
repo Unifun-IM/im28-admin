@@ -239,7 +239,10 @@ declare namespace AdminAPI {
     log_id?: string;
     group_id?: string;
     operator_type?: "user" | "sys_user";
-    operator_id?: string;
+    /** C 端操作用户 ID；operator_type=user 时有值。 */
+    operator_user_id?: string;
+    /** 后台系统操作用户 ID；operator_type=sys_user 时有值。 */
+    operator_sys_user_id?: number;
     action?: string;
     description?: string;
     target_user_ids?: string[];
@@ -281,7 +284,7 @@ declare namespace AdminAPI {
     /** 封禁周期。temporary=限时，permanent=永久。 */
     ban_period?: "temporary" | "permanent";
     /** 执行最近一次封禁操作的后台用户 ID。 */
-    operator_id?: string;
+    operator_id?: number;
     /** 最近一次封禁操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
     operated_end_at?: RFC3339Time;
@@ -568,7 +571,7 @@ declare namespace AdminAPI {
     /** 字段化查询类型，只能在同时传入 keyword 时使用；除 nickname 为包含匹配外，其余类型均为精确匹配。 */
     keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
     /** 将用户加入白名单的后台用户 ID。 */
-    operator_id?: string;
+    operator_id?: number;
     /** 加入白名单时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
     operated_end_at?: RFC3339Time;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { isSSR } from '@shared/lib/is';
 
@@ -17,20 +17,21 @@ function useStorage(
     getDefaultStorage(key) || defaultValue || ''
   );
 
-  const setStorageValue = (value: string) => {
-    if (!isSSR) {
-      localStorage.setItem(key, value);
-      if (value !== storedValue) {
-        setStoredValue(value);
+  const setStorageValue = useCallback(
+    (value: string) => {
+      if (!isSSR) {
+        localStorage.setItem(key, value);
+        setStoredValue((prev) => (value !== prev ? value : prev));
       }
-    }
-  };
+    },
+    [key]
+  );
 
-  const removeStorage = () => {
+  const removeStorage = useCallback(() => {
     if (!isSSR) {
       localStorage.removeItem(key);
     }
-  };
+  }, [key]);
 
   useEffect(() => {
     const storageValue = localStorage.getItem(key);

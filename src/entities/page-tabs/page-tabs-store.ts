@@ -117,6 +117,19 @@ export class PageTabsStore {
     saveTabs(this.tabs);
   }
 
+  /** 按当前语言重写全部标签标题（切换语言时调用） */
+  relocalizeTitles(resolve: (path: string, prevTitle: string) => string) {
+    let changed = false;
+    this.tabs.forEach((tab) => {
+      const next = resolve(tab.path, tab.title);
+      if (next && next !== tab.title) {
+        tab.title = next;
+        changed = true;
+      }
+    });
+    if (changed) saveTabs(this.tabs);
+  }
+
   /** 固定标签；已达上限时返回 false */
   pin(path: string): boolean {
     const index = this.tabs.findIndex((t) => t.path === path);
