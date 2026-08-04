@@ -16,6 +16,17 @@ declare namespace AdminAPI {
     device_id?: string;
   };
 
+  type AdminAddIPBlacklistRequest = {
+    /** 一次加入黑名单的 IP 地址；支持 IPv4 和 IPv6，整批原子处理。 */
+    ip_addresses: string[];
+    /** 封控原因，不能仅包含空白字符。 */
+    reason: string;
+    /** 可选的原因说明，传入时不能仅包含空白字符。 */
+    reason_description?: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；校验后不可重复使用。 */
+    two_factor_code: string;
+  };
+
   type AdminAddWhitelistUserRequest = {
     /** 已注册的 C 端用户 ID。 */
     user_id: string;
@@ -67,6 +78,15 @@ declare namespace AdminAPI {
     /** 原因说明，应用于本批全部用户，不能仅包含空白字符。 */
     reason_description: string;
     /** 当前管理员的 Google Authenticator 6 位动态验证码；整批操作成功后不可重复使用。 */
+    two_factor_code: string;
+  };
+
+  type AdminBatchRemoveIPBlacklistRequest = {
+    /** 需要恢复访问的 IP 地址；整批原子处理。 */
+    ip_addresses: string[];
+    /** 可选的恢复说明，传入时不能仅包含空白字符。 */
+    reason_description?: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；校验后不可重复使用。 */
     two_factor_code: string;
   };
 
@@ -195,6 +215,19 @@ declare namespace AdminAPI {
     operator_sys_user?: SysUser;
   };
 
+  type AdminIPBlacklistEntry = {
+    /** 被限制访问的 IPv4 或 IPv6 地址。 */
+    ip_address?: string;
+    operator?: SysUser;
+    /** 封控原因。 */
+    reason?: string;
+    /** 封控原因说明。 */
+    reason_description?: string;
+    operated_at?: RFC3339Time;
+    /** 最近一次被网关拦截的访问时间；从未命中时为空，命中时间最多每分钟更新一次。 */
+    last_accessed_at?: RFC3339Time;
+  };
+
   type AdminListBannedUserEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -269,8 +302,6 @@ declare namespace AdminAPI {
     /** 关键词类型；传此字段时必须同时传 `keyword`。 */
     keyword_type?: "group_id" | "title";
     owner_user_id?: string;
-    /** 群创建人用户 ID；群主转让后保持不变。 */
-    creator_user_id?: string;
     status?: GroupStatus;
     /** 群创建时间起点，必须早于或等于 `created_end_at`。 */
     created_start_at?: RFC3339Time;
@@ -283,6 +314,30 @@ declare namespace AdminAPI {
     page?: number;
     page_size?: number;
   };
+
+  type AdminListIPBlacklistEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminIPBlacklistEntry[]; total?: number };
+    };
+
+  type AdminListIPBlacklistRequest = {
+    /** 按 IP 地址包含查询；支持 IPv4 和 IPv6。 */
+    ip_address?: string;
+    /** 按封控原因精确查询。 */
+    reason?: string;
+    /** 加入黑名单时间范围起点；不得晚于 operated_end_at。 */
+    operated_start_at?: RFC3339Time;
+    operated_end_at?: RFC3339Time;
+    page?: number;
+    page_size?: number;
+  };
+
+  type AdminListUserContactEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminUserContactWrap[]; total?: number };
+    };
 
   type AdminListUserConversationEnvelope =
     // #/components/schemas/ResponseBase
@@ -325,6 +380,12 @@ declare namespace AdminAPI {
       data?: { list?: AdminUserWrap[]; total?: number };
     };
 
+  type AdminListUserGroupEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminUserGroupWrap[]; total?: number };
+    };
+
   type AdminListUserOperationLogEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -345,6 +406,13 @@ declare namespace AdminAPI {
     operated_end_at?: RFC3339Time;
     /** 按操作时间排序。 */
     sort_order?: "asc" | "desc";
+    page?: number;
+    page_size?: number;
+  };
+
+  type AdminListUserRelationRequest = {
+    /** 需要查询的 C 端用户 ID。 */
+    user_id: string;
     page?: number;
     page_size?: number;
   };
@@ -408,6 +476,15 @@ declare namespace AdminAPI {
     sent_at?: string;
     updated_at?: string;
     expire_at?: string;
+  };
+
+  type AdminRemoveIPBlacklistRequest = {
+    /** 需要恢复访问的 IPv4 或 IPv6 地址。 */
+    ip_address: string;
+    /** 可选的恢复说明，传入时不能仅包含空白字符。 */
+    reason_description?: string;
+    /** 当前管理员的 Google Authenticator 6 位动态验证码；校验后不可重复使用。 */
+    two_factor_code: string;
   };
 
   type AdminRemoveWhitelistUserRequest = {
@@ -536,6 +613,11 @@ declare namespace AdminAPI {
     ext?: string;
   };
 
+  type AdminUserContactWrap = {
+    friend?: Friend;
+    user?: User;
+  };
+
   type AdminUserConversation = {
     conversation_id?: string;
     /** 1=单聊，3=群聊，4=通知。 */
@@ -564,6 +646,11 @@ declare namespace AdminAPI {
     /** 当前使用用户最后登录时间作为最后活跃时间；从未登录时为空字符串。 */
     last_active_at?: string;
     registered_at?: RFC3339Time;
+  };
+
+  type AdminUserGroupWrap = {
+    group?: Group;
+    member?: GroupMember;
   };
 
   type AdminUserOperationClient = {
@@ -1122,6 +1209,14 @@ declare namespace AdminAPI {
     alias?: string;
     /** 当前用户给好友设置的手机号备注。 */
     phone?: string;
+    /** 当前用户给好友设置的备注说明。 */
+    remark?: string;
+    /** 当前用户给好友设置的标签。 */
+    tags?: string[];
+    /** 是否为星标好友。 */
+    is_starred?: boolean;
+    /** 建立好友关系时记录的来源类型。 */
+    source_type?: string;
     created_at?: RFC3339Time;
   };
 
@@ -1196,6 +1291,8 @@ declare namespace AdminAPI {
     /** 群公告版本；公告内容变化时递增。 */
     announcement_version?: Uint64String;
     owner_user_id?: string;
+    /** 最初创建群聊的用户 ID；群主转让后保持不变。 */
+    creator_user_id?: string;
     mode?: GroupType;
     status?: GroupStatus;
     member_count?: number;
@@ -1306,6 +1403,10 @@ declare namespace AdminAPI {
     mute_until?: RFC3339Time;
     /** 是否被单独禁言；用于管理筛选。 */
     is_muted?: boolean;
+    /** 该成员在群内的昵称。 */
+    nickname?: string;
+    /** 成为当前管理员的时间；非管理员为空。 */
+    admin_since?: RFC3339Time;
   };
 
   type GroupMemberFilter = 0 | 1 | 2 | 3 | 4 | 5;
@@ -1876,6 +1977,26 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminRiskIPBlacklistAddParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminRiskIPBlacklistBatchRemoveParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminRiskIPBlacklistListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminRiskIPBlacklistRemoveParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminRolesCreateParams = {
     ""?: any;
     ""?: any;
@@ -1991,7 +2112,17 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminUsersContactsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminUsersDetailParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminUsersGroupsListParams = {
     ""?: any;
     ""?: any;
   };

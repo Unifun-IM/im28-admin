@@ -53,6 +53,8 @@ type MemberItem = {
   role?: string;
   roleLevel?: AdminAPI.RoleLevel;
   joinTime?: string;
+  /** 成为管理员时间 */
+  adminSince?: string;
   account?: string;
   phone?: string;
   phoneAreaCode?: string;
@@ -88,14 +90,16 @@ function mapManager(
   const member = wrap.member;
   const user = wrap.user;
   const userId = member?.user_id || user?.user_id;
+  const groupNick = member?.nickname?.trim();
   return {
     id: userId,
     userId,
-    nickname: displayName(user, userId || '-'),
+    nickname: groupNick || displayName(user, userId || '-'),
     avatar: user?.avatar_url,
     role: openimLabel(t, 'roleLevel', member?.role),
     roleLevel: member?.role,
     joinTime: formatDateTime(member?.joined_at, undefined, '-'),
+    adminSince: formatDateTime(member?.admin_since, undefined, '-'),
     account: user?.account,
     phone: user?.phone,
     phoneAreaCode: user?.phone_area_code
@@ -831,7 +835,16 @@ export default function GroupDetailDrawer({
                   {
                     label: t['groupDetail.member.field.joinedAt'],
                     value: String(activeMember.joinTime || '-')
-                  }
+                  },
+                  ...(activeMember.adminSince &&
+                  activeMember.adminSince !== '-'
+                    ? [
+                        {
+                          label: t['groupDetail.member.field.adminSince'],
+                          value: String(activeMember.adminSince)
+                        }
+                      ]
+                    : [])
                 ]}
               />
             </div>

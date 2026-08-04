@@ -12,6 +12,7 @@ import * as groups from "./groups";
 import * as adminhuihuachaxun from "./adminhuihuachaxun";
 import * as adminhuihuashezhi from "./adminhuihuashezhi";
 import * as messages from "./messages";
+import * as adminfengkongguanli from "./adminfengkongguanli";
 import * as health from "./health";
 export default {
   admintongyong,
@@ -24,5 +25,6 @@ export default {
   adminhuihuachaxun,
   adminhuihuashezhi,
   messages,
+  adminfengkongguanli,
   health,
 };

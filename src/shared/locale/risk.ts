@@ -36,12 +36,14 @@ const i18n = {
     'ipBlacklist.add.placeholder.reasonDescription': 'Add description',
     'ipBlacklist.add.submit': 'Add to IP blacklist',
     'ipBlacklist.add.msg.ipRequired': 'Please enter at least one IP',
+    'ipBlacklist.add.msg.success': 'Added to IP blacklist',
     'ipBlacklist.release.title': 'Release IP blacklist',
     'ipBlacklist.release.tip':
       'IP address: {ip}. Access will be restored after release.',
     'ipBlacklist.release.field.reasonDescription': 'Reason description',
     'ipBlacklist.release.placeholder.reasonDescription': 'Add description',
     'ipBlacklist.release.submit': 'Release IP blacklist',
+    'ipBlacklist.release.msg.success': 'IP released from blacklist',
     'ipBlacklist.action.batchRelease': 'Batch release',
     'ipBlacklist.action.cancelBatch': 'Cancel batch',
     'ipBlacklist.releaseReason.mistaken': 'Mistaken ban',
@@ -56,7 +58,8 @@ const i18n = {
     'ipBlacklist.batchRelease.placeholder.reason': 'Select release reason',
     'ipBlacklist.batchRelease.placeholder.reasonDescription':
       'Enter the specific reason for release',
-    'ipBlacklist.batchRelease.submit': 'Release IP blacklist'
+    'ipBlacklist.batchRelease.submit': 'Release IP blacklist',
+    'ipBlacklist.batchRelease.msg.success': 'IPs released from blacklist'
   },
   'zh-CN': {
     'menu.risk': '风控',
@@ -94,12 +97,14 @@ const i18n = {
     'ipBlacklist.add.placeholder.reasonDescription': '添加说明',
     'ipBlacklist.add.submit': '加入IP黑名单',
     'ipBlacklist.add.msg.ipRequired': '请至少输入一个 IP 地址',
+    'ipBlacklist.add.msg.success': '已加入 IP 黑名单',
     'ipBlacklist.release.title': '解除IP黑名单',
     'ipBlacklist.release.tip':
       'IP地址： {ip}，解除后将恢复访问系统权限。',
     'ipBlacklist.release.field.reasonDescription': '原因说明',
     'ipBlacklist.release.placeholder.reasonDescription': '添加说明',
     'ipBlacklist.release.submit': '解除IP黑名单',
+    'ipBlacklist.release.msg.success': '已解除 IP 黑名单',
     'ipBlacklist.action.batchRelease': '批量解除',
     'ipBlacklist.action.cancelBatch': '取消批量',
     'ipBlacklist.releaseReason.mistaken': '误封',
@@ -114,7 +119,8 @@ const i18n = {
     'ipBlacklist.batchRelease.placeholder.reason': '选择解禁原因',
     'ipBlacklist.batchRelease.placeholder.reasonDescription':
       '请输入解除的具体原因',
-    'ipBlacklist.batchRelease.submit': '解除IP黑名单'
+    'ipBlacklist.batchRelease.submit': '解除IP黑名单',
+    'ipBlacklist.batchRelease.msg.success': '已批量解除 IP 黑名单'
   }
 };
 

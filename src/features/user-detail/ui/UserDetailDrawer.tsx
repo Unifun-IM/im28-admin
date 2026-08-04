@@ -16,6 +16,7 @@ import {
 import { StatusBadge, UserAvatar } from '@shared/ui';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
+import UserRelationListModal from './UserRelationListModal';
 import './user-detail-drawer.less';
 import '@shared/ui/biz-detail-table.less';
 
@@ -122,6 +123,9 @@ export default function UserDetailDrawer({
     useState<AdminAPI.AdminDetailUserEnvelope['data']>();
   const [logs, setLogs] = useState<AdminAPI.AdminUserOperationLogWrap[]>([]);
   const [tab, setTab] = useState<string>(defaultTab);
+  const [relationMode, setRelationMode] = useState<'friends' | 'groups' | null>(
+    null
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -193,6 +197,7 @@ export default function UserDetailDrawer({
   );
 
   return (
+    <>
     <Drawer
       className="use-user-detail-drawer"
       width={640}
@@ -300,9 +305,7 @@ export default function UserDetailDrawer({
                         value: (
                           <SocialLink
                             value={detail?.friend_count ?? 0}
-                            onClick={() =>
-                              Message.info(t['userDetail.social.friendsTodo'])
-                            }
+                            onClick={() => setRelationMode('friends')}
                           />
                         )
                       },
@@ -311,9 +314,7 @@ export default function UserDetailDrawer({
                         value: (
                           <SocialLink
                             value={detail?.group_count ?? 0}
-                            onClick={() =>
-                              Message.info(t['userDetail.social.groupsTodo'])
-                            }
+                            onClick={() => setRelationMode('groups')}
                           />
                         )
                       }
@@ -365,5 +366,12 @@ export default function UserDetailDrawer({
         </div>
       </Spin>
     </Drawer>
+      <UserRelationListModal
+        visible={!!relationMode}
+        mode={relationMode || 'friends'}
+        userId={userId}
+        onClose={() => setRelationMode(null)}
+      />
+    </>
   );
 }

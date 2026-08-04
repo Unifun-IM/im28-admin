@@ -65,6 +65,24 @@ export async function postV1AdminUsersBlacklistList(
   );
 }
 
+/** 查询用户通讯录 按用户 ID 分页查询当前有效好友关系。返回该用户维护的别名、备注、标签等关系字段，以及好友完整用户资料。需要 `admin.users.read` 权限。 POST /v1/admin/users/contacts/list */
+export async function postV1AdminUsersContactsList(
+  body: AdminAPI.AdminListUserRelationRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListUserContactEnvelope>(
+    "/v1/admin/users/contacts/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** 查询用户详情 需要 `admin.users.read` 权限；不返回邀请码或邀请人信息。 POST /v1/admin/users/detail */
 export async function postV1AdminUsersDetail(
   body: AdminAPI.AdminDetailUserRequest,
@@ -78,6 +96,24 @@ export async function postV1AdminUsersDetail(
     data: body,
     ...(options || {}),
   });
+}
+
+/** 查询用户群列表 按用户 ID 分页查询当前有效群成员关系，固定按入群时间倒序返回。列表包含群资料、该用户在群中的角色、群昵称、入群时间及禁言状态。需要 `admin.users.read` 权限。 POST /v1/admin/users/groups/list */
+export async function postV1AdminUsersGroupsList(
+  body: AdminAPI.AdminListUserRelationRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListUserGroupEnvelope>(
+    "/v1/admin/users/groups/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
 }
 
 /** 查询用户 需要 `admin.users.read` 权限；`super_admin` 角色不受单项权限限制。 POST /v1/admin/users/list */

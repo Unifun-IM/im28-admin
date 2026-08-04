@@ -1,6 +1,7 @@
 /**
  * 查聊天 — 对接 Admin 会话查询 API
  * @see postV1AdminConversationsList / postV1AdminConversationMessagesList
+ * 通讯录 / 所属群：postV1AdminUsersContactsList / postV1AdminUsersGroupsList
  * 消息类型对齐 OpenIM MessageContentType
  * @see https://docs.openim.io/sdks/enum/messageContentType
  */
@@ -8,6 +9,10 @@ import {
   postV1AdminConversationMessagesList,
   postV1AdminConversationsList
 } from '@shared/api/admin/adminhuihuachaxun';
+import {
+  postV1AdminUsersContactsList,
+  postV1AdminUsersGroupsList
+} from '@shared/api/admin/users';
 import { formatDateTime } from '@shared/lib/formatTime';
 import {
   isHiddenMessageContentType,
@@ -29,6 +34,10 @@ export type ChatBookPeer = {
   online?: boolean;
   memberCount?: number;
   onlineCount?: number;
+  remark?: string;
+  source?: string;
+  addedAt?: string;
+  starred?: boolean;
   kind: 'session' | 'group' | 'contact';
 };
 
@@ -164,7 +173,109 @@ async function listAllConversations(
   return peers;
 }
 
-/** 拉取指定用户的会话列表，拆成单聊 / 群聊 */
+function mapContact(
+  wrap: AdminAPI.AdminUserContactWrap
+): ChatBookPeer | null {
+  const user = wrap.user;
+  const friend = wrap.friend;
+  const id = user?.user_id || friend?.friend_user_id;
+  if (!id) return null;
+  const alias = friend?.alias?.trim();
+  const nickname = user?.nickname?.trim();
+  return {
+    id,
+    name: alias || nickname || id,
+    avatar: user?.avatar_url,
+    remark: friend?.remark?.trim() || alias || undefined,
+    source: friend?.source_type || undefined,
+    addedAt: formatDateTime(friend?.created_at) || undefined,
+    starred: !!friend?.is_starred,
+    kind: 'contact'
+  };
+}
+
+function mapUserGroup(
+  wrap: AdminAPI.AdminUserGroupWrap
+): ChatBookPeer | null {
+  const group = wrap.group;
+  const member = wrap.member;
+  const id = group?.group_id;
+  if (!id) return null;
+  const nick = member?.nickname?.trim();
+  return {
+    id,
+    name: group?.title || id,
+    avatar: group?.avatar_url,
+    sub: nick ? `群昵称：${nick}` : `ID：${id}`,
+    memberCount: group?.member_count,
+    kind: 'group'
+  };
+}
+
+function buildContactSections(contacts: ChatBookPeer[]) {
+  const map = new Map<string, ChatBookPeer[]>();
+  const sorted = [...contacts].sort((a, b) =>
+    a.name.localeCompare(b.name, 'zh')
+  );
+  for (const c of sorted) {
+    const ch = (c.name || '').trim().charAt(0).toUpperCase();
+    const letter = /^[A-Z]$/.test(ch) ? ch : '#';
+    const list = map.get(letter) || [];
+    list.push(c);
+    map.set(letter, list);
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => {
+      if (a === '#') return 1;
+      if (b === '#') return -1;
+      return a.localeCompare(b);
+    })
+    .map(([letter, items]) => ({ letter, items }));
+}
+
+async function listAllContacts(userId: string): Promise<ChatBookPeer[]> {
+  const peers: ChatBookPeer[] = [];
+  let page = 1;
+  let total = Infinity;
+  while ((page - 1) * LIST_PAGE_SIZE < total && page <= LIST_PAGE_MAX) {
+    const res = await postV1AdminUsersContactsList({
+      user_id: userId,
+      page,
+      page_size: LIST_PAGE_SIZE
+    });
+    total = res.data?.total ?? 0;
+    (res.data?.list || []).forEach((row) => {
+      const peer = mapContact(row);
+      if (peer) peers.push(peer);
+    });
+    if (!(res.data?.list || []).length) break;
+    page += 1;
+  }
+  return peers;
+}
+
+async function listAllUserGroups(userId: string): Promise<ChatBookPeer[]> {
+  const peers: ChatBookPeer[] = [];
+  let page = 1;
+  let total = Infinity;
+  while ((page - 1) * LIST_PAGE_SIZE < total && page <= LIST_PAGE_MAX) {
+    const res = await postV1AdminUsersGroupsList({
+      user_id: userId,
+      page,
+      page_size: LIST_PAGE_SIZE
+    });
+    total = res.data?.total ?? 0;
+    (res.data?.list || []).forEach((row) => {
+      const peer = mapUserGroup(row);
+      if (peer) peers.push(peer);
+    });
+    if (!(res.data?.list || []).length) break;
+    page += 1;
+  }
+  return peers;
+}
+
+/** 拉取指定用户的会话列表，拆成单聊 / 群聊；通讯录接 contacts/groups 接口 */
 export async function getUserChatBook(userId: string): Promise<ChatBook> {
   if (!userId) {
     return {
@@ -177,17 +288,39 @@ export async function getUserChatBook(userId: string): Promise<ChatBook> {
       contactCount: 0
     };
   }
-  const peers = await listAllConversations(userId);
+  const [peers, contacts, memberGroups] = await Promise.all([
+    listAllConversations(userId),
+    listAllContacts(userId),
+    listAllUserGroups(userId)
+  ]);
   const sessions = peers.filter((p) => p.kind === 'session');
-  const groups = peers.filter((p) => p.kind === 'group');
+  const conversationGroups = peers.filter((p) => p.kind === 'group');
+  const convById = new Map(conversationGroups.map((g) => [g.id, g]));
+  const groups = memberGroups.map((g) => {
+    const hit = convById.get(g.id);
+    return hit
+      ? {
+          ...g,
+          conversationId: hit.conversationId,
+          lastMessage: hit.lastMessage,
+          time: hit.time
+        }
+      : g;
+  });
+  // 会话里有、所属群接口未返回的群仍保留
+  const known = new Set(groups.map((g) => g.id));
+  conversationGroups.forEach((g) => {
+    if (!known.has(g.id)) groups.push(g);
+  });
+  const starred = contacts.filter((c) => c.starred);
   return {
     sessions,
     groups,
-    contacts: [],
-    starred: [],
-    contactSections: [],
+    contacts,
+    starred,
+    contactSections: buildContactSections(contacts),
     groupCount: groups.length,
-    contactCount: 0
+    contactCount: contacts.length
   };
 }
 
