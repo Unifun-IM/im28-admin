@@ -174,6 +174,17 @@ body {
   border-radius: var(--border-radius-small, 8px);
 }
 
+/**
+ * Modal / Drawer 遮罩 — Figma border/遮罩/1
+ * background: rgba(0,0,0,0.40)；backdrop-filter: blur(3.5px)
+ */
+.arco-modal-mask,
+.arco-drawer-mask {
+  background: var(--color-mask-1);
+  backdrop-filter: blur(3.5px);
+  -webkit-backdrop-filter: blur(3.5px);
+}
+
 .arco-modal {
   .arco-modal-header {
     justify-content: flex-start;

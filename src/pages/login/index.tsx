@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import checkLogin from '@shared/lib/checkLogin';
+import useLocale from '@shared/lib/useLocale';
 import loginBannerBg from './assets/login-banner-bg.svg';
 import loginLogo from './assets/login-logo.svg';
 import LoginForm from './form';
@@ -11,6 +12,8 @@ import './login.less';
  * 左栏背景：Frame 671 导出图（524×900）
  */
 function Login() {
+  const t = useLocale();
+
   useEffect(() => {
     document.body.setAttribute('arco-theme', 'light');
   }, []);
@@ -33,24 +36,23 @@ function Login() {
           <div className="flex items-center gap-[16px]">
             <img src={loginLogo} alt="" className="block size-[24px]" />
             <span className="text-[20px] font-bold leading-[28px] text-white">
-              IM-28 Management
+              {t['login.panel.brand']}
             </span>
           </div>
           <div className="flex flex-col gap-[21px]">
             <h1 className="m-0 text-[31.5px] font-semibold leading-[39.375px] text-white">
-              Elevate your
+              {t['login.panel.titleLine1']}
               <br />
-              communication management
+              {t['login.panel.titleLine2']}
             </h1>
             <p className="m-0 max-w-[336px] text-[12.25px] leading-[19.906px] text-white/80">
-              A comprehensive backend to manage accounts, control precise permissions,
-              and audit system operations securely.
+              {t['login.panel.desc']}
             </p>
           </div>
           <div className="flex h-[14px] items-center gap-[14px] text-[10.5px] font-medium leading-[14px] text-white/70">
-            <span>© 2026 NexIM Corp</span>
+            <span>{t['login.panel.copyright']}</span>
             <span>•</span>
-            <span>Privacy Policy</span>
+            <span>{t['login.panel.privacy']}</span>
           </div>
         </div>
       </div>

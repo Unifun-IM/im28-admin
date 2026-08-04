@@ -217,10 +217,6 @@ export default function UserDetailDrawer({
       unmountOnExit
       maskClosable
       onCancel={onClose}
-      maskStyle={{
-        background: 'var(--color-mask-1)',
-        backdropFilter: 'blur(3.5px)'
-      }}
     >
       <Spin loading={loading} className="block w-full">
         <div className="flex flex-col gap-[12px]">

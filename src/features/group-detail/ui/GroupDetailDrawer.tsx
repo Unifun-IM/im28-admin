@@ -458,10 +458,6 @@ export default function GroupDetailDrawer({
       unmountOnExit
       maskClosable
       onCancel={onClose}
-      maskStyle={{
-        background: 'var(--color-mask-1)',
-        backdropFilter: 'blur(3.5px)'
-      }}
     >
       <Spin
         loading={loading || (view === 'member' && memberLoading)}
