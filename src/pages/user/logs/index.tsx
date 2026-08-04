@@ -9,14 +9,20 @@ import {
   FilterKeywordInput,
   FilterSelect
 } from '@widgets/biz-list';
+import { postV1AdminUsersOperationLogsList } from '@shared/api/admin/users';
 import { UserDetailDrawer } from '@features/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
 
-type LogsFormValues = AdminAPI.AdminListUserOperationLogRequest & {
+type LogsFormValues = {
+  keyword?: string;
+  keyword_type?: AdminAPI.AdminListUserOperationLogRequest['keyword_type'];
+  behavior_type?: string;
+  client_type?: AdminAPI.AdminListUserOperationLogRequest['client_type'];
   operated_range?: unknown[];
+  sort_order?: AdminAPI.AdminListUserOperationLogRequest['sort_order'];
 };
 
 const BEHAVIOR_TYPES = [
@@ -31,7 +37,21 @@ const BEHAVIOR_TYPES = [
 
 const CLIENT_TYPES = ['ios', 'android', 'web', 'server'] as const;
 
-/** 用户操作日志 — AdminListUserOperationLogRequest / AdminUserOperationLogWrap */
+function toRfc3339(value: unknown): string | undefined {
+  if (value == null || value === '') return undefined;
+  const raw =
+    typeof (value as { toDate?: () => Date }).toDate === 'function'
+      ? (value as { toDate: () => Date }).toDate()
+      : value;
+  const d = raw instanceof Date ? raw : new Date(raw as string | number);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return d.toISOString();
+}
+
+/**
+ * 用户操作日志 — AdminListUserOperationLogRequest / AdminUserOperationLogWrap
+ * @see postV1AdminUsersOperationLogsList
+ */
 export default function Page() {
   const t = useLocale();
   const common = t;
@@ -79,16 +99,34 @@ export default function Page() {
   const [pageSize, setPageSize] = useState(15);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (_p = page, _size = pageSize) => {
-    setLoading(true);
-    try {
-      // 用户日志接口暂不对接
-      setData([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize]);
+  const fetchData = useCallback(
+    async (p = page, size = pageSize) => {
+      setLoading(true);
+      try {
+        const values = form.getFieldsValue();
+        const keyword = values.keyword?.trim() || undefined;
+        const range = values.operated_range;
+        const res = await postV1AdminUsersOperationLogsList({
+          page: p,
+          page_size: size,
+          keyword,
+          keyword_type: keyword
+            ? values.keyword_type || undefined
+            : undefined,
+          behavior_type: values.behavior_type || undefined,
+          client_type: values.client_type || undefined,
+          operated_start_at: range?.[0] ? toRfc3339(range[0]) : undefined,
+          operated_end_at: range?.[1] ? toRfc3339(range[1]) : undefined,
+          sort_order: values.sort_order || 'desc'
+        });
+        setData(res.data?.list || []);
+        setTotal(res.data?.total || 0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [form, page, pageSize]
+  );
 
   useEffect(() => {
     fetchData(1, pageSize);
@@ -225,8 +263,11 @@ export default function Page() {
               title: t['userLogs.col.behaviorCategory'],
               dataIndex: 'log.behavior_category',
               width: 140,
-              render: (_: unknown, record: AdminAPI.AdminUserOperationLogWrap) =>
-                record.log?.behavior_category || '--'
+              render: (_: unknown, record: AdminAPI.AdminUserOperationLogWrap) => {
+                const category = record.log?.behavior_category;
+                if (!category) return '--';
+                return t[`userLogs.category.${category}`] || category;
+              }
             },
             {
               title: t['userLogs.col.status'],

@@ -158,8 +158,6 @@ export const PageLayout = observer(function PageLayout({
     if (!route) {
       if (pathname.startsWith('/trade/redpacket-detail')) {
         route = matchRoute('/trade/redpacket-detail');
-      } else if (pathname.startsWith('/session/chat')) {
-        route = matchRoute('/session/chat');
       }
     }
     if (route) return locale[route.name] || route.name;
@@ -280,9 +278,6 @@ export const PageLayout = observer(function PageLayout({
       if (pathname.startsWith('/trade/redpacket-detail')) {
         newSelectedKeys.push('trade/redpacket-records');
       }
-      if (pathname.startsWith('/session/chat')) {
-        newSelectedKeys.push('session/user');
-      }
     }
 
     // 打开选中项的祖先 SubMenu（如 user/manage）
@@ -328,10 +323,7 @@ export const PageLayout = observer(function PageLayout({
     let routeConfig = routeMap.current.get(pathname);
     if (!routeConfig) {
       // 动态详情页：/trade/redpacket-detail/:id 等
-      const prefixes = [
-        '/trade/redpacket-detail',
-        '/session/chat'
-      ];
+      const prefixes = ['/trade/redpacket-detail'];
       for (const prefix of prefixes) {
         if (pathname.startsWith(prefix)) {
           routeConfig = routeMap.current.get(prefix);

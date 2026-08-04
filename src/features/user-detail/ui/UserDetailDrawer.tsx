@@ -109,6 +109,8 @@ function logDetailText(
 /**
  * 用户详情抽屉 — Figma 1125:26019（基本信息）/ 750:23153（操作日志 Timeline）
  * 宽 640；对接 AdminAPI，交互按稿面保留
+ * @see postV1AdminUsersDetail
+ * @see postV1AdminUsersOperationLogsList
  */
 export default function UserDetailDrawer({
   visible,
@@ -136,6 +138,8 @@ export default function UserDetailDrawer({
     if (!visible || !userId) return;
     let cancelled = false;
     setLoading(true);
+    setDetail(undefined);
+    setLogs([]);
     Promise.all([
       postV1AdminUsersDetail({ user_id: userId }),
       postV1AdminUsersOperationLogsList({
@@ -150,6 +154,11 @@ export default function UserDetailDrawer({
         if (cancelled) return;
         setDetail(detailRes.data);
         setLogs(logsRes.data?.list || []);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setDetail(undefined);
+        setLogs([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
