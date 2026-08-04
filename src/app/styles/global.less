@@ -78,6 +78,56 @@ body {
   color: var(--color-text-1);
 }
 
+/* 主题切换圆形扩散 — 对齐 Art Design Pro theme-animation.scss
+ * https://github.com/Daymychen/art-design-pro/blob/main/src/assets/styles/core/theme-animation.scss
+ */
+@keyframes theme-vt-clip {
+  from {
+    clip-path: circle(0% at var(--theme-vt-x, 100%) var(--theme-vt-y, 0%));
+  }
+
+  to {
+    clip-path: circle(
+      var(--theme-vt-r, 100%) at var(--theme-vt-x, 100%) var(--theme-vt-y, 0%)
+    );
+  }
+}
+
+@supports (view-transition-name: none) {
+  html::view-transition-old(*) {
+    animation: none;
+  }
+
+  html::view-transition-new(*) {
+    animation: theme-vt-clip 0.5s ease-in both;
+  }
+
+  html::view-transition-old(root) {
+    z-index: 1;
+  }
+
+  html::view-transition-new(root) {
+    z-index: 9999;
+  }
+
+  /* 切到暗色后：旧层（亮色）反向收缩，露出下层暗色 */
+  html.dark::view-transition-old(*) {
+    animation: theme-vt-clip 0.5s ease-in reverse both;
+  }
+
+  html.dark::view-transition-new(*) {
+    animation: none;
+  }
+
+  html.dark::view-transition-old(root) {
+    z-index: 9999;
+  }
+
+  html.dark::view-transition-new(root) {
+    z-index: 1;
+  }
+}
+
 /* 侧栏折叠时二级菜单浮层（portal 渲染，需全局样式）
  * 勿用 .arco-menu-pop：折叠态一级项也带该类，会误伤侧栏图标
  */

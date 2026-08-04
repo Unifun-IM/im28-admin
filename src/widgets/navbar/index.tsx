@@ -27,6 +27,7 @@ import {
 } from '@entities/global-state';
 import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
+import startThemeTransition from '@shared/lib/startThemeTransition';
 import { IconButton } from '@shared/ui';
 import MessageBox from '@widgets/message-box';
 import Settings from '@widgets/settings';
@@ -54,7 +55,7 @@ export type NavbarProps = {
 function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
   const t = useLocale();
   const locale = useLocale();
-  const { userInfo, userLoading } = useGlobalSelector(
+  const { userInfo, userLoading, settings } = useGlobalSelector(
     (state: GlobalState) => state
   );
 
@@ -63,6 +64,22 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
   const [userMenuVisible, setUserMenuVisible] = useState(false);
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
+
+  function onToggleTheme(e: Event) {
+    const next = theme === 'light' ? 'dark' : 'light';
+    const mouse = e as MouseEvent;
+
+    startThemeTransition(next, {
+      origin: {
+        clientX: Number.isFinite(mouse.clientX)
+          ? mouse.clientX
+          : window.innerWidth,
+        clientY: Number.isFinite(mouse.clientY) ? mouse.clientY : 0
+      },
+      themeColor: settings?.themeColor,
+      onThemeChange: (value) => setTheme?.(value)
+    });
+  }
 
   const displayName =
     userInfo?.sys_user?.display_name ||
@@ -210,7 +227,7 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
           <IconButton
             icon={theme !== 'dark' ? <IconSunFill /> : <IconMoonFill />}
             tip={themeToggleLabel}
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            onClick={onToggleTheme}
           />
         </div>
         {userInfo && (

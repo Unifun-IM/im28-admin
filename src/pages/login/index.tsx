@@ -16,6 +16,7 @@ function Login() {
 
   useEffect(() => {
     document.body.setAttribute('arco-theme', 'light');
+    document.documentElement.classList.remove('dark');
   }, []);
 
   // 已登录访问 /login → 回首页
