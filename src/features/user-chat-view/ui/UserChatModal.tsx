@@ -165,7 +165,7 @@ export type UserChatModalProps = {
   /**
    * 入口场景（参数区分单聊 / 群聊）
    * - user：用户会话查询进入，默认会话列表
-   * - group：群组会话查询进入，默认通讯录群资料（进入群聊后再开消息）
+   * - group：群组会话查询进入；有 target 时直达群聊记录，否则通讯录群列表
    */
   scene: ChatModalScene;
   /** 被查看用户 ID（用户会话必填；群入口可用群主 ID 作通讯录上下文） */
@@ -239,7 +239,7 @@ type ChatMsg = {
  * 查聊天 Modal（单聊 / 群聊共用）
  * 用 scene + target 区分入口：
  * - scene=user：791:30435 / 791:36214 / 791:32208
- * - scene=group：977:23441（群资料）→ 977:23565（进入群聊）
+ * - scene=group：有 target 时直达 977:23565 群聊记录；否则 977:23441 群列表
  */
 export default function UserChatModal({
   visible,
@@ -277,11 +277,23 @@ export default function UserChatModal({
     kind: t.type === 'group' ? 'group' : 'session'
   });
 
+  /** 列表「查看聊天」直达消息区，跳过群资料中间页 */
+  const openGroupChatDirect = (peer: ChatPeer) => {
+    setProfile(peer);
+    setChat({
+      ...peer,
+      kind: 'group',
+      lastMessage: peer.lastMessage || '进入群聊',
+      time: peer.time || '刚刚',
+      unread: 0
+    });
+  };
+
   const viewerUserId = target?.viewerUserId || userId;
 
   useEffect(() => {
     if (!visible) return;
-    // 群组会话入口：通讯录 + 群资料卡（977:23441），不直接进聊天
+    // 群组会话入口：通讯录 + 群列表；有 target 时再直达聊天记录
     const startNav: NavTab = isGroupScene
       ? 'contacts'
       : target
@@ -295,7 +307,7 @@ export default function UserChatModal({
     setChat(null);
     setMessages([]);
 
-    // 无查看用户时仍可展示目标群资料（消息需 conversationId + userId）
+    // 无查看用户时仍可展示目标群（消息需 conversationId + userId）
     if (!viewerUserId) {
       if (isGroupScene && target?.type === 'group') {
         const peer = targetToPeer(target);
@@ -307,7 +319,7 @@ export default function UserChatModal({
           groupCount: 1,
           contactCount: 0
         });
-        setProfile(peer);
+        openGroupChatDirect(peer);
       } else {
         setBook(null);
       }
@@ -327,6 +339,7 @@ export default function UserChatModal({
                 name: target.name || hit.name,
                 memberCount: target.memberCount ?? hit.memberCount,
                 onlineCount: target.onlineCount ?? hit.onlineCount,
+                conversationId: target.conversationId || hit.conversationId,
                 sub: hit.sub || `ID：${hit.id}`
               }
             : targetToPeer(target);
@@ -344,8 +357,7 @@ export default function UserChatModal({
             };
           }
           setBook(data);
-          setProfile(peer);
-          setChat(null);
+          openGroupChatDirect(peer);
           return;
         }
         setBook(data);
@@ -428,8 +440,12 @@ export default function UserChatModal({
     setChat(null);
   };
 
-  /** 通讯录点好友/群 → 右侧资料卡（不直接进聊天） */
+  /** 通讯录点好友 → 资料卡；群组会话入口点群 → 直达聊天记录 */
   const onSelectContact = (peer: ChatPeer) => {
+    if (isGroupScene && peer.kind === 'group') {
+      openGroupChatDirect(peer);
+      return;
+    }
     setChat(null);
     setProfile(peer);
   };

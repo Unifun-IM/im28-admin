@@ -46,6 +46,16 @@ export function mapLoginToast(
   }
 
   if (kind === 'login') {
+    const e = asFailed(error);
+    // 100031：当前 IP 不在白名单 / 不允许访问后台
+    if (
+      e?.bizCode === 100031 ||
+      /100031|不允许访问|ip.*(不允许|not allowed|denied|whitelist|forbidden)|current ip/.test(
+        s
+      )
+    ) {
+      return t['login.msg.ipDenied'];
+    }
     if (/禁用|disabled|forbidden/.test(s)) {
       return t['login.msg.accountDisabled'];
     }

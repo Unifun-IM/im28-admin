@@ -8,6 +8,11 @@ import axios, {
 } from 'axios';
 import { Message } from '@arco-design/web-react';
 
+import {
+  isIpAccessDeniedError,
+  redirectToIpAccessDenied
+} from '@shared/lib/ipAccessDenied';
+
 /** 业务成功码（与 Admin OpenAPI ResponseBase / ApiCode 的 0 一致） */
 const API_SUCCESS_CODE = 0;
 
@@ -330,6 +335,11 @@ instance.interceptors.response.use(
         return retryAfterRefresh(cfg, failed);
       }
 
+      if (isIpAccessDeniedError(failed)) {
+        redirectToIpAccessDenied();
+        return Promise.reject(failed);
+      }
+
       if (!silent) {
         Message.error(msg);
       }
@@ -351,6 +361,11 @@ instance.interceptors.response.use(
 
     if (isAuthFailure(undefined, status, message)) {
       return retryAfterRefresh(cfg, failed);
+    }
+
+    if (isIpAccessDeniedError(failed)) {
+      redirectToIpAccessDenied();
+      return Promise.reject(failed);
     }
 
     if (!silent) {

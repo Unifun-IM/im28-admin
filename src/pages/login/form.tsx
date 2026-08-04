@@ -6,6 +6,7 @@ import {
 } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import {
   postV1AdminAuthLogin,
@@ -15,6 +16,9 @@ import {
   postV1AdminAuthTwoFactorVerify
 } from '@shared/api/admin/auth';
 import { setAuthTokens } from '@shared/api/request';
+import {
+  isIpAccessDeniedError
+} from '@shared/lib/ipAccessDenied';
 import useLocale from '@shared/lib/useLocale';
 
 import ForceChangePasswordModal from './ForceChangePasswordModal';
@@ -53,6 +57,7 @@ export default function LoginForm() {
   const [gaErrorTick, setGaErrorTick] = useState(0);
 
   const t = useLocale();
+  const navigate = useNavigate();
 
   function finishLogin(token?: AdminAPI.Token) {
     const access = token?.access_token;
@@ -138,6 +143,10 @@ export default function LoginForm() {
         await applyLoginData(res.data);
       }
     } catch (error) {
+      if (isIpAccessDeniedError(error)) {
+        navigate('/ip-denied', { replace: true });
+        return;
+      }
       Message.error(mapLoginToast(error, 'login', t));
       setSliderOk(false);
     } finally {

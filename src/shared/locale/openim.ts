@@ -101,6 +101,14 @@ const i18n = {
     'openim.friendApply.canceled': 'Canceled',
     'openim.friendApply.expired': 'Expired',
 
+    // 好友来源 — AdminAPI Friend.source_type / ApplyFriendRequest
+    'openim.sourceType.phone': 'Phone',
+    'openim.sourceType.email': 'Email',
+    'openim.sourceType.user_id': 'User ID',
+    'openim.sourceType.group': 'Group',
+    'openim.sourceType.card': 'Contact card',
+    'openim.sourceType.qrcode': 'QR code',
+
     // 性别（AdminAPI User.gender 注释；OpenIM 用户资料常见约定）
     'openim.gender.0': 'Unset',
     'openim.gender.1': 'Male',
@@ -197,6 +205,14 @@ const i18n = {
     'openim.friendApply.rejected': '已拒绝',
     'openim.friendApply.canceled': '已取消',
     'openim.friendApply.expired': '已过期',
+
+    // 好友来源 — AdminAPI Friend.source_type / ApplyFriendRequest
+    'openim.sourceType.phone': '手机号',
+    'openim.sourceType.email': '邮箱',
+    'openim.sourceType.user_id': '用户ID',
+    'openim.sourceType.group': '群聊',
+    'openim.sourceType.card': '名片',
+    'openim.sourceType.qrcode': '二维码',
 
     'openim.gender.0': '未设置',
     'openim.gender.1': '男',

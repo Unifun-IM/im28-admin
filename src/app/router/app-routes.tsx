@@ -1,6 +1,7 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 
 import LoginPage from '@pages/login';
+import IpDeniedPage from '@pages/exception/ip-denied';
 
 import { AdminLayout } from './admin-layout';
 
@@ -10,6 +11,11 @@ export function appRoutes(): RouteObject[] {
       path: '/login',
       element: <LoginPage />,
       handle: { title: 'Login', public: true }
+    },
+    {
+      path: '/ip-denied',
+      element: <IpDeniedPage />,
+      handle: { title: 'IP Access Denied', public: true }
     },
     {
       path: '/*',

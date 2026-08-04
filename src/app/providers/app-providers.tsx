@@ -13,7 +13,16 @@ import { postV1AdminAuthMe } from '@shared/api/admin/auth';
 import { GlobalContext } from '@shared/lib/global-context';
 import changeTheme from '@shared/lib/changeTheme';
 import checkLogin from '@shared/lib/checkLogin';
+import {
+  isIpAccessDeniedError,
+  redirectToIpAccessDenied
+} from '@shared/lib/ipAccessDenied';
 import useStorage from '@shared/lib/useStorage';
+
+function isPublicPath(pathname: string) {
+  const p = pathname.replace(/\/+$/, '') || '/';
+  return p === '/login' || p === '/ip-denied';
+}
 
 function getArcoLocale(lang: string) {
   switch (lang) {
@@ -58,7 +67,7 @@ export function AppProviders({ children }: PropsWithChildren) {
       localStorage.removeItem('userStatus');
       clearAuthSession();
       systemSettingsStore.clear();
-      if (window.location.pathname.replace(/\//g, '') !== 'login') {
+      if (!isPublicPath(window.location.pathname)) {
         window.location.pathname = '/login';
       }
     });
@@ -89,10 +98,14 @@ export function AppProviders({ children }: PropsWithChildren) {
             userLoading: false
           });
         })
-        .catch(() => {
+        .catch((error) => {
+          if (isIpAccessDeniedError(error)) {
+            redirectToIpAccessDenied();
+            return;
+          }
           globalStore.updateUserInfo({ userLoading: false });
         });
-    } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
+    } else if (!isPublicPath(window.location.pathname)) {
       window.location.pathname = '/login';
     }
     // 仅启动时拉一次；勿依赖 setLang（历史实现每次渲染都会变，导致切语言被系统默认打回）

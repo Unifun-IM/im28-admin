@@ -16,6 +16,8 @@ export type UserRelationListModalProps = {
   onClose: () => void;
 };
 
+const noWrapCell = { whiteSpace: 'nowrap' as const };
+
 /**
  * 用户详情 · 好友 / 群聊列表
  * @see postV1AdminUsersContactsList / postV1AdminGroupsListByUser
@@ -99,18 +101,24 @@ export default function UserRelationListModal({
     {
       title: t['userDetail.relation.col.remark'],
       width: 140,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserContactWrap) =>
         row.friend?.remark || row.friend?.alias || '--'
     },
     {
       title: t['userDetail.relation.col.source'],
       width: 120,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserContactWrap) =>
-        row.friend?.source_type || '--'
+        openimLabel(t, 'sourceType', row.friend?.source_type)
     },
     {
       title: t['userDetail.relation.col.starred'],
-      width: 80,
+      width: 72,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserContactWrap) =>
         row.friend?.is_starred
           ? t['userDetail.relation.starred.yes']
@@ -118,9 +126,14 @@ export default function UserRelationListModal({
     },
     {
       title: t['userDetail.relation.col.addedAt'],
-      width: 170,
-      render: (_: unknown, row: AdminAPI.AdminUserContactWrap) =>
-        formatDateTime(row.friend?.created_at)
+      width: 200,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
+      render: (_: unknown, row: AdminAPI.AdminUserContactWrap) => (
+        <span className="whitespace-nowrap">
+          {formatDateTime(row.friend?.created_at)}
+        </span>
+      )
     }
   ];
 
@@ -143,24 +156,38 @@ export default function UserRelationListModal({
     {
       title: t['userDetail.relation.col.groupNickname'],
       width: 140,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) =>
         row.member?.nickname || '--'
     },
     {
       title: t['userDetail.relation.col.role'],
-      width: 100,
-      render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) =>
-        openimLabel(t, 'roleLevel', row.member?.role) || '--'
+      width: 120,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
+      render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) => (
+        <span className="whitespace-nowrap">
+          {openimLabel(t, 'roleLevel', row.member?.role) || '--'}
+        </span>
+      )
     },
     {
       title: t['userDetail.relation.col.joinedAt'],
-      width: 170,
-      render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) =>
-        formatDateTime(row.member?.joined_at)
+      width: 200,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
+      render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) => (
+        <span className="whitespace-nowrap">
+          {formatDateTime(row.member?.joined_at)}
+        </span>
+      )
     },
     {
       title: t['userDetail.relation.col.muted'],
-      width: 90,
+      width: 72,
+      ellipsis: true,
+      bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) =>
         row.member?.is_muted
           ? t['userDetail.relation.muted.yes']
@@ -191,6 +218,7 @@ export default function UserRelationListModal({
           }
           data={friends}
           columns={friendColumns}
+          scroll={{ x: 780 }}
           pagination={{
             current: page,
             pageSize,
@@ -209,6 +237,7 @@ export default function UserRelationListModal({
           rowKey={(row) => row.group?.group_id || String(Math.random())}
           data={groups}
           columns={groupColumns}
+          scroll={{ x: 780 }}
           pagination={{
             current: page,
             pageSize,

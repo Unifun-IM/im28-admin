@@ -55,6 +55,8 @@ const i18n = {
     'login.gaBind.copySecret': 'Copy secret',
     'login.msg.loginSuccess': 'Signed in',
     'login.msg.accountPwdErr': 'Incorrect account or password',
+    'login.msg.ipDenied':
+      'Current IP is not allowed to access the admin portal',
     'login.msg.accountDisabled':
       'This account has been disabled, please contact the administrator',
     'login.msg.accountLocked':
@@ -144,6 +146,7 @@ const i18n = {
     'login.gaBind.copySecret': '复制密钥',
     'login.msg.loginSuccess': '登录成功',
     'login.msg.accountPwdErr': '账号或密码错误',
+    'login.msg.ipDenied': '当前IP不允许访问后台',
     'login.msg.accountDisabled': '该账号已被禁用，请联系管理员',
     'login.msg.accountLocked': '账号已锁定，请联系管理员',
     'login.msg.loginTooMany': '登录失败次数过多，请稍后再试',

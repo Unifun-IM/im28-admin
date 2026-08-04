@@ -107,11 +107,20 @@ function mapManager(
   };
 }
 
-function logDetailText(item: AdminAPI.AdminGroupOperationLogWrap): string {
+function logDetailText(
+  item: AdminAPI.AdminGroupOperationLogWrap,
+  actionLabel?: string
+): string {
   const log = item.log;
   if (!log) return '';
   const parts: string[] = [];
-  if (log.description) parts.push(log.description);
+  // description 常与操作类型中文一致，已在 action 列展示时不再重复
+  if (
+    log.description &&
+    (!actionLabel || log.description !== actionLabel)
+  ) {
+    parts.push(log.description);
+  }
   const operator =
     item.operator_user?.nickname ||
     item.operator_user?.user_id ||
@@ -317,14 +326,18 @@ export default function GroupDetailDrawer({
     () =>
       logs.map((item, index) => {
         const log = item.log;
+        const actionKey = log?.action;
+        const actionLabel = actionKey
+          ? t[`groupDetail.logAction.${actionKey}`] || actionKey
+          : '-';
         return {
           id: log?.log_id || `${log?.operated_at}-${index}`,
           time: formatDateTime(log?.operated_at, 'YYYY/MM/DD HH:mm:ss', '-'),
-          action: log?.action || '-',
-          detail: logDetailText(item)
+          action: actionLabel,
+          detail: logDetailText(item, actionLabel)
         };
       }),
-    [logs]
+    [logs, t]
   );
 
   const filteredMembers = useMemo(() => {
