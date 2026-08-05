@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Form, Input } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
@@ -10,7 +10,10 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
-import { postV1AdminGroupsList } from '@shared/api/admin/groups';
+import {
+  postV1AdminGroupsList,
+  postV1AdminGroupsUpdateStatus
+} from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
 import {
   UserChatModal,
@@ -56,8 +59,9 @@ function parseBatchIds(raw?: string) {
 }
 
 /**
- * 群组查询 — Figma 977:33806；批量搜索 1125:26762
+ * 群组查询 — Figma 977:33806 / 更多菜单 1225:28854；批量搜索 1125:26762
  * AdminAPI.AdminListGroupRequest（无 group_ids，批量按 ID 精确查后合并）
+ * 操作：详情 + 更多（禁言/封禁/解散）→ postV1AdminGroupsUpdateStatus
  */
 export default function GroupQueryPage() {
   const t = useLocale();
@@ -200,6 +204,91 @@ export default function GroupQueryPage() {
   const exitBatchMode = () => {
     setBatchMode(false);
     form.setFieldValue('batchGroupIds', undefined);
+  };
+
+  /**
+   * 封禁 / 解除封禁 — postV1AdminGroupsUpdateStatus
+   * AdminWritableGroupStatus：0=正常，1=封禁
+   */
+  const confirmBanStatus = (
+    row: GroupListRow,
+    status: AdminAPI.AdminWritableGroupStatus,
+    kind: 'ban' | 'unban'
+  ) => {
+    const group_id = row.group?.group_id;
+    if (!group_id) return;
+    const name = row.group?.title || group_id;
+    Modal.confirm({
+      title: t[`groupQuery.confirm.${kind}`].replace('{name}', name),
+      onOk: async () => {
+        await postV1AdminGroupsUpdateStatus({ group_id, status });
+        Message.success(common['common.success']);
+        fetchData(page, pageSize);
+      }
+    });
+  };
+
+  /**
+   * 禁言 / 解除禁言 / 解散
+   * OpenAPI：禁言走群设置、解散走解散流程，不能经 update-status 写 2/3；
+   * 专用 admin 接口未就绪前仅提示。
+   */
+  const confirmMuteOrDismiss = (_kind: 'mute' | 'unmute' | 'dismiss') => {
+    Message.warning(t['groupQuery.msg.actionApiPending']);
+  };
+
+  /** 按群状态组装更多菜单项（详情始终外露） */
+  const buildStatusActions = (row: GroupListRow) => {
+    const status = row.group?.status;
+    if (status === 2) return [];
+    if (status === 1) {
+      return [
+        {
+          key: 'unban',
+          label: t['groupQuery.action.unban'],
+          onClick: () => confirmBanStatus(row, 0, 'unban')
+        }
+      ];
+    }
+    if (status === 3) {
+      return [
+        {
+          key: 'unmute',
+          label: t['groupQuery.action.unmute'],
+          onClick: () => confirmMuteOrDismiss('unmute')
+        },
+        {
+          key: 'ban',
+          label: t['groupQuery.action.ban'],
+          onClick: () => confirmBanStatus(row, 1, 'ban')
+        },
+        {
+          key: 'dismiss',
+          label: t['groupQuery.action.dismiss'],
+          danger: true,
+          onClick: () => confirmMuteOrDismiss('dismiss')
+        }
+      ];
+    }
+    // 正常(0)及其他
+    return [
+      {
+        key: 'ban',
+        label: t['groupQuery.action.ban'],
+        onClick: () => confirmBanStatus(row, 1, 'ban')
+      },
+      {
+        key: 'mute',
+        label: t['groupQuery.action.mute'],
+        onClick: () => confirmMuteOrDismiss('mute')
+      },
+      {
+        key: 'dismiss',
+        label: t['groupQuery.action.dismiss'],
+        danger: true,
+        onClick: () => confirmMuteOrDismiss('dismiss')
+      }
+    ];
   };
 
   return (
@@ -362,18 +451,21 @@ export default function GroupQueryPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 80,
+              width: 100,
               render: (_: unknown, row: GroupListRow) => {
                 const group_id = row.group?.group_id || '';
+                const moreItems = buildStatusActions(row);
                 return (
                   <ActionLinks
                     variant="text"
+                    maxVisible={1}
                     items={[
                       {
                         key: 'detail',
                         label: common['common.detail'],
                         onClick: () => setDetailGroupId(group_id)
-                      }
+                      },
+                      ...moreItems
                     ]}
                   />
                 );

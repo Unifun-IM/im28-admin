@@ -686,7 +686,7 @@ export default function GroupDetailDrawer({
                           }
                         >
                           <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
-                            <span className="w-[119px] shrink-0 text-arco-text-3">
+                            <span className="w-[140px] shrink-0 whitespace-nowrap text-arco-text-3">
                               {item.time}
                             </span>
                             <span className="flex min-w-0 flex-1 items-center gap-[12px]">

@@ -12,6 +12,7 @@ import cs from 'classnames';
 import copy from 'copy-to-clipboard';
 import useLocale from '@shared/lib/useLocale';
 import { UserAvatar } from '@shared/ui';
+import IconMoreDots from './assets/icon-more-dots.svg?react';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
@@ -171,9 +172,13 @@ export type ActionLinkItem = {
 
 export type ActionLinksProps = {
   items: ActionLinkItem[];
-  /** 直接展示的图标上限（含「更多」占位），默认 3 */
+  /**
+   * 直接展示上限。
+   * - icon：含「更多」占位，默认 3
+   * - text：默认全部展示；传 1 时其余进「更多」下拉（群组查询 Figma 977:33806）
+   */
   maxVisible?: number;
-  /** icon：图标操作列；text：文字链接（用户查询 Figma） */
+  /** icon：图标操作列；text：文字链接（用户查询 / 群组查询） */
   variant?: 'icon' | 'text';
   className?: string;
 };
@@ -183,6 +188,10 @@ const ICON_BTN =
 
 const TEXT_BTN =
   'inline-flex cursor-pointer items-center border-0 bg-transparent p-0 text-[12px] leading-[12px] text-[rgb(var(--primary-6))] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40';
+
+/** 更多触发器 — Figma interactive-button/more 14×14 */
+const MORE_BTN =
+  'inline-flex size-[14px] shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:size-[14px]';
 
 function resolveActionIcon(item: ActionLinkItem): React.ReactNode {
   if (item.icon) return item.icon;
@@ -197,22 +206,69 @@ function resolveActionIcon(item: ActionLinkItem): React.ReactNode {
   return <IconSettings />;
 }
 
+function buildMoreMenu(
+  moreItems: ActionLinkItem[],
+  opts?: { textOnly?: boolean }
+) {
+  return (
+    <Menu
+      style={{ minWidth: 120 }}
+      onClickMenuItem={(key) => {
+        const item = moreItems.find((it) => it.key === key);
+        if (!item || item.disabled) return;
+        item.onClick?.();
+      }}
+    >
+      {moreItems.map((item) => (
+        <Menu.Item
+          key={item.key}
+          disabled={item.disabled}
+          className={
+            item.danger ? '!text-[rgb(var(--danger-6))]' : undefined
+          }
+        >
+          {opts?.textOnly ? (
+            item.label
+          ) : (
+            <span className="inline-flex items-center gap-2">
+              <span className="inline-flex text-xs [&_svg]:text-xs">
+                {resolveActionIcon(item)}
+              </span>
+              {item.label}
+            </span>
+          )}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
+}
+
 /**
- * 表格操作列（Figma 602:34917 / 用户查询文字链）
+ * 表格操作列（Figma 602:34917 / 用户查询文字链 / 群组 977:33806）
  * - icon：最多展示 3 个，超出进「…」
- * - text：并排文字链接
+ * - text：并排文字链接；可设 maxVisible 收起到更多下拉
  */
 export function ActionLinks({
   items,
-  maxVisible = 3,
+  maxVisible,
   variant = 'icon',
   className
 }: ActionLinksProps) {
   const t = useLocale();
+
   if (variant === 'text') {
+    const cap = maxVisible ?? items.length;
+    const safeMax = Math.max(0, cap);
+    const needMore = items.length > safeMax;
+    const visibleItems = needMore ? items.slice(0, safeMax) : items;
+    const moreItems = needMore ? items.slice(safeMax) : [];
+    const moreMenu = moreItems.length
+      ? buildMoreMenu(moreItems, { textOnly: true })
+      : null;
+
     return (
       <div className={cs('inline-flex items-center gap-[8px]', className)}>
-        {items.map((item) => (
+        {visibleItems.map((item) => (
           <button
             key={item.key}
             type="button"
@@ -226,39 +282,29 @@ export function ActionLinks({
             {item.label}
           </button>
         ))}
+        {moreMenu ? (
+          <Dropdown droplist={moreMenu} position="br" trigger="click">
+            <button
+              type="button"
+              className={MORE_BTN}
+              aria-label={t['common.more']}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <IconMoreDots aria-hidden />
+            </button>
+          </Dropdown>
+        ) : maxVisible != null ? (
+          <span className="inline-block size-[14px] shrink-0" aria-hidden />
+        ) : null}
       </div>
     );
   }
 
-  const safeMax = Math.max(1, maxVisible);
+  const safeMax = Math.max(1, maxVisible ?? 3);
   const needMore = items.length > safeMax;
   const visibleItems = needMore ? items.slice(0, safeMax - 1) : items;
   const moreItems = needMore ? items.slice(safeMax - 1) : [];
-
-  const moreMenu = moreItems.length ? (
-    <Menu
-      onClickMenuItem={(key) => {
-        const item = moreItems.find((it) => it.key === key);
-        if (!item || item.disabled) return;
-        item.onClick?.();
-      }}
-    >
-      {moreItems.map((item) => (
-        <Menu.Item
-          key={item.key}
-          disabled={item.disabled}
-          className={item.danger ? '!text-arco-danger' : undefined}
-        >
-          <span className="inline-flex items-center gap-2">
-            <span className="inline-flex text-xs [&_svg]:text-xs">
-              {resolveActionIcon(item)}
-            </span>
-            {item.label}
-          </span>
-        </Menu.Item>
-      ))}
-    </Menu>
-  ) : null;
+  const moreMenu = moreItems.length ? buildMoreMenu(moreItems) : null;
 
   return (
     <div className={cs('inline-flex items-center justify-end gap-2', className)}>
