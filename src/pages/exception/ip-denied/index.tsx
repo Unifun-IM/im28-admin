@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 /**
  * IP 非白名单非法访问拦截页 — Figma 1050:22903
- * 触发：任意接口业务码 100031（axios 全局拦截）；页面错误码固定展示 403
- * IP 一律由 ipify 获取展示
+ * 触发：任意接口业务码 100031（axios 全局拦截）
+ * 页面错误码固定展示 403
+ *
+ * IP 来源：当前站点 /cdn-cgi/trace
  */
 function IpDeniedPage() {
   const [ip, setIp] = useState('—');
@@ -11,20 +13,72 @@ function IpDeniedPage() {
   useEffect(() => {
     document.body.setAttribute('arco-theme', 'dark');
     document.documentElement.classList.add('dark');
+
+    return () => {
+      document.body.removeAttribute('arco-theme');
+      document.documentElement.classList.remove('dark');
+    };
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch('https://api.ipify.org?format=json')
-      .then((res) => res.json())
-      .then((data: { ip?: string }) => {
-        if (!cancelled && data?.ip) setIp(data.ip);
-      })
-      .catch(() => {
-        if (!cancelled) setIp('—');
-      });
+    const controller = new AbortController();
+
+    const fetchClientIp = async () => {
+      try {
+        const response = await fetch('/cdn-cgi/trace', {
+          method: 'GET',
+          cache: 'no-store',
+          signal: controller.signal,
+          headers: {
+            Accept: 'text/plain',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Trace request failed: ${response.status}`);
+        }
+
+        const traceText = await response.text();
+
+        const traceData = Object.fromEntries(
+          traceText
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => {
+              const separatorIndex = line.indexOf('=');
+
+              if (separatorIndex === -1) {
+                return [line, ''];
+              }
+
+              return [
+                line.slice(0, separatorIndex),
+                line.slice(separatorIndex + 1),
+              ];
+            }),
+        );
+
+        const clientIp = traceData.ip?.trim();
+
+        setIp(clientIp || '—');
+      } catch (error) {
+        if (
+          error instanceof DOMException &&
+          error.name === 'AbortError'
+        ) {
+          return;
+        }
+
+        console.error('Failed to fetch client IP:', error);
+        setIp('—');
+      }
+    };
+
+    void fetchClientIp();
+
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, []);
 
@@ -42,10 +96,12 @@ function IpDeniedPage() {
             <p className="m-0 text-[clamp(28px,4vw,36px)] font-bold leading-[44px] text-white">
               IP地址访问受限
             </p>
+
             <p className="m-0 text-[20px] leading-7 text-white">
               很抱歉，您的IP地址{' '}
               <span className="text-[#e20404]">{ip}</span> 访问受限
             </p>
+
             <p className="m-0 text-[20px] leading-7 text-white/60">
               We apologize that access from your IP address{' '}
               <span className="text-[#e20404]">{ip}</span> is currently
@@ -56,24 +112,32 @@ function IpDeniedPage() {
           <div className="flex w-full flex-col gap-4">
             <div className="flex w-full items-center justify-between gap-4">
               <div className="flex flex-col gap-2 text-left">
-                <span className="text-[24px] leading-8 text-white">错误代码</span>
+                <span className="text-[24px] leading-8 text-white">
+                  错误代码
+                </span>
                 <span className="text-[20px] leading-7 text-white/60">
                   Error Code
                 </span>
               </div>
-              <span className="text-[24px] leading-8 text-[#e20404]">403</span>
+
+              <span className="text-[24px] leading-8 text-[#e20404]">
+                403
+              </span>
             </div>
 
             <div className="h-px w-full bg-[rgba(255,255,255,0.12)]" />
 
             <div className="flex w-full items-center justify-between gap-4">
               <div className="flex flex-col gap-2 text-left">
-                <span className="text-[24px] leading-8 text-white">受限原因</span>
+                <span className="text-[24px] leading-8 text-white">
+                  受限原因
+                </span>
                 <span className="text-[20px] leading-7 text-white/60">
                   Reason
                 </span>
               </div>
-              <span className="text-[24px] leading-8 text-[#e20404]">
+
+              <span className="text-right text-[24px] leading-8 text-[#e20404]">
                 IP Not Whitelisted
               </span>
             </div>
@@ -83,6 +147,7 @@ function IpDeniedPage() {
             <p className="m-0 text-white">
               如需开通访问权限，请联系管理员或我司技术支持协助。
             </p>
+
             <p className="m-0 text-white/60">
               Should you require access, please feel free to reach out to our
               administrator or technical support team for further assistance.
