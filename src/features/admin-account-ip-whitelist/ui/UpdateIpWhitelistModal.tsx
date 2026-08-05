@@ -33,7 +33,8 @@ function parseIps(raw: string): string[] {
 type Step = 'form' | 'ga';
 
 /**
- * 调整白名单 — Figma 1023:23052 / 921:44417
+ * 调整白名单 — Figma 1023:23052 / 921:44417 / 1217:27788
+ * 留空 = 空数组，表示不限制来源 IP
  * AdminAPI.UpdateSysUserIPWhitelistRequest
  */
 export default function UpdateIpWhitelistModal({
@@ -64,11 +65,8 @@ export default function UpdateIpWhitelistModal({
   const goGa = async () => {
     try {
       const values = await form.validate();
+      // 留空 = 不限制来源 IP（空数组）
       const nextIps = parseIps(values.ip_text || '');
-      if (!nextIps.length) {
-        Message.error(t['ipWhitelist.msg.ipRequired']);
-        return;
-      }
       const invalid = nextIps.find((ip) => !IPV4_RE.test(ip));
       if (invalid) {
         Message.error(
@@ -139,13 +137,11 @@ export default function UpdateIpWhitelistModal({
           <FormItem
             field="ip_text"
             label={t['ipWhitelist.field.ips']}
-            extra={t['ipWhitelist.field.ipsExtra']}
-            rules={[
-              {
-                required: true,
-                message: t['ipWhitelist.placeholder.ips']
-              }
-            ]}
+            extra={
+              <span className="text-[12px] leading-[18px] text-[rgb(var(--danger-6))]">
+                {t['ipWhitelist.field.ipsExtra']}
+              </span>
+            }
           >
             <Input
               allowClear

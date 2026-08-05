@@ -43,9 +43,9 @@ export type CreateAccountModalProps = {
 type Step = 'form' | 'success';
 
 /**
- * 新建账号 — Figma 666:21800 / 921:44334
+ * 新建账号 — Figma 666:21800 / 921:44334 / 1217:27788
  * 不传密码：服务端生成 temporary_password，成功页一次性展示
- * IP：CreateSysUserRequest 未声明，创建时仍透传；正式调整请走 update-ip-whitelist
+ * IP 非必填：留空传空数组表示不限制；正式调整请走 update-ip-whitelist
  */
 export default function CreateAccountModal({
   visible,
@@ -97,11 +97,8 @@ export default function CreateAccountModal({
   const submit = async () => {
     try {
       const values = await form.validate();
+      // 留空 = 不限制来源 IP（空数组）
       const ips = parseIps(values.ip_text || '');
-      if (!ips.length) {
-        Message.error(t['createAccount.msg.ipRequired']);
-        return;
-      }
       const invalid = ips.find((ip) => !IPV4_RE.test(ip));
       if (invalid) {
         Message.error(
@@ -202,13 +199,11 @@ export default function CreateAccountModal({
           <FormItem
             field="ip_text"
             label={t['createAccount.field.ipWhitelist']}
-            rules={[
-              {
-                required: true,
-                message: t['createAccount.placeholder.ipWhitelist']
-              }
-            ]}
-            extra={t['createAccount.field.ipWhitelistExtra']}
+            extra={
+              <span className="text-[12px] leading-[18px] text-[rgb(var(--danger-6))]">
+                {t['createAccount.field.ipWhitelistExtra']}
+              </span>
+            }
           >
             <Input
               placeholder={t['createAccount.placeholder.ipWhitelist']}
