@@ -15,6 +15,7 @@ import {
 } from '@arco-design/web-react/icon';
 import {
   postV1AdminGroupsDetail,
+  postV1AdminGroupsMembersList,
   postV1AdminGroupsOperationLogsList
 } from '@shared/api/admin/groups';
 import { postV1AdminUsersDetail } from '@shared/api/admin/users';
@@ -84,9 +85,9 @@ function displayName(user?: AdminAPI.User | null, fallback = '-') {
   return user?.nickname || user?.account || user?.user_id || fallback;
 }
 
-function mapManager(
+function mapGroupMemberWrap(
   t: Record<string, string>,
-  wrap: AdminAPI.AdminDetailGroupManagerWrap
+  wrap: { member?: AdminAPI.GroupMember; user?: AdminAPI.User }
 ): MemberItem {
   const member = wrap.member;
   const user = wrap.user;
@@ -221,7 +222,7 @@ function GroupAvatar({
 /**
  * 群详情 Drawer
  * Figma 977:22817 基本信息 / 977:22961 操作日志 / 977:23026 群成员 / 977:23094 成员用户信息
- * 全量成员列表暂无 Admin 契约，成员视图展示 detail.managers（群主及管理员）
+ * 成员列表：postV1AdminGroupsMembersList；管理区管理员：detail.managers
  */
 export default function GroupDetailDrawer({
   visible,
@@ -236,6 +237,9 @@ export default function GroupDetailDrawer({
   const [detail, setDetail] =
     useState<AdminAPI.AdminDetailGroupEnvelope['data']>();
   const [logs, setLogs] = useState<AdminAPI.AdminGroupOperationLogWrap[]>([]);
+  const [memberWraps, setMemberWraps] = useState<
+    AdminAPI.AdminGroupMemberWrap[]
+  >([]);
   const [tab, setTab] = useState<string>(defaultTab);
   const [view, setView] = useState<View>('main');
   const [memberKeyword, setMemberKeyword] = useState('');
@@ -255,6 +259,7 @@ export default function GroupDetailDrawer({
     setMemberFrom('members');
     setMemberUser(undefined);
     setMemberOnline('unknown');
+    setMemberWraps([]);
   }, [visible, defaultTab, groupId]);
 
   useEffect(() => {
@@ -267,12 +272,18 @@ export default function GroupDetailDrawer({
         group_id: groupId,
         page: 1,
         page_size: 50
+      }),
+      postV1AdminGroupsMembersList({
+        group_id: groupId,
+        page: 1,
+        page_size: 100
       })
     ])
-      .then(([detailRes, logsRes]) => {
+      .then(([detailRes, logsRes, membersRes]) => {
         if (cancelled) return;
         setDetail(detailRes.data);
         setLogs(logsRes.data?.list || []);
+        setMemberWraps(membersRes.data?.list || []);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -317,9 +328,15 @@ export default function GroupDetailDrawer({
   const statusRaw = group?.status;
   const status = openimLabel(t, 'groupStatus', statusRaw);
 
-  const members = useMemo(
-    () => (detail?.managers || []).map((wrap) => mapManager(t, wrap)),
+  const managers = useMemo(
+    () =>
+      (detail?.managers || []).map((wrap) => mapGroupMemberWrap(t, wrap)),
     [detail?.managers, t]
+  );
+
+  const members = useMemo(
+    () => memberWraps.map((wrap) => mapGroupMemberWrap(t, wrap)),
+    [memberWraps, t]
   );
 
   const timelineItems = useMemo<LogItem[]>(
@@ -652,7 +669,7 @@ export default function GroupDetailDrawer({
                             </LinkValue>
                           )
                         },
-                        ...members
+                        ...managers
                           .filter((a) => a.roleLevel !== 100)
                           .slice(0, 5)
                           .map((a) => ({

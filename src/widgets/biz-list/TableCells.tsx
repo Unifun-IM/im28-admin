@@ -173,15 +173,21 @@ export type ActionLinkItem = {
 export type ActionLinksProps = {
   items: ActionLinkItem[];
   /**
-   * 直接展示上限。
-   * - icon：含「更多」占位，默认 3
-   * - text：默认全部展示；传 1 时其余进「更多」下拉（群组查询 Figma 977:33806）
+   * 折叠后外露条数。
+   * - text：仅当 items.length > 3 时折叠为「外露 + 更多」，默认外露 1
+   * - icon：默认 3（含「更多」占位；溢出时可见数 = maxVisible - 1）
    */
   maxVisible?: number;
-  /** icon：图标操作列；text：文字链接（用户查询 / 群组查询） */
+  /** icon：图标操作列；text：文字链接 */
   variant?: 'icon' | 'text';
   className?: string;
 };
+
+/** text：超过 3 项才折叠，折叠后外露条数 */
+const TEXT_FOLD_WHEN_OVER = 3;
+const DEFAULT_TEXT_FOLDED_VISIBLE = 1;
+/** icon：最多 3 个槽位 */
+const DEFAULT_ICON_MAX_VISIBLE = 3;
 
 const ICON_BTN =
   'inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-arco-text-2 hover:bg-arco-fill-2 hover:text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-xs';
@@ -244,9 +250,9 @@ function buildMoreMenu(
 }
 
 /**
- * 表格操作列（Figma 602:34917 / 用户查询文字链 / 群组 977:33806）
- * - icon：最多展示 3 个，超出进「…」
- * - text：并排文字链接；可设 maxVisible 收起到更多下拉
+ * 表格操作列
+ * - text：≤3 全部展示；>3 折叠为「首项 + 更多」（群组查询通用做法）
+ * - icon：最多 3 个槽位（含更多）
  */
 export function ActionLinks({
   items,
@@ -257,17 +263,27 @@ export function ActionLinks({
   const t = useLocale();
 
   if (variant === 'text') {
-    const cap = maxVisible ?? items.length;
-    const safeMax = Math.max(0, cap);
-    const needMore = items.length > safeMax;
-    const visibleItems = needMore ? items.slice(0, safeMax) : items;
-    const moreItems = needMore ? items.slice(safeMax) : [];
+    const foldedVisible = Math.max(
+      0,
+      maxVisible ?? DEFAULT_TEXT_FOLDED_VISIBLE
+    );
+    const needFold = items.length > TEXT_FOLD_WHEN_OVER;
+    const visibleItems = needFold ? items.slice(0, foldedVisible) : items;
+    const moreItems = needFold ? items.slice(foldedVisible) : [];
     const moreMenu = moreItems.length
       ? buildMoreMenu(moreItems, { textOnly: true })
       : null;
+    /** 折叠态仅外露首项时，无更多也占位，保证「详情」与有更多行左对齐 */
+    const reserveMoreSlot =
+      moreMenu != null || visibleItems.length === foldedVisible;
 
     return (
-      <div className={cs('inline-flex items-center gap-[8px]', className)}>
+      <div
+        className={cs(
+          'flex w-full items-center justify-center gap-[8px]',
+          className
+        )}
+      >
         {visibleItems.map((item) => (
           <button
             key={item.key}
@@ -293,21 +309,26 @@ export function ActionLinks({
               <IconMoreDots aria-hidden />
             </button>
           </Dropdown>
-        ) : maxVisible != null ? (
+        ) : reserveMoreSlot ? (
           <span className="inline-block size-[14px] shrink-0" aria-hidden />
         ) : null}
       </div>
     );
   }
 
-  const safeMax = Math.max(1, maxVisible ?? 3);
+  const safeMax = Math.max(1, maxVisible ?? DEFAULT_ICON_MAX_VISIBLE);
   const needMore = items.length > safeMax;
   const visibleItems = needMore ? items.slice(0, safeMax - 1) : items;
   const moreItems = needMore ? items.slice(safeMax - 1) : [];
   const moreMenu = moreItems.length ? buildMoreMenu(moreItems) : null;
 
   return (
-    <div className={cs('inline-flex items-center justify-end gap-2', className)}>
+    <div
+      className={cs(
+        'flex w-full items-center justify-center gap-2',
+        className
+      )}
+    >
       {visibleItems.map((item) => (
         <Tooltip key={item.key} content={item.label}>
           <button

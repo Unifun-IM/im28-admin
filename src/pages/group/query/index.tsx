@@ -451,14 +451,13 @@ export default function GroupQueryPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 100,
+              width: 70,
               render: (_: unknown, row: GroupListRow) => {
                 const group_id = row.group?.group_id || '';
                 const moreItems = buildStatusActions(row);
                 return (
                   <ActionLinks
                     variant="text"
-                    maxVisible={1}
                     items={[
                       {
                         key: 'detail',

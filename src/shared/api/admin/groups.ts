@@ -50,6 +50,24 @@ export async function postV1AdminGroupsListByUser(
   );
 }
 
+/** 查询群成员列表 根据群 ID 分页查询当前有效群成员，按入群时间升序稳定返回。每项包含群成员关系和 C 端用户资料；已退出、被移除或被封禁的历史成员不返回。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/members/list */
+export async function postV1AdminGroupsMembersList(
+  body: AdminAPI.AdminListGroupMemberRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.AdminListGroupMemberEnvelope>(
+    "/v1/admin/groups/members/list",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** 查询群操作日志 按群分页查询操作时间线，可按动作和时间范围筛选。操作日志在群业务提交成功后尽力写入，不作为群业务事务的一部分。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/operation-logs/list */
 export async function postV1AdminGroupsOperationLogsList(
   body: AdminAPI.AdminListGroupOperationLogRequest,

@@ -235,9 +235,15 @@ declare namespace AdminAPI {
     updated_at?: RFC3339Time;
   };
 
+  type AdminGroupMemberWrap = {
+    member?: GroupMember;
+    user?: User;
+  };
+
   type AdminGroupOperationLog = {
     log_id?: string;
     group_id?: string;
+    /** 操作人类型。user=C 端用户，sys_user=后台系统用户。 */
     operator_type?: "user" | "sys_user";
     /** C 端操作用户 ID；operator_type=user 时有值。 */
     operator_user_id?: string;
@@ -279,7 +285,7 @@ declare namespace AdminAPI {
   type AdminListBannedUserRequest = {
     /** 查询内容，不能仅包含空白字符。keyword_type 为空时同时匹配用户 ID、账号、手机号、邮箱和昵称。 */
     keyword?: string;
-    /** 字段化查询类型，只能在同时传入 keyword 时使用；除 nickname 为包含匹配外，其余类型均为精确匹配。 */
+    /** 字段化查询类型。user_id=用户 ID，account=用户账号，phone=手机号，email=邮箱，nickname=用户昵称；只能在同时传入 keyword 时使用。除 nickname 为包含匹配外，其余类型均为精确匹配。 */
     keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
     /** 封禁周期。temporary=限时，permanent=永久。 */
     ban_period?: "temporary" | "permanent";
@@ -351,6 +357,19 @@ declare namespace AdminAPI {
       data?: { list?: { group?: Group; owner?: User }[]; total?: number };
     };
 
+  type AdminListGroupMemberEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: AdminGroupMemberWrap[]; total?: number };
+    };
+
+  type AdminListGroupMemberRequest = {
+    /** 要查看成员的群业务 ID。 */
+    group_id: string;
+    page?: number;
+    page_size?: number;
+  };
+
   type AdminListGroupOperationLogEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -372,7 +391,7 @@ declare namespace AdminAPI {
   type AdminListGroupRequest = {
     /** 群搜索关键词；`keyword_type=group_id` 时精确匹配群 ID，`keyword_type=title` 时模糊匹配群名称；不传类型时同时匹配两者。 */
     keyword?: string;
-    /** 关键词类型；传此字段时必须同时传 `keyword`。 */
+    /** 关键词类型。group_id=群 ID 精确匹配，title=群名称模糊匹配；传此字段时必须同时传 `keyword`。 */
     keyword_type?: "group_id" | "title";
     owner_user_id?: string;
     status?: GroupStatus;
@@ -380,9 +399,9 @@ declare namespace AdminAPI {
     created_start_at?: RFC3339Time;
     /** 群创建时间终点。 */
     created_end_at?: RFC3339Time;
-    /** 排序字段；不传时按创建时间排序。 */
+    /** 排序字段。member_count=群成员数量，created_at=群创建时间；不传时按创建时间排序。 */
     sort_by?: "member_count" | "created_at";
-    /** 排序方向；传此字段时必须同时传 `sort_by`，不传时默认 `desc`。 */
+    /** 排序方向。asc=升序，desc=降序；传此字段时必须同时传 `sort_by`，不传时默认 desc。 */
     sort_order?: "asc" | "desc";
     page?: number;
     page_size?: number;
@@ -464,7 +483,7 @@ declare namespace AdminAPI {
     };
 
   type AdminListUserConversationQueryRequest = {
-    /** 用户关键词类型；传 keyword 时必填。 */
+    /** 用户关键词类型。user_id=用户 ID，nickname=用户昵称，phone=手机号，email=邮箱，account=用户账号；传 keyword 时必填。 */
     keyword_type?: "user_id" | "nickname" | "phone" | "email" | "account";
     /** 用户关键词。为空时固定返回空列表，不会默认查询全部用户。 */
     keyword?: string;
@@ -515,16 +534,16 @@ declare namespace AdminAPI {
   type AdminListUserOperationLogRequest = {
     /** 用户搜索内容，不能仅包含空白字符；传入时必须同时传 keyword_type。 */
     keyword?: string;
-    /** 用户搜索字段；传入时必须同时传 keyword。 */
+    /** 用户搜索字段。user_id=用户 ID，phone=手机号，email=邮箱，account=用户账号，nickname=用户昵称；传入时必须同时传 keyword。 */
     keyword_type?: "user_id" | "phone" | "email" | "account" | "nickname";
     /** 行为类型机器标识，例如 register、login、login_failed、logout、update_avatar、update_profile、send_message；为空时查询全部类型。 */
     behavior_type?: string;
-    /** 客户端类型；server 表示服务端任务或无用户设备的系统行为。 */
+    /** 客户端类型。ios=iOS 客户端，android=Android 客户端，web=Web/H5 客户端，server=服务端任务或无用户设备的系统行为。 */
     client_type?: "ios" | "android" | "web" | "server";
     /** 操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
     operated_end_at?: RFC3339Time;
-    /** 按操作时间排序。 */
+    /** 按操作时间排序。asc=升序，desc=降序。 */
     sort_order?: "asc" | "desc";
     page?: number;
     page_size?: number;
@@ -540,7 +559,7 @@ declare namespace AdminAPI {
   type AdminListUserRequest = {
     /** 查询内容。keyword_type 为空时同时匹配用户 ID、账号、手机号、邮箱和昵称。 */
     keyword?: string;
-    /** 字段化查询类型；只能在同时传入 keyword 时使用。除 nickname 为包含匹配外，其余类型均为精确匹配。 */
+    /** 字段化查询类型。user_id=用户 ID，account=用户账号，phone=手机号，email=邮箱，nickname=用户昵称；只能在同时传入 keyword 时使用。除 nickname 为包含匹配外，其余类型均为精确匹配。 */
     keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
     /** 批量搜索用户 ID；与其他查询条件同时传入时按 AND 组合。 */
     user_ids?: string[];
@@ -552,8 +571,9 @@ declare namespace AdminAPI {
     /** 最后操作时间范围起点；与 last_operated_end_at 同时传入时不得晚于结束时间。 */
     last_operated_start_at?: RFC3339Time;
     last_operated_end_at?: RFC3339Time;
+    /** 排序字段。registered_at=注册时间，last_operated_at=最后操作时间（用户 updated_at）。 */
     sort_by?: "registered_at" | "last_operated_at";
-    /** 只能在同时传入 sort_by 时使用。 */
+    /** 排序方向。asc=升序，desc=降序；只能在同时传入 sort_by 时使用。 */
     sort_order?: "asc" | "desc";
     page?: number;
     page_size?: number;
@@ -568,7 +588,7 @@ declare namespace AdminAPI {
   type AdminListWhitelistedUserRequest = {
     /** 查询内容，不能仅包含空白字符。keyword_type 为空时同时匹配用户 ID、账号、手机号、邮箱和昵称。 */
     keyword?: string;
-    /** 字段化查询类型，只能在同时传入 keyword 时使用；除 nickname 为包含匹配外，其余类型均为精确匹配。 */
+    /** 字段化查询类型。user_id=用户 ID，account=用户账号，phone=手机号，email=邮箱，nickname=用户昵称；只能在同时传入 keyword 时使用。除 nickname 为包含匹配外，其余类型均为精确匹配。 */
     keyword_type?: "user_id" | "account" | "phone" | "email" | "nickname";
     /** 将用户加入白名单的后台用户 ID。 */
     operator_id?: number;
@@ -624,7 +644,7 @@ declare namespace AdminAPI {
     };
 
   type AdminSearchUserRequest = {
-    /** 搜索字段类型。五种类型都使用不区分大小写的包含匹配，输入的 `%` 和 `_` 按普通字符处理。 */
+    /** 搜索字段类型。user_id=用户 ID，phone=手机号，email=邮箱，account=用户账号，nickname=用户昵称；五种类型都使用不区分大小写的包含匹配，输入的 `%` 和 `_` 按普通字符处理。 */
     type: "user_id" | "phone" | "email" | "account" | "nickname";
     /** 搜索内容，不能仅包含空白字符。 */
     keyword: string;
@@ -805,6 +825,7 @@ declare namespace AdminAPI {
   };
 
   type AdminUserOperationClient = {
+    /** 客户端类型。ios=iOS 客户端，android=Android 客户端，web=Web/H5 客户端，server=服务端任务或无用户设备的系统行为。 */
     type?: "ios" | "android" | "web" | "server";
     /** 客户端版本号。 */
     version?: string;
@@ -872,7 +893,19 @@ declare namespace AdminAPI {
     | 100009
     | 100010
     | 100011
-    | 100012;
+    | 100012
+    | 100013
+    | 100014
+    | 100015
+    | 100016
+    | 100019
+    | 100025
+    | 100026
+    | 100028
+    | 100029
+    | 100030
+    | 100031
+    | 100032;
 
   type ApplyFriendRequest = {
     target_id: string;
@@ -953,10 +986,16 @@ declare namespace AdminAPI {
   };
 
   type CardGroup = {
+    /** 群 ID。发送群名片时客户端只需提供此字段。 */
     group_id: string;
+    /** 群名称快照。发送时由服务端按 group_id 查询并回填，客户端传值会被忽略。 */
     title?: string;
+    /** 群头像快照。发送时由服务端按 group_id 查询并回填，客户端传值会被忽略。 */
     avatar_url?: string;
+    /** 群成员数快照。发送时由服务端按 group_id 查询并回填，客户端传值会被忽略。 */
     member_count?: number;
+    /** 群简介快照。发送时由服务端按 group_id 查询并回填，客户端传值会被忽略；服务端按 Unicode 字符截取前 50 个，群未设置简介时为空字符串。 */
+    description?: string;
   };
 
   type CardMessage = {
@@ -1063,12 +1102,12 @@ declare namespace AdminAPI {
   };
 
   type ConversationExitInfo = {
-    /** 当前用户退出态。 */
+    /** 当前用户退出态。left=主动退群，removed=被移出群聊。 */
     state?: "left" | "removed";
     /** 触发退出态的操作人用户 ID；主动退出时为当前用户。 */
     operator_user_id?: string;
     operator_role?: RoleLevel;
-    /** 退出原因。 */
+    /** 退出原因。left=主动退群，removed=被移出群聊，dismissed=群已解散。 */
     reason?: "left" | "removed" | "dismissed";
     occurred_at?: RFC3339Time;
     operator_user?: User;
@@ -1282,6 +1321,7 @@ declare namespace AdminAPI {
     /** 当前会话最新消息编辑或删除更新序号。 */
     last_update_seq?: Uint64String;
     version?: Uint64String;
+    /** 当前用户的会话成员状态。active=正常，left=已主动退出，removed=已被移除，muted=已禁言。 */
     my_user_state?: "active" | "left" | "removed" | "muted";
     join_seq?: Uint64String;
     leave_seq?: Uint64String;
@@ -1344,6 +1384,7 @@ declare namespace AdminAPI {
   };
 
   type ForwardOrigin = {
+    /** 转发来源类型，当前固定为 user，表示来源是 C 端用户。 */
     type?: "user";
     /** 最初来源消息的发送者用户 ID。 */
     user_id?: string;
@@ -1376,7 +1417,7 @@ declare namespace AdminAPI {
     requester_id?: string;
     target_id?: string;
     message?: string;
-    /** 添加来源标记，只用于记录来源，最终目标用户仍通过 target_id 确定。 */
+    /** 添加来源标记。phone=手机号搜索，email=邮箱搜索，user_id=用户 ID 搜索，group=群聊，card=名片，qrcode=二维码；仅用于记录来源，最终目标用户仍通过 target_id 确定。 */
     source_type?: "phone" | "email" | "user_id" | "group" | "card" | "qrcode";
     status?: FriendApplicationStatus;
     /** 当前用户作为申请接收方时是否已读；当前用户是发起方时固定为 true。 */
@@ -1488,9 +1529,11 @@ declare namespace AdminAPI {
     requester_user_id?: string;
     /** 邀请人；主动申请时为空。 */
     inviter_user_id?: string;
+    /** 入群记录类型。apply=用户主动申请入群，invite=群成员邀请用户入群。 */
     type?: "apply" | "invite";
     source_type?: string;
     message?: string;
+    /** 入群记录状态。pending=待处理，accepted=已同意，rejected=已拒绝。 */
     status?: "pending" | "accepted" | "rejected";
     handled_by?: string;
     handled_at?: RFC3339Time;
@@ -1509,6 +1552,7 @@ declare namespace AdminAPI {
     /** 当前会话最新消息编辑或删除更新序号。 */
     last_update_seq?: Uint64String;
     version?: Uint64String;
+    /** 当前用户的群会话成员状态。active=正常，left=已主动退群，removed=已被移出群聊，muted=已禁言。 */
     my_user_state?: "active" | "left" | "removed" | "muted";
     my_role?: RoleLevel;
     join_seq?: Uint64String;
@@ -1547,6 +1591,7 @@ declare namespace AdminAPI {
     group_id?: string;
     user_id?: string;
     role?: RoleLevel;
+    /** 群成员状态。active=正常，left=已主动退群，removed=已被移出群聊，banned=已被群封禁。 */
     state?: "active" | "left" | "removed" | "banned";
     joined_at?: RFC3339Time;
     updated_at?: RFC3339Time;
@@ -1568,6 +1613,7 @@ declare namespace AdminAPI {
 
   type GroupUserPermission = {
     role?: RoleLevel;
+    /** 当前用户的群成员状态。active=正常，left=已主动退群，removed=已被移出群聊，banned=已被群封禁。 */
     state?: "active" | "left" | "removed" | "banned";
     /** 是否被群封禁；当前等同于成员状态 banned。 */
     is_banned?: boolean;
@@ -1901,9 +1947,11 @@ declare namespace AdminAPI {
     update_id?: string;
     conversation_id?: string;
     update_seq?: Uint64String;
+    /** 消息变更类型。edited=消息已编辑，deleted=消息已删除。 */
     type?: "edited" | "deleted";
     target_msg_id?: string;
     operator_user_id?: string;
+    /** 删除范围，仅 type=deleted 时有意义。self=仅对操作用户隐藏，all=对会话相关用户全局删除。 */
     delete_scope?: "self" | "all";
     message?: Message;
     occurred_at?: RFC3339Time;
@@ -2075,6 +2123,11 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminGroupsListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminGroupsMembersListParams = {
     ""?: any;
     ""?: any;
   };
@@ -2577,7 +2630,7 @@ declare namespace AdminAPI {
     logo_url: string;
     /** 后台默认语言，使用语言标签，例如 zh-CN、en-US。 */
     default_language: string;
-    /** 后台时间展示格式。 */
+    /** 后台时间展示格式。12h=12 小时制，24h=24 小时制。 */
     time_format: "12h" | "24h";
     /** 是否全局启用后台 IPv4 白名单校验。 */
     ip_whitelist_enabled: boolean;
@@ -2832,7 +2885,7 @@ declare namespace AdminAPI {
     logo_url?: string;
     /** 可选。默认语言标签，不能仅包含空白字符；不传表示保留原值。 */
     default_language?: string;
-    /** 可选。不传表示保留原值。 */
+    /** 后台时间展示格式。12h=12 小时制，24h=24 小时制；可选，不传表示保留原值。 */
     time_format?: "12h" | "24h";
     /** 可选。开启后，后台登录、改密、二步验证、刷新 token 和已登录请求均校验系统用户各自的 IPv4 白名单；关闭后跳过 IP 条件；不传表示保留原值。 */
     ip_whitelist_enabled?: boolean;
@@ -2920,7 +2973,7 @@ declare namespace AdminAPI {
     };
 
   type VerifySecurityRequest = {
-    /** 本次安全验证用途。安全 token 只能用于对应操作，不能跨用途使用。 */
+    /** 本次安全验证用途。update_password=修改当前后台账号密码，reset_two_factor=重置当前后台账号的二步验证；安全 token 只能用于对应操作，不能跨用途使用。 */
     operation: "update_password" | "reset_two_factor";
     /** 当前已绑定认证器生成的 6 位动态验证码。 */
     two_factor_code: string;
