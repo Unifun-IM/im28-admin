@@ -1862,16 +1862,6 @@ declare namespace AdminAPI {
     nickname?: string;
   };
 
-  type MergeMessage = {
-    title: string;
-    abstracts?: string[];
-    url?: string;
-  };
-
-  type MergeMessageBody = {
-    merge: MergeMessage;
-  };
-
   type Message = {
     msg_id?: string;
     conversation_id?: string;
@@ -1904,7 +1894,6 @@ declare namespace AdminAPI {
     | 104
     | 105
     | 106
-    | 107
     | 108
     | 109
     | 110
