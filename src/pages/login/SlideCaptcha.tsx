@@ -12,7 +12,7 @@ export type SlideCaptchaProps = {
 };
 
 /**
- * 滑块验证 — Figma 602:35197
+ * 滑块验证 — Figma 602:35197 / 成功态 602:35319
  */
 export default function SlideCaptcha({
   value,

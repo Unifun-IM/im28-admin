@@ -65,7 +65,7 @@
   }
 }
 
-/* 滑块验证 — Figma 602:35197 */
+/* 滑块验证 — Figma 602:35197 / 成功态 602:35319 */
 .use-login-slide {
   position: relative;
   box-sizing: border-box;
@@ -80,9 +80,10 @@
   background: var(--color-fill-2);
   transition: background-color 0.35s ease, border-color 0.35s ease;
 
+  /* 成功：浅绿底 + border/2，整条不为实心绿 */
   &.is-verified {
-    background: rgb(var(--success-1));
-    border-color: transparent;
+    background: rgba(var(--success-6), 0.12);
+    border-color: var(--color-border-2);
   }
 
   .use-login-slide__fill {
@@ -99,9 +100,7 @@
   }
 
   &.is-verified .use-login-slide__fill {
-    width: 100% !important;
-    background: rgb(var(--success-6));
-    opacity: 1 !important;
+    opacity: 0 !important;
   }
 
   /*
@@ -138,9 +137,10 @@
     animation: use-login-slide-shimmer 2s cubic-bezier(0, 0.2, 1, 1) infinite;
   }
 
+  /* Figma 602:35319：成功文案 text/2，非白字 */
   .use-login-slide__tip.is-success {
-    color: var(--color-text-white);
-    -webkit-text-fill-color: var(--color-text-white);
+    color: var(--color-text-2);
+    -webkit-text-fill-color: var(--color-text-2);
     background: none;
     animation: use-login-slide-tip-in 0.4s ease both;
   }
@@ -167,10 +167,11 @@
       box-shadow: 0 4px 12px rgba(99, 92, 255, 0.36);
     }
 
+    /* 成功：贴右，success/6 + 白勾 */
     &.is-verified {
       margin-left: auto;
       background: rgb(var(--success-6));
-      box-shadow: 0 2px 8px rgba(77, 181, 130, 0.28);
+      box-shadow: none;
       animation: use-login-slide-handle-settle 0.45s
         cubic-bezier(0.22, 1, 0.36, 1) both;
     }
