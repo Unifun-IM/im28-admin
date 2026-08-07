@@ -1809,27 +1809,8 @@ declare namespace AdminAPI {
     status?: AccountStatus;
   };
 
-  type LocationMessage = {
-    latitude?: number;
-    longitude?: number;
-    name?: string;
-    address?: string;
-  };
-
-  type LocationMessageBody = {
-    location: LocationMessage;
-  };
-
   type LogoutRequest = {
     access_token?: string;
-  };
-
-  type MarkdownMessage = {
-    text: string;
-  };
-
-  type MarkdownMessageBody = {
-    markdown: MarkdownMessage;
   };
 
   type MarkFriendApplicationsReadRequest = {
@@ -1842,15 +1823,6 @@ declare namespace AdminAPI {
     conversation_id: string;
     /** 前端确认已读到的消息序号；不传或传 0 表示标记到服务端当前最新消息序号，兼容旧逻辑。 */
     read_seq?: Uint64String;
-  };
-
-  type MentionMessage = {
-    text: string;
-    targets?: MentionTarget[];
-  };
-
-  type MentionMessageBody = {
-    mention: MentionMessage;
   };
 
   type MentionTarget = {
@@ -1893,14 +1865,11 @@ declare namespace AdminAPI {
     | 103
     | 104
     | 105
-    | 106
     | 108
-    | 109
     | 110
     | 113
     | 114
     | 115
-    | 118
     | 1200
     | 1201
     | 1202
