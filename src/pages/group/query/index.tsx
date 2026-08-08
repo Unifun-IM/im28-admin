@@ -62,7 +62,7 @@ function parseBatchIds(raw?: string) {
 /**
  * 群组查询 — Figma 977:33806 / 更多菜单 1225:28854；批量搜索 1125:26762
  * AdminAPI.AdminListGroupRequest（无 group_ids，批量按 ID 精确查后合并）
- * 操作：封禁 postV1AdminGroupsBan / 禁言 postV1AdminGroupsMute；解散接口未就绪
+ * 操作：封禁 postV1AdminGroupsBan / 禁言 postV1AdminGroupsMute
  */
 export default function GroupQueryPage() {
   const t = useLocale();
@@ -241,14 +241,9 @@ export default function GroupQueryPage() {
     });
   };
 
-  /** 解散：后台专用接口尚未就绪 */
-  const confirmDismissPending = () => {
-    Message.warning(t['groupQuery.msg.actionApiPending']);
-  };
-
   /**
    * 按群状态 / mute_all 组装更多菜单（详情始终外露）
-   * 已解散无操作；已封禁仅解封；其余可禁言(mute_all) / 封禁 / 解散
+   * 已解散无操作；已封禁仅解封；其余可封禁 / 禁言(mute_all)
    */
   const buildStatusActions = (row: GroupListRow) => {
     const status = row.group?.status;
@@ -274,12 +269,6 @@ export default function GroupQueryPage() {
           key: 'ban',
           label: t['groupQuery.action.ban'],
           onClick: () => confirmBan(row, true)
-        },
-        {
-          key: 'dismiss',
-          label: t['groupQuery.action.dismiss'],
-          danger: true,
-          onClick: confirmDismissPending
         }
       ];
     }
@@ -293,12 +282,6 @@ export default function GroupQueryPage() {
         key: 'mute',
         label: t['groupQuery.action.mute'],
         onClick: () => confirmMute(row, true)
-      },
-      {
-        key: 'dismiss',
-        label: t['groupQuery.action.dismiss'],
-        danger: true,
-        onClick: confirmDismissPending
       }
     ];
   };
@@ -463,7 +446,7 @@ export default function GroupQueryPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 70,
+              width: 100,
               render: (_: unknown, row: GroupListRow) => {
                 const group_id = row.group?.group_id || '';
                 const moreItems = buildStatusActions(row);
