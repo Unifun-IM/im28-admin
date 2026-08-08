@@ -36,6 +36,13 @@ declare namespace AdminAPI {
     two_factor_code: string;
   };
 
+  type AdminBanGroupRequest = {
+    /** 群 ID。 */
+    group_id: string;
+    /** 是否封禁。`true`=封禁，`false`=由后台解除封禁。群主和群管理员不能自行解除封禁。 */
+    enabled: boolean;
+  };
+
   type AdminBannedUserWrap = {
     user?: User;
     operator?: SysUser;
@@ -613,9 +620,17 @@ declare namespace AdminAPI {
     edited_at?: string;
     mention_user_ids?: string[];
     mentions?: MentionTarget[];
+    entities?: MessageEntity[];
     sent_at?: string;
     updated_at?: string;
     expire_at?: string;
+  };
+
+  type AdminMuteGroupRequest = {
+    /** 群 ID。 */
+    group_id: string;
+    /** 是否开启全体禁言。`true`=开启，`false`=关闭。该操作修改群的 `mute_all` 设置，群主仍可通过 C 端群禁言设置将其关闭。 */
+    enabled: boolean;
   };
 
   type AdminRemoveIPBlacklistRequest = {
@@ -736,11 +751,6 @@ declare namespace AdminAPI {
     normal_group_member_limit: number;
     /** 群公告字数上限配置。当前仅保存，不参与群公告长度校验。 */
     announcement_max_length: 500 | 1000 | 2000;
-  };
-
-  type AdminUpdateGroupStatusRequest = {
-    group_id: string;
-    status: AdminWritableGroupStatus;
   };
 
   type AdminUpgradeGroupRequest = {
@@ -877,8 +887,6 @@ declare namespace AdminAPI {
     /** 加入白名单时间。 */
     operated_at?: RFC3339Time;
   };
-
-  type AdminWritableGroupStatus = 0 | 1;
 
   type ApiCode =
     | 0
@@ -1356,6 +1364,8 @@ declare namespace AdminAPI {
     body: MessageBody;
     /** 编辑后的完整消息级 @ 目标；省略或传空数组表示清除原 @ 信息。 */
     mentions?: MentionTarget[];
+    /** 编辑后的完整文本范围实体；省略或传空数组表示清除原实体。 */
+    entities?: MessageEntity[];
   };
 
   type EmojiMessage = {
@@ -1720,7 +1730,6 @@ declare namespace AdminAPI {
     };
 
   type ListFriendApplicationRequest = {
-    status?: FriendApplicationStatus;
     page?: number;
     page_size?: number;
   };
@@ -1850,6 +1859,8 @@ declare namespace AdminAPI {
     edited_at?: RFC3339Time;
     /** 消息级@目标列表。 */
     mentions?: MentionTarget[];
+    /** 消息文本范围实体。 */
+    entities?: MessageEntity[];
     sent_at?: RFC3339Time;
     updated_at?: RFC3339Time;
     /** 消息自动删除时间；空字符串表示不会自动删除。 */
@@ -1858,6 +1869,17 @@ declare namespace AdminAPI {
   };
 
   type MessageBody = Record<string, any>;
+
+  type MessageEntity = {
+    /** 实体类型。 */
+    type: string;
+    /** 实体在文本中的起始偏移量。 */
+    offset?: number;
+    /** 实体覆盖的文本长度。 */
+    length: number;
+    /** 预设资源 ID；当前实体类型不需要时为空。 */
+    preset_id?: string;
+  };
 
   type MessageType =
     | 101
@@ -1887,6 +1909,7 @@ declare namespace AdminAPI {
     | 1513
     | 1514
     | 1515
+    | 1516
     | 1519
     | 1520
     | 1521
@@ -2070,6 +2093,11 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminGroupsBanParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminGroupsDetailParams = {
     ""?: any;
     ""?: any;
@@ -2090,6 +2118,11 @@ declare namespace AdminAPI {
     ""?: any;
   };
 
+  type postV1AdminGroupsMuteParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminGroupsOperationLogsListParams = {
     ""?: any;
     ""?: any;
@@ -2101,11 +2134,6 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminGroupsSettingsUpdateParams = {
-    ""?: any;
-    ""?: any;
-  };
-
-  type postV1AdminGroupsUpdateStatusParams = {
     ""?: any;
     ""?: any;
   };
@@ -2494,6 +2522,8 @@ declare namespace AdminAPI {
     body: MessageBody;
     /** 消息级@目标列表；文本、图片、视频、文件、引用、Markdown 等消息都可以携带。 */
     mentions?: MentionTarget[];
+    /** 文本范围实体列表。 */
+    entities?: MessageEntity[];
   };
 
   type SetupTwoFactorEnvelope =
@@ -2742,13 +2772,13 @@ declare namespace AdminAPI {
 
   type UpdateGroupMuteRequest = {
     group_id: string;
-    /** 全体禁言开关；普通成员不能发言，群主仍可发言，管理员由 admin_send_message 控制。 */
+    /** 全体禁言开关；未传保持原值。普通成员不能发言，群主仍可发言，管理员由 admin_send_message 控制。 */
     mute_all?: boolean;
-    /** 普通成员禁言开关；开启后仅普通成员不能发言。 */
+    /** 普通成员禁言开关；未传保持原值，开启后仅普通成员不能发言。 */
     mute_member?: boolean;
-    /** 群发言频率开关；开启后普通成员按 send_frequency_seconds 限制发言间隔。 */
+    /** 群发言频率开关；未传保持原值，开启后普通成员按 send_frequency_seconds 限制发言间隔。 */
     send_frequency_enabled?: boolean;
-    /** 群发言频率间隔秒数。 */
+    /** 群发言频率间隔秒数；未传保持原值。 */
     send_frequency_seconds?: 30 | 60 | 180 | 300 | 600 | 1800 | 3600;
   };
 

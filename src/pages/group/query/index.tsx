@@ -11,8 +11,9 @@ import {
   StatusBadge
 } from '@widgets/biz-list';
 import {
+  postV1AdminGroupsBan,
   postV1AdminGroupsList,
-  postV1AdminGroupsUpdateStatus
+  postV1AdminGroupsMute
 } from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
 import {
@@ -61,7 +62,7 @@ function parseBatchIds(raw?: string) {
 /**
  * 群组查询 — Figma 977:33806 / 更多菜单 1225:28854；批量搜索 1125:26762
  * AdminAPI.AdminListGroupRequest（无 group_ids，批量按 ID 精确查后合并）
- * 操作：详情 + 更多（禁言/封禁/解散）→ postV1AdminGroupsUpdateStatus
+ * 操作：封禁 postV1AdminGroupsBan / 禁言 postV1AdminGroupsMute；解散接口未就绪
  */
 export default function GroupQueryPage() {
   const t = useLocale();
@@ -206,22 +207,16 @@ export default function GroupQueryPage() {
     form.setFieldValue('batchGroupIds', undefined);
   };
 
-  /**
-   * 封禁 / 解除封禁 — postV1AdminGroupsUpdateStatus
-   * AdminWritableGroupStatus：0=正常，1=封禁
-   */
-  const confirmBanStatus = (
-    row: GroupListRow,
-    status: AdminAPI.AdminWritableGroupStatus,
-    kind: 'ban' | 'unban'
-  ) => {
+  /** 封禁 / 解除封禁 — postV1AdminGroupsBan（enabled） */
+  const confirmBan = (row: GroupListRow, enabled: boolean) => {
     const group_id = row.group?.group_id;
     if (!group_id) return;
     const name = row.group?.title || group_id;
+    const kind = enabled ? 'ban' : 'unban';
     Modal.confirm({
       title: t[`groupQuery.confirm.${kind}`].replace('{name}', name),
       onOk: async () => {
-        await postV1AdminGroupsUpdateStatus({ group_id, status });
+        await postV1AdminGroupsBan({ group_id, enabled });
         Message.success(common['common.success']);
         fetchData(page, pageSize);
       }
@@ -229,15 +224,32 @@ export default function GroupQueryPage() {
   };
 
   /**
-   * 禁言 / 解除禁言 / 解散
-   * OpenAPI：禁言走群设置、解散走解散流程，不能经 update-status 写 2/3；
-   * 专用 admin 接口未就绪前仅提示。
+   * 全体禁言 / 解除 — postV1AdminGroupsMute（改 mute_all，不改生命周期 status）
    */
-  const confirmMuteOrDismiss = (_kind: 'mute' | 'unmute' | 'dismiss') => {
+  const confirmMute = (row: GroupListRow, enabled: boolean) => {
+    const group_id = row.group?.group_id;
+    if (!group_id) return;
+    const name = row.group?.title || group_id;
+    const kind = enabled ? 'mute' : 'unmute';
+    Modal.confirm({
+      title: t[`groupQuery.confirm.${kind}`].replace('{name}', name),
+      onOk: async () => {
+        await postV1AdminGroupsMute({ group_id, enabled });
+        Message.success(common['common.success']);
+        fetchData(page, pageSize);
+      }
+    });
+  };
+
+  /** 解散：后台专用接口尚未就绪 */
+  const confirmDismissPending = () => {
     Message.warning(t['groupQuery.msg.actionApiPending']);
   };
 
-  /** 按群状态组装更多菜单项（详情始终外露） */
+  /**
+   * 按群状态 / mute_all 组装更多菜单（详情始终外露）
+   * 已解散无操作；已封禁仅解封；其余可禁言(mute_all) / 封禁 / 解散
+   */
   const buildStatusActions = (row: GroupListRow) => {
     const status = row.group?.status;
     if (status === 2) return [];
@@ -246,47 +258,47 @@ export default function GroupQueryPage() {
         {
           key: 'unban',
           label: t['groupQuery.action.unban'],
-          onClick: () => confirmBanStatus(row, 0, 'unban')
+          onClick: () => confirmBan(row, false)
         }
       ];
     }
-    if (status === 3) {
+    const muted = !!row.group?.mute_all || status === 3;
+    if (muted) {
       return [
         {
           key: 'unmute',
           label: t['groupQuery.action.unmute'],
-          onClick: () => confirmMuteOrDismiss('unmute')
+          onClick: () => confirmMute(row, false)
         },
         {
           key: 'ban',
           label: t['groupQuery.action.ban'],
-          onClick: () => confirmBanStatus(row, 1, 'ban')
+          onClick: () => confirmBan(row, true)
         },
         {
           key: 'dismiss',
           label: t['groupQuery.action.dismiss'],
           danger: true,
-          onClick: () => confirmMuteOrDismiss('dismiss')
+          onClick: confirmDismissPending
         }
       ];
     }
-    // 正常(0)及其他
     return [
       {
         key: 'ban',
         label: t['groupQuery.action.ban'],
-        onClick: () => confirmBanStatus(row, 1, 'ban')
+        onClick: () => confirmBan(row, true)
       },
       {
         key: 'mute',
         label: t['groupQuery.action.mute'],
-        onClick: () => confirmMuteOrDismiss('mute')
+        onClick: () => confirmMute(row, true)
       },
       {
         key: 'dismiss',
         label: t['groupQuery.action.dismiss'],
         danger: true,
-        onClick: () => confirmMuteOrDismiss('dismiss')
+        onClick: confirmDismissPending
       }
     ];
   };

@@ -32,7 +32,7 @@ const i18n = {
     'groupQuery.confirm.dismiss':
       'Disband group「{name}」? This cannot be undone.',
     'groupQuery.msg.actionApiPending':
-      'Mute / disband admin APIs are not available yet',
+      'Disband admin API is not available yet',
     'groupDetail.title': 'Group details',
     'groupDetail.tab.basic': 'Basic info',
     'groupDetail.tab.logs': 'Operation log',
@@ -198,7 +198,7 @@ const i18n = {
     'groupQuery.confirm.ban': '确定封禁群「{name}」？封禁后群将不可用。',
     'groupQuery.confirm.unban': '确定解除群「{name}」的封禁？',
     'groupQuery.confirm.dismiss': '确定解散群「{name}」？解散后不可恢复。',
-    'groupQuery.msg.actionApiPending': '禁言 / 解散的后台接口尚未就绪',
+    'groupQuery.msg.actionApiPending': '解散的后台接口尚未就绪',
     'groupDetail.title': '群详情',
     'groupDetail.tab.basic': '基本信息',
     'groupDetail.tab.logs': '操作日志',

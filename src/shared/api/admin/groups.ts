@@ -2,6 +2,21 @@
 /* eslint-disable */
 import request from "@shared/api/request";
 
+/** 封禁或解除封禁群聊 后台开启或解除群封禁。封禁后群主和群管理员不能通过 C 端恢复群聊，只有后台调用本接口并传 `enabled=false` 才能解除。已解散的群不能封禁或恢复。需要 `admin.groups.write` 权限。 POST /v1/admin/groups/ban */
+export async function postV1AdminGroupsBan(
+  body: AdminAPI.AdminBanGroupRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/groups/ban", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 查询群详情 返回群基础资料、全部群设置、创建人、当前群主、群主及管理员，以及群会话最后活跃时间。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/detail */
 export async function postV1AdminGroupsDetail(
   body: AdminAPI.AdminDetailGroupRequest,
@@ -68,6 +83,21 @@ export async function postV1AdminGroupsMembersList(
   );
 }
 
+/** 开启或关闭群全体禁言 后台修改群的 `mute_all` 设置，不修改群生命周期状态。群主仍可通过 C 端群禁言设置关闭该禁言。封禁或已解散的群不能通过本接口修改禁言。需要 `admin.groups.write` 权限。 POST /v1/admin/groups/mute */
+export async function postV1AdminGroupsMute(
+  body: AdminAPI.AdminMuteGroupRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/groups/mute", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 查询群操作日志 按群分页查询操作时间线，可按动作和时间范围筛选。操作日志在群业务提交成功后尽力写入，不作为群业务事务的一部分。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/operation-logs/list */
 export async function postV1AdminGroupsOperationLogsList(
   body: AdminAPI.AdminListGroupOperationLogRequest,
@@ -105,21 +135,6 @@ export async function postV1AdminGroupsSettingsUpdate(
   options?: { [key: string]: any }
 ) {
   return request<AdminAPI.ResponseBase>("/v1/admin/groups/settings/update", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 更新群状态 POST /v1/admin/groups/update-status */
-export async function postV1AdminGroupsUpdateStatus(
-  body: AdminAPI.AdminUpdateGroupStatusRequest,
-  options?: { [key: string]: any }
-) {
-  return request<AdminAPI.ResponseBase>("/v1/admin/groups/update-status", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
