@@ -1,10 +1,14 @@
 /**
- * OpenIM / Admin MessageContentType → 查聊天气泡
+ * Admin / OpenIM MessageContentType → 查聊天气泡
  * UI 样式对齐 Figma 1092:33280
- * @see https://docs.openim.io/sdks/enum/messageContentType
+ * 展示文案走 openim.msg / openim.event（见 locale/openim.ts）
+ * @see docs/消息类型说明.md
+ * @see AdminAPI.MessageType
  */
 
-/** 与 OpenIM SDK MessageType / Admin MessageType 数值对齐 */
+import { openimMsg, resolveOpenimLocale } from '@shared/lib/openimLabels';
+
+/** 与 Admin MessageType 对齐；1203+ / 2101 等为 OpenIM 历史兼容 */
 export const MessageContentType = {
   Text: 101,
   Picture: 102,
@@ -22,17 +26,22 @@ export const MessageContentType = {
   C2CReceipt: 112,
   Typing: 113,
   Quote: 114,
+  /** Admin：MESSAGE_TYPE_EMOJI */
   CustomFace: 115,
   AdvancedText: 117,
-  /** 文档 Message Types：Markdown；部分平台同值语义不同 */
   Markdown: 118,
   CustomMsgNotTriggerConversation: 119,
   CustomMsgOnlineOnly: 120,
 
-  /** Admin MessageType：好友相关系统通知起点 */
+  /** 1200 好友申请（个人通知） */
+  FriendApplicationNotice: 1200,
   FriendNotification: 1200,
+  /** 1201 成为好友（单聊会话消息） */
+  FriendCreatedNotice: 1201,
   FriendApplicationApprovedNotification: 1201,
-  FriendApplicationRejectedNotification: 1202,
+  /** 1202 好友关系解除（个人通知）— 非「申请被拒」 */
+  FriendDeletedNotice: 1202,
+  /** OpenIM 历史扩展 */
   FriendApplicationNotification: 1203,
   FriendAddedNotification: 1204,
   FriendDeletedNotification: 1205,
@@ -42,6 +51,7 @@ export const MessageContentType = {
 
   ConversationChangeNotification: 1300,
   UserInfoUpdatedNotification: 1303,
+  /** 1400 未分配独立类型的兜底系统事件 */
   OANotification: 1400,
 
   GroupCreatedNotification: 1501,
@@ -59,17 +69,18 @@ export const MessageContentType = {
   GroupMemberCancelMutedNotification: 1513,
   GroupMutedNotification: 1514,
   GroupCancelMutedNotification: 1515,
-  GroupMemberInfoChangedNotification: 1516,
+  /** 1516 群发言频率配置变更（非成员资料变更） */
+  GroupSendFrequencyChangedNotification: 1516,
   GroupMemberSetToAdminNotification: 1517,
   GroupMemberSetToOrdinaryUserNotification: 1518,
   GroupInfoSetAnnouncementNotification: 1519,
   GroupInfoSetNameNotification: 1520,
-  /** Admin OpenAPI MessageContentType 1521（系统类） */
-  GroupSystemNotification1521: 1521,
+  /** 1521 群简介变更 */
+  GroupDescriptionChangedNotification: 1521,
 
   /**
-   * Admin 通话过程系统通知（body.system.event_type = rtc.call.*）
-   * @see AdminAPI.MessageType 1601-1608 / SystemMessage
+   * 通话过程通知（body.system.event_type = rtc.call.*）；不写聊天消息表
+   * 最终通话记录用 110 + custom.key=rtc.call.summary
    */
   RtcCallInviteNotification: 1601,
   RtcCallAcceptNotification: 1602,
@@ -77,15 +88,17 @@ export const MessageContentType = {
   RtcCallCancelNotification: 1604,
   RtcCallHangupNotification: 1605,
   RtcCallEndedNotification: 1606,
-  RtcCallNotification1607: 1607,
-  RtcCallNotification1608: 1608,
+  /** 预留：未接通话 */
+  RtcCallMissedNotification: 1607,
+  /** 预留：通话失败 */
+  RtcCallFailedNotification: 1608,
 
   BurnAfterReadingNotification: 1701,
   BusinessNotification: 2001,
   /** OpenIM 历史撤回通知 */
   RevokeMessageNotification: 2101,
-  /** Admin MessageType 撤回 / 系统删除类通知 */
-  AdminRevokeMessageNotification: 2102,
+  /** Admin：会话历史清空 conversation_cleared（非撤回） */
+  ConversationClearedNotification: 2102,
   SignalHasReadReceiptNotification: 2150,
   GroupHasReadReceiptNotification: 2155
 } as const;
@@ -147,12 +160,12 @@ export function isHiddenMessageContentType(type?: number): boolean {
   );
 }
 
-/** 通知 / 系统类（含撤回、Admin 1601-1608 通话过程通知） */
+/** 通知 / 系统类（含撤回、会话清空、1601-1608 通话过程通知） */
 export function isNotificationMessageContentType(type?: number): boolean {
   if (type == null) return false;
   if (
     type === MessageContentType.RevokeMessageNotification ||
-    type === MessageContentType.AdminRevokeMessageNotification
+    type === MessageContentType.ConversationClearedNotification
   ) {
     return true;
   }
@@ -162,11 +175,34 @@ export function isNotificationMessageContentType(type?: number): boolean {
   return type >= 1200 && type < 2200 && !isHiddenMessageContentType(type);
 }
 
+/** Admin 用户内容消息（文档 §4.1）；未知类型走「暂不支持」兜底 */
+const KNOWN_USER_CONTENT_TYPES = new Set<number>([
+  MessageContentType.Text,
+  MessageContentType.Picture,
+  MessageContentType.Voice,
+  MessageContentType.Video,
+  MessageContentType.File,
+  MessageContentType.AtText,
+  MessageContentType.Merger,
+  MessageContentType.Card,
+  MessageContentType.Location,
+  MessageContentType.Custom,
+  MessageContentType.Quote,
+  MessageContentType.CustomFace,
+  MessageContentType.AdvancedText,
+  MessageContentType.Markdown
+]);
+
+export function isKnownUserContentMessageType(type?: number): boolean {
+  if (type == null) return false;
+  return KNOWN_USER_CONTENT_TYPES.has(type);
+}
+
 export function isRtcCallProcessNotification(type?: number): boolean {
   if (type == null) return false;
   return (
     type >= MessageContentType.RtcCallInviteNotification &&
-    type <= MessageContentType.RtcCallNotification1608
+    type <= MessageContentType.RtcCallFailedNotification
   );
 }
 
@@ -200,12 +236,29 @@ function formatDurationSeconds(sec?: number): string | undefined {
   return `${n}"`;
 }
 
-function formatCallDuration(sec?: number): string | undefined {
+/** 解析消息时可选上下文 */
+export type ParseMessageBodyOptions = {
+  /** 当前会话所属用户（管理端「查聊天」视角） */
+  viewerUserId?: string;
+  /** user_id → 展示名（昵称/账号） */
+  resolveUserName?: (userId: string) => string | undefined;
+  /** openim 文案包；不传则按 arco-lang 解析 */
+  locale?: Record<string, string>;
+};
+
+function formatCallDuration(
+  sec?: number,
+  locale?: Record<string, string>
+): string | undefined {
   if (sec == null || sec < 0) return undefined;
   const n = Math.round(sec);
   const mm = String(Math.floor(n / 60)).padStart(2, '0');
   const ss = String(n % 60).padStart(2, '0');
-  return `通话时长 ${mm}:${ss}`;
+  return openimMsg(locale, 'callDuration', `通话时长 ${mm}:${ss}`, { mm, ss });
+}
+
+function localeOf(opts?: ParseMessageBodyOptions) {
+  return opts?.locale || resolveOpenimLocale();
 }
 
 function nested(body: Record<string, any>, ...keys: string[]) {
@@ -220,9 +273,11 @@ function nested(body: Record<string, any>, ...keys: string[]) {
  * Admin 约定：key=rtc.call.summary，data 为 JSON（含 status_text / duration_seconds / call_type）。
  */
 function parseCustomCall(
-  custom?: Record<string, any>
+  custom?: Record<string, any>,
+  opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody | null {
   if (!custom) return null;
+  const t = localeOf(opts);
   let data: Record<string, any> = custom;
   const raw = pickStr(custom.data, custom.Data);
   if (raw) {
@@ -272,25 +327,29 @@ function parseCustomCall(
     /video|视频/.test(`${key} ${callType}`);
 
   const sec = pickNum(data.duration_seconds, data.duration, data.callDuration);
-  const durationLabel = sec != null && sec > 0 ? formatCallDuration(sec) : undefined;
+  const durationLabel =
+    sec != null && sec > 0 ? formatCallDuration(sec, t) : undefined;
+  const rejectedLabel = openimMsg(t, 'callRejected', '已拒绝');
+  const cancelledLabel = openimMsg(t, 'callCancelled', '已取消');
+  const callLabel = openimMsg(t, 'call', '通话');
 
   let content: string;
   if (rejected) {
-    content = statusText || '已拒绝';
+    content = statusText || rejectedLabel;
   } else if (cancelled) {
-    content = statusText || '已取消';
+    content = statusText || cancelledLabel;
   } else if (durationLabel) {
     content = durationLabel;
   } else {
-    content = statusText || reason || '通话';
+    content = statusText || reason || callLabel;
   }
 
   return {
     content,
     callStatus: rejected
-      ? statusText || '已拒绝'
+      ? statusText || rejectedLabel
       : cancelled
-        ? statusText || '已取消'
+        ? statusText || cancelledLabel
         : statusText,
     callKind: isVideo ? 'video' : 'voice',
     duration: durationLabel
@@ -306,48 +365,87 @@ export function isAdminSystemMessageType(type?: number): boolean {
   if (type === 1200 || type === 1201 || type === 1202) return true;
   if (type === MessageContentType.OANotification) return true;
   if (type === MessageContentType.BurnAfterReadingNotification) return true;
-  if (type === MessageContentType.AdminRevokeMessageNotification) return true;
+  if (type === MessageContentType.ConversationClearedNotification) return true;
   if (isRtcCallProcessNotification(type)) return true;
   // 群相关系统通知（Admin MessageType 子集 + 兼容 OpenIM 扩展码）
   if (type >= 1501 && type <= 1521) return true;
   return false;
 }
 
-/** rtc.call.* → 可读中文；call_type 区分音视频 */
+/** rtc.call.* → 可读文案；call_type 区分音视频 */
 function formatRtcCallSystemText(
   eventType: string,
-  extra: Record<string, any>
+  extra: Record<string, any>,
+  opts?: ParseMessageBodyOptions
 ): string {
+  const t = localeOf(opts);
   const callType = String(
     pickStr(extra.call_type, extra.callType) || ''
   ).toLowerCase();
   const isVideo = callType === 'video' || callType === '2';
-  const kind = isVideo ? '视频通话' : '语音通话';
-  switch (eventType) {
-    case 'rtc.call.invite':
-      return `发起${kind}`;
-    case 'rtc.call.accept':
-      return `已接听${kind}`;
-    case 'rtc.call.reject':
-      return `已拒绝${kind}`;
-    case 'rtc.call.cancel':
-      return `已取消${kind}`;
-    case 'rtc.call.hangup':
-      return `${kind}已挂断`;
-    case 'rtc.call.ended':
-      return `${kind}已结束`;
-    default:
-      return eventType;
-  }
+  const kind = isVideo
+    ? openimMsg(t, 'videoCall', '视频通话')
+    : openimMsg(t, 'voiceCall', '语音通话');
+  const map: Record<string, string> = {
+    'rtc.call.invite': 'rtcInvite',
+    'rtc.call.accept': 'rtcAccept',
+    'rtc.call.reject': 'rtcReject',
+    'rtc.call.cancel': 'rtcCancel',
+    'rtc.call.hangup': 'rtcHangup',
+    'rtc.call.ended': 'rtcEnded',
+    'rtc.call.missed': 'rtcMissed',
+    'rtc.call.failed': 'rtcFailed'
+  };
+  const msgKey = map[eventType];
+  if (!msgKey) return eventType;
+  return openimMsg(t, msgKey, eventType, { kind });
 }
 
-/** 解析消息时可选上下文（用于好友系统文案里填对方昵称） */
-export type ParseMessageBodyOptions = {
-  /** 当前会话所属用户（管理端「查聊天」视角） */
-  viewerUserId?: string;
-  /** user_id → 展示名（昵称/账号） */
-  resolveUserName?: (userId: string) => string | undefined;
-};
+/** 群系统 event_type → 可读文案（system.text 为空时） */
+function formatGroupSystemText(
+  eventType: string,
+  extra: Record<string, any>,
+  opts?: ParseMessageBodyOptions
+): string | undefined {
+  const t = localeOf(opts);
+  const key = eventType.trim().toLowerCase().replace(/\./g, '_');
+  const operator = pickStr(
+    extra.operator_nickname,
+    extra.operatorNickname,
+    extra.operator_user_id,
+    extra.operatorUserId
+  );
+  if (key === 'group_info_changed' && operator) {
+    return openimMsg(t, 'group_info_changed_by', '{name}修改了群信息', {
+      name: operator
+    });
+  }
+  const fallbacks: Record<string, string> = {
+    group_created: '群聊已创建',
+    group_info_changed: '群信息已变更',
+    group_admin_permission_updated: '群管理员权限已更新',
+    group_admin_set: '已设置群管理员',
+    group_admin_cancel: '已取消群管理员',
+    group_application_created: '发来一条入群申请',
+    group_member_left: '成员已退群',
+    group_owner_changed: '群主已变更',
+    group_member_kicked: '成员已被移出群聊',
+    group_member_invited: '已邀请成员入群',
+    group_member_joined: '成员已加入群聊',
+    group_member_enter: '成员已加入群聊',
+    group_dismissed: '群聊已解散',
+    group_member_muted: '成员已被禁言',
+    group_member_unmuted: '成员禁言已解除',
+    group_muted: '已开启全员禁言',
+    group_unmuted: '已关闭全员禁言',
+    group_send_frequency_changed: '群发言频率已变更',
+    group_announcement_changed: '群公告已更新',
+    group_name_changed: '群名称已变更',
+    group_description_changed: '群简介已变更'
+  };
+  const fb = fallbacks[key];
+  return fb ? openimMsg(t, key, fb) : undefined;
+}
 
 /**
  * 从好友申请附言里猜自称名（非协议字段，仅兜底）。
@@ -365,16 +463,15 @@ function guessNameFromApplicationMsg(msg?: string): string | undefined {
 }
 
 /**
- * 好友相关 system.event_type → 可读中文。
- * friend_created 文案贴近客户端：
- * 「你已添加了{昵称}通过了你的朋友验证请求，以上是打招呼的消息。」
- * 名称：nickname → 解析 application_msg（我是/我叫）→ user_id / 对方
+ * 好友相关 system.event_type → 可读文案。
+ * 名称：nickname → 解析 application_msg（我是/我叫）→ user_id / peer
  */
 function formatFriendSystemText(
   eventType: string,
   extra: Record<string, any>,
   opts?: ParseMessageBodyOptions
 ): string | undefined {
+  const t = localeOf(opts);
   const key = eventType.trim().toLowerCase().replace(/\./g, '_');
   switch (key) {
     case 'friend_created':
@@ -404,27 +501,33 @@ function formatFriendSystemText(
           extra.nickname
         );
 
-      // 无昵称时再从附言「我是XXX / 我叫XXX」兜底
       const name =
         nickname ||
         guessNameFromApplicationMsg(applicationMsg) ||
         peerId ||
-        '对方';
+        openimMsg(t, 'peer', '对方');
 
       return applicationMsg
-        ? `你已添加了${name}通过了你的朋友验证请求，以上是打招呼的消息。`
-        : `你已添加了${name}通过了你的朋友验证请求。`;
+        ? openimMsg(
+            t,
+            'friendCreatedGreeting',
+            '你已添加了{name}通过了你的朋友验证请求，以上是打招呼的消息。',
+            { name }
+          )
+        : openimMsg(
+            t,
+            'friendCreated',
+            '你已添加了{name}通过了你的朋友验证请求。',
+            { name }
+          );
     }
     case 'friend_deleted':
     case 'friend_removed':
-      return '好友关系已解除';
     case 'friend_application':
     case 'friend_application_created':
-      return '发来一条好友申请';
     case 'friend_application_rejected':
-      return '好友申请已拒绝';
     case 'friend_remark_set':
-      return '好友备注已更新';
+      return openimMsg(t, key, key);
     default:
       return undefined;
   }
@@ -436,8 +539,9 @@ function formatSystemEventText(
   extra: Record<string, any>,
   opts?: ParseMessageBodyOptions
 ): string | undefined {
+  const t = localeOf(opts);
   if (eventType.startsWith('rtc.call.')) {
-    return formatRtcCallSystemText(eventType, extra);
+    return formatRtcCallSystemText(eventType, extra, opts);
   }
   if (
     eventType.startsWith('friend') ||
@@ -446,36 +550,77 @@ function formatSystemEventText(
   ) {
     return formatFriendSystemText(eventType, extra, opts);
   }
+  if (
+    eventType.startsWith('group') ||
+    eventType.includes('group_') ||
+    eventType.includes('group.')
+  ) {
+    return formatGroupSystemText(eventType, extra, opts);
+  }
+  const normalized = eventType.replace(/\./g, '_');
+  if (normalized === 'conversation_cleared') {
+    return openimMsg(t, 'conversation_cleared', '聊天记录已清空');
+  }
+  if (normalized === 'auto_delete_changed') {
+    return openimMsg(t, 'auto_delete_changed', '自动删除配置已变更');
+  }
   return undefined;
 }
 
+/** MessageType → event key，用于无 text/event 时的默认文案 */
+const TYPE_EVENT_KEY: Partial<Record<number, string>> = {
+  [MessageContentType.FriendApplicationNotice]: 'friend_application_created',
+  [MessageContentType.FriendApplicationNotification]:
+    'friend_application_created',
+  [MessageContentType.FriendDeletedNotice]: 'friend_deleted',
+  [MessageContentType.FriendDeletedNotification]: 'friend_deleted',
+  [MessageContentType.RevokeMessageNotification]: 'message_revoked',
+  [MessageContentType.ConversationClearedNotification]: 'conversation_cleared',
+  [MessageContentType.BurnAfterReadingNotification]: 'burn_after_reading',
+  [MessageContentType.OANotification]: 'system_notice',
+  [MessageContentType.GroupCreatedNotification]: 'group_created',
+  [MessageContentType.GroupInfoSetNotification]: 'group_info_changed',
+  [MessageContentType.JoinGroupApplicationNotification]:
+    'group_application_created',
+  [MessageContentType.MemberQuitNotification]: 'group_member_left',
+  [MessageContentType.GroupOwnerTransferredNotification]: 'group_owner_changed',
+  [MessageContentType.MemberKickedNotification]: 'group_member_kicked',
+  [MessageContentType.MemberInvitedNotification]: 'group_member_invited',
+  [MessageContentType.MemberEnterNotification]: 'group_member_joined',
+  [MessageContentType.DismissGroupNotification]: 'group_dismissed',
+  [MessageContentType.GroupMemberMutedNotification]: 'group_member_muted',
+  [MessageContentType.GroupMemberCancelMutedNotification]:
+    'group_member_unmuted',
+  [MessageContentType.GroupMutedNotification]: 'group_muted',
+  [MessageContentType.GroupCancelMutedNotification]: 'group_unmuted',
+  [MessageContentType.GroupSendFrequencyChangedNotification]:
+    'group_send_frequency_changed',
+  [MessageContentType.GroupInfoSetAnnouncementNotification]:
+    'group_announcement_changed',
+  [MessageContentType.GroupInfoSetNameNotification]: 'group_name_changed',
+  [MessageContentType.GroupDescriptionChangedNotification]:
+    'group_description_changed'
+};
+
 /** MessageType 无 text/event 映射时的默认文案 */
-function defaultSystemTextByType(type?: number): string | undefined {
+function defaultSystemTextByType(
+  type?: number,
+  opts?: ParseMessageBodyOptions
+): string | undefined {
   if (type == null) return undefined;
-  switch (type) {
-    case MessageContentType.FriendNotification:
-      return '好友通知';
-    case MessageContentType.FriendApplicationApprovedNotification:
-    case MessageContentType.FriendAddedNotification:
-      return '你已添加了对方通过了你的朋友验证请求。';
-    case MessageContentType.FriendApplicationRejectedNotification:
-      return '好友申请已拒绝';
-    case MessageContentType.FriendApplicationNotification:
-      return '发来一条好友申请';
-    case MessageContentType.FriendDeletedNotification:
-      return '好友关系已解除';
-    case MessageContentType.RevokeMessageNotification:
-    case MessageContentType.AdminRevokeMessageNotification:
-      return '消息已撤回';
-    case MessageContentType.BurnAfterReadingNotification:
-      return '阅后即焚消息';
-    case MessageContentType.OANotification:
-      return '系统通知';
-    case MessageContentType.GroupSystemNotification1521:
-      return '系统通知';
-    default:
-      return undefined;
+  const t = localeOf(opts);
+  if (
+    type === MessageContentType.FriendCreatedNotice ||
+    type === MessageContentType.FriendAddedNotification
+  ) {
+    return openimMsg(
+      t,
+      'friendCreatedDefault',
+      '你已添加了对方通过了你的朋友验证请求。'
+    );
   }
+  const eventKey = TYPE_EVENT_KEY[type];
+  return eventKey ? openimMsg(t, eventKey, eventKey) : undefined;
 }
 
 /**
@@ -524,7 +669,7 @@ function parseSystemMessageBody(
     friendEventKey === 'friend_created' ||
     friendEventKey === 'friend_added' ||
     friendEventKey === 'friend_application_approved' ||
-    type === MessageContentType.FriendApplicationApprovedNotification ||
+    type === MessageContentType.FriendCreatedNotice ||
     type === MessageContentType.FriendAddedNotification;
 
   if (isFriendCreatedEvent) {
@@ -548,7 +693,7 @@ function parseSystemMessageBody(
   }
 
   if (!content) {
-    content = defaultSystemTextByType(type);
+    content = defaultSystemTextByType(type, opts);
   }
 
   // OpenIM 历史 notificationElem 兼容
@@ -566,7 +711,9 @@ function parseSystemMessageBody(
 
   // 仍无文案时不要露出裸 event_type（如 friend_created），用类型默认或通用提示
   if (!content && eventType) {
-    content = defaultSystemTextByType(type) || '系统消息';
+    content =
+      defaultSystemTextByType(type, opts) ||
+      openimMsg(localeOf(opts), 'system', '系统消息');
   }
 
   return { content: content || undefined };
@@ -608,10 +755,18 @@ export function mapMessageContentTypeToUi(
       return 'quote';
     case MessageContentType.Merger:
       return 'merger';
+    case MessageContentType.CustomFace: {
+      // 115：有 url 时按图片气泡展示表情贴纸
+      const face =
+        nested(body, 'emoji', 'faceElem', 'face_elem') || body.emoji || body;
+      const url = pickStr(face?.url, body.url);
+      return url ? 'image' : 'text';
+    }
     case MessageContentType.Custom: {
       const call = parseCustomCall(
         nested(body, 'custom', 'customElem', 'custom_elem') || body
       );
+      // map 阶段无 locale；仅判断是否通话气泡
       return call ? 'call' : 'text';
     }
     default:
@@ -629,6 +784,7 @@ export function parseOpenIMMessageBody(
   opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody {
   const forward = parseForwardOrigin(body);
+  const t = localeOf(opts);
 
   const textElem = nested(body, 'text', 'textElem', 'text_elem');
   const pictureElem = nested(body, 'image', 'pictureElem', 'picture_elem');
@@ -824,7 +980,11 @@ export function parseOpenIMMessageBody(
       if (kind === 'group') {
         return {
           ...forward,
-          content: pickStr(group?.title, body.title, '[群名片]'),
+          content: pickStr(
+            group?.title,
+            body.title,
+            openimMsg(t, 'groupCard', '[群名片]')
+          ),
           cardKind: 'group',
           cardId: pickStr(group?.group_id, body.group_id),
           cardName: pickStr(group?.title, body.title),
@@ -835,7 +995,11 @@ export function parseOpenIMMessageBody(
       }
       return {
         ...forward,
-        content: pickStr(user?.nickname, body.nickname, '[名片]'),
+        content: pickStr(
+          user?.nickname,
+          body.nickname,
+          openimMsg(t, 'card', '[名片]')
+        ),
         cardKind: 'user',
         cardId: pickStr(user?.user_id, body.user_id, body.userID),
         cardName: pickStr(user?.nickname, body.nickname),
@@ -851,7 +1015,7 @@ export function parseOpenIMMessageBody(
           locationElem?.description,
           body.name,
           body.description,
-          '[位置]'
+          openimMsg(t, 'location', '[位置]')
         ),
         locationName: pickStr(locationElem?.name, body.name),
         locationAddress: pickStr(
@@ -869,26 +1033,34 @@ export function parseOpenIMMessageBody(
         : [];
       return {
         ...forward,
-        content: pickStr(mergeElem?.title, body.title, '[合并消息]'),
+        content: pickStr(
+          mergeElem?.title,
+          body.title,
+          openimMsg(t, 'merge', '[合并消息]')
+        ),
         quoteText: abstracts.slice(0, 3).join('\n') || undefined
       };
     }
 
-    case MessageContentType.CustomFace:
+    case MessageContentType.CustomFace: {
+      const url = pickStr(faceElem?.url, body.url);
       return {
         ...forward,
-        content: pickStr(
-          faceElem?.emoji_id,
-          faceElem?.data,
-          faceElem?.url,
-          body.data,
-          '[表情]'
-        ),
-        mediaUrl: pickStr(faceElem?.url, body.url)
+        content: url
+          ? ''
+          : pickStr(
+              faceElem?.emoji_id,
+              faceElem?.data,
+              body.data,
+              openimMsg(t, 'emoji', '[表情]')
+            ),
+        mediaUrl: url,
+        thumbnailUrl: url
       };
+    }
 
     case MessageContentType.Custom: {
-      const call = parseCustomCall(customElem || body);
+      const call = parseCustomCall(customElem || body, opts);
       if (call) return { ...forward, ...call };
       return {
         ...forward,
@@ -897,13 +1069,13 @@ export function parseOpenIMMessageBody(
           typeof customElem?.data === 'string' ? customElem.data : undefined,
           body.description,
           typeof body.data === 'string' ? body.data : undefined,
-          '[自定义消息]'
+          openimMsg(t, 'custom', '[自定义消息]')
         )
       };
     }
 
     case MessageContentType.RevokeMessageNotification:
-    case MessageContentType.AdminRevokeMessageNotification:
+    case MessageContentType.ConversationClearedNotification:
       return parseSystemMessageBody(systemElem, body, type, opts);
 
     default:
@@ -914,14 +1086,26 @@ export function parseOpenIMMessageBody(
       ) {
         return parseSystemMessageBody(systemElem, body, type, opts);
       }
-      return {
-        ...forward,
-        content: pickStr(
+      {
+        const content = pickStr(
           typeof textElem?.text === 'string' ? textElem.text : undefined,
           body.markdown?.text,
           typeof body.text === 'string' ? body.text : undefined,
           body.content
-        )
-      };
+        );
+        // 未知用户内容类型：保留位置，展示兜底文案（文档 §1）
+        if (
+          !content &&
+          type != null &&
+          !isKnownUserContentMessageType(type) &&
+          !isHiddenMessageContentType(type)
+        ) {
+          return {
+            ...forward,
+            content: openimMsg(t, 'unsupported', '暂不支持的消息类型')
+          };
+        }
+        return { ...forward, content };
+      }
   }
 }

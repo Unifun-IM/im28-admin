@@ -19,8 +19,7 @@ import {
   mapMessageContentTypeToUi,
   parseOpenIMMessageBody
 } from '@shared/lib/openimMessageContentType';
-import { openimLabel } from '@shared/lib/openimLabels';
-import openimLocale from '@shared/locale/openim';
+import { openimLabel, resolveOpenimLocale } from '@shared/lib/openimLabels';
 
 export type ChatBookPeer = {
   id: string;
@@ -99,13 +98,12 @@ const LIST_PAGE_SIZE = 100;
 /** 防止异常 total 导致死循环 */
 const LIST_PAGE_MAX = 20;
 
-/** 会话列表预览用中文 locale（列表层无 React hook） */
-const zhOpenim = openimLocale['zh-CN'] as Record<string, string>;
-
 function typeBracketLabel(type?: number): string {
   if (type == null) return '';
-  const label = openimLabel(zhOpenim, 'messageType', type, '');
-  return label ? `[${label}]` : `[消息 ${type}]`;
+  const t = resolveOpenimLocale();
+  const label = openimLabel(t, 'messageType', type, '');
+  if (label) return `[${label}]`;
+  return t['openim.messageType.unsupported'] || t['openim.msg.unsupported'] || '';
 }
 
 function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
@@ -114,13 +112,19 @@ function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
   if (msg.status === 5) return '';
   if (isHiddenMessageContentType(msg.type)) return '';
   const body = msg.body || {};
-  const parsed = parseOpenIMMessageBody(msg.type, body);
+  const parsed = parseOpenIMMessageBody(msg.type, body, {
+    locale: resolveOpenimLocale()
+  });
   const ui = mapMessageContentTypeToUi(msg.type, body);
   if (ui === 'text' || ui === 'system' || ui === 'quote') {
     return parsed.content?.trim() || typeBracketLabel(msg.type);
   }
   if (ui === 'call') {
-    return parsed.content?.trim() || typeBracketLabel(msg.type) || '[通话]';
+    return (
+      parsed.content?.trim() ||
+      typeBracketLabel(msg.type) ||
+      `[${resolveOpenimLocale()['openim.messageType.110.call'] || '通话'}]`
+    );
   }
   if (ui === 'file' && parsed.fileName) return parsed.fileName;
   if (ui === 'voice' && parsed.duration) {
@@ -412,6 +416,7 @@ export async function getChatMessages(params: {
       const body = (m.body || {}) as Record<string, any>;
       const parsed = parseOpenIMMessageBody(m.type, body, {
         viewerUserId: userId,
+        locale: resolveOpenimLocale(),
         // 只回传 nickname；无昵称时由解析层从 application_msg 兜底
         resolveUserName: (id) => {
           const nick = users.get(id)?.nickname?.trim();
