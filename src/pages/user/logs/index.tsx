@@ -25,17 +25,25 @@ type LogsFormValues = {
   sort_order?: AdminAPI.AdminListUserOperationLogRequest['sort_order'];
 };
 
+/** OpenAPI 示例行为类型；筛选传 behavior_type 机器标识 */
 const BEHAVIOR_TYPES = [
-  'register',
-  'login',
-  'login_failed',
-  'logout',
-  'update_avatar',
-  'update_profile',
-  'send_message'
+  'registered',
+  'logged_in',
+  'profile_updated',
+  'friend_applied',
+  'message_sent',
+  'group_created',
+  'call_started'
 ] as const;
 
-const CLIENT_TYPES = ['ios', 'android', 'web', 'server'] as const;
+const CLIENT_TYPES = [
+  'ios',
+  'android',
+  'windows',
+  'macos',
+  'web',
+  'server'
+] as const;
 
 function toRfc3339(value: unknown): string | undefined {
   if (value == null || value === '') return undefined;

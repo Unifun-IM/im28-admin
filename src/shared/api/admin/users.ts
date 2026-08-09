@@ -149,7 +149,7 @@ export async function postV1AdminUsersOnlineStatusList(
   );
 }
 
-/** 查询用户操作日志 需要 `admin.users.read` 权限；支持按用户、行为类型、客户端类型和操作时间筛选，并按操作时间排序及分页。当前用户行为采集与数据库查询尚未接入，因此固定返回空列表和总数 0。 POST /v1/admin/users/operation-logs/list */
+/** 查询用户操作日志 需要 `admin.users.read` 权限；查询 `ac_user_operation_log`，支持按用户、行为类型、客户端类型和操作时间筛选，并按操作时间排序及分页。日志由 API Gateway 对 C 端关键写操作尽力异步采集，写入失败不影响原业务请求，因此不能替代业务事实或审计日志。 POST /v1/admin/users/operation-logs/list */
 export async function postV1AdminUsersOperationLogsList(
   body: AdminAPI.AdminListUserOperationLogRequest,
   options?: { [key: string]: any }

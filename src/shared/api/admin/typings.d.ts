@@ -543,10 +543,10 @@ declare namespace AdminAPI {
     keyword?: string;
     /** 用户搜索字段。user_id=用户 ID，phone=手机号，email=邮箱，account=用户账号，nickname=用户昵称；传入时必须同时传 keyword。 */
     keyword_type?: "user_id" | "phone" | "email" | "account" | "nickname";
-    /** 行为类型机器标识，例如 register、login、login_failed、logout、update_avatar、update_profile、send_message；为空时查询全部类型。 */
+    /** 行为类型机器标识，例如 registered、logged_in、profile_updated、friend_applied、message_sent、group_created、call_started；为空时查询全部类型。 */
     behavior_type?: string;
-    /** 客户端类型。ios=iOS 客户端，android=Android 客户端，web=Web/H5 客户端，server=服务端任务或无用户设备的系统行为。 */
-    client_type?: "ios" | "android" | "web" | "server";
+    /** 客户端类型。ios=iOS，android=Android，windows=Windows，macos=macOS，web=Web/H5，server=服务端任务。 */
+    client_type?: "ios" | "android" | "windows" | "macos" | "web" | "server";
     /** 操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
     operated_end_at?: RFC3339Time;
@@ -835,8 +835,8 @@ declare namespace AdminAPI {
   };
 
   type AdminUserOperationClient = {
-    /** 客户端类型。ios=iOS 客户端，android=Android 客户端，web=Web/H5 客户端，server=服务端任务或无用户设备的系统行为。 */
-    type?: "ios" | "android" | "web" | "server";
+    /** 客户端类型。ios=iOS，android=Android，windows=Windows，macos=macOS，web=Web/H5，server=服务端任务。 */
+    type?: "ios" | "android" | "windows" | "macos" | "web" | "server";
     /** 客户端版本号。 */
     version?: string;
     /** 操作系统及版本；服务端任务时为空。 */
@@ -857,9 +857,9 @@ declare namespace AdminAPI {
     log_id?: string;
     /** 操作时间，使用 RFC3339。 */
     operated_at?: string;
-    /** 行为类型机器标识，例如 register、update_avatar、send_message。 */
+    /** 行为类型机器标识，例如 registered、logged_in、profile_updated、friend_applied、message_sent、group_created、call_started。 */
     behavior_type?: string;
-    /** 行为分类机器标识，例如 account_security、profile、notification、friend、message。 */
+    /** 行为分类机器标识，包括 auth、account、account_security、friend、conversation、message、group、call、emoji、setting。 */
     behavior_category?: string;
     /** 行为执行状态。 */
     status?: "success" | "failed";
