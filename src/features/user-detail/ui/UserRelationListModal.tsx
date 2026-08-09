@@ -7,7 +7,7 @@ import { postV1AdminGroupsListByUser } from '@shared/api/admin/groups';
 import { AvatarNameCell } from '@widgets/biz-list';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
-import { openimLabel } from '@shared/lib/openimLabels';
+import { imLabel } from '@shared/lib/imLabels';
 
 export type UserRelationListModalProps = {
   visible: boolean;
@@ -112,7 +112,7 @@ export default function UserRelationListModal({
       ellipsis: true,
       bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserContactWrap) =>
-        openimLabel(t, 'sourceType', row.friend?.source_type)
+        imLabel(t, 'sourceType', row.friend?.source_type)
     },
     {
       title: t['userDetail.relation.col.starred'],
@@ -168,7 +168,7 @@ export default function UserRelationListModal({
       bodyCellStyle: noWrapCell,
       render: (_: unknown, row: AdminAPI.AdminUserGroupWrap) => (
         <span className="whitespace-nowrap">
-          {openimLabel(t, 'roleLevel', row.member?.role) || '--'}
+          {imLabel(t, 'roleLevel', row.member?.role) || '--'}
         </span>
       )
     },

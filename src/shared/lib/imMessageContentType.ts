@@ -1,14 +1,14 @@
 /**
- * Admin / OpenIM MessageContentType → 查聊天气泡
+ * Admin / IM MessageContentType → 查聊天气泡
  * UI 样式对齐 Figma 1092:33280
- * 展示文案走 openim.msg / openim.event（见 locale/openim.ts）
+ * 展示文案走 im.msg / im.event（见 locale/im.ts）
  * @see docs/消息类型说明.md
  * @see AdminAPI.MessageType
  */
 
-import { openimMsg, resolveOpenimLocale } from '@shared/lib/openimLabels';
+import { imMsg, resolveImLocale } from '@shared/lib/imLabels';
 
-/** 与 Admin MessageType 对齐；1203+ / 2101 等为 OpenIM 历史兼容 */
+/** 与 Admin MessageType 对齐；1203+ / 2101 等为 IM 历史兼容 */
 export const MessageContentType = {
   Text: 101,
   Picture: 102,
@@ -41,7 +41,7 @@ export const MessageContentType = {
   FriendApplicationApprovedNotification: 1201,
   /** 1202 好友关系解除（个人通知）— 非「申请被拒」 */
   FriendDeletedNotice: 1202,
-  /** OpenIM 历史扩展 */
+  /** IM 历史扩展 */
   FriendApplicationNotification: 1203,
   FriendAddedNotification: 1204,
   FriendDeletedNotification: 1205,
@@ -95,7 +95,7 @@ export const MessageContentType = {
 
   BurnAfterReadingNotification: 1701,
   BusinessNotification: 2001,
-  /** OpenIM 历史撤回通知 */
+  /** IM 历史撤回通知 */
   RevokeMessageNotification: 2101,
   /** Admin：会话历史清空 conversation_cleared（非撤回） */
   ConversationClearedNotification: 2102,
@@ -110,7 +110,7 @@ export type MessageContentTypeValue =
   (typeof MessageContentType)[keyof typeof MessageContentType];
 
 /** 聊天 UI 气泡类型（Figma 1092:33280 消息样式枚举） */
-export type OpenIMChatUiMsgType =
+export type ImChatUiMsgType =
   | 'text'
   | 'image'
   | 'voice'
@@ -242,7 +242,7 @@ export type ParseMessageBodyOptions = {
   viewerUserId?: string;
   /** user_id → 展示名（昵称/账号） */
   resolveUserName?: (userId: string) => string | undefined;
-  /** openim 文案包；不传则按 arco-lang 解析 */
+  /** im 文案包；不传则按 arco-lang 解析 */
   locale?: Record<string, string>;
 };
 
@@ -254,11 +254,11 @@ function formatCallDuration(
   const n = Math.round(sec);
   const mm = String(Math.floor(n / 60)).padStart(2, '0');
   const ss = String(n % 60).padStart(2, '0');
-  return openimMsg(locale, 'callDuration', `通话时长 ${mm}:${ss}`, { mm, ss });
+  return imMsg(locale, 'callDuration', `通话时长 ${mm}:${ss}`, { mm, ss });
 }
 
 function localeOf(opts?: ParseMessageBodyOptions) {
-  return opts?.locale || resolveOpenimLocale();
+  return opts?.locale || resolveImLocale();
 }
 
 function nested(body: Record<string, any>, ...keys: string[]) {
@@ -329,9 +329,9 @@ function parseCustomCall(
   const sec = pickNum(data.duration_seconds, data.duration, data.callDuration);
   const durationLabel =
     sec != null && sec > 0 ? formatCallDuration(sec, t) : undefined;
-  const rejectedLabel = openimMsg(t, 'callRejected', '已拒绝');
-  const cancelledLabel = openimMsg(t, 'callCancelled', '已取消');
-  const callLabel = openimMsg(t, 'call', '通话');
+  const rejectedLabel = imMsg(t, 'callRejected', '已拒绝');
+  const cancelledLabel = imMsg(t, 'callCancelled', '已取消');
+  const callLabel = imMsg(t, 'call', '通话');
 
   let content: string;
   if (rejected) {
@@ -367,7 +367,7 @@ export function isAdminSystemMessageType(type?: number): boolean {
   if (type === MessageContentType.BurnAfterReadingNotification) return true;
   if (type === MessageContentType.ConversationClearedNotification) return true;
   if (isRtcCallProcessNotification(type)) return true;
-  // 群相关系统通知（Admin MessageType 子集 + 兼容 OpenIM 扩展码）
+  // 群相关系统通知（Admin MessageType 子集 + 兼容 IM 扩展码）
   if (type >= 1501 && type <= 1521) return true;
   return false;
 }
@@ -384,8 +384,8 @@ function formatRtcCallSystemText(
   ).toLowerCase();
   const isVideo = callType === 'video' || callType === '2';
   const kind = isVideo
-    ? openimMsg(t, 'videoCall', '视频通话')
-    : openimMsg(t, 'voiceCall', '语音通话');
+    ? imMsg(t, 'videoCall', '视频通话')
+    : imMsg(t, 'voiceCall', '语音通话');
   const map: Record<string, string> = {
     'rtc.call.invite': 'rtcInvite',
     'rtc.call.accept': 'rtcAccept',
@@ -398,7 +398,7 @@ function formatRtcCallSystemText(
   };
   const msgKey = map[eventType];
   if (!msgKey) return eventType;
-  return openimMsg(t, msgKey, eventType, { kind });
+  return imMsg(t, msgKey, eventType, { kind });
 }
 
 /** 群系统 event_type → 可读文案（system.text 为空时） */
@@ -416,7 +416,7 @@ function formatGroupSystemText(
     extra.operatorUserId
   );
   if (key === 'group_info_changed' && operator) {
-    return openimMsg(t, 'group_info_changed_by', '{name}修改了群信息', {
+    return imMsg(t, 'group_info_changed_by', '{name}修改了群信息', {
       name: operator
     });
   }
@@ -444,7 +444,7 @@ function formatGroupSystemText(
     group_description_changed: '群简介已变更'
   };
   const fb = fallbacks[key];
-  return fb ? openimMsg(t, key, fb) : undefined;
+  return fb ? imMsg(t, key, fb) : undefined;
 }
 
 /**
@@ -505,16 +505,16 @@ function formatFriendSystemText(
         nickname ||
         guessNameFromApplicationMsg(applicationMsg) ||
         peerId ||
-        openimMsg(t, 'peer', '对方');
+        imMsg(t, 'peer', '对方');
 
       return applicationMsg
-        ? openimMsg(
+        ? imMsg(
             t,
             'friendCreatedGreeting',
             '你已添加了{name}通过了你的朋友验证请求，以上是打招呼的消息。',
             { name }
           )
-        : openimMsg(
+        : imMsg(
             t,
             'friendCreated',
             '你已添加了{name}通过了你的朋友验证请求。',
@@ -527,7 +527,7 @@ function formatFriendSystemText(
     case 'friend_application_created':
     case 'friend_application_rejected':
     case 'friend_remark_set':
-      return openimMsg(t, key, key);
+      return imMsg(t, key, key);
     default:
       return undefined;
   }
@@ -559,10 +559,10 @@ function formatSystemEventText(
   }
   const normalized = eventType.replace(/\./g, '_');
   if (normalized === 'conversation_cleared') {
-    return openimMsg(t, 'conversation_cleared', '聊天记录已清空');
+    return imMsg(t, 'conversation_cleared', '聊天记录已清空');
   }
   if (normalized === 'auto_delete_changed') {
-    return openimMsg(t, 'auto_delete_changed', '自动删除配置已变更');
+    return imMsg(t, 'auto_delete_changed', '自动删除配置已变更');
   }
   return undefined;
 }
@@ -613,14 +613,14 @@ function defaultSystemTextByType(
     type === MessageContentType.FriendCreatedNotice ||
     type === MessageContentType.FriendAddedNotification
   ) {
-    return openimMsg(
+    return imMsg(
       t,
       'friendCreatedDefault',
       '你已添加了对方通过了你的朋友验证请求。'
     );
   }
   const eventKey = TYPE_EVENT_KEY[type];
-  return eventKey ? openimMsg(t, eventKey, eventKey) : undefined;
+  return eventKey ? imMsg(t, eventKey, eventKey) : undefined;
 }
 
 /**
@@ -696,7 +696,7 @@ function parseSystemMessageBody(
     content = defaultSystemTextByType(type, opts);
   }
 
-  // OpenIM 历史 notificationElem 兼容
+  // IM 历史 notificationElem 兼容
   if (!content) {
     content = pickStr(
       sys.detail,
@@ -713,7 +713,7 @@ function parseSystemMessageBody(
   if (!content && eventType) {
     content =
       defaultSystemTextByType(type, opts) ||
-      openimMsg(localeOf(opts), 'system', '系统消息');
+      imMsg(localeOf(opts), 'system', '系统消息');
   }
 
   return { content: content || undefined };
@@ -731,11 +731,11 @@ function parseForwardOrigin(
   };
 }
 
-/** OpenIM contentType + body → 查聊天气泡类型 */
+/** IM contentType + body → 查聊天气泡类型 */
 export function mapMessageContentTypeToUi(
   type?: number,
   body: Record<string, any> = {}
-): OpenIMChatUiMsgType {
+): ImChatUiMsgType {
   if (type == null) return 'text';
   if (isNotificationMessageContentType(type)) return 'system';
   switch (type) {
@@ -775,10 +775,10 @@ export function mapMessageContentTypeToUi(
 }
 
 /**
- * 从 Admin MessageBody / OpenIM body 解析展示字段。
+ * 从 Admin MessageBody / IM body 解析展示字段。
  * Admin 侧常见：text / image / audio / video / file / card / quote / location / merge / custom
  */
-export function parseOpenIMMessageBody(
+export function parseImMessageBody(
   type: number | undefined,
   body: Record<string, any> = {},
   opts?: ParseMessageBodyOptions
@@ -796,7 +796,7 @@ export function parseOpenIMMessageBody(
   const locationElem = nested(body, 'location', 'locationElem', 'location_elem');
   const quoteElem = nested(body, 'quote', 'quoteElem', 'quote_elem');
   const mergeElem = nested(body, 'merge', 'mergeElem', 'merge_elem');
-  /** Admin：emoji；OpenIM 兼容 faceElem */
+  /** Admin：emoji；IM 兼容 faceElem */
   const faceElem = nested(body, 'emoji', 'faceElem', 'face_elem');
   const customElem = nested(body, 'custom', 'customElem', 'custom_elem');
   /** Admin 系统通知统一为 body.system */
@@ -983,7 +983,7 @@ export function parseOpenIMMessageBody(
           content: pickStr(
             group?.title,
             body.title,
-            openimMsg(t, 'groupCard', '[群名片]')
+            imMsg(t, 'groupCard', '[群名片]')
           ),
           cardKind: 'group',
           cardId: pickStr(group?.group_id, body.group_id),
@@ -998,7 +998,7 @@ export function parseOpenIMMessageBody(
         content: pickStr(
           user?.nickname,
           body.nickname,
-          openimMsg(t, 'card', '[名片]')
+          imMsg(t, 'card', '[名片]')
         ),
         cardKind: 'user',
         cardId: pickStr(user?.user_id, body.user_id, body.userID),
@@ -1015,7 +1015,7 @@ export function parseOpenIMMessageBody(
           locationElem?.description,
           body.name,
           body.description,
-          openimMsg(t, 'location', '[位置]')
+          imMsg(t, 'location', '[位置]')
         ),
         locationName: pickStr(locationElem?.name, body.name),
         locationAddress: pickStr(
@@ -1036,7 +1036,7 @@ export function parseOpenIMMessageBody(
         content: pickStr(
           mergeElem?.title,
           body.title,
-          openimMsg(t, 'merge', '[合并消息]')
+          imMsg(t, 'merge', '[合并消息]')
         ),
         quoteText: abstracts.slice(0, 3).join('\n') || undefined
       };
@@ -1052,7 +1052,7 @@ export function parseOpenIMMessageBody(
               faceElem?.emoji_id,
               faceElem?.data,
               body.data,
-              openimMsg(t, 'emoji', '[表情]')
+              imMsg(t, 'emoji', '[表情]')
             ),
         mediaUrl: url,
         thumbnailUrl: url
@@ -1069,7 +1069,7 @@ export function parseOpenIMMessageBody(
           typeof customElem?.data === 'string' ? customElem.data : undefined,
           body.description,
           typeof body.data === 'string' ? body.data : undefined,
-          openimMsg(t, 'custom', '[自定义消息]')
+          imMsg(t, 'custom', '[自定义消息]')
         )
       };
     }
@@ -1102,7 +1102,7 @@ export function parseOpenIMMessageBody(
         ) {
           return {
             ...forward,
-            content: openimMsg(t, 'unsupported', '暂不支持的消息类型')
+            content: imMsg(t, 'unsupported', '暂不支持的消息类型')
           };
         }
         return { ...forward, content };

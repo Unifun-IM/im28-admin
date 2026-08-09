@@ -206,7 +206,7 @@ type ChatMsg = {
     | 'location'
     | 'quote'
     | 'merger';
-  /** OpenIM / Admin MessageContentType */
+  /** IM / Admin MessageContentType */
   contentType?: number;
   content?: string;
   senderId?: string;

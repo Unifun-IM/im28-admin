@@ -14,7 +14,7 @@ const i18n = {
     'userQuery.keywordType.phone': "Phone",
     'userQuery.keywordType.email': "Email",
     'userQuery.keywordType.account': "Account",
-    // AdminAPI.AccountStatus（业务拉黑），非 OpenIM LoginStatus / account_check
+    // AdminAPI.AccountStatus（业务拉黑），非 IM LoginStatus / account_check
     'userQuery.status.active': "Normal",
     'userQuery.status.disabled': "Blacklisted",
     'userQuery.action.batchSearch': "Batch search",
@@ -289,7 +289,7 @@ const i18n = {
     'userQuery.keywordType.phone': "手机号",
     'userQuery.keywordType.email': "邮箱",
     'userQuery.keywordType.account': "账号",
-    // AdminAPI.AccountStatus（业务拉黑），非 OpenIM LoginStatus / account_check
+    // AdminAPI.AccountStatus（业务拉黑），非 IM LoginStatus / account_check
     'userQuery.status.active': "正常",
     'userQuery.status.disabled': "已拉黑",
     'userQuery.action.batchSearch': "批量搜索",

@@ -5,7 +5,7 @@ import useLocale from '@shared/lib/useLocale';
 export type GroupRoleTagProps = {
   /** 用户 ID，决定标签颜色 */
   userId?: string | null;
-  /** OpenIM RoleLevel：100 群主 / 60 管理员 */
+  /** IM RoleLevel：100 群主 / 60 管理员 */
   roleLevel?: number | null;
   className?: string;
 };
@@ -24,7 +24,7 @@ export function GroupRoleTag({
   const color = getRoleTagColor(String(userId || ''));
   const label =
     roleLevel === 100
-      ? t['openim.roleLevel.100']
+      ? t['im.roleLevel.100']
       : t['groupDetail.field.admin'];
 
   return (

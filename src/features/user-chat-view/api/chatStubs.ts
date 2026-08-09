@@ -3,8 +3,7 @@
  * @see postV1AdminConversationsList / postV1AdminConversationMessagesList
  * 通讯录 / 所属群：postV1AdminUsersContactsList / postV1AdminGroupsListByUser
  * 在线状态：postV1AdminUsersOnlineStatusList
- * 消息类型对齐 OpenIM MessageContentType
- * @see https://docs.openim.io/sdks/enum/messageContentType
+ * 消息类型对齐 IM MessageContentType
  */
 import {
   postV1AdminConversationMessagesList,
@@ -17,9 +16,9 @@ import { fetchUserOnlineStatusMap } from '@shared/lib/userOnlineStatus';
 import {
   isHiddenMessageContentType,
   mapMessageContentTypeToUi,
-  parseOpenIMMessageBody
-} from '@shared/lib/openimMessageContentType';
-import { openimLabel, resolveOpenimLocale } from '@shared/lib/openimLabels';
+  parseImMessageBody
+} from '@shared/lib/imMessageContentType';
+import { imLabel, resolveImLocale } from '@shared/lib/imLabels';
 
 export type ChatBookPeer = {
   id: string;
@@ -66,7 +65,7 @@ export type ChatMsg = {
     | 'location'
     | 'quote'
     | 'merger';
-  /** OpenIM / Admin MessageContentType 原始值 */
+  /** IM / Admin MessageContentType 原始值 */
   contentType?: number;
   content?: string;
   senderId?: string;
@@ -100,10 +99,10 @@ const LIST_PAGE_MAX = 20;
 
 function typeBracketLabel(type?: number): string {
   if (type == null) return '';
-  const t = resolveOpenimLocale();
-  const label = openimLabel(t, 'messageType', type, '');
+  const t = resolveImLocale();
+  const label = imLabel(t, 'messageType', type, '');
   if (label) return `[${label}]`;
-  return t['openim.messageType.unsupported'] || t['openim.msg.unsupported'] || '';
+  return t['im.messageType.unsupported'] || t['im.msg.unsupported'] || '';
 }
 
 function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
@@ -112,8 +111,8 @@ function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
   if (msg.status === 5) return '';
   if (isHiddenMessageContentType(msg.type)) return '';
   const body = msg.body || {};
-  const parsed = parseOpenIMMessageBody(msg.type, body, {
-    locale: resolveOpenimLocale()
+  const parsed = parseImMessageBody(msg.type, body, {
+    locale: resolveImLocale()
   });
   const ui = mapMessageContentTypeToUi(msg.type, body);
   if (ui === 'text' || ui === 'system' || ui === 'quote') {
@@ -123,7 +122,7 @@ function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
     return (
       parsed.content?.trim() ||
       typeBracketLabel(msg.type) ||
-      `[${resolveOpenimLocale()['openim.messageType.110.call'] || '通话'}]`
+      `[${resolveImLocale()['im.messageType.110.call'] || '通话'}]`
     );
   }
   if (ui === 'file' && parsed.fileName) return parsed.fileName;
@@ -414,9 +413,9 @@ export async function getChatMessages(params: {
 
       const sender = users.get(m.sender_id || '');
       const body = (m.body || {}) as Record<string, any>;
-      const parsed = parseOpenIMMessageBody(m.type, body, {
+      const parsed = parseImMessageBody(m.type, body, {
         viewerUserId: userId,
-        locale: resolveOpenimLocale(),
+        locale: resolveImLocale(),
         // 只回传 nickname；无昵称时由解析层从 application_msg 兜底
         resolveUserName: (id) => {
           const nick = users.get(id)?.nickname?.trim();

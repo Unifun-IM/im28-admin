@@ -25,7 +25,7 @@ import {
   StatusBadge,
   UserAvatar
 } from '@shared/ui';
-import { openimLabel } from '@shared/lib/openimLabels';
+import { imLabel } from '@shared/lib/imLabels';
 import { getAvatarLetter } from '@shared/lib/userAvatar';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -98,7 +98,7 @@ function mapGroupMemberWrap(
     userId,
     nickname: groupNick || displayName(user, userId || '-'),
     avatar: user?.avatar_url,
-    role: openimLabel(t, 'roleLevel', member?.role),
+    role: imLabel(t, 'roleLevel', member?.role),
     roleLevel: member?.role,
     joinTime: formatDateTime(member?.joined_at, undefined, '-'),
     adminSince: formatDateTime(member?.admin_since, undefined, '-'),
@@ -326,7 +326,7 @@ export default function GroupDetailDrawer({
   const group = detail?.group;
   const name = group?.title || '-';
   const statusRaw = group?.status;
-  const status = openimLabel(t, 'groupStatus', statusRaw);
+  const status = imLabel(t, 'groupStatus', statusRaw);
 
   const managers = useMemo(
     () =>
@@ -835,7 +835,7 @@ export default function GroupDetailDrawer({
                 <div className="mt-[2px]">
                   <StatusBadge
                     status={memberOnlineOk ? 'success' : 'default'}
-                    text={openimLabel(t, 'online', memberOnline)}
+                    text={imLabel(t, 'online', memberOnline)}
                     className="!text-[14px] !leading-[21px] !text-arco-text-2"
                   />
                 </div>

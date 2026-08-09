@@ -21,7 +21,7 @@ import {
   type ChatModalTarget
 } from '@features/user-chat-view';
 import useLocale from '@shared/lib/useLocale';
-import { openimLabel } from '@shared/lib/openimLabels';
+import { imLabel } from '@shared/lib/imLabels';
 import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
@@ -40,7 +40,7 @@ type GroupListForm = {
   batchGroupIds?: string;
 };
 
-/** OpenIM GroupStatus：0 正常 / 1 封禁 / 2 解散 / 3 禁言 */
+/** IM GroupStatus：0 正常 / 1 封禁 / 2 解散 / 3 禁言 */
 function groupStatusBadge(
   status?: AdminAPI.GroupStatus
 ): 'success' | 'error' | 'warning' | 'default' {
@@ -90,7 +90,7 @@ export default function GroupQueryPage() {
   const statusOptions = useMemo(
     () =>
       (['0', '1', '2', '3'] as const).map((value) => ({
-        label: openimLabel(t, 'groupStatus', value),
+        label: imLabel(t, 'groupStatus', value),
         value
       })),
     [t]
@@ -432,7 +432,7 @@ export default function GroupQueryPage() {
               render: (_: unknown, row: GroupListRow) => (
                 <StatusBadge
                   status={groupStatusBadge(row.group?.status)}
-                  text={openimLabel(t, 'groupStatus', row.group?.status)}
+                  text={imLabel(t, 'groupStatus', row.group?.status)}
                 />
               )
             },

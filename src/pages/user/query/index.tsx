@@ -19,7 +19,7 @@ import { postV1AdminUsersList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
 import { UserDetailDrawer } from '@features/user-detail';
 import useLocale from '@shared/lib/useLocale';
-import { openimLabel } from '@shared/lib/openimLabels';
+import { imLabel } from '@shared/lib/imLabels';
 import { formatDateTime } from '@shared/lib/formatTime';
 import { attachUsersOnlineStatus } from '@shared/lib/userOnlineStatus';
 
@@ -180,9 +180,9 @@ export default function UserQueryPage() {
             placeholder={t['userQuery.filter.onlineStatus']}
             options={[
               { label: t['userQuery.filter.all'], value: '' },
-              { label: openimLabel(t, 'online', 'online'), value: 'online' },
-              { label: openimLabel(t, 'online', 'offline'), value: 'offline' },
-              { label: openimLabel(t, 'online', 'unknown'), value: 'unknown' }
+              { label: imLabel(t, 'online', 'online'), value: 'online' },
+              { label: imLabel(t, 'online', 'offline'), value: 'offline' },
+              { label: imLabel(t, 'online', 'unknown'), value: 'unknown' }
             ]}
             allowClear
           />
@@ -391,7 +391,7 @@ export default function UserQueryPage() {
                     size="small"
                     className="!m-0"
                   >
-                    {openimLabel(t, 'online', v)}
+                    {imLabel(t, 'online', v)}
                   </Tag>
                 );
               }
