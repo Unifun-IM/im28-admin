@@ -14,69 +14,13 @@ export type IRoute = AuthParams & {
 };
 
 /**
- * 侧栏顺序对齐稿面：首页看板 → 用户 → 群组 → 会话 → 交易 → 系统 → 风控
- * 系统下：后台账号 / 角色 / 系统参数设置 / 系统操作日志
- * 风控下：IP黑名单
+ * 脚手架默认菜单：首页看板 → 系统（后台账号 / 角色 / 系统参数 / 操作日志）
+ * 业务菜单在具体项目中按需追加。
  */
 export const routes: IRoute[] = [
   {
     name: 'menu.dashboard',
     key: 'dashboard'
-  },
-  {
-    name: 'menu.user',
-    key: 'user',
-    children: [
-      {
-        name: 'menu.user.manage',
-        key: 'user/manage',
-        children: [
-          { name: 'menu.user.query', key: 'user/query' },
-          { name: 'menu.user.blacklist', key: 'user/blacklist' },
-          { name: 'menu.user.whitelist', key: 'user/whitelist' }
-        ]
-      },
-      { name: 'menu.user.logs', key: 'user/logs' }
-    ]
-  },
-  {
-    name: 'menu.group',
-    key: 'group',
-    children: [
-      { name: 'menu.group.query', key: 'group/query' },
-      { name: 'menu.group.settings', key: 'group/settings' }
-    ]
-  },
-  {
-    name: 'menu.session',
-    key: 'session',
-    children: [
-      {
-        name: 'menu.session.query',
-        key: 'session/query',
-        children: [
-          { name: 'menu.session.user', key: 'session/user' },
-          { name: 'menu.session.group', key: 'session/group' }
-        ]
-      },
-      { name: 'menu.session.settings', key: 'session/settings' }
-    ]
-  },
-  {
-    name: 'menu.trade',
-    key: 'trade',
-    /** 交易模块暂未对接，侧栏先隐藏 */
-    ignore: true,
-    children: [
-      { name: 'menu.trade.redpacketRecords', key: 'trade/redpacket-records' },
-      { name: 'menu.trade.redpacketConfig', key: 'trade/redpacket-config' },
-      {
-        name: 'menu.trade.redpacketDetail',
-        key: 'trade/redpacket-detail',
-        ignore: true,
-        path: '/trade/redpacket-detail/:id'
-      }
-    ]
   },
   {
     name: 'menu.system',
@@ -89,13 +33,6 @@ export const routes: IRoute[] = [
         key: 'system-params/settings'
       },
       { name: 'menu.system.opLogs', key: 'system/op-logs' }
-    ]
-  },
-  {
-    name: 'menu.risk',
-    key: 'risk',
-    children: [
-      { name: 'menu.risk.ipBlacklist', key: 'risk/ip-blacklist' }
     ]
   }
 ];
@@ -117,7 +54,7 @@ export const getName = (path: string, routeList: IRoute[] = routes): string | un
 };
 
 /**
- * 按 pathname 取最长匹配路由的 locale key（支持 /trade/redpacket-detail/:id 等前缀路径）
+ * 按 pathname 取最长匹配路由的 locale key（支持带 path 参数的叶子路由）
  */
 export const getRouteNameByPath = (
   path: string,

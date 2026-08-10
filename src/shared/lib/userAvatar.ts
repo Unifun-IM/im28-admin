@@ -1,6 +1,5 @@
 /**
  * 用户头像占位：用户 ID → 固定哈希 → 色板取余；无图时取昵称首字符。
- * 群主/管理员标签复用同序纯色板（头像渐变色的深色端）。
  */
 
 export const avatarColors = [
@@ -12,18 +11,6 @@ export const avatarColors = [
   ['#FF9A91', '#F46575'], // 5
   ['#8EA1FF', '#596EEB'], // 6
   ['#F7A0D4', '#E561B1'] // 7
-] as const;
-
-/** 群主/管理员标签纯色（与 avatarColors 深色端一一对应） */
-export const roleTagColors = [
-  '#C94EE4', // 0
-  '#2698ED', // 1
-  '#20BEB6', // 2
-  '#35C565', // 3
-  '#FF9850', // 4
-  '#F46575', // 5
-  '#596EEB', // 6
-  '#E561B1' // 7
 ] as const;
 
 /** 用户 ID → 稳定非负整数哈希 */
@@ -46,20 +33,6 @@ export function getAvatarGradient(
   userId: string
 ): readonly [string, string] {
   return avatarColors[getAvatarColorIndex(userId)];
-}
-
-/** 群角色标签色：hash(用户ID) % 色板 */
-export function getRoleTagColor(userId: string): string {
-  return roleTagColors[hashUserId(userId) % roleTagColors.length];
-}
-
-export function hexToRgba(hex: string, alpha: number): string {
-  const raw = hex.replace('#', '');
-  if (raw.length !== 6) return hex;
-  const r = Number.parseInt(raw.slice(0, 2), 16);
-  const g = Number.parseInt(raw.slice(2, 4), 16);
-  const b = Number.parseInt(raw.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 /**

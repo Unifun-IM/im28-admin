@@ -14,7 +14,7 @@ export type PageTabItem = {
 /** 默认可固定标签数量上限 */
 export const MAX_PINNED_TABS = 3;
 
-const STORAGE_KEY = 'im-admin-page-tabs';
+const STORAGE_KEY = 'admin-scaffold-page-tabs';
 
 function loadTabs(): PageTabItem[] {
   try {

@@ -1,11 +1,7 @@
 import common from "./common";
 import login from "./login";
 import exception from "./exception";
-import user from "./user";
-import session from "./session";
 import system from "./system";
-import risk from "./risk";
-import im from "./im";
 
 type LocalePack = Record<string, Record<string, string>>;
 
@@ -21,18 +17,9 @@ function mergeLocale(...packs: LocalePack[]): LocalePack {
 /**
  * i18n 统一入口
  * - common：菜单 / 壳层 / 通用文案
- * - 业务：login / user / session / system / risk / exception
- * - im：与 IM SDK 对齐的枚举文案
+ * - 业务：login / system / exception
+ * 具体业务 locale 包在业务仓库中追加 merge
  */
-const i18n = mergeLocale(
-  common,
-  login,
-  exception,
-  user,
-  session,
-  system,
-  risk,
-  im
-);
+const i18n = mergeLocale(common, login, exception, system);
 
 export default i18n;

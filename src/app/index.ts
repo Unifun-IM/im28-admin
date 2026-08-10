@@ -1,2 +1,2 @@
-/** Root im-admin React application. */
+/** Root admin-scaffold React application. */
 export { App } from './App';

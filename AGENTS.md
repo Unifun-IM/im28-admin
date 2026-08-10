@@ -1,6 +1,8 @@
-# im-admin — Agent 准则
+# admin-scaffold — Agent 准则
 
 给 AI / 协作者的项目约定。改代码前先遵守下列规则；细节以 `README.md` 为准。
+
+本仓库是**管理后台通用脚手架**：不含具体业务域页面；业务在派生项目中追加。
 
 ## 全局基本准则
 
@@ -35,7 +37,7 @@
 - 目录按 **FSD** 重组，不是 Pro 默认的 `src/pages` + 扁平结构
 - 状态用 **MobX**，不是 Pro 常见的 Redux / context-only 方案
 - 样式为 **Arco 优先 + Tailwind 补位（关 Preflight）**，Less 仅作 Arco 重置 / 不得已补充
-- 业务菜单与视觉以 **Figma 业务1.0** 为准，演示页（workplace 等）可不挂菜单
+- 脚手架默认菜单仅 **dashboard + system**；业务菜单与视觉由派生项目按 Figma / 产品稿扩展
 
 不确定交互或布局惯例时：先查 Pro Vite 模板对应实现，再按上表差异落到本仓库分层。
 
@@ -54,7 +56,7 @@ src/app | pages | widgets | features | entities | shared
 ```
 
 - 禁止在 `src/` 下新建 `components`、`containers`、`services`、`utils`、`hooks` 等遗留根目录
-- 页面放 `pages/`；用户交互特性放 `features/`（如拉黑/白名单弹窗、用户详情 Drawer、个人中心）；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
+- 页面放 `pages/`；用户交互特性放 `features/`（如账号创建、角色权限、个人中心）；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
 - `entities` 现有 MobX 单例：`global-state`（用户信息 / Pro 壳层 settings）、`page-tabs`、`system-settings`（登录后拉取的后台系统参数）
 - 依赖方向：`pages → widgets/features → entities → shared`，禁止反向依赖；`features` 与 `widgets` 同层，优先不要互相依赖
 
@@ -88,18 +90,18 @@ src/app | pages | widgets | features | entities | shared
 8. 壳层菜单仍用 `admin-shell/style/layout.module.less`（复杂侧栏覆盖）
 
 
-## UI / 业务
+## UI / 组件约定
 
-- 视觉与交互以 Figma「IM管理后台 / 业务1.0」为准；侧栏常规 **240px** / 最小 **56px**（贴边全高、仅右边框，Figma `862:20168`；折叠见 `602:35590`）
+- 侧栏常规 **240px** / 最小 **56px**（贴边全高、仅右边框）；折叠态保留图标轨
 - 通用列表积木复用 `@widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage` / `TableBatchBar`）
 - 业务表格约定（`BizListPage`）：单元格默认单行省略 + 溢出用 Arco `Tooltip`；默认斑马纹（Hover/选中优先）；`操作` 列自动 `fixed: 'right'`，左侧投影走 Arco 横向滚动标准；分页默认 15 条、选项 15/30/50，**total ≤ 15 不展示分页**
 - 详情 Drawer / Modal 内表格统一 `className="use-biz-detail-table"`（外框 + 单元格网格，见 `global.less`）
-- 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉（Figma `602:34917`）；用户查询等可为 `variant="text"`
-- 批量操作（Figma `741:24735` / `804:19957`）：配置了 `batchActions` 时，表头点「批量操作」才进入选择列；勾选后工具栏右侧浅色 `TableBatchBar`（关闭 / 只显示已选 + Switch / 业务操作）；关闭或「取消批量」退出并清空选中
-- 页面打开记录快捷导航复用 `@widgets/page-tabs`（Figma `609:47633`），由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
+- 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉；列表页可用 `variant="text"`
+- 批量操作：配置了 `batchActions` 时，表头点「批量操作」才进入选择列；勾选后工具栏右侧浅色 `TableBatchBar`（关闭 / 只显示已选 + Switch / 业务操作）；关闭或「取消批量」退出并清空选中
+- 页面打开记录快捷导航复用 `@widgets/page-tabs`，由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
 - 系统参数：`systemSettingsStore` 登录后与 `auth/me` 并行拉取；侧栏品牌用 `system_name` / `logo_url`；`formatDateTime` 未传 format 时跟随 `time_format`（`12h`/`24h`）
 - 后台图片上传：`@shared/lib/uploadAdminImage` → `upload-credential` 取凭证 → 浏览器 **PostObject 表单直传 OSS**（勿走业务 `request`，避免带 Bearer）→ 使用凭证返回的 `url`
-- UI 文案走 `src/shared/locale/*.ts` + `useLocale()`（zh-CN / en-US）
+- UI 文案走 `src/shared/locale/*.ts` + `useLocale()`（zh-CN / en-US）；业务包按需 merge
 
 ## API
 

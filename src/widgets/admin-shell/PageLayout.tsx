@@ -3,8 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { Layout, Menu } from '@arco-design/web-react';
 import {
   IconDoubleRight,
-  IconMenuFold,
-  IconUserGroup
+  IconMenuFold
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { observer } from 'mobx-react-lite';
@@ -18,11 +17,7 @@ import {
 import { pageTabsStore } from '@entities/page-tabs';
 import { systemSettingsStore } from '@entities/system-settings';
 import IconDashboard from '@shared/assets/icon-dashboard.svg?react';
-import IconRisk from '@shared/assets/icon-risk.svg?react';
-import IconSession from '@shared/assets/icon-session.svg?react';
 import IconSystem from '@shared/assets/icon-system.svg?react';
-import IconTrade from '@shared/assets/icon-trade.svg?react';
-import IconUser from '@shared/assets/icon-user.svg?react';
 import Logo from '@shared/assets/logo.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import getUrlParams from '@shared/lib/getUrlParams';
@@ -60,18 +55,8 @@ function getIconFromKey(key: string) {
   switch (key) {
     case 'dashboard':
       return <IconDashboard className={styles.icon} />;
-    case 'user':
-      return <IconUser className={styles.icon} />;
-    case 'group':
-      return <IconUserGroup className={styles.icon} />;
     case 'system':
       return <IconSystem className={styles.icon} />;
-    case 'trade':
-      return <IconTrade className={styles.icon} />;
-    case 'session':
-      return <IconSession className={styles.icon} />;
-    case 'risk':
-      return <IconRisk className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }
