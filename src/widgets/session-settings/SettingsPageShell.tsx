@@ -93,7 +93,9 @@ export default function SettingsPageShell({
           ref={scrollRef}
           className="max-h-[calc(100vh-220px)] min-w-0 flex-1 overflow-y-auto"
         >
-          <div className="flex flex-col gap-3">{children}</div>
+          <div className="use-session-settings-content flex flex-col gap-3">
+            {children}
+          </div>
         </div>
       </div>
     </Card>

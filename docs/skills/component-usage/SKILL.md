@@ -274,6 +274,8 @@ API 与行为以 `package.json` 中当前安装版本、包内 TypeScript 类型
 系统参数、偏好设置、配置类页面优先参考 `src/pages/system-params/settings/index.tsx`：
 
 - 页面壳层用 `SettingsPageShell`。
+- 每个独立配置分组使用 `SettingsSectionCard`；直接放在 Arco `Form` 下时，`SettingsPageShell` 会统一提供 `12px` 纵向间距，不要在生成页面重复补 margin 或依赖额外 `className`。
+- 同一个锚点下包含多个 `SettingsSectionCard` 时，用一个语义分组容器包住，并保持容器内 `12px` 纵向间距；不要让卡片边框直接相贴。
 - 表单仍使用 Arco `Form`、`Grid`、`Input`、`Select`、`Switch`、`Upload` 等。
 - 有未保存内容离开风险时用 `useUnsavedChangesGuard` 和 `UnsavedChangesModal`。
 - 后台图片上传使用 `uploadAdminImage`，不要绕过凭证流程自写业务 request 上传。
