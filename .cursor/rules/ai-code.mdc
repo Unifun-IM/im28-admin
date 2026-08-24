@@ -1,0 +1,14 @@
+---
+description: 管理后台框架统一 AI code 入口，按任务路由项目、API、组件、CSS、Figma、SVG 与页面生成 skills
+alwaysApply: true
+---
+
+# AI Code 统一入口
+
+开始任务前读取：
+
+- `docs/framework-guide.md`
+- `docs/skills/ai-code/SKILL.md`
+- `docs/skills/project-rules/SKILL.md`
+
+再按 `ai-code` 的任务路由读取对应专项 skill。规则正文只维护在 `docs/skills/**/SKILL.md`，本文件不复制具体规则。

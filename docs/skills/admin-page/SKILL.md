@@ -1,13 +1,15 @@
 ---
 name: admin-page
-description: Generate or adjust admin scaffold list/detail pages from PRD and generated Admin OpenAPI, including filters, table columns, detail drawers, tabs, and operation records. Use for Codex, Claude Code, and Cursor when building backend admin pages in this repo.
+description: Generate or adjust standard admin framework list/detail pages from a complete Figma URL, PRD, and generated Admin OpenAPI in that priority order, including filters, table columns, detail drawers, tabs, and operation records.
 ---
 
 # AI 通用后台页面生成 Skill
 
 适用对象：Codex、Claude Code、Cursor，以及其它会读取仓库 Markdown 约定的 AI 编码助手。
 
-本 skill 用于在本脚手架或派生项目中，根据产品 PRD 与脚本生成的 Admin OpenAPI 接口，生成或调整后台列表页、详情 Drawer、操作记录等通用管理页面。
+本 skill 用于在本后台框架或派生项目中，根据完整 Figma 页面地址、产品 PRD 与脚本生成的 Admin OpenAPI 接口，生成或调整标准后台列表页、详情 Drawer、操作记录等通用管理页面。
+
+生成页面前先读取 `docs/skills/api-generation/SKILL.md`、`docs/skills/component-usage/SKILL.md` 与 `docs/skills/css-usage/SKILL.md`；任务提供完整 Figma 地址时同时读取 `docs/skills/figma-rules/SKILL.md`。本 skill 只补充 Figma / PRD / OpenAPI 的信息优先级、字段推导、接口接线和页面生成规则。
 
 ## 触发场景
 
@@ -18,21 +20,36 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 - 表格展示列
 - 详情 Drawer / Modal
 - 操作记录、变更记录、登录记录、审计记录等详情内表格
+- 根据完整 Figma 地址还原页面字段、结构和交互
 - 根据 OpenAPI 生成接口接入真实请求
 
 ## 信息优先级
 
 按以下顺序确定页面信息，前者优先级高于后者：
 
-1. 产品 PRD：优先查找当前任务范围内的 `prd.md`、`PRD.md`、需求说明、产品文档。PRD 有明确字段、交互、展示顺序、文案时，以 PRD 为准。
-2. 接口文件：如果没有 PRD，或 PRD 未覆盖某块信息，从脚本生成的接口文件推导。接口来源包括 `src/shared/api/admin/**` 与全局 `AdminAPI` 类型。
-3. 现有页面模式：同类页面仅作为交互和组件模式参考，不自动扩面修改。
+1. 完整 Figma 地址：用户贴出能够定位目标文件和页面 / Frame / 节点的完整 `figma.com` 地址，并且该地址可通过只读工具读取时，以 Figma 为最高优先级。
+   - Figma 决定搜索字段、字段控件类型、标签与占位文案、排列顺序、表格列、详情字段与分组、Drawer / Modal、Tab、记录表格、操作入口、状态和页面布局。
+   - PRD 与接口只补充 Figma 没有提供的整个视图 / 区域，或设计稿明确标注待补的信息，不得覆盖 Figma 已明确的字段、顺序或展示结构。
+   - 完整地址无法读取时必须明确说明，禁止假装读取或静默把 PRD 当作同等设计稿；后续只能基于实际可读取的信息继续。
+2. 产品 PRD：没有完整可读的 Figma 地址，或 Figma 未覆盖某块信息时，查找当前任务范围内的 `prd.md`、`PRD.md`、需求说明和产品文档。PRD 有明确字段、交互、展示顺序、文案时，以 PRD 为准。
+3. 接口文件：Figma 与 PRD 都未覆盖某块信息时，从脚本生成的接口文件推导。接口来源包括 `src/shared/api/admin/**` 与全局 `AdminAPI` 类型。
+4. 现有页面模式：同类页面仅作为组件和交互模式参考，不自动扩面修改，也不覆盖前三类来源。
 
-如果 PRD 与接口冲突：
+### 显式集合与补充边界
 
-- UI 交互、字段展示、筛选入口优先按 PRD 保留。
-- 请求体只能传接口支持的字段；接口暂不支持的 PRD 字段先保留在 UI，不强行塞入请求体。
-- 在回复里简短说明暂未接线的字段，等待接口补齐。
+- 完整目标 Frame 中已经出现筛选区、表头、详情字段列表、Tab 或操作入口时，该区域的可见项视为闭合集合；未出现的字段、列、Tab 或操作默认是明确不展示，PRD、接口和现有页面不得自行补入。
+- PRD 明确列出完整字段、列、Tab 或操作集合时，同样按闭合集合处理；接口只负责绑定和数据契约，不追加可见项。
+- 低优先级来源可以补充闭合集合中已有项的实现信息，例如 `AdminAPI` 字段绑定、枚举来源、校验规则、请求格式、时间格式、权限和空值处理。
+- 只有高优先级来源完全没有提供某个视图 / 区域，例如只提供列表 Frame 而没有详情设计，或明确标注该区域待补时，才由下一优先级来源定义该区域的可见项。
+- 不得把“设计稿 / PRD 没有出现某项”解释成“尚未覆盖”，进而从接口自动增加筛选、列、详情字段、Tab 或操作。
+
+### UI 定义与数据契约
+
+- Figma / PRD 决定页面展示什么以及如何组织；生成接口决定真实可请求、可提交和可读取的数据契约。
+- Figma 明确的 UI 字段能够对应接口字段时，代码直接使用 `AdminAPI` 字段名，不增加映射层。
+- 只有完整可读 Figma 地址中明确展示、但生成接口未提供的字段，允许作为 Figma 专项例外继续实现 UI 壳；不得手改生成 API、虚构请求参数或伪造响应数据。该字段使用局部 UI 状态或空值展示，并在完成说明中列出接口缺口。
+- Figma 专项例外不适用于普通 PRD / API 页面，也不是“接口不支持仍保留 UI”的全局规则。只有 PRD 而接口缺少对应契约时，报告契约缺口，不创建未接线字段或控件。
+- 不根据模糊截图、文件首页或无法定位目标节点的链接启用该例外或臆造字段。
 
 ## 增量生成与接口变更同步
 
@@ -49,8 +66,9 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 
 1. 已有页面对应的接口发生变更：同步更新已有页面、请求体、响应读取、表格列、详情字段、筛选接线、类型引用和 locale 文案。
 2. 新增接口对应新业务能力：新增对应路由、页面、feature / widget、locale、菜单配置等必要文件。
-3. 接口删除或字段缺失：不要直接删除 PRD 或既有 UI 交互；能不传的先不传，并在代码注释或回复中说明接口未支持。
-4. 只处理本次任务点名范围内的页面或接口；发现其它接口变更只在回复中提示，等待下一条指令。
+3. 任务提供具体 PRD、完整可读 Figma 地址，或明确点名页面、路由、接口、代码文件时，只处理该目标及必要直接依赖。
+4. 没有这些明确目标时，遵循现有路由、页面、生成函数 import 和类型引用，同步接口变化直接影响的现有代码；新增接口按现有页面模式执行第 2 条。
+5. 无调用关系的页面、相似问题和无关工程债只在回复中提示，不自行扩面。
 
 判断“已有页面”时优先搜索：
 
@@ -75,7 +93,7 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 - tab key
 - 内部 helper 名
 
-接口字段已经是英文时，优先沿用 `AdminAPI` 字段名，不额外做字段映射。PRD 是中文时，把页面概念翻译为清晰英文，例如：
+接口字段已经是英文时，优先沿用 `AdminAPI` 字段名，不额外做字段映射。Figma / PRD 展示概念是中文时，把代码标识翻译为清晰英文，例如：
 
 | 中文概念 | 推荐英文 |
 | --- | --- |
@@ -110,7 +128,7 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 
 ## 列表页生成规则
 
-列表页优先复用 `@widgets/biz-list`：
+列表页优先复用 `@widgets/biz-list`，具体组件选择遵守 `docs/skills/component-usage/SKILL.md`：
 
 - 页面壳：`BizListPage`
 - 筛选区：`SearchFilterBar` + `FilterField`
@@ -124,13 +142,13 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 
 ### 搜索条件推导
 
-搜索条件优先来自 PRD；没有 PRD 时，从列表接口请求类型推导。
+搜索条件按完整可读 Figma > PRD > 列表接口请求类型推导。Figma / PRD 已明确筛选集合时，不从接口追加条件；低优先级来源只补已有条件的字段绑定、枚举、校验和请求格式。只有整个筛选区域未提供时，才从下一优先级来源推导。
 
-字段到组件的默认映射：
+Figma / PRD 没有明确控件类型时，才使用以下默认映射：
 
 | 字段类型 / 语义 | 推荐组件 | 说明 |
 | --- | --- | --- |
-| `keyword` / `q` / `search` | `FilterInput` 或 `FilterKeywordInput` | PRD 有多字段搜索时用 `FilterKeywordInput` |
+| `keyword` / `q` / `search` | `FilterInput` 或 `FilterKeywordInput` | Figma / PRD 有多字段搜索时用 `FilterKeywordInput` |
 | `id` / `*_id` | `FilterInput` | ID 通常保持文本输入，避免超长数字精度问题 |
 | `name` / `title` / `username` / `account` | `FilterInput` | 普通文本搜索 |
 | 字符串枚举 union | `FilterSelect` | 选项文案走 locale |
@@ -140,23 +158,21 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 | `date` / `*_date` | `FilterDateRange` | 不带时间 |
 | number min/max | Arco `InputNumber` | 放在 `FilterField` 内，保留 Arco Form/Grid |
 | status/state/type/category | `FilterSelect` | 优先使用接口枚举 |
-| ip / phone / email | `FilterInput` | 不自行格式化，除非 PRD 要求校验 |
+| ip / phone / email | `FilterInput` | 不自行格式化，除非 Figma / PRD 要求校验 |
 
-筛选区布局：
+筛选区布局 fallback：
 
-- 默认一行四个筛选项。
-- 不因为后端暂不支持某筛选字段就删除 UI。
-- 暂不进请求体的字段在代码中保留清晰注释，说明接口未支持。
+- 只有 Figma / PRD 未明确筛选布局时，默认一行四个筛选项。
 - 不使用 Tailwind 重做 Form/Grid。
 
 ### 表格列推导
 
-表格列优先来自 PRD；没有 PRD 时，从列表响应类型推导。
+表格列按完整可读 Figma > PRD > 列表响应类型推导。Figma / PRD 已明确列集合时，不从响应类型追加列；低优先级来源只补已有列的数据绑定、枚举和格式。只有整个列集合未提供时，才从下一优先级来源推导。
 
-默认规则：
+以下规则仅在 Figma / PRD 未明确对应字段展示、单元格样式、操作列或分页时作为 fallback：
 
 - ID 与名称/标题/账号优先合并为一列展示，例如主行展示名称，副行展示 ID，可复用 `AvatarNameCell` / `DoubleLineCell`。
-- 如 PRD 无特殊说明，除 ID/名称合并外，一个响应字段一列展示。
+- 当 Figma / PRD 完全没有提供列集合、需要从接口推导时，除 ID/名称合并外，一个响应字段一列展示。
 - 状态字段使用 `StatusBadge` 或业务已有状态组件。
 - 时间字段使用 `formatDateTime`。
 - 图片 / 头像字段使用 `UserAvatar` 或 Arco Image/Avatar，不直接裸露 URL。
@@ -164,11 +180,13 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 - 操作列使用 `ActionLinks`，并交给 `BizListPage` 自动 fixed right。
 - 分页默认 15 条，选项 15 / 30 / 50，沿用 `BizListPage` 默认约定。
 
-不要为了“列很多”自行删字段。确实过宽时使用横向滚动、合理宽度和省略。
+只有在 Figma / PRD 完全没有提供列集合、页面按接口 fallback 推导全部列时，才适用“不要因为列很多自行删字段”；确实过宽时使用横向滚动、合理宽度和省略。Figma / PRD 已提供闭合列集合时，不添加其中未出现的响应字段。
 
 ## 详情 Drawer 生成规则
 
-详情优先使用 `@widgets/biz-detail-drawer` 的 `BizDetailDrawer`。
+详情优先使用 `@widgets/biz-detail-drawer` 的 `BizDetailDrawer`，具体纯详情 / 多分组 / 多 Tab / 操作记录表格用法遵守 `docs/skills/component-usage/SKILL.md`。
+
+以下纯详情、分组和 Tab 规则仅在 Figma / PRD 未明确对应详情结构时作为 fallback；完整详情 Frame 已给出的字段、分组和 Tab 是闭合集合，不从接口追加未展示项。
 
 ### 纯详情
 
@@ -177,7 +195,7 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 - 使用 `fields` 或单个 `sections`。
 - 默认 tab 不显示，只展示详情内容。
 - 字段为空展示 `--`。
-- ID 与名称可以在详情中分开展示，除非 PRD 要求合并。
+- ID 与名称可以在详情中分开展示，除非 Figma 或 PRD 要求合并。
 
 ### 多分组详情
 
@@ -185,7 +203,7 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 
 - 使用多个 `sections`。
 - section title 使用语义化 locale 文案。
-- 不为了分组创建多 Tab，除非 PRD 或信息密度需要。
+- 不为了分组创建多 Tab，除非 Figma、PRD 或信息密度需要。
 
 ### 多 Tab 详情
 
@@ -202,7 +220,9 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 - 基本详情接口 + 操作记录接口
 - 基本详情接口 + 多个记录类接口
 - 同一对象下存在明显不同类型的信息，例如资料、权限、登录记录、审计记录
-- PRD 明确要求 Tab
+- Figma 或 PRD 明确要求 Tab
+
+其中接口数量触发 Tab 的规则只适用于 Figma / PRD 没有提供完整详情结构时；设计稿或 PRD 已明确 Tab 集合时，不因存在额外接口自动增加 Tab。
 
 ### 详情内记录表格
 
@@ -210,7 +230,7 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 
 - 使用 `BizDetailDrawer` 的 `operationRecords`。
 - 或手写 Arco `Table` 时统一加 `className="use-biz-detail-table"`。
-- 表格列仍按 PRD > 接口响应推导。
+- 表格列仍按完整可读 Figma > PRD > 接口响应推导。
 - 时间字段使用 `formatDateTime`。
 - 操作内容、备注、原因等长文本使用省略 + Tooltip。
 - 详情内记录默认不展示外层 `BizListPage`，避免 Drawer 内再套列表页卡片。
@@ -220,6 +240,7 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 - 直接使用 `@shared/api/admin/*` 生成函数。
 - Form 字段、Table `dataIndex`、state 尽量直接使用 `AdminAPI` 字段名。
 - 不新增业务字段映射层。
+- 完整可读 Figma 明确展示且接口未提供的字段，按上述 Figma 专项例外使用局部 UI 状态或空值展示，不写入 `AdminAPI` 类型，不加入真实请求参数；PRD / API-only 页面不得创建此类未接线字段。
 - 列表请求保留 `page` / `page_size`。
 - 搜索时重置到第 1 页。
 - 重置时清空 Form 并拉第 1 页。
@@ -230,13 +251,21 @@ description: Generate or adjust admin scaffold list/detail pages from PRD and ge
 
 - 所有 UI 文案写入 `src/shared/locale/*.ts` 或派生项目对应业务 locale。
 - 英文与中文都要补齐。
-- 枚举值展示必须走 locale，不直接展示接口原始枚举，除非 PRD 明确要求。
+- 枚举值展示必须走 locale，不直接展示接口原始枚举，除非 Figma / PRD 明确要求。
 - 代码标识用语义化英文；展示文案按 locale。
 
 ## 不做的事
 
 - 不手改 OpenAPI 生成物。
 - 不用 mock 替代缺失接口。
-- 不因为接口暂不支持就删 PRD 中的筛选、按钮、Tab、Drawer 步骤。
 - 不把 Tailwind 当成 Form/Grid/Table 的替代品。
 - 不跨出用户本次点名页面或组件范围批量修同类页面。
+
+## 完成检查
+
+- 提供完整可读 Figma 地址时，搜索字段、控件、表格列、详情、Tab、操作入口和顺序是否均以 Figma 为准。
+- 没有完整可读 Figma 地址时，是否按 PRD > 生成接口补充页面信息。
+- Figma / PRD 已明确的字段、列、Tab 和操作是否作为闭合集合处理，且低优先级来源没有追加未展示项。
+- 一行四筛选、ID/名称合并、全字段列、操作列和分页等默认值是否只在高优先级来源未明确时作为 fallback。
+- Figma 无接口字段的 UI 是否严格限定为完整可读设计稿明确展示的专项例外，且没有扩展到 PRD / API-only 页面。
+- 低优先级来源是否只补缺失信息，且没有手改生成 API、虚构请求参数或伪造响应数据。

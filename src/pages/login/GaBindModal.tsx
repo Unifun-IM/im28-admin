@@ -4,7 +4,7 @@ import { Button, Input, Message, Modal, VerificationCode } from '@arco-design/we
 import useLocale from '@shared/lib/useLocale';
 import '@features/ga-verify/ui/ga-verify-modal.less';
 
-import copyIcon from './assets/icon-copy.svg';
+import copyIcon from '@app/assets/icon-copy.svg';
 
 export type GaBindModalProps = {
   visible: boolean;

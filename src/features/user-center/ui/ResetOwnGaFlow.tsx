@@ -6,7 +6,7 @@ import {
   postV1AdminAuthSecurityVerify,
   postV1AdminAuthTwoFactorReset
 } from '@shared/api/admin/auth';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@app/assets/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './user-center-modal.less';

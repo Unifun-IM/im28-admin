@@ -24,8 +24,8 @@ import ForceChangePasswordModal from './ForceChangePasswordModal';
 import ForcePasswordNoticeModal from './ForcePasswordNoticeModal';
 import GaBindModal from './GaBindModal';
 import { GaVerifyModal } from '@features/ga-verify';
-import iconUnlock from './assets/icon-unlock.svg';
-import iconUser from './assets/icon-user.svg';
+import iconUnlock from '@app/assets/icon-unlock.svg';
+import iconUser from '@app/assets/icon-user.svg';
 import { mapLoginToast } from './mapLoginToast';
 import SlideCaptcha from './SlideCaptcha';
 

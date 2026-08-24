@@ -26,7 +26,12 @@ module.exports = {
       {
         patterns: [
           {
-            group: ['@app/*'],
+            group: [
+              '@app/*',
+              '!@app/assets',
+              '!@app/assets/*.svg',
+              '!@app/assets/*.svg?react'
+            ],
             message: 'Only app layer may import app internals.'
           },
           {
@@ -56,7 +61,13 @@ module.exports = {
           {
             patterns: [
               {
-                group: ['@app/*', '@pages/*'],
+                group: [
+                  '@app/*',
+                  '@pages/*',
+                  '!@app/assets',
+                  '!@app/assets/*.svg',
+                  '!@app/assets/*.svg?react'
+                ],
                 message: 'Pages may only import lower FSD layers.'
               }
             ]
@@ -72,7 +83,14 @@ module.exports = {
           {
             patterns: [
               {
-                group: ['@app/*', '@pages/*', '@widgets/*'],
+                group: [
+                  '@app/*',
+                  '@pages/*',
+                  '@widgets/*',
+                  '!@app/assets',
+                  '!@app/assets/*.svg',
+                  '!@app/assets/*.svg?react'
+                ],
                 message: 'Widgets may only import lower FSD layers.'
               }
             ]
@@ -88,7 +106,15 @@ module.exports = {
           {
             patterns: [
               {
-                group: ['@app/*', '@pages/*', '@widgets/*', '@features/*'],
+                group: [
+                  '@app/*',
+                  '@pages/*',
+                  '@widgets/*',
+                  '@features/*',
+                  '!@app/assets',
+                  '!@app/assets/*.svg',
+                  '!@app/assets/*.svg?react'
+                ],
                 message: 'Features may only import lower FSD layers.'
               }
             ]
@@ -104,7 +130,16 @@ module.exports = {
           {
             patterns: [
               {
-                group: ['@app/*', '@pages/*', '@widgets/*', '@features/*', '@entities/*'],
+                group: [
+                  '@app/*',
+                  '@pages/*',
+                  '@widgets/*',
+                  '@features/*',
+                  '@entities/*',
+                  '!@app/assets',
+                  '!@app/assets/*.svg',
+                  '!@app/assets/*.svg?react'
+                ],
                 message: 'Entities may only import shared or same-slice relative modules.'
               }
             ]
@@ -120,7 +155,16 @@ module.exports = {
           {
             patterns: [
               {
-                group: ['@app/*', '@pages/*', '@widgets/*', '@features/*', '@entities/*'],
+                group: [
+                  '@app/*',
+                  '@pages/*',
+                  '@widgets/*',
+                  '@features/*',
+                  '@entities/*',
+                  '!@app/assets',
+                  '!@app/assets/*.svg',
+                  '!@app/assets/*.svg?react'
+                ],
                 message: 'Shared must stay product-agnostic.'
               }
             ]

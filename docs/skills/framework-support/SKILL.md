@@ -1,22 +1,24 @@
 ---
-name: scaffold-support
-description: Reference the current built-in capabilities of this admin scaffold, including architecture, shell, auth, system pages, widgets, API, styling, testing, and deployment support.
+name: framework-support
+description: Reference the current built-in capabilities of this admin framework, including architecture, shell, auth, system pages, widgets, AI page-generation skills, API, styling, testing, and deployment support.
 ---
 
-# 脚手架现有支持清单
+# 后台框架现有支持清单
 
-> 截至 2026-08-23，本清单按当前仓库代码梳理。本文描述的是脚手架已经内置的通用后台能力，不包含派生项目中的具体业务域页面。
+> 截至 2026-08-24，本清单按当前仓库代码梳理。本文描述的是后台框架已经内置的基础通用能力与 AI 标准页面生成支持，不包含派生项目中的具体业务域页面。
 
 ## 定位
 
-`admin-scaffold` 是基于 Arco Design Pro Vite 精简模板演进的管理后台通用脚手架。仓库提供后台应用的基础壳层、登录鉴权、系统管理、通用列表积木、主题/i18n、OpenAPI 接入和部署模板；业务项目在此基础上追加业务菜单、页面、feature、locale 和接口调用。
+`admin-scaffold` 是基于 Arco Design Pro Vite 精简模板演进的管理后台基础框架。仓库不只是空白脚手架，而是提供后台应用的基础壳层、登录鉴权、系统管理、通用列表/详情积木、主题/i18n、OpenAPI 接入、部署模板，以及供 Codex / Claude Code / Cursor 复用的 AI 标准页面生成规则；业务项目在此基础上追加业务菜单、页面、feature、locale 和接口调用。
 
-脚手架默认只承载通用后台能力：
+框架默认承载基础通用后台能力：
 
 - 登录、鉴权态启动、异常页与空工作台
 - 顶栏、侧栏、多页签、面包屑、设置抽屉等后台壳层
 - 后台账号、角色权限、系统参数、操作日志等系统管理页
 - 通用列表页、筛选区、表格、批量操作、状态、空态等 UI 积木
+- 通用详情 Drawer、详情内操作记录表格、设置页壳层等标准页面积木
+- AI code tools 共用的项目规则、Figma 规则、组件使用、SVG 图标决策与后台页面生成 skill
 - Admin OpenAPI 生成物与统一请求实例
 - 主题色、浅/暗色、语言、时间格式、Logo、系统名称等基础设置
 - Docker、Nginx、Kubernetes 部署样例与 Vitest 测试基础
@@ -30,7 +32,7 @@ description: Reference the current built-in capabilities of this admin scaffold,
 - Arco Design React + `@arco-themes/react-arco-pro`
 - MobX / `mobx-react-lite`
 - Less / Less Modules
-- Tailwind CSS v3，`preflight: false`，仅用于 Arco 覆盖不到的自建装饰
+- Tailwind CSS v3，`preflight: false`，用于 Arco 标准组件之外的布局与装饰
 - `@umijs/openapi` 生成 Admin 网关接口
 - Vitest + Testing Library + jsdom
 
@@ -39,12 +41,12 @@ description: Reference the current built-in capabilities of this admin scaffold,
 源码按 FSD 分层组织：
 
 ```text
-src/app       # 应用入口、Providers、路由发现与路由装配
+src/app       # 应用入口、Providers、路由装配、全部 icon SVG 与通用 SVG
 src/pages     # 页面：login / dashboard / system / system-params / exception
 src/widgets   # 后台壳层、顶栏、多页签、通用列表、设置页壳等复合 UI
 src/features  # 通用交互：账号创建、角色创建、GA、个人中心、未保存守卫
 src/entities  # 全局 MobX store：global-state / page-tabs / system-settings
-src/shared    # api / lib / locale / config / ui / assets
+src/shared    # api / lib / locale / config / ui
 ```
 
 现有测试会校验 `src/` 下保留 FSD 顶层目录，并禁止新增遗留根目录 `components`、`containers`、`services`、`utils`、`hooks`。
@@ -61,7 +63,7 @@ Vite 已配置以下别名：
 - `@shared`
 - `@`
 
-业务扩展时优先沿用这些别名，保持依赖方向为 `pages -> widgets/features -> entities -> shared`。
+业务扩展时优先沿用这些别名，保持依赖方向为 `pages -> widgets/features -> entities -> shared`。所有 icon SVG 及通用 SVG 统一从 `@app/assets/*.svg` 引用，这是静态资源例外；其它 `@app/*` 仍遵守 FSD 依赖限制。
 
 ## 路由与菜单
 
@@ -88,7 +90,7 @@ Vite 已配置以下别名：
 
 - 路由支持 `requiredPermissions` 与 `oneOfPerm`。
 - 菜单渲染时会根据 `userInfo.permissions` 过滤可见路由。
-- 当前默认菜单未强配权限，便于脚手架默认全显；派生项目可在路由配置上补权限约束。
+- 当前默认菜单未强配权限，便于框架默认全显；派生项目可在路由配置上补权限约束。
 
 ## 后台壳层
 
@@ -155,7 +157,7 @@ Vite 已配置以下别名：
 
 - 展示用户名称和账号
 - 修改展示名并同步全局用户信息
-- 上传头像预览，当前接口暂无头像保存字段时保留 UI 和上传结果提示
+- 上传头像预览和上传结果提示
 - 修改本人密码流程
 - 重置本人 GA 流程
 - 敏感操作后强制重新登录
@@ -291,7 +293,6 @@ Vite 已配置以下别名：
 - `DataSummary`：数据摘要
 - `TruncateText` 等表格单元格辅助
 - `EmptyState`：通用空态
-- `ApiNotReady`：无整页 OpenAPI 契约时的统一占位
 - `IconButton`：图标按钮与 tooltip
 - `UserAvatar`：用户头像展示
 
@@ -329,6 +330,8 @@ Admin 网关 OpenAPI 生成物位于 `src/shared/api/admin/**`。当前包含：
 npm run openapi
 ```
 
+该命令是统一生成入口，会读取当前项目的 OpenAPI 输入、`.openapi2tsrc.ts` 和环境变量，生成当前配置对应的 API 与 typings；固定执行该命令与派生项目使用自身配置不冲突。
+
 生成流程：
 
 ```text
@@ -337,11 +340,10 @@ scripts/convert-yaml-to-json.mjs -> openapi2ts
 
 约束：
 
-- 禁止手改 `src/shared/api/admin/**`。
+- API 与 typings 的生成流程和只读边界见 `docs/skills/api-generation/SKILL.md`。
+- 禁止手改 `src/shared/api/admin/**`，包括 `typings.d.ts`。
 - 页面、feature 直接使用生成函数和 `AdminAPI` 字段名。
 - 列表信封使用 `res.data?.list` 和 `res.data?.total`。
-- 接口暂不支持的 UI 条件先保留交互，不为接口能力删控件。
-- 无整页契约时使用 `ApiNotReady`。
 
 ### 图片上传
 
@@ -374,7 +376,7 @@ scripts/convert-yaml-to-json.mjs -> openapi2ts
 - `applyThemeColor` 会同步 Arco primary 色板
 - 支持浅色 / 暗色主题
 - 顶栏主题切换使用 View Transition 圆形扩散动画
-- Figma Light / Dark token JSON 存放在 `docs/Light.tokens.json` 与 `docs/Dark.tokens.json`
+- Figma Light / Dark token JSON 存放在 `docs/theme/Light.tokens.json` 与 `docs/theme/Dark.tokens.json`
 - 语义色集中在 `src/app/styles/theme-tokens.less`
 
 ### 样式入口
@@ -387,9 +389,10 @@ arco.css -> tailwind.css -> global.less
 
 使用约束：
 
-- 标准表单、筛选、表格、按钮优先使用 Arco 组件。
-- Tailwind 仅补自建装饰和布局细节。
-- 全局样式仅放跨页面、portal、基础设施、Arco 兼容补丁。
+- 页面组件决策统一遵守：组件发现 → 已有组件 → 重复 UI 抽取 → Arco Design / Arco Design Pro → 自建。
+- 颜色、公共样式抽取与 Tailwind / Less 选型以 `docs/skills/css-usage/SKILL.md` 为准。
+- Tailwind 用于 Arco 标准组件之外的布局和装饰。
+- 全局样式仅放跨页面共享样式、portal、基础设施、Arco 兼容补丁；公共组件的语义化 `use-*` 修饰类属于跨页面共享样式，不属于具体业务页面样式。
 - 非标准自建 UI 独立在对应 widget / feature 下引入样式。
 
 ### 全局样式补丁
@@ -405,7 +408,7 @@ arco.css -> tailwind.css -> global.less
 - 全局 Message 样式
 - success Switch
 - Modal、Checkbox 等通用视觉补位
-- 业务详情表格 `.use-biz-detail-table`
+- 通用详情表格 `.use-biz-detail-table`
 
 ## i18n
 
@@ -458,7 +461,6 @@ i18n 入口为 `src/shared/locale/index.ts`，当前内置：
 
 通用占位：
 
-- `ApiNotReady`：接口未就绪时保留页面入口和路由。
 - `EmptyState`：列表或页面空态。
 
 ## 测试与质量
@@ -536,12 +538,12 @@ tsc -b && vite build
 4. 如有复合可复用 UI，拆到 `src/widgets/<widget-name>`。
 5. 如需跨页面状态，放到 `src/entities/<entity-name>`。
 6. 业务文案新增到 `src/shared/locale/<biz>.ts` 并在 `locale/index.ts` merge。
-7. 业务 API 更新 OpenAPI 后执行 `npm run openapi`。
+7. 业务 API 更新 OpenAPI 后执行统一入口 `npm run openapi`，由命令读取当前项目配置。
 8. 侧栏新一级菜单图标在 `PageLayout.getIconFromKey` 注册。
 
 ## 当前不内置的内容
 
-脚手架刻意不包含：
+框架刻意不内置：
 
 - 具体业务域页面
 - 业务 mock 数据
@@ -551,4 +553,4 @@ tsc -b && vite build
 - 未在 OpenAPI 中出现的整页接口实现
 - 自动提交 git / 自动推送远程
 
-派生项目可以扩展这些能力，但应继续遵守 Arco 优先、FSD 分层、OpenAPI 生成物禁止手改、接口不完整不删 UI 交互等项目约定。
+派生项目可以扩展这些业务能力，但应继续遵守“组件发现 → 已有组件 → 重复 UI 抽取 → Arco Design / Arco Design Pro → 自建”、FSD 分层、OpenAPI 生成物禁止手改，以及 AI 标准页面生成 skill 等项目约定。

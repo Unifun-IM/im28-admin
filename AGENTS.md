@@ -1,132 +1,33 @@
-# admin-scaffold — Agent 准则
+# admin-scaffold — Agent 入口
 
-给 AI / 协作者的项目约定。改代码前先遵守下列规则；细节以 `README.md` 为准。
+本仓库是管理后台基础框架：内置登录鉴权、后台壳层、系统管理、通用列表/详情积木、设置页能力与 AI 标准页面生成 skill。公共项目说明见 `docs/framework-guide.md`。
 
-本仓库是**管理后台通用脚手架**：不含具体业务域页面；业务在派生项目中追加。
+## 必读入口
 
-## 全局基本准则
+改代码前先读：
 
-**优先采用 Arco Design 标准组件；Figma 约束交互细节；非标准组件强制像素级布局。**
-
-**对接接口不改交互：即便后端暂不支持（如部分搜索条件），也先保留 UI 交互。**
-
-**严格限定每次指令边界：只做用户点名的范围，不顺手扩修「同类问题」。**
-
-全仓库统一顺序：
-
-1. **优先 Arco Design / Arco Design Pro 标准组件** — `Form`、`Grid`、`Space`、`Card`、`Table`、`Button`、`Select` 等；能 props 解决的不要手写布局或 Tailwind 重做
-2. **Figma 约束交互与视觉细节** — 在标准组件之上，用稿约束状态、间距观感、色/圆角/字号等；以 `get_design_context` + 截图对照，差异用 `use-*` / props 补齐（**不**为贴稿拆掉 Grid 等标准结构）。**Figma 只读：禁止任何写入/编辑稿面**
-3. **非标准组件（自建壳层 / 无 Arco 对应物）** — **强制像素级布局**：对照 Figma 图层数值与截图双验证，逐帧还原
-4. **Tailwind** — 仅补 Arco 覆盖不到的自建装饰；`preflight: false`；禁止用 Tailwind 替代 Form/Grid/Table
-5. **对接接口不改交互** — 接 OpenAPI / 真实请求时，**禁止**因字段缺失、暂不支持而删减筛选、按钮、Tab、弹窗步骤等既有交互；能传的字段照常传，不能传的先留在 Form/UI 上（可先不进请求体），待接口补齐再接线。无整页契约时用 `ApiNotReady`，**不要**为「接口不够」简化稿面交互
-6. **严格限定指令边界** — 每一次用户指令只处理其**明确点名**的页面 / 组件 / 问题；禁止借「一并修掉」「同类都改」「追溯全仓」自行扩大范围。发现相关债或同类问题：在回复里**简短列出**，等用户下一条指令再改。用户写明「批量 / 全部 / 同类一并」才可扩面
-
-同内容：`.cursor/rules/arco-first.mdc`、`.cursor/rules/figma-pixel-verify.mdc`、`.cursor/rules/api-keep-ui.mdc`、`.cursor/rules/task-scope.mdc`（均 `alwaysApply`）。
-
-## AI Code Tools Skill
-
-Codex / Claude Code / Cursor 共用入口：
-
+- `docs/framework-guide.md`
 - `docs/skills/ai-code/SKILL.md`
+- `docs/skills/project-rules/SKILL.md`
 
-该入口会按任务类型路由到：
+按任务补读：
 
-- 通用项目规则：`docs/skills/project-rules/SKILL.md`
+- Figma / 按稿 / 像素级 / 设计 token：`docs/skills/figma-rules/SKILL.md`
+- CSS / 主题颜色 / 公共样式 / Tailwind：`docs/skills/css-usage/SKILL.md`
+- OpenAPI / API / typings 生成：`docs/skills/api-generation/SKILL.md`
+- 页面组件选择：`docs/skills/component-usage/SKILL.md`
+- SVG / 菜单图标 / Figma 图标：`docs/skills/svg-icon-usage/SKILL.md`
 - 后台列表 / 详情页生成：`docs/skills/admin-page/SKILL.md`
+- 框架能力清单：`docs/skills/framework-support/SKILL.md`
 
-工具侧只做薄引用，避免重复维护：Codex 使用 `AGENTS.md`，Cursor 使用 `.cursor/rules/*.mdc`，Claude Code 使用 `.claude/CLAUDE.md`。
+工具侧只做薄引用，避免重复维护：Codex 使用本文件，Cursor 使用 `.cursor/rules/ai-code.mdc`，Claude Code 使用 `.claude/CLAUDE.md`。
 
-## 参考基线：Arco Design Pro
+## 硬性约束
 
-本仓库能力源自 [Arco Design Pro](https://github.com/arco-design/arco-design-pro) 的 **Vite 精简模板**（`arco-design-pro-vite`），官方站点 [pro.arco.design](https://pro.arco.design)。
-
-实现 / 对照问题时优先参考上游：
-
-- 布局壳层（Navbar / Menu / Settings 抽屉）、主题切换、i18n、权限包装等 Pro 惯例
-- 组件用法与主题变量以 [Arco Design React](https://arco.design/react/docs/start) + Pro 主题包为准
-
-本仓库相对上游的刻意差异（不要「还原成官方脚手架」）：
-
-- 目录按 **FSD** 重组，不是 Pro 默认的 `src/pages` + 扁平结构
-- 状态用 **MobX**，不是 Pro 常见的 Redux / context-only 方案
-- 样式为 **Arco 优先 + Tailwind 补位（关 Preflight）**，Less 仅作 Arco 重置 / 不得已补充
-- 脚手架默认菜单仅 **dashboard + system**；业务菜单与视觉由派生项目按 Figma / 产品稿扩展
-
-不确定交互或布局惯例时：先查 Pro Vite 模板对应实现，再按上表差异落到本仓库分层。
-
-## 技术栈
-
-- React 18 + TypeScript + Vite 5 + React Router v6
-- UI：**Arco Design**（`@arco-design/web-react` + `@arco-themes/react-arco-pro`）
-- 状态：**MobX** / `mobx-react-lite`（不要引入 Redux）
-- 样式：**Arco Design 优先**；Tailwind CSS v3 仅补 Arco 覆盖不到的自建布局（`preflight: false`）；Less 用于必要的 Arco 重置
-- 路径别名：`@app` / `@pages` / `@widgets` / `@features` / `@entities` / `@shared`
-
-## FSD 目录
-
-```text
-src/app | pages | widgets | features | entities | shared
-```
-
-- 禁止在 `src/` 下新建 `components`、`containers`、`services`、`utils`、`hooks` 等遗留根目录
-- 页面放 `pages/`；用户交互特性放 `features/`（如账号创建、角色权限、个人中心）；可复用复合 UI 放 `widgets/`；跨页实体与全局 store 放 `entities/`；通用能力放 `shared/`
-- `entities` 现有 MobX 单例：`global-state`（用户信息 / Pro 壳层 settings）、`page-tabs`、`system-settings`（登录后拉取的后台系统参数）
-- 依赖方向：`pages → widgets/features → entities → shared`，禁止反向依赖；`features` 与 `widgets` 同层，优先不要互相依赖
-
-## 样式优先级（强制）
-
-与「全局基本准则」一致，落地时：
-
-1. **Arco 标准组件** — 结构 / 布局走组件 + props
-2. **Figma 细节** — 标准组件上的交互与 token，用 `use-*` / props 补
-3. **非标准组件** — 像素级布局（图层 + 截图双验证）
-4. **Tailwind** — 仅自建装饰；勿重做 Form/Grid/Table
-5. **少建** `style/index.module.less`（伪元素 / 深度 DOM 等除外）
-
-| 场景 | 用什么 |
-| --- | --- |
-| 表单 / 筛选 / 表格 / 按钮 | **Arco**（Pro：`Card` + `Form` + `Grid` + `Space`） |
-| 标准组件上的 Figma 交互/视觉差 | **`global.less`（`use-*`）** |
-| 非标准自建 UI（page-tabs 凹角等） | **像素级**（Figma 图层 + 截图） |
-| 自建壳层装饰间距 | **Tailwind**（`preflight: false`） |
-| 单处打穿 Arco 内部 DOM | **本地 Less Modules** |
-
-硬性约束：
-
-1. **`preflight: false`**（`tailwind.config.js`），禁止打开，避免冲掉 Arco 基础样式。边框重置见 `src/app/styles/tailwind.css`（`@layer base` 仅补 `border-width:0`，修复 `border-b`+`border-solid` 其它边变 3px）
-2. **不要用 Tailwind 全面替换** Arco 主题 / 组件内部样式；当前无 prefix，勿另起一套工具类前缀
-3. 主题色走 `applyThemeColor` + `settings.json` 的 `themeColor`（默认 `#635CFF`）；**浅/暗色 primary/6 均钉品牌色**
-4. 语义色以 `src/app/styles/theme-tokens.less` 为准；壳层用 `--color-bg-1` / `--color-bg-2` 等变量，勿写死浅色 hex
-5. 样式入口：`arco.css` → `tailwind.css` → `global.less`（含 theme-tokens）
-6. **新增**自定义 UI 默认不建 `style/index.module.less`
-7. 筛选区参考 Arco Design Pro search-table：`SearchFilterBar`（`Card` + `Form` + `Grid` gutter=`[24, 16]`，默认 Col span=6 **一行四个**；操作区占满行末剩余栅格右对齐）；`.use-biz-filter-bar` 只补视觉；控件用 `FilterKeywordInput` / `FilterInput` / `FilterSelect` / `FilterMultiSelect` / `FilterDateRange`
-8. 壳层菜单仍用 `admin-shell/style/layout.module.less`（复杂侧栏覆盖）
-
-
-## UI / 组件约定
-
-- 侧栏常规 **240px** / 最小 **56px**（贴边全高、仅右边框）；折叠态保留图标轨
-- 通用列表积木复用 `@widgets/biz-list`（`SearchFilterBar` / `DataSummary` / `BizListPage` / `TableBatchBar`）
-- 业务表格约定（`BizListPage`）：单元格默认单行省略 + 溢出用 Arco `Tooltip`；默认斑马纹（Hover/选中优先）；`操作` 列自动 `fixed: 'right'`，左侧投影走 Arco 横向滚动标准；分页默认 15 条、选项 15/30/50，**total ≤ 15 不展示分页**
-- 详情 Drawer / Modal 内表格统一 `className="use-biz-detail-table"`（外框 + 单元格网格，见 `global.less`）
-- 操作列用 `ActionLinks`：最多 3 个 icon，Hover Tooltip；超出收进「…」下拉；列表页可用 `variant="text"`
-- 批量操作：配置了 `batchActions` 时，表头点「批量操作」才进入选择列；勾选后工具栏右侧浅色 `TableBatchBar`（关闭 / 只显示已选 + Switch / 业务操作）；关闭或「取消批量」退出并清空选中
-- 页面打开记录快捷导航复用 `@widgets/page-tabs`，由 Layout 自动收录路由并支持关闭 / 溢出 / 全屏
-- 系统参数：`systemSettingsStore` 登录后与 `auth/me` 并行拉取；侧栏品牌用 `system_name` / `logo_url`；`formatDateTime` 未传 format 时跟随 `time_format`（`12h`/`24h`）
-- 后台图片上传：`@shared/lib/uploadAdminImage` → `upload-credential` 取凭证 → 浏览器 **PostObject 表单直传 OSS**（勿走业务 `request`，避免带 Bearer）→ 使用凭证返回的 `url`
-- UI 文案走 `src/shared/locale/*.ts` + `useLocale()`（zh-CN / en-US）；业务包按需 merge
-
-## API
-
-- Admin 网关生成物：`src/shared/api/admin/**`（`npm run openapi`），**禁止任何手改**
-- 业务页 / feature **直接**使用生成函数与 `AdminAPI` 字段名（Form/Table/state 不做映射）；列表信封用 `res.data?.list` / `res.data?.total`
-- **对接不改交互**（见全局准则 §5）：保留 Figma / 现有筛选与操作入口；接口暂不支持的条件先留 UI，勿删控件「迁就接口」
-- 无 OpenAPI 的菜单页：保留路由，统一 `ApiNotReady`（文案「接口未就绪」），不要再引入 mock / `/api/biz`
-- 手写 axios 单例 `shared/api/request.ts` 勿删；鉴权 token 走 `setAccessToken` / `getAccessToken`
-
-## 改动边界
-
-- **指令边界优先**（见全局准则 §6）：范围以当条用户表述为准，不自行扩到「看起来相关」的其它模块
-- 只改任务相关文件；不顺手大重构、不批量「格式化无关文件」
-- 不擅自提交 git / 推远程；用户明确要求再提交
-- 新增依赖前先说明理由；UI 库以 Arco 为准，不要再引入第二套组件库
+- 组件决策统一遵守：组件发现 → 已有组件 → 重复 UI 抽取 → Arco Design / Arco Design Pro → 自建。
+- Figma 只读，禁止写入或编辑稿面。
+- 生成页面时，完整可读 Figma 地址 > PRD > 脚本生成接口；高优先级来源明确列出的字段、列、Tab 和操作是闭合集合，低优先级来源只补实现信息，不追加可见项。
+- 非标准组件才强制像素级布局。
+- OpenAPI 生成的 API 与 typings 禁止手改，只能按配置执行命令重新生成。
+- 普通任务严格限定点名范围；OpenAPI 生成物保留完整结果，业务代码有具体 PRD / Figma / 点名目标时同步该目标，没有时沿现有调用关系同步直接受影响代码。
+- 不擅自提交 git / 推远程；用户明确要求再提交。

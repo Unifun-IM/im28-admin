@@ -1,6 +1,6 @@
 ---
 name: project-rules
-description: Shared admin-scaffold project rules for AI agents, covering Arco-first UI, Figma read-only verification, SVG assets, theme tokens, OpenAPI generated files, API/UI behavior, and strict task scope.
+description: Shared admin-scaffold project rules for AI agents, covering project-component-first UI, Arco Design, FSD boundaries, theme tokens, OpenAPI generation, and strict task scope.
 ---
 
 # Project Rules Skill
@@ -10,111 +10,52 @@ description: Shared admin-scaffold project rules for AI agents, covering Arco-fi
 本 skill 是本仓库通用工程规则的单一来源。工具私有入口只做薄引用，不复制正文：
 
 - Codex：`AGENTS.md`
-- Cursor：`.cursor/rules/*.mdc`
+- Cursor：`.cursor/rules/ai-code.mdc`
 - Claude Code：`.claude/CLAUDE.md`
 
 ## UI 实现优先级
 
-1. 优先采用 Arco Design 标准组件及 Pro 惯用法。
-   - `Form`、`Grid`、`Space`、`Card`、`Table`、`Button`、`Select` 等优先。
+组件决策固定遵守以下顺序，具体发现、抽取和 Arco 最佳用法见 `docs/skills/component-usage/SKILL.md`：
+
+1. 组件发现：搜索 `shared/ui`、`widgets`、`features`、当前业务切片的公开组件和业务中散落的相似实现。
+2. 已有组件：能够表达需求时直接复用；本次范围内的等价散落实现迁移到该组件。
+3. 重复 UI 抽取：没有现成组件但已存在多个相似实现时，先按 FSD 抽取；范围外调用方只提示，不自行批量修改。
+4. Arco Design / Arco Design Pro：没有合适组件或可抽取的重复实现时，使用标准组件及 Pro 惯用法。
+   - `Form`、`Grid`、`Space`、`Card`、`Table`、`Button`、`Select` 等优先于自建实现。
    - 能用组件和 props 解决的，不用手写布局或 Tailwind 重做。
-2. Figma 只约束标准组件上的交互与视觉细节。
-   - 状态、反馈、间距观感、色、圆角、字号等用 `use-*` 或组件 props 补齐。
-   - 不为贴稿拆掉 Arco `Grid` / `Form` / `Table` 等标准结构。
-3. 非标准组件强制像素级布局。
+5. 自建：只有项目组件和 Arco 都无法表达的非标准 UI 才新增小范围自建实现。
    - 无 Arco 等价物的自建 UI，需要按 Figma 图层数值与截图双验证还原。
-4. Tailwind 最后使用。
-   - 仅补自建装饰；`preflight: false`；禁止替代 Form / Grid / Table。
 
-## Figma 用法边界
+实现约束：
 
-Figma 在本项目中只读：
+- 完整可读的 Figma 地址决定页面可见信息、交互和视觉；标准组件仍保留项目组件 / Arco 结构。
+- 页面生成时的字段、控件类型、顺序、表格列、详情分组与 Tab 按 `admin-page` 的 Figma > PRD > 生成接口优先级执行。
+- Figma / PRD 已明确列出的字段、列、Tab 和操作是闭合集合，未出现项默认不展示；低优先级来源只补绑定、枚举、校验和格式，不追加可见项。
+- 接口缺失字段仍实现 UI 只允许作为 `admin-page` 定义的完整可读 Figma 专项例外；不得扩展为普通 PRD / API 页面的通用规则。
+- 标准组件的状态、反馈、间距观感、色、圆角、字号等用 `use-*` 或组件 props 补齐，不为贴稿拆掉 Arco `Grid` / `Form` / `Table` 等标准结构。
+- 普通布局与装饰使用 Tailwind；`preflight: false`；禁止替代 Form / Grid / Table。颜色、公共样式抽取、Tailwind / Less 选型遵守 `docs/skills/css-usage/SKILL.md`。
 
-- 禁止对 Figma 做任何写入或编辑。
-- 禁止调用 `use_figma`、`generate_figma_design`、`create_new_file`、`upload_assets`、Code Connect 写入类工具，以及任何会改动稿面、变量、组件库的操作。
-- 仅允许只读：`get_design_context`、`get_screenshot`、`get_metadata`、`get_variable_defs` 等。
-- 实现方向一律是代码对齐设计稿，不是把代码推回 Figma。
+## Figma 与设计稿
 
-还原边界：
+Figma 只读、截图对照、非标准组件像素校验、Figma 自定义 SVG 资源等规则已收拢到 `docs/skills/figma-rules/SKILL.md`。
 
-| 场景 | 做法 |
-| --- | --- |
-| Arco 标准组件 | 结构用 Arco；Figma 只约束交互与视觉细节 |
-| 非标准 / 自建组件 | 强制像素级布局，图层数值 + 截图双验证 |
+任意任务涉及 Figma 链接、设计稿还原、按稿对齐、像素级验证或 Figma 导出的 SVG 时，先读取 `figma-rules`。生成页面且提供完整可读 Figma 地址时，再按 `docs/skills/admin-page/SKILL.md` 执行信息优先级；页面使用图标时按 `docs/skills/svg-icon-usage/SKILL.md` 决策图标来源和资产归属。
 
-## Figma SVG 资源
+## CSS、主题与样式
 
-从设计稿还原 UI 时，稿面自定义图标优先导入 Figma 导出的 SVG，不手写 path，不用近似第三方图标替代。Arco 标准组件自带图标除外。
+项目同时支持亮色与暗色。新增或修改样式时读取 `docs/skills/css-usage/SKILL.md`，按其中规则使用主题 CSS 自定义变量、抽取公共样式，并用 Tailwind CSS 完成普通布局与装饰。
 
-规则：
-
-1. 来源：使用 Figma 只读上下文或等价导出的矢量资源，禁止凭记忆手绘 SVG。
-2. 落盘：每个图标保存为独立文件，例如 `src/**/assets/icon-*.svg`，再 import 引用；禁止把大段 SVG 内联进 TSX。
-3. FSD 归属：
-   - 单个 `feature` / `page` / `widget` 使用，放对应切片 `assets/`。
-   - 两个及以上切片复用，或壳层 / 全局通用，抽到 `src/shared/assets/`。
-   - `shared` 不得依赖 `features` / `pages` 下的资源。
-4. 命名：`icon-{场景}-{名称}.svg`；进入 `shared/assets` 的用通用名。
-5. 过期 URL：提交仓库的必须是本地文件字节，不是远程 asset 链接。
-
-## 主题色与暗亮色
-
-项目同时支持亮色与暗色。颜色必须对齐 token，禁止在业务样式里写死浅色 hex 或 `rgba(0,0,0,*)`。
-
-权威来源：
-
-- 运行时：`src/app/styles/theme-tokens.less`
-- 设计源：`docs/Light.tokens.json`、`docs/Dark.tokens.json`
-- 切换：`changeTheme` 和 `body[arco-theme='dark']`
-- 品牌阶：`applyThemeColor`
-
-常用映射：
-
-| Figma / 稿面常见值 | Token |
-| --- | --- |
-| 页面底 `#F7F8FA` | `var(--color-bg-1)` |
-| 卡片 / 表格 / 弹层底 `#FFF` | `var(--color-bg-2)` / `var(--color-bg-popup)` |
-| 主 / 次 / 弱文案 | `--color-text-1` / `-2` / `-3` |
-| 分割线 `rgba(0,0,0,0.08)` | `var(--color-border-2)` |
-| 遮罩 `rgba(0,0,0,0.4)` | `var(--color-mask-1)` |
-| 填充灰 `#F2F3F5` / `#E5E6EB` | `--color-fill-2` / `-3` |
-| 品牌紫 `#635CFF` | `rgb(var(--primary-6))` |
-| 品牌浅底 12% | `var(--color-primary-light)` |
-| 成功 / 警告 / 危险 | `rgb(var(--success-6))` 等；浅底用 `--color-*-light` |
-
-写法：
-
-- 属性值本体必须是 `var(--...)` 或 `rgb(var(--...))`。
-- 优先语义 token，少写暗色分支。
-- 新增 Modal / Drawer 遮罩一律使用 `var(--color-mask-1)`。
+硬性约束：禁止在新增业务样式中写死颜色；保持 Tailwind `preflight: false`；不要用 Tailwind 替代 Arco 标准组件。
 
 ## Admin OpenAPI 生成物
 
-`src/shared/api/admin/**` 由 `npm run openapi` 从 OpenAPI 生成。
+API 与 typings 的配置读取、输入源选择、生成命令、只读边界和增量检查统一遵守 `docs/skills/api-generation/SKILL.md`。
 
-必须遵守：
-
-1. 禁止对 `src/shared/api/admin/**` 做任何手改、格式化、重命名、删注释或改签名。
-2. 需要新接口或改契约时，更新 OpenAPI 后运行 `npm run openapi`。
-3. 业务直接使用生成函数与 `AdminAPI` 字段名，页面 Form / Table / state 不做字段映射层。
-4. 组合调用写在 `features` / `pages`，不要改生成文件。
-5. 无 OpenAPI 的整页用 `ApiNotReady`。
-6. 手写请求基础设施仅限 `src/shared/api/request.ts` 及其测试。
-
-## 对接接口不改交互
-
-接 OpenAPI / 真实接口时，以 PRD、Figma 与既有页面交互为准，不为迁就后端能力简化 UI。
-
-必须遵守：
-
-1. 禁止因接口缺字段或暂不支持而删除或隐藏筛选条件、工具栏按钮、Tab、批量操作、弹窗步骤等既有交互。
-2. 请求体里契约有的字段正常传；契约没有的条件先留在 Form / 控件上，可暂不进 body，待 OpenAPI 补齐再接线。
-3. 整页无契约时，用 `ApiNotReady` 占位，仍保留路由与菜单。
-4. 字段名跟 `AdminAPI`，Form / Table 不做映射层。
+硬性约束：`src/shared/api/admin/**` 中的接口函数、索引和 `typings.d.ts` 只能由配置命令生成，禁止任何手改；需要改变接口或类型时修改 OpenAPI 源或生成配置后重新生成。
 
 ## 严格限定指令边界
 
-每次用户指令只做其明确点名的范围。
+普通任务只做用户明确点名的范围。OpenAPI 完整生成与受影响调用方同步按本节例外执行。
 
 必须遵守：
 
@@ -123,3 +64,10 @@ Figma 在本项目中只读：
 3. 发现相关债只在回复中简短列出，等待用户下一条指令。
 4. 不借清理名义重构、批量格式化、升级无关依赖或文案。
 5. 多文件改动仅限完成该指令所必需的 locale、样式、调用方等最小连带。
+
+OpenAPI 工作流的范围例外：
+
+- 生成目录、索引和 typings 保留 `npm run openapi` 产生的完整确定性差异，不按点名页面裁剪。
+- 有具体 PRD、完整可读 Figma 或明确点名页面 / 路由 / 接口 / 文件时，业务代码只同步该目标及必要直接依赖。
+- 没有这些明确目标时，遵循现有路由和 API 调用关系，同步接口变化直接影响的现有代码；新增接口按现有页面模式生成对应页面。
+- 该例外不授权修改无调用关系的页面、同类问题或无关工程债。
