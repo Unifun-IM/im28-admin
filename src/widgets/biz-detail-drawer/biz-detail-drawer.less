@@ -41,6 +41,15 @@
   overflow: auto;
 }
 
+.use-biz-detail-drawer-spin {
+  display: block;
+  height: 100%;
+
+  > .arco-spin-children {
+    height: 100%;
+  }
+}
+
 .use-biz-detail-tabs {
   display: flex;
   min-height: 100%;
@@ -49,30 +58,92 @@
   > .arco-tabs-header {
     flex-shrink: 0;
     margin: -4px 0 16px;
-    border-bottom: 1px solid var(--color-border-2);
+    align-items: flex-end;
+  }
+
+  .arco-tabs-header,
+  .arco-tabs-header-nav,
+  .arco-tabs-header-scroll {
+    margin-left: 0;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .arco-tabs-header-nav::before {
+    height: 1px;
+    background-color: var(--color-border-2);
   }
 
   .arco-tabs-header-title {
-    height: 36px;
+    position: relative;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin: 0 24px 0 0;
-    padding: 0;
+    padding: 9px 0;
+    background-color: transparent !important;
     color: var(--color-text-2);
     font-size: 14px;
-    line-height: 36px;
+    font-weight: 400;
+    line-height: 22px;
+
+    &::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: transparent;
+      content: '';
+      transition: background-color 0.15s ease;
+    }
 
     &:hover {
+      background-color: transparent !important;
       color: rgb(var(--primary-6));
     }
   }
 
-  .arco-tabs-header-title-active {
+  .arco-tabs-header-title:first-child {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .arco-tabs-header-title:last-child {
+    margin-right: 0;
+  }
+
+  .arco-tabs-header-title-text {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  .arco-tabs-header-title-active,
+  .arco-tabs-header-title-active:hover {
+    background-color: transparent !important;
     color: rgb(var(--primary-6));
     font-weight: 500;
+
+    &::after {
+      background: rgb(var(--primary-6));
+    }
+  }
+
+  .arco-tabs-header-ink {
+    display: none !important;
   }
 
   > .arco-tabs-content {
     min-height: 0;
     flex: 1;
+    padding: 0;
+  }
+
+  .arco-tabs-content-item {
+    padding: 0;
   }
 }
 

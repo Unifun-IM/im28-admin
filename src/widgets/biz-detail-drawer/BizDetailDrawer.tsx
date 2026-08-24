@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import {
   Descriptions,
   Drawer,
+  Spin,
   Table,
   Tabs,
   type DescriptionsProps,
@@ -75,6 +76,7 @@ export type BizDetailDrawerProps<T extends Record<string, unknown>> = Omit<
   activeTab?: string;
   defaultActiveTab?: string;
   onTabChange?: (key: string) => void;
+  loading?: boolean;
   operationRecords?: BizDetailOperationRecordsProps<T>;
   /** 详情底部扩展内容，如审计说明、外链等 */
   extra?: React.ReactNode;
@@ -185,6 +187,7 @@ export default function BizDetailDrawer<T extends Record<string, unknown>>({
   activeTab,
   defaultActiveTab,
   onTabChange,
+  loading = false,
   operationRecords,
   extra,
   className,
@@ -246,33 +249,35 @@ export default function BizDetailDrawer<T extends Record<string, unknown>>({
       className={cs('use-biz-detail-drawer', className)}
       wrapClassName={cs('use-biz-detail-drawer-wrap', wrapClassName)}
     >
-      <div className="use-biz-detail-drawer-body">
-        {shouldRenderTabs ? (
-          <Tabs
-            className="use-biz-detail-tabs"
-            type="line"
-            size="default"
-            activeTab={activeTab}
-            defaultActiveTab={defaultActiveTab ?? mergedTabs[0]?.key}
-            animation={false}
-            destroyOnHide={false}
-            onChange={onTabChange}
-          >
-            {mergedTabs.map((tab) => (
-              <TabPane
-                key={tab.key}
-                title={tab.title}
-                disabled={tab.disabled}
-                destroyOnHide={tab.destroyOnHide}
-              >
-                {tab.children}
-              </TabPane>
-            ))}
-          </Tabs>
-        ) : (
-          mergedTabs[0]?.children ?? detailContent
-        )}
-      </div>
+      <Spin loading={loading} className="use-biz-detail-drawer-spin">
+        <div className="use-biz-detail-drawer-body">
+          {shouldRenderTabs ? (
+            <Tabs
+              className="use-biz-detail-tabs"
+              type="line"
+              size="default"
+              activeTab={activeTab}
+              defaultActiveTab={defaultActiveTab ?? mergedTabs[0]?.key}
+              animation={false}
+              destroyOnHide={false}
+              onChange={onTabChange}
+            >
+              {mergedTabs.map((tab) => (
+                <TabPane
+                  key={tab.key}
+                  title={tab.title}
+                  disabled={tab.disabled}
+                  destroyOnHide={tab.destroyOnHide}
+                >
+                  {tab.children}
+                </TabPane>
+              ))}
+            </Tabs>
+          ) : (
+            mergedTabs[0]?.children ?? detailContent
+          )}
+        </div>
+      </Spin>
     </Drawer>
   );
 }
