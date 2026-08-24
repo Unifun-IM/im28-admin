@@ -1,6 +1,6 @@
 ---
 name: admin-page
-description: Generate or adjust standard admin framework list/detail pages from a complete Figma URL, PRD, and generated Admin OpenAPI in that priority order, including filters, table columns, detail drawers, tabs, and operation records.
+description: Generate or adjust standard admin framework pages, sidebar navigation, and routes from an explicit navigation structure, complete Figma URL, PRD, and generated Admin OpenAPI, including filters, tables, detail drawers, tabs, and records.
 ---
 
 # AI 通用后台页面生成 Skill
@@ -20,6 +20,7 @@ description: Generate or adjust standard admin framework list/detail pages from 
 - 表格展示列
 - 详情 Drawer / Modal
 - 操作记录、变更记录、登录记录、审计记录等详情内表格
+- 左侧导航分组、菜单顺序、菜单名称与页面路由
 - 根据完整 Figma 地址还原页面字段、结构和交互
 - 根据 OpenAPI 生成接口接入真实请求
 
@@ -77,6 +78,26 @@ description: Generate or adjust standard admin framework list/detail pages from 
 - 页面内已引用的 `@shared/api/admin/*` 生成函数
 - 相关 feature / widget 名称
 - locale key 与菜单 key
+
+## 左侧导航与路由组织
+
+新增或调整页面、菜单、路由时，先确定是否存在明确的左侧导航说明。导航的分组、层级、顺序、名称和路径按以下优先级决定，低优先级来源不得重排高优先级已经明确的结构：
+
+1. 用户在当前任务中直接提供的导航树、菜单清单、路由表或明确顺序。
+2. 完整可读 Figma 目标中明确展示的左侧导航结构。
+3. 当前任务范围内的 `prd.md`、`PRD.md`、产品说明或导航说明文档。
+4. `src/shared/config/routes.ts` 中已有业务导航结构。
+5. 生成接口只能帮助识别候选业务页面，不能自行决定菜单分组、层级或顺序。
+
+执行约束：
+
+- 高优先级来源给出完整导航时，该导航是闭合集合；不要从接口或现有菜单追加未出现的一级 / 二级菜单。
+- 只给出局部导航调整时，仅修改点名分组及必要路由，不重排未涉及菜单。
+- 导航名称、父子层级、排列顺序、默认入口和明确给出的路径按说明实现；未给路径时使用语义化英文 route key。
+- 同步维护 `src/shared/config/routes.ts`、`src/pages/<route.key>/index.tsx`、菜单 locale key，以及新增一级菜单对应的 `PageLayout.getIconFromKey` / SVG 资产。
+- 页面目录必须与 route key 映射一致；不要只新增页面而遗漏菜单，也不要创建没有页面实现的可点击叶子菜单。
+- 没有任何导航、Figma 或 PRD 顺序说明时，保留现有业务菜单相对顺序；新增业务一级菜单放在 `system` 之前，使“系统”默认保持左侧导航最后一组。
+- 如果高优先级导航明确指定“系统”的位置，则按该结构执行；“系统最后”只是无明确说明时的模板 fallback。
 
 ## 语义化英文
 

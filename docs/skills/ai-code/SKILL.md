@@ -36,7 +36,7 @@ description: Common entry skill for Codex, Claude Code, Cursor, and other AI cod
 | Figma 只读对照、按稿还原、像素级验证、Figma 自定义 SVG 资源 | `docs/skills/figma-rules/SKILL.md` |
 | 生成页面时复用项目组件、正确使用 Arco、抽取相似通用 UI | `docs/skills/component-usage/SKILL.md` |
 | 页面使用图标、侧栏菜单图标、Figma 自定义 SVG、SVG 资产归属决策 | `docs/skills/svg-icon-usage/SKILL.md` |
-| 根据完整 Figma 地址、PRD、生成接口新增或调整后台列表页、搜索条件、表格列、详情 Drawer、详情内操作记录 | `docs/skills/admin-page/SKILL.md` |
+| 根据导航结构、完整 Figma 地址、PRD、生成接口新增或调整左侧菜单、路由、后台列表页、搜索条件、表格列、详情 Drawer、详情内操作记录 | `docs/skills/admin-page/SKILL.md` |
 
 如果任务同时命中多类，先读 `project-rules`，再读对应专项 skill，最后读具体业务 skill。涉及接口或类型生成时补读 `api-generation`；新增或修改页面样式时补读 `css-usage`；页面任务提供完整 Figma 地址时补读 `figma-rules`，并按 `admin-page` 执行 Figma > PRD > 生成接口的信息优先级；涉及菜单图标、按钮图标、空态插画或 SVG 资产时补读 `svg-icon-usage`。
 

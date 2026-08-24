@@ -30,6 +30,7 @@ description: Shared admin-scaffold project rules for AI agents, covering project
 
 - 完整可读的 Figma 地址决定页面可见信息、交互和视觉；标准组件仍保留项目组件 / Arco 结构。
 - 页面生成时的字段、控件类型、顺序、表格列、详情分组与 Tab 按 `admin-page` 的 Figma > PRD > 生成接口优先级执行。
+- 左侧导航和路由按 `admin-page` 的导航专项优先级执行：显式导航结构 / 完整 Figma / PRD 优先于现有配置和接口推导；没有顺序说明时，新增业务菜单放在 `system` 前并保持系统菜单默认末位。
 - Figma / PRD 已明确列出的字段、列、Tab 和操作是闭合集合，未出现项默认不展示；低优先级来源只补绑定、枚举、校验和格式，不追加可见项。
 - 接口缺失字段仍实现 UI 只允许作为 `admin-page` 定义的完整可读 Figma 专项例外；不得扩展为普通 PRD / API 页面的通用规则。
 - 标准组件的状态、反馈、间距观感、色、圆角、字号等用 `use-*` 或组件 props 补齐，不为贴稿拆掉 Arco `Grid` / `Form` / `Table` 等标准结构。

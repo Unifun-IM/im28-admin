@@ -71,6 +71,8 @@ Vite 已配置以下别名：
 
 默认路由配置位于 `src/shared/config/routes.ts`：
 
+模板 fallback 中“系统”固定为左侧导航最后一组，业务一级菜单默认插在它之前。用户提供导航树、完整可读 Figma 侧栏或 PRD 导航说明时，菜单分组、顺序与路由优先按 `docs/skills/admin-page/SKILL.md` 执行，不强制系统末位。
+
 | 菜单 | 路由 | 当前支持 |
 | --- | --- | --- |
 | 首页看板 | `/dashboard` | 空工作台，占位给业务项目扩展 |
@@ -534,7 +536,7 @@ tsc -b && vite build
 
 新增业务模块通常按以下步骤：
 
-1. 在 `src/shared/config/routes.ts` 追加菜单路由。
+1. 按 `admin-page` 的导航优先级在 `src/shared/config/routes.ts` 增加菜单路由；无明确导航说明时，把业务一级菜单插在末位 `system` 之前。
 2. 新增 `src/pages/<route.key>/index.tsx`。
 3. 如有用户交互流程，拆到 `src/features/<feature-name>`。
 4. 如有复合可复用 UI，拆到 `src/widgets/<widget-name>`。

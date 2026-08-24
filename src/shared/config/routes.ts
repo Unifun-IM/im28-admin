@@ -14,14 +14,16 @@ export type IRoute = AuthParams & {
 };
 
 /**
- * 脚手架默认菜单：首页看板 → 系统（后台账号 / 角色 / 系统参数 / 操作日志）
- * 业务菜单在具体项目中按需追加。
+ * 脚手架默认菜单：首页看板 → 业务菜单扩展位 → 系统。
+ * 未提供产品导航结构时，派生项目的业务一级菜单插在 system 之前，
+ * 使系统管理保持左侧导航最后一组。
  */
 export const routes: IRoute[] = [
   {
     name: 'menu.dashboard',
     key: 'dashboard'
   },
+  // 默认末位分组；产品导航或 PRD 明确顺序时按其要求调整。
   {
     name: 'menu.system',
     key: 'system',
