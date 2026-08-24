@@ -57,7 +57,7 @@ src/
   shared/        # api / lib / locale / config / ui
 ```
 
-依赖方向：`pages -> widgets/features -> entities -> shared`。所有 icon SVG 及通用 SVG 统一放在 `src/app/assets`，允许各层直接引用其中的静态资产，但不得借此依赖 `app` 下的代码模块。禁止在 `src/` 下新增遗留根目录 `components`、`containers`、`services`、`utils`、`hooks`。
+依赖方向：`pages -> widgets/features -> entities -> shared`。`src/main.tsx` 属于 app 装配入口，可以导入 `@app` 的样式与公开模块。widget 组合其它 widget、feature 复用其它 feature 时只能通过目标切片的 `index.ts` 公开入口；禁止同层深层导入、循环依赖，以及 widget 与 feature 互相依赖。所有 icon SVG 及通用 SVG 统一放在 `src/app/assets`，允许各层直接引用其中的静态资产，但不得借此依赖 `app` 下的代码模块。禁止在 `src/` 下新增遗留根目录 `components`、`containers`、`services`、`utils`、`hooks`。
 
 ## 内置菜单
 
@@ -84,6 +84,7 @@ src/
 - 颜色、公共样式抽取与 Tailwind / Less 选型见 `docs/skills/css-usage/SKILL.md`。
 - Figma 只读；按稿还原规则见 `docs/skills/figma-rules/SKILL.md`。
 - OpenAPI 生成物 `src/shared/api/admin/**` 禁止手改。
+- ESLint 不检查 OpenAPI 生成目录；生成物问题应修正 OpenAPI 源或生成配置后重新生成，不能为通过 lint 手工修改生成文件。
 - API 与 typings 必须按项目配置执行生成命令，具体流程见 `docs/skills/api-generation/SKILL.md`。
 - 业务页 / feature 直接使用生成函数与 `AdminAPI` 字段名，避免新增业务字段映射层。
 - 普通任务严格限定用户点名范围；OpenAPI 工作流的完整生成与现有调用方同步范围见 `docs/skills/api-generation/SKILL.md`。

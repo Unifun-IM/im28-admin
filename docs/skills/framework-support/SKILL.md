@@ -63,7 +63,7 @@ Vite 已配置以下别名：
 - `@shared`
 - `@`
 
-业务扩展时优先沿用这些别名，保持依赖方向为 `pages -> widgets/features -> entities -> shared`。所有 icon SVG 及通用 SVG 统一从 `@app/assets/*.svg` 引用，这是静态资源例外；其它 `@app/*` 仍遵守 FSD 依赖限制。
+业务扩展时优先沿用这些别名，保持依赖方向为 `pages -> widgets/features -> entities -> shared`。`src/main.tsx` 作为 app 装配入口可以导入 `@app`；widget 组合 widget、feature 复用 feature 时只允许通过目标切片公开入口，禁止深层导入、循环依赖和 widget / feature 互相依赖。所有 icon SVG 及通用 SVG 统一从 `@app/assets/*.svg` 引用，这是静态资源例外；其它 `@app/*` 仍遵守 FSD 依赖限制。
 
 ## 路由与菜单
 

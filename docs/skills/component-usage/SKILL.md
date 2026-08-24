@@ -61,6 +61,7 @@ description: Choose, compose, and extract components when generating or adjustin
 - props 表达稳定差异，不传整页 store、请求实例或大量仅供单页面使用的配置。
 - 保留 loading、disabled、empty、error、权限、暗色和 locale 等已有行为。
 - 在切片 `index.ts` 暴露公共组件和必要类型，调用方通过公开入口引用。
+- widget 组合其它 widget、feature 复用其它 feature 时同样只走目标切片公开入口；不要形成循环依赖或 widget / feature 互相依赖。
 - 迁移本次任务范围内已确认等价的调用方；范围外的相似实现只提示，不自行批量修改。
 - 不因两段 class 偶然相同就抽象；没有稳定语义时保持局部实现。
 

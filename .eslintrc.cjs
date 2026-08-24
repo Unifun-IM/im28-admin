@@ -18,7 +18,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended'
   ],
-  ignorePatterns: ['dist', 'node_modules'],
+  ignorePatterns: ['dist', 'node_modules', 'src/shared/api/admin/**'],
   rules: {
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     'no-restricted-imports': [
@@ -48,7 +48,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['src/app/**/*.{ts,tsx}'],
+      files: ['src/app/**/*.{ts,tsx}', 'src/main.tsx'],
       rules: {
         'no-restricted-imports': 'off'
       }
@@ -86,12 +86,14 @@ module.exports = {
                 group: [
                   '@app/*',
                   '@pages/*',
-                  '@widgets/*',
+                  '@features/*',
+                  '@widgets/*/**',
                   '!@app/assets',
                   '!@app/assets/*.svg',
                   '!@app/assets/*.svg?react'
                 ],
-                message: 'Widgets may only import lower FSD layers.'
+                message:
+                  'Widgets may import lower layers and other widgets through their public entry only.'
               }
             ]
           }
@@ -110,12 +112,13 @@ module.exports = {
                   '@app/*',
                   '@pages/*',
                   '@widgets/*',
-                  '@features/*',
+                  '@features/*/**',
                   '!@app/assets',
                   '!@app/assets/*.svg',
                   '!@app/assets/*.svg?react'
                 ],
-                message: 'Features may only import lower FSD layers.'
+                message:
+                  'Features may import lower layers and other features through their public entry only.'
               }
             ]
           }

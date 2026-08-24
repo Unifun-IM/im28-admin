@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { postV1AdminSystemSettingsGet } from '@shared/api/admin/platform';
+import { setTimeFormatPreference } from '@shared/lib/formatTime';
 
 /**
  * 后台系统参数（AdminAPI.SystemSetting）
@@ -37,6 +38,7 @@ class SystemSettingsStore {
   apply(setting: AdminAPI.SystemSetting | null | undefined) {
     this.setting = setting ?? null;
     this.loaded = true;
+    setTimeFormatPreference(this.timeFormat);
     if (typeof document !== 'undefined' && this.systemName) {
       document.title = this.systemName;
     }
@@ -64,6 +66,7 @@ class SystemSettingsStore {
     this.setting = null;
     this.loaded = false;
     this.loading = false;
+    setTimeFormatPreference('24h');
   }
 }
 

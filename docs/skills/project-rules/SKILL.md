@@ -35,6 +35,14 @@ description: Shared admin-scaffold project rules for AI agents, covering project
 - 标准组件的状态、反馈、间距观感、色、圆角、字号等用 `use-*` 或组件 props 补齐，不为贴稿拆掉 Arco `Grid` / `Form` / `Table` 等标准结构。
 - 普通布局与装饰使用 Tailwind；`preflight: false`；禁止替代 Form / Grid / Table。颜色、公共样式抽取、Tailwind / Less 选型遵守 `docs/skills/css-usage/SKILL.md`。
 
+## FSD 依赖边界
+
+- 基本方向为 `pages -> widgets/features -> entities -> shared`；`app` 和 `src/main.tsx` 负责应用装配。
+- widget 可以组合其它 widget，feature 可以复用其它 feature，但只能从目标切片的 `index.ts` 公开入口导入。
+- 禁止同层切片深层导入和循环依赖；widget 与 feature 不互相依赖，需要共同能力时下沉到 `entities` / `shared`，需要组合时交给 `pages` / `app`。
+- `shared` 保持产品无关，不依赖 `entities` 或更高层；全局状态通过上层参数、配置函数或 Provider 注入 shared 能力。
+- `src/app/assets` 是静态 SVG 资产例外，各层可以从 `@app/assets/*` 引用 SVG，但不得引用其它 app 内部模块。
+
 ## Figma 与设计稿
 
 Figma 只读、截图对照、非标准组件像素校验、Figma 自定义 SVG 资源等规则已收拢到 `docs/skills/figma-rules/SKILL.md`。
@@ -69,5 +77,6 @@ OpenAPI 工作流的范围例外：
 
 - 生成目录、索引和 typings 保留 `npm run openapi` 产生的完整确定性差异，不按点名页面裁剪。
 - 有具体 PRD、完整可读 Figma 或明确点名页面 / 路由 / 接口 / 文件时，业务代码只同步该目标及必要直接依赖。
-- 没有这些明确目标时，遵循现有路由和 API 调用关系，同步接口变化直接影响的现有代码；新增接口按现有页面模式生成对应页面。
+- 没有这些明确目标时，遵循现有路由和 API 调用关系，同步接口变化直接影响的现有代码。
+- 没有调用方的新增接口，只有在能够明确识别为可独立落页的新业务能力时才生成页面；辅助、动作、上传、详情或记录接口不单独创建路由页面。
 - 该例外不授权修改无调用关系的页面、同类问题或无关工程债。
