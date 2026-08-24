@@ -5,22 +5,10 @@ alwaysApply: true
 
 # Admin OpenAPI 生成物（不可手改）
 
-`src/shared/api/admin/**`（含 `auth.ts`、`users.ts`、`typings.d.ts`、`index.ts` 等）全部由 `npm run openapi` 从远程 OpenAPI 生成。
+通用入口：`docs/skills/ai-code/SKILL.md`。
 
-## 必须遵守
+规则正文已收拢到：
 
-1. **禁止**对该目录下任何文件做编辑、格式化「顺手改」、重命名、删减注释或改函数签名。
-2. 需要新接口 / 改契约：更新远端 OpenAPI 文档后执行 `npm run openapi` 重新生成。
-3. 业务直接使用生成函数与 `AdminAPI` 字段（页面 Form/Table/state **不做字段映射**）；组合调用写在 `features` / `pages`，**不要**改生成文件。无 OpenAPI 的页用 `ApiNotReady`。
-4. 手写请求基础设施仅限：`src/shared/api/request.ts`（及测试）；勿把业务逻辑塞进 `admin/`。
+- `docs/skills/project-rules/SKILL.md` 的「Admin OpenAPI 生成物」
 
-## 反例 / 正例
-
-```ts
-// ❌ 在 admin/auth.ts 里加封装或改返回类型
-// ❌ 为过 lint 去改 admin/typings.d.ts
-
-// ✅ import { postV1AdminAuthLogin } from '@shared/api/admin/auth'
-// ✅ 在 login feature 里处理 next_step / 存 token
-// ✅ 文档变更后：npm run openapi
-```
+Cursor 必须保持本规则 alwaysApply；不要在 `.cursor/rules` 里复制正文，避免与 Codex / Claude Code 规则漂移。

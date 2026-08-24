@@ -23,6 +23,19 @@
 
 同内容：`.cursor/rules/arco-first.mdc`、`.cursor/rules/figma-pixel-verify.mdc`、`.cursor/rules/api-keep-ui.mdc`、`.cursor/rules/task-scope.mdc`（均 `alwaysApply`）。
 
+## AI Code Tools Skill
+
+Codex / Claude Code / Cursor 共用入口：
+
+- `docs/skills/ai-code/SKILL.md`
+
+该入口会按任务类型路由到：
+
+- 通用项目规则：`docs/skills/project-rules/SKILL.md`
+- 后台列表 / 详情页生成：`docs/skills/admin-page/SKILL.md`
+
+工具侧只做薄引用，避免重复维护：Codex 使用 `AGENTS.md`，Cursor 使用 `.cursor/rules/*.mdc`，Claude Code 使用 `.claude/CLAUDE.md`。
+
 ## 参考基线：Arco Design Pro
 
 本仓库能力源自 [Arco Design Pro](https://github.com/arco-design/arco-design-pro) 的 **Vite 精简模板**（`arco-design-pro-vite`），官方站点 [pro.arco.design](https://pro.arco.design)。

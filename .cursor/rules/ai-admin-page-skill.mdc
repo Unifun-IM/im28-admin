@@ -1,0 +1,14 @@
+---
+description: 后台列表/详情页生成时读取 docs/skills/admin-page/SKILL.md；PRD 优先，其次脚本生成接口
+alwaysApply: true
+---
+
+# AI 后台页面生成 Skill
+
+页面生成通用入口：`docs/skills/ai-code/SKILL.md`。
+
+规则正文已收拢到：
+
+- `docs/skills/admin-page/SKILL.md`
+
+Cursor 必须保持本规则 alwaysApply；不要在 `.cursor/rules` 里复制正文，避免与 Codex / Claude Code 规则漂移。

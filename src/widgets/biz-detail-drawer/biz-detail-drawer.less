@@ -1,0 +1,139 @@
+.use-biz-detail-drawer {
+  .arco-drawer-header {
+    height: 56px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--color-border-2);
+    background: var(--color-bg-2);
+  }
+
+  .arco-drawer-title {
+    color: var(--color-text-1);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+
+  .arco-drawer-close-icon {
+    color: var(--color-text-3);
+
+    &:hover {
+      color: var(--color-text-1);
+      background: var(--color-fill-2);
+    }
+  }
+
+  .arco-drawer-body {
+    padding: 0;
+    background: var(--color-bg-1);
+  }
+
+  .arco-drawer-footer {
+    border-top: 1px solid var(--color-border-2);
+    background: var(--color-bg-2);
+  }
+}
+
+.use-biz-detail-drawer-body {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 16px 20px 20px;
+  overflow: auto;
+}
+
+.use-biz-detail-tabs {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+
+  > .arco-tabs-header {
+    flex-shrink: 0;
+    margin: -4px 0 16px;
+    border-bottom: 1px solid var(--color-border-2);
+  }
+
+  .arco-tabs-header-title {
+    height: 36px;
+    margin: 0 24px 0 0;
+    padding: 0;
+    color: var(--color-text-2);
+    font-size: 14px;
+    line-height: 36px;
+
+    &:hover {
+      color: rgb(var(--primary-6));
+    }
+  }
+
+  .arco-tabs-header-title-active {
+    color: rgb(var(--primary-6));
+    font-weight: 500;
+  }
+
+  > .arco-tabs-content {
+    min-height: 0;
+    flex: 1;
+  }
+}
+
+.use-biz-detail-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.use-biz-detail-descriptions {
+  .arco-descriptions-title {
+    margin: 0 0 8px;
+    color: var(--color-text-1);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+  }
+
+  .arco-descriptions-table {
+    overflow: hidden;
+    border-color: var(--color-border-2);
+    border-radius: 8px;
+    background: var(--color-bg-2);
+  }
+
+  .arco-descriptions-item-label,
+  .arco-descriptions-item-value {
+    min-height: 40px;
+    padding: 10px 12px;
+    border-color: var(--color-border-2) !important;
+    font-size: 12px;
+    line-height: 20px;
+    vertical-align: middle;
+  }
+
+  .arco-descriptions-item-label {
+    width: 128px;
+    background: var(--color-fill-1);
+    color: var(--color-text-3);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .arco-descriptions-item-value {
+    color: var(--color-text-1);
+    word-break: break-word;
+  }
+}
+
+.use-biz-detail-extra {
+  margin-top: 16px;
+}
+
+.use-biz-detail-operation-records {
+  min-width: 0;
+}
+
+.use-biz-detail-operation-title {
+  margin-bottom: 8px;
+  color: var(--color-text-1);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+}

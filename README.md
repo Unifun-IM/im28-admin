@@ -13,6 +13,10 @@
 
 **全局基本准则：** 优先采用 Arco Design 标准组件；Figma 约束交互细节；非标准组件强制像素级布局（详见 `AGENTS.md`）。
 
+完整能力梳理见 [`docs/skills/scaffold-support/SKILL.md`](docs/skills/scaffold-support/SKILL.md)。
+
+AI code 工具统一入口见 [`docs/skills/ai-code/SKILL.md`](docs/skills/ai-code/SKILL.md)；专项规则见 [`docs/skills/project-rules/SKILL.md`](docs/skills/project-rules/SKILL.md)、[`docs/skills/admin-page/SKILL.md`](docs/skills/admin-page/SKILL.md)。Codex / Cursor / Claude Code 入口分别见 `AGENTS.md`、`.cursor/rules/*.mdc`、`.claude/CLAUDE.md`。
+
 ## 技术栈
 
 - React 18 + TypeScript + Vite 5
