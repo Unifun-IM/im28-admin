@@ -40,7 +40,7 @@ export default function SettingsPageShell({
     <Card
       loading={loading}
       bordered={false}
-      className="!rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]"
+      className="use-session-settings-shell !rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]"
       bodyStyle={{ padding: 12 }}
     >
       <div className="mb-0 flex items-center justify-between">

@@ -49,6 +49,8 @@ export type BizDetailTab = {
 export type BizDetailOperationRecordsProps<T extends Record<string, unknown>> = {
   /** Tab 标题，默认 common.operationRecords */
   title?: React.ReactNode;
+  /** Tab 内容区标题；默认不重复展示 Tab 标题 */
+  contentTitle?: React.ReactNode;
   data?: T[];
   loading?: boolean;
   columns: TableColumnProps<T>[];
@@ -151,7 +153,7 @@ function BizDetailDescriptions({
 }
 
 function BizDetailOperationTable<T extends Record<string, unknown>>({
-  title,
+  contentTitle,
   data,
   loading,
   columns,
@@ -161,8 +163,8 @@ function BizDetailOperationTable<T extends Record<string, unknown>>({
 }: BizDetailOperationRecordsProps<T>) {
   return (
     <div className="use-biz-detail-operation-records">
-      {title ? (
-        <div className="use-biz-detail-operation-title">{title}</div>
+      {contentTitle ? (
+        <div className="use-biz-detail-operation-title">{contentTitle}</div>
       ) : null}
       <Table
         {...tableProps}
