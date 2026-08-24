@@ -281,7 +281,7 @@ Vite 已配置以下别名：
 - `total <= 15` 时隐藏分页
 - 普通列默认 `ellipsis`
 - 操作列自动识别并默认 `fixed: right`
-- 操作列默认居中，默认宽度 108
+- 操作列默认居中；省略 `width` 时组件兜底为 108，页面生成仍须按 `component-usage` 的列宽分析显式计算，不能把 108 当作统一标准
 
 ### 操作与状态组件
 
@@ -305,7 +305,9 @@ Vite 已配置以下别名：
 - 纯详情展示：传 `fields` 或 `sections` 即可渲染基础信息。
 - 多分组详情：多个 `sections` 会按标题分组展示。
 - 多 Tab 详情：传 `tabs` 可追加自定义 Tab 内容。
+- 对象摘要：传 `summary` 在 Tab 上方展示头像、名称与状态等摘要信息。
 - 详情 + 操作记录：传 `operationRecords` 会自动追加「操作记录」Tab。
+- 详情异步请求：传 `loading` 使用 Arco `Spin` 保持 Drawer 内容结构稳定。
 - 操作记录表格复用 `.use-biz-detail-table`，保持详情内表格外框、表头、单元格网格与现有组件样式一致。
 - 默认 Drawer 宽度 720px，默认无 footer，适合只读详情场景；需要底部操作时可透传 Arco `Drawer` 的 `footer`。
 

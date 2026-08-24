@@ -79,6 +79,8 @@ export type BizDetailDrawerProps<T extends Record<string, unknown>> = Omit<
   defaultActiveTab?: string;
   onTabChange?: (key: string) => void;
   loading?: boolean;
+  /** Tabs / 详情内容上方的对象摘要，如头像、名称和状态。 */
+  summary?: React.ReactNode;
   operationRecords?: BizDetailOperationRecordsProps<T>;
   /** 详情底部扩展内容，如审计说明、外链等 */
   extra?: React.ReactNode;
@@ -190,6 +192,7 @@ export default function BizDetailDrawer<T extends Record<string, unknown>>({
   defaultActiveTab,
   onTabChange,
   loading = false,
+  summary,
   operationRecords,
   extra,
   className,
@@ -253,6 +256,9 @@ export default function BizDetailDrawer<T extends Record<string, unknown>>({
     >
       <Spin loading={loading} className="use-biz-detail-drawer-spin">
         <div className="use-biz-detail-drawer-body">
+          {summary ? (
+            <div className="use-biz-detail-summary">{summary}</div>
+          ) : null}
           {shouldRenderTabs ? (
             <Tabs
               className="use-biz-detail-tabs"
