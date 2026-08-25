@@ -227,7 +227,7 @@ API 与行为以 `package.json` 中当前安装版本、包内 TypeScript 类型
 - 多分组详情：传多个 `sections`，不用为了普通分组强行开 Tab。
 - 多类信息或多接口：传 `tabs`，或同时传 `operationRecords` 自动追加操作记录 Tab。
 - 需要在 Tab 上方展示头像、名称、状态等对象摘要时传 `summary`，不要把摘要重复塞进 Descriptions。
-- 默认宽度 720，默认无 footer；需要编辑/确认流程时再传 footer。
+- 默认宽度 `50%`，默认无 footer；需要编辑/确认流程时再传 footer。
 
 推荐形态：
 

@@ -313,7 +313,7 @@ Vite 已配置以下别名：
 - 操作记录 / 关联列表表格复用 `.use-biz-detail-table`（`src/shared/ui/biz-detail-table.less`）：外框 8px 上下圆角一致，分页在框外；手写 Table 须 import 该 less 并加 className。
 - 关联列表 Drawer 使用 `@widgets/biz-relation-list-drawer`；Timeline 操作日志使用 `@widgets/biz-operation-timeline`。
 - 标准表单 Modal 壳使用 `use-biz-form-modal`；字段复制 / 链接行使用 `CopyValue` / `DetailLinkRow`。
-- 默认 Drawer 宽度 720px，默认无 footer，适合只读详情场景；需要底部操作时可透传 Arco `Drawer` 的 `footer`。
+- 默认 Drawer 宽度 `50%`，默认无 footer，适合只读详情场景；需要底部操作时可透传 Arco `Drawer` 的 `footer`。
 
 ## API 与 OpenAPI
 

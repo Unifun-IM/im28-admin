@@ -199,7 +199,7 @@ export default function BizDetailDrawer<T extends Record<string, unknown>>({
   extra,
   className,
   wrapClassName,
-  width = 720,
+  width = '50%',
   footer = null,
   ...drawerProps
 }: BizDetailDrawerProps<T>) {
