@@ -5,7 +5,8 @@
  * 1. Arco 默认 th / header 吃 --border-radius-medium（本项目 12px），外框是 8px；
  *    必须清掉内部圆角，否则角上会露白缝。
  * 2. 外框已有 border，单元格只保留「右 + 底」网格线；末行去底边、末列去右边，
- *    避免与外框叠成双线。scroll 模式下 body 表不一定包在 content-inner 里。
+ *    避免与外框叠成双线。
+ * 3. 关联列表默认不要传 scroll.x：Arco 会在表底留横向滚动条槽，看起来像多一条底边。
  */
 .use-biz-detail-table.arco-table {
   .arco-table-container {
@@ -74,10 +75,22 @@
     border-right: none !important;
   }
 
-  /* scroll 时 body 独立成表，不一定有 content-inner */
-  .arco-table-body tbody > .arco-table-tr:last-child > .arco-table-td,
-  .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td {
+  /* 末行贴外框底边；选择器尽量宽，兼容 scroll 拆表 */
+  .arco-table-tr:last-child > .arco-table-td {
     border-bottom: none !important;
+  }
+
+  /*
+   * 若业务仍传入 scroll.x：隐藏表体横向滚动条占位高度，
+   * 否则滚动条槽会在末行与外框底边之间挤出一条缝 + 双线。
+   * 仍可用触控板 / Shift+滚轮横向滚动。
+   */
+  .arco-table-body {
+    scrollbar-width: none;
+  }
+
+  .arco-table-body::-webkit-scrollbar {
+    height: 0;
   }
 
   .arco-table-th-item {
