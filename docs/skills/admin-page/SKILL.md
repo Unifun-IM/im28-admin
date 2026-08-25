@@ -260,7 +260,7 @@ Figma / PRD 没有明确控件类型时，才使用以下默认映射：
 - 使用 `BizDetailDrawer` 的 `operationRecords`。
 - 关联列表优先 `BizRelationListDrawer`；稿面 Timeline 日志优先 `BizOperationTimeline`。
 - 或手写 Arco `Table` 时：`import '@shared/ui/biz-detail-table.less'` + `className="use-biz-detail-table"`。
-- 圆角作用在 `.arco-table-container`（上下均为 8px），分页在圆角框外；禁止裸 Table 导致仅顶角圆角、底角直角。
+- 圆角与边框对齐列表 `use-biz-table`：外框在 `.arco-table-container`（8px），表体只保留列分隔；分页在框外；禁止裸 Table。
 - 表格列仍按完整可读 Figma > PRD > 接口响应推导。
 - 时间字段使用 `formatDateTime`。
 - 操作内容、备注、原因等长文本使用省略 + Tooltip。

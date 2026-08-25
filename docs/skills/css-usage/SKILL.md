@@ -72,16 +72,15 @@ description: "Apply styling when generating or changing admin UI in this repo: u
 - `global.less` 不承载只服务于某个具体业务页面的样式。跨页面公共组件使用的语义化 `use-*` 修饰类属于共享组件样式，例如 `use-biz-detail-table`，可以放入 `global.less`。
 - 不使用 `@apply` 复制一套平行于 Tailwind 的工具类；重复布局优先抽组件或 class 常量。
 
-### 详情 / Modal 内表格圆角（`use-biz-detail-table`）
+### 详情 / Modal 内表格（`use-biz-detail-table`）
 
-Drawer、Modal 内的关联列表或记录表格不要依赖 Arco 默认「仅表头顶角圆角」。统一使用：
+对齐列表 `use-biz-table` 的边框策略，不要依赖 Arco 默认「仅表头顶角圆角」：
 
 - 样式：`src/shared/ui/biz-detail-table.less`
-- 用法：先 `import '@shared/ui/biz-detail-table.less'`，再给 `Table` 加 `className="use-biz-detail-table"`
-- 效果：`.arco-table-container` 外框 `border + border-radius: 8px + overflow: hidden`，**上下圆角一致**；分页在圆角框外
-- 坑：Arco 默认 `th` / `header` 吃 `--border-radius-medium`（本项目 **12px**），外框是 **8px**。必须在该 less 里清掉内部圆角（含 `content-scroll` 伪元素），**不要**给 `.arco-table-body` 写 `border-radius: inherit`，否则角上会露白缝，像框内多了一圈 padding。
-- 坑：外框已有 border，单元格只保留右/底网格线；末行去底、末列去右。`scroll` 时 body 独立成表，末行选择器要用 `.arco-table-tr:last-child`。
-- 坑：详情/关联列表**默认不要**传 `scroll.x`。Arco 会拆表头表体并在底部留横向滚动条槽，与外框底边形成双线；确需横向滚动时再显式传，并依赖 `biz-detail-table.less` 隐藏滚动条占位高度。
+- 用法：`import '@shared/ui/biz-detail-table.less'` + `className="use-biz-detail-table"`
+- 外框：`.arco-table-container` 自带 `border + 8px 圆角 + overflow:hidden`（列表外框由 Card 提供，详情表自己画）
+- 单元格：清掉 Arco 默认边框/圆角；表头保留底边 + 列分隔；**表体只保留列分隔、无行底边**（底边交给外框，避免末行双线）
+- 分页在圆角框外；关联列表默认不传 `scroll.x`（同列表，确需再显式传）
 
 禁止在业务页再复制一份局部圆角 / 网格线样式。
 

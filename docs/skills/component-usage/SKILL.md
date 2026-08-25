@@ -262,13 +262,13 @@ API 与行为以 `package.json` 中当前安装版本、包内 TypeScript 类型
 Drawer / Modal 内的关联列表、操作记录、变更记录、登录记录、审计记录等表格统一使用详情表样式，**不要**用裸 Arco Table（否则只有表头顶角圆角，底角会被裁切成直角）：
 
 - 首选 `BizDetailDrawer.operationRecords`（内部已带样式）。
-- 关联列表（好友 / 群聊 / 成员等）优先 `BizRelationListDrawer`（默认不设 `scroll.x`，避免表底滚动条槽造成双线）。
+- 关联列表（好友 / 群聊 / 成员等）优先 `BizRelationListDrawer`（默认不设 `scroll.x`，与列表一致）。
 - 稿面为 Timeline 的操作日志优先 `BizOperationTimeline`。
 - 手写 Arco `Table` 时：
   1. `import '@shared/ui/biz-detail-table.less'`
   2. `className="use-biz-detail-table"`
 - 样式文件：`src/shared/ui/biz-detail-table.less`
-- 视觉约定：`.arco-table-container` 外框 `8px` 圆角 + 边框，**上下圆角一致**；分页在圆角框外。须清掉 Arco 默认 12px 表头圆角，避免角上露白。
+- 视觉约定：对齐 `use-biz-table`——清 Arco 默认圆角/边框；外框 8px；表体只保留列分隔；分页在框外。
 - 不在 Drawer 内嵌套 `BizListPage`，避免卡片套卡片和分页/筛选语义混乱。
 
 ```tsx
