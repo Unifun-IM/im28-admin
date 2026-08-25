@@ -442,24 +442,27 @@
   }
 }
 
-/* 筛选下拉：Figma 602:35141 多选 / 602:35100 单选 — 圆角 12 + 内边距 8 */
+/* 筛选下拉：Figma 602:35141 多选 / 602:35100 单选 — 弹层圆角；选项铺满避免缩成胶囊 */
 .arco-select-popup:has(.use-biz-filter-dropdown) {
-  padding: 8px !important;
+  padding: 4px !important;
   border: none !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .use-biz-filter-dropdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 120px;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
   .arco-select-popup-inner {
     max-height: 280px;
     padding: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
   }
 
   /* 多选内嵌搜索 */
@@ -485,6 +488,9 @@
   }
 
   .arco-select-option-wrapper {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
     padding: 0 !important;
   }
 
@@ -492,10 +498,14 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
     min-height: 32px;
     height: 32px;
-    margin: 0;
-    border-radius: 8px;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border-radius: 6px;
     line-height: 22px;
     font-size: 14px;
     color: var(--color-text-1, #1d2129);
@@ -525,7 +535,7 @@
     align-items: center;
     gap: 4px;
     height: 32px;
-    padding: 0 4px 0 0;
+    padding: 0 8px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -544,7 +554,7 @@
   .use-biz-filter-select-clear {
     height: 22px;
     margin-top: 0;
-    padding: 0;
+    padding: 0 8px;
     font-size: 14px;
     line-height: 22px;
     color: rgb(var(--primary-6));
@@ -557,7 +567,13 @@
   }
 }
 
-/* 多选：选中态只靠 checkbox，行底不高亮（Figma 602:35141） */
+/* 多选：需要更宽以容纳搜索 / 全选；选中态只靠 checkbox */
+.arco-select-popup-multiple:has(.use-biz-filter-dropdown) {
+  .use-biz-filter-dropdown {
+    min-width: 160px;
+  }
+}
+
 .arco-select-popup-multiple .use-biz-filter-dropdown {
   .arco-select-option-selected {
     background-color: transparent !important;
