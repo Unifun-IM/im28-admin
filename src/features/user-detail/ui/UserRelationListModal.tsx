@@ -8,6 +8,7 @@ import { AvatarNameCell } from '@widgets/biz-list';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 import { imLabel } from '@shared/lib/imLabels';
+import '@shared/ui/biz-detail-table.less';
 
 export type UserRelationListModalProps = {
   visible: boolean;
@@ -210,6 +211,7 @@ export default function UserRelationListModal({
     >
       {isFriends ? (
         <Table
+          className="use-biz-detail-table"
           loading={loading}
           rowKey={(row) =>
             row.user?.user_id ||
@@ -233,6 +235,7 @@ export default function UserRelationListModal({
         />
       ) : (
         <Table
+          className="use-biz-detail-table"
           loading={loading}
           rowKey={(row) => row.group?.group_id || String(Math.random())}
           data={groups}

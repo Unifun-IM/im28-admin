@@ -1,9 +1,17 @@
-/* 详情 Drawer / Modal 内 Table — 外框 + 单元格网格（全局复用） */
+/* 详情 Drawer / Modal 内 Table — 外框圆角 + 单元格网格（全局复用）
+ * 分页在外，圆角只作用在 .arco-table-container，上下圆角一致。
+ */
 .use-biz-detail-table.arco-table {
   .arco-table-container {
     border: 1px solid var(--color-border-2);
     border-radius: 8px;
     overflow: hidden;
+  }
+
+  /* 横向滚动时 Arco 会拆出 content-scroll；同样裁切圆角 */
+  .arco-table-content-scroll,
+  .arco-table-body {
+    border-radius: inherit;
   }
 
   .arco-table-th {
@@ -43,5 +51,10 @@
 
   .arco-table-th-item {
     padding: 0;
+  }
+
+  /* 分页在圆角框外，保持默认间距 */
+  .arco-pagination {
+    margin-top: 16px;
   }
 }
