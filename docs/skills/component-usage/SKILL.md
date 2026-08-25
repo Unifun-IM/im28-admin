@@ -30,6 +30,14 @@ description: Choose, compose, and extract components when generating or adjustin
 - 检查当前页面同域的 feature / widget，确认是否已有未统一导出的可复用实现。
 - 阅读候选组件 props 和现有调用方，确认其加载、空态、权限、主题和响应式行为。
 
+详情组件必须额外做“同一实体”发现：
+
+1. 先确定详情对象的实体类型和稳定 ID，例如用户 + `user_id`、群组 + `group_id`，不能把“用户查询页详情”“用户日志页详情”当成两个实体。
+2. 搜索 `<Entity>DetailDrawer` / `<Entity>DetailModal`、相关详情接口调用方、其它列表的详情操作，以及 `widgets` / `features` 公开入口。
+3. 同一实体从查询、日志、黑名单、白名单、关联列表等不同页面进入时，默认必须复用同一个实体详情组件；页面只保存目标 ID 并传入 `visible`、`entityId`、`onClose`。
+4. 入口需要默认落在日志、关系等不同 Tab 时，通过 `defaultTab` / `initialView` 等语义化 props 表达，不复制 Drawer、详情请求、字段数组、Tab 或样式。
+5. Figma / PRD 明确要求同一实体在某入口展示额外信息时，优先扩展公共组件的可选 props / slots；只有对象契约、权限或交互流程本质不同，且无法共享详情主体时，才建立独立组件。
+
 当前常用项目组件：
 
 | 需求 | 项目组件 |
@@ -249,6 +257,8 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 - 需要在 Tab 上方展示头像、名称、状态等对象摘要时传 `summary`，不要把摘要重复塞进 Descriptions。
 - 默认宽度 `50%`，默认无 footer；需要编辑/确认流程时再传 footer。
 
+`BizDetailDrawer` 是通用详情积木，不代表每个页面都应直接各拼一套 Drawer。同一业务实体已经存在跨页面详情组件时，页面必须优先使用该实体组件；实体组件内部再复用 `BizDetailDrawer`。例如用户查询、用户日志、黑名单和白名单应共用一个 `UserDetailDrawer`，入口差异只通过目标 ID 和默认 Tab 表达。
+
 推荐形态：
 
 ```tsx
@@ -276,6 +286,7 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 - 多种记录或关联信息时用语义化英文 tab key，如 `operationRecords`、`changeRecords`、`loginRecords`、`relatedUsers`。
 - 字段空值交给 `BizDetailDrawer` 默认展示 `--`，不要在每个字段重复写兜底，除非该字段有特殊展示。
 - Drawer 打开时拉详情；关闭时清理当前对象和临时状态。
+- 同一实体的详情 API、字段、Tab、空值、状态和样式只维护在实体详情组件中；接口变化时修改该组件，不在每个调用页面重复同步一套实现。
 
 ## 详情内表格
 
@@ -340,6 +351,7 @@ import '@shared/ui/biz-detail-table.less';
 - 不绕过项目已有组件直接复制其 Arco 组合和样式。
 - 不用 Tailwind 替代 Arco `Form`、`Grid`、`Table`、`Button`。
 - 不为单页复制 `biz-list`、`biz-detail-drawer` 已有能力。
+- 不为同一实体的不同来源页面创建平行详情 Drawer；先复用实体详情组件，再用 props 表达入口差异。
 - 不让相似通用 UI 继续散落在多个业务页面；确认稳定语义后按 FSD 抽取。
 - 不把操作记录表格做成普通列表页嵌进 Drawer。
 - 不手改 `src/shared/api/admin/**` 生成物。
