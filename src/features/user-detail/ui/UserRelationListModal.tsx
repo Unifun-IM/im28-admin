@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Drawer, Table } from '@arco-design/web-react';
 import {
   postV1AdminUsersContactsList
 } from '@shared/api/admin/users';
 import { postV1AdminGroupsListByUser } from '@shared/api/admin/groups';
 import { AvatarNameCell } from '@widgets/biz-list';
+import { BizRelationListDrawer } from '@widgets/biz-relation-list-drawer';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 import { imLabel } from '@shared/lib/imLabels';
-import '@shared/ui/biz-detail-table.less';
 
 export type UserRelationListModalProps = {
   visible: boolean;
@@ -79,6 +78,18 @@ export default function UserRelationListModal({
     fetchData(1, pageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, mode, userId]);
+
+  const pagination = {
+    current: page,
+    pageSize,
+    total,
+    showTotal: true as const,
+    onChange: (p: number, s: number) => {
+      setPage(p);
+      setPageSize(s);
+      fetchData(p, s);
+    }
+  };
 
   const friendColumns = [
     {
@@ -196,64 +207,41 @@ export default function UserRelationListModal({
     }
   ];
 
+  if (isFriends) {
+    return (
+      <BizRelationListDrawer
+        visible={visible}
+        title={t['userDetail.relation.friendsTitle']}
+        onClose={onClose}
+        loading={loading}
+        data={friends as unknown as Record<string, unknown>[]}
+        columns={friendColumns as never}
+        rowKey={(row) =>
+          String(
+            (row as AdminAPI.AdminUserContactWrap).user?.user_id ||
+              (row as AdminAPI.AdminUserContactWrap).friend?.friend_user_id ||
+              Math.random()
+          )
+        }
+        pagination={pagination}
+      />
+    );
+  }
+
   return (
-    <Drawer
-      width={880}
-      title={
-        isFriends
-          ? t['userDetail.relation.friendsTitle']
-          : t['userDetail.relation.groupsTitle']
-      }
+    <BizRelationListDrawer
       visible={visible}
-      onCancel={onClose}
-      footer={null}
-      unmountOnExit
-    >
-      {isFriends ? (
-        <Table
-          className="use-biz-detail-table"
-          loading={loading}
-          rowKey={(row) =>
-            row.user?.user_id ||
-            row.friend?.friend_user_id ||
-            String(Math.random())
-          }
-          data={friends}
-          columns={friendColumns}
-          scroll={{ x: 780 }}
-          pagination={{
-            current: page,
-            pageSize,
-            total,
-            showTotal: true,
-            onChange: (p, s) => {
-              setPage(p);
-              setPageSize(s);
-              fetchData(p, s);
-            }
-          }}
-        />
-      ) : (
-        <Table
-          className="use-biz-detail-table"
-          loading={loading}
-          rowKey={(row) => row.group?.group_id || String(Math.random())}
-          data={groups}
-          columns={groupColumns}
-          scroll={{ x: 780 }}
-          pagination={{
-            current: page,
-            pageSize,
-            total,
-            showTotal: true,
-            onChange: (p, s) => {
-              setPage(p);
-              setPageSize(s);
-              fetchData(p, s);
-            }
-          }}
-        />
-      )}
-    </Drawer>
+      title={t['userDetail.relation.groupsTitle']}
+      onClose={onClose}
+      loading={loading}
+      data={groups as unknown as Record<string, unknown>[]}
+      columns={groupColumns as never}
+      rowKey={(row) =>
+        String(
+          (row as AdminAPI.AdminUserGroupWrap).group?.group_id || Math.random()
+        )
+      }
+      pagination={pagination}
+    />
   );
 }

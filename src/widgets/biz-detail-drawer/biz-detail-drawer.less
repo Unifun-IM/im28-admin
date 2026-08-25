@@ -1,0 +1,249 @@
+.use-biz-detail-drawer {
+  .arco-drawer-header {
+    height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--color-border-2);
+    background: var(--color-bg-2);
+  }
+
+  .arco-drawer-header-title {
+    color: var(--color-text-1);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+  }
+
+  .arco-drawer-close-icon {
+    color: var(--color-text-3);
+
+    &:hover {
+      color: var(--color-text-1);
+      background: var(--color-fill-2);
+    }
+  }
+
+  .arco-drawer-scroll {
+    overflow: hidden;
+  }
+
+  .arco-drawer-content {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+    background: var(--color-bg-1);
+  }
+
+  .arco-drawer-footer {
+    padding: 16px 21px 21px;
+    border-top: 1px solid var(--color-border-2);
+    background: var(--color-bg-2);
+  }
+}
+
+.use-biz-detail-drawer-body {
+  box-sizing: border-box;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 16px;
+  overflow: auto;
+}
+
+.use-biz-detail-drawer-spin {
+  display: block;
+  height: 100%;
+  min-height: 0;
+
+  > .arco-spin-children {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+  }
+}
+
+.use-biz-detail-summary {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+.use-biz-detail-tabs {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* Arco Tabs 直接子节点是 header-nav，不是 header */
+  > .arco-tabs-header-nav {
+    z-index: 2;
+    flex-shrink: 0;
+    margin: 0 0 12px;
+    background: var(--color-bg-1);
+  }
+
+  .arco-tabs-header,
+  .arco-tabs-header-nav,
+  .arco-tabs-header-scroll {
+    margin-left: 0;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .arco-tabs-header-nav::before {
+    height: 1px;
+    background-color: var(--color-border-2);
+  }
+
+  .arco-tabs-header-title {
+    position: relative;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 24px 0 0;
+    padding: 9px 0;
+    background-color: transparent !important;
+    color: var(--color-text-2);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+
+    &::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: transparent;
+      content: '';
+      transition: background-color 0.15s ease;
+    }
+
+    &:hover {
+      background-color: transparent !important;
+      color: rgb(var(--primary-6));
+    }
+  }
+
+  .arco-tabs-header-title:first-child {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .arco-tabs-header-title:last-child {
+    margin-right: 0;
+  }
+
+  .arco-tabs-header-title-text {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+
+    &::before {
+      background-color: transparent !important;
+    }
+  }
+
+  .arco-tabs-header-title-active,
+  .arco-tabs-header-title-active:hover {
+    background-color: transparent !important;
+    color: rgb(var(--primary-6));
+    font-weight: 500;
+
+    &::after {
+      background: rgb(var(--primary-6));
+    }
+  }
+
+  .arco-tabs-header-ink {
+    display: none !important;
+  }
+
+  > .arco-tabs-content {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+  }
+
+  .arco-tabs-content-item {
+    padding: 0;
+  }
+}
+
+.use-biz-detail-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.use-biz-detail-descriptions {
+  .arco-descriptions-title {
+    margin: 0 0 12px;
+    color: var(--color-text-1);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21px;
+  }
+
+  .arco-descriptions-body {
+    overflow: hidden;
+    border: 1px solid var(--color-border-2);
+    border-radius: 8px;
+    background: var(--color-bg-2);
+  }
+
+  .arco-descriptions-table {
+    background: var(--color-bg-2);
+  }
+
+  .arco-descriptions-item-label,
+  .arco-descriptions-item-value {
+    min-height: 32px;
+    padding: 5px 12px;
+    border-color: var(--color-border-2) !important;
+    font-size: 12px;
+    line-height: 20px;
+    vertical-align: middle;
+  }
+
+  .arco-descriptions-item-label {
+    width: 120px;
+    min-width: 120px;
+    background: var(--color-fill-1);
+    color: var(--color-text-3);
+    font-weight: 500;
+    line-height: 22px;
+    white-space: nowrap;
+  }
+
+  .arco-descriptions-item-value {
+    color: var(--color-text-1);
+    font-size: 14px;
+    line-height: 21px;
+    word-break: break-word;
+  }
+}
+
+.use-biz-detail-extra {
+  margin-top: 16px;
+}
+
+.use-biz-detail-operation-records {
+  min-width: 0;
+}
+
+.use-biz-detail-operation-title {
+  margin-bottom: 8px;
+  color: var(--color-text-1);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+}

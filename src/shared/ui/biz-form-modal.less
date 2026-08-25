@@ -1,0 +1,90 @@
+/**
+ * 标准业务表单 Modal 壳 — 圆角 12 / header·footer 48 / 语义色
+ * 用法：Modal className="use-biz-form-modal"，成功态再加 "is-success"
+ */
+.arco-modal.use-biz-form-modal {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-border-1);
+
+  .arco-modal-header {
+    height: 48px;
+    padding: 0 24px;
+    background: var(--color-bg-1);
+    border-bottom: 1px solid var(--color-border-2);
+
+    .arco-modal-title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      color: var(--color-text-1);
+    }
+  }
+
+  .arco-modal-content {
+    padding: 12px 24px 24px;
+    background: var(--color-bg-1);
+  }
+
+  .arco-modal-footer {
+    height: 48px;
+    padding: 0 24px;
+    background: var(--color-bg-1);
+    border-top: 1px solid var(--color-border-1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .arco-form-item-label > label {
+    color: var(--color-text-2);
+  }
+
+  .arco-btn {
+    border-radius: 6px;
+    height: 32px;
+  }
+
+  .arco-btn-primary.arco-btn-status-danger {
+    background-color: rgb(var(--danger-6));
+    border-color: rgb(var(--danger-6));
+  }
+
+  .arco-result-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21px;
+    color: var(--color-text-1);
+  }
+
+  .arco-result-subtitle {
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--color-text-3);
+  }
+
+  &.is-success {
+    .arco-modal-header,
+    .arco-modal-footer {
+      display: none;
+    }
+
+    .arco-modal-content {
+      padding: 24px;
+      background: var(--color-bg-2);
+    }
+
+    .arco-result {
+      padding: 24px 0 0;
+    }
+  }
+}
+
+.use-biz-form-modal-success {
+  .arco-result-subtitle {
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
+  }
+}

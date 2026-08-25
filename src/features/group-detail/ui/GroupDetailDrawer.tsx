@@ -5,8 +5,7 @@ import {
   Drawer,
   Input,
   Spin,
-  Tabs,
-  Timeline
+  Tabs
 } from '@arco-design/web-react';
 import {
   IconLeft,
@@ -23,8 +22,10 @@ import {
   GroupRoleTag,
   groupRoleNameStyle,
   StatusBadge,
-  UserAvatar
+  UserAvatar,
+  DetailLinkRow
 } from '@shared/ui';
+import { BizOperationTimeline } from '@widgets/biz-operation-timeline';
 import { imLabel } from '@shared/lib/imLabels';
 import { getAvatarLetter } from '@shared/lib/userAvatar';
 import useLocale from '@shared/lib/useLocale';
@@ -149,13 +150,9 @@ function LinkValue({
   onClick?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className="cursor-pointer border-0 bg-transparent p-0 text-[14px] leading-[21px] text-[rgb(var(--link-6))]"
-      onClick={onClick}
-    >
+    <DetailLinkRow showArrow={false} onClick={onClick}>
       {children}
-    </button>
+    </DetailLinkRow>
   );
 }
 
@@ -166,18 +163,7 @@ function SocialLink({
   value: React.ReactNode;
   onClick?: () => void;
 }) {
-  return (
-    <button
-      type="button"
-      className="inline-flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
-      onClick={onClick}
-    >
-      <span className="text-[14px] leading-[21px] text-[rgb(var(--link-6))]">
-        {value}
-      </span>
-      <IconRight className="text-[14px] text-arco-text-3" />
-    </button>
-  );
+  return <DetailLinkRow onClick={onClick}>{value}</DetailLinkRow>;
 }
 
 /** 群头像：稿面九宫格；无成员时回退群头像 */
@@ -692,40 +678,22 @@ export default function GroupDetailDrawer({
 
               <Tabs.TabPane key="logs" title={t['groupDetail.tab.logs']}>
                 <div className="pt-[12px]">
-                  {timelineItems.length ? (
-                    <Timeline className="use-group-detail-timeline">
-                      {timelineItems.map((item, index) => (
-                        <Timeline.Item
-                          key={item.id || `${item.time}-${index}`}
-                          dotColor={
-                            index === 0
-                              ? 'rgb(var(--primary-6))'
-                              : 'var(--color-neutral-3, #c9cdd4)'
-                          }
-                        >
-                          <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
-                            <span className="w-[140px] shrink-0 whitespace-nowrap text-arco-text-3">
-                              {item.time}
-                            </span>
-                            <span className="flex min-w-0 flex-1 items-center gap-[12px]">
-                              <span className="w-[200px] shrink-0 text-arco-text-1">
-                                {item.action || '-'}
-                              </span>
-                              <span className="min-w-0 shrink truncate text-arco-text-3">
-                                {item.detail || ''}
-                              </span>
-                            </span>
-                          </div>
-                        </Timeline.Item>
-                      ))}
-                    </Timeline>
-                  ) : (
-                    !loading && (
-                      <div className="py-8 text-center text-[12px] text-arco-text-3">
-                        {t['groupDetail.logs.empty']}
-                      </div>
-                    )
-                  )}
+                  <BizOperationTimeline
+                    className="use-group-detail-timeline"
+                    items={timelineItems.map((item) => ({
+                      key: item.id || String(item.time),
+                      time: item.time,
+                      action: item.action || '-',
+                      detail: item.detail || ''
+                    }))}
+                    empty={
+                      !loading ? (
+                        <div className="py-8 text-center text-[12px] text-arco-text-3">
+                          {t['groupDetail.logs.empty']}
+                        </div>
+                      ) : null
+                    }
+                  />
                 </div>
               </Tabs.TabPane>
             </Tabs>

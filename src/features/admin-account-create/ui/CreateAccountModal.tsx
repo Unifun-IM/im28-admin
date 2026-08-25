@@ -14,6 +14,7 @@ import cs from 'classnames';
 import { postV1AdminSystemUsersCreate } from '@shared/api/admin/systemUsers';
 import { postV1AdminRolesList } from '@shared/api/admin/rbac';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './create-account-modal.less';
 
 const FormItem = Form.Item;
@@ -157,7 +158,7 @@ export default function CreateAccountModal({
       unmountOnExit
       closable={false}
       maskClosable={false}
-      className={cs('use-create-account-modal', {
+      className={cs('use-biz-form-modal', 'use-create-account-modal', {
         'is-success': step === 'success'
       })}
       wrapClassName="use-create-account-modal-wrap"

@@ -8,4 +8,5 @@ export {
   groupRoleNameStyle,
   type GroupRoleTagProps
 } from './group-role-tag';
-
+export { CopyValue, type CopyValueProps } from './copy-value';
+export { DetailLinkRow, type DetailLinkRowProps } from './detail-link-row';

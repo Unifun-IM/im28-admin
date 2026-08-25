@@ -3,6 +3,7 @@ import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { postV1AdminSystemUsersUpdateIpWhitelist } from '@shared/api/admin/systemUsers';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './update-ip-whitelist-modal.less';
 
 const FormItem = Form.Item;
@@ -110,7 +111,7 @@ export default function UpdateIpWhitelistModal({
         unmountOnExit
         closable={false}
         maskClosable={false}
-        className="use-update-ip-whitelist-modal"
+        className="use-biz-form-modal use-update-ip-whitelist-modal"
         wrapClassName="use-update-ip-whitelist-modal-wrap"
         style={{ width: 780 }}
         title={t['ipWhitelist.title']}

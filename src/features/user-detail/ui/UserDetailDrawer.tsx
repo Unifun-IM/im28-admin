@@ -2,18 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Descriptions,
   Drawer,
-  Message,
   Spin,
-  Tabs,
-  Timeline
+  Tabs
 } from '@arco-design/web-react';
-import { IconCopy, IconRight } from '@arco-design/web-react/icon';
-import copy from 'copy-to-clipboard';
 import {
   postV1AdminUsersDetail,
   postV1AdminUsersOperationLogsList
 } from '@shared/api/admin/users';
-import { StatusBadge, UserAvatar } from '@shared/ui';
+import { StatusBadge, UserAvatar, CopyValue, DetailLinkRow } from '@shared/ui';
+import { BizOperationTimeline } from '@widgets/biz-operation-timeline';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 import UserRelationListModal from './UserRelationListModal';
@@ -39,47 +36,6 @@ function formatPhone(
   if (area) return `${area} ${raw}`;
   if (/^1\d{10}$/.test(raw)) return `+86 ${raw}`;
   return raw;
-}
-
-function CopyValue({ value }: { value: string }) {
-  const common = useLocale();
-  return (
-    <span className="inline-flex items-center gap-[8px]">
-      <span className="text-[12px] leading-[22px] text-arco-text-1">{value}</span>
-      <button
-        type="button"
-        className="inline-flex size-[10px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-3 hover:text-arco-text-1"
-        aria-label={common['common.copy']}
-        onClick={() => {
-          copy(value);
-          Message.success(common['common.copied']);
-        }}
-      >
-        <IconCopy className="text-[10px]" />
-      </button>
-    </span>
-  );
-}
-
-function SocialLink({
-  value,
-  onClick
-}: {
-  value: React.ReactNode;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className="inline-flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
-      onClick={onClick}
-    >
-      <span className="text-[14px] leading-[21px] text-[rgb(var(--link-6))]">
-        {value}
-      </span>
-      <IconRight className="text-[14px] text-arco-text-3" />
-    </button>
-  );
 }
 
 function logDetailText(
@@ -308,19 +264,21 @@ export default function UserDetailDrawer({
                       {
                         label: t['userDetail.field.friendCount'],
                         value: (
-                          <SocialLink
-                            value={detail?.friend_count ?? 0}
+                          <DetailLinkRow
                             onClick={() => setRelationMode('friends')}
-                          />
+                          >
+                            {detail?.friend_count ?? 0}
+                          </DetailLinkRow>
                         )
                       },
                       {
                         label: t['userDetail.field.groupCount'],
                         value: (
-                          <SocialLink
-                            value={detail?.group_count ?? 0}
+                          <DetailLinkRow
                             onClick={() => setRelationMode('groups')}
-                          />
+                          >
+                            {detail?.group_count ?? 0}
+                          </DetailLinkRow>
                         )
                       }
                     ]}
@@ -331,40 +289,17 @@ export default function UserDetailDrawer({
 
             <Tabs.TabPane key="logs" title={t['userDetail.tab.logs']}>
               <div className="pt-[12px]">
-                {timelineItems.length ? (
-                  <Timeline className="use-user-detail-timeline">
-                    {timelineItems.map((item, index) => (
-                      <Timeline.Item
-                        key={item.key}
-                        dotColor={
-                          index === 0
-                            ? 'rgb(var(--primary-6))'
-                            : 'var(--color-neutral-3, #c9cdd4)'
-                        }
-                      >
-                        <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
-                          <span className="w-[140px] shrink-0 whitespace-nowrap text-arco-text-3">
-                            {item.time}
-                          </span>
-                          <span className="flex min-w-0 flex-1 items-center gap-[12px]">
-                            <span className="w-[200px] shrink-0 text-arco-text-1">
-                              {item.action}
-                            </span>
-                            <span className="min-w-0 shrink truncate text-arco-text-3">
-                              {item.detail}
-                            </span>
-                          </span>
-                        </div>
-                      </Timeline.Item>
-                    ))}
-                  </Timeline>
-                ) : (
-                  !loading && (
-                    <div className="py-8 text-center text-[12px] text-arco-text-3">
-                      {t['userDetail.logs.empty']}
-                    </div>
-                  )
-                )}
+                <BizOperationTimeline
+                  className="use-user-detail-timeline"
+                  items={timelineItems}
+                  empty={
+                    !loading ? (
+                      <div className="py-8 text-center text-[12px] text-arco-text-3">
+                        {t['userDetail.logs.empty']}
+                      </div>
+                    ) : null
+                  }
+                />
               </div>
             </Tabs.TabPane>
           </Tabs>
