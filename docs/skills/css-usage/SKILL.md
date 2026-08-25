@@ -79,6 +79,7 @@ Drawer、Modal 内的关联列表或记录表格不要依赖 Arco 默认「仅�
 - 样式：`src/shared/ui/biz-detail-table.less`
 - 用法：先 `import '@shared/ui/biz-detail-table.less'`，再给 `Table` 加 `className="use-biz-detail-table"`
 - 效果：`.arco-table-container` 外框 `border + border-radius: 8px + overflow: hidden`，**上下圆角一致**；分页在圆角框外
+- 坑：Arco 默认 `th` / `header` 吃 `--border-radius-medium`（本项目 **12px**），外框是 **8px**。必须在该 less 里清掉内部圆角（含 `content-scroll` 伪元素），**不要**给 `.arco-table-body` 写 `border-radius: inherit`，否则角上会露白缝，像框内多了一圈 padding。
 
 禁止在业务页再复制一份局部圆角 / 网格线样式。
 
