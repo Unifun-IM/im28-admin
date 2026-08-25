@@ -218,9 +218,9 @@ export default function UserDetailDrawer({
       maskClosable
       onCancel={onClose}
     >
-      <Spin loading={loading} className="block w-full">
-        <div className="flex flex-col gap-[12px]">
-          <div className="flex h-[56px] items-center gap-[16px]">
+      <Spin loading={loading} className="use-user-detail-drawer-spin">
+        <div className="use-user-detail-drawer-body">
+          <div className="use-user-detail-summary flex h-[56px] items-center gap-[16px]">
             <UserAvatar
               size={56}
               className="use-user-detail-avatar shrink-0"

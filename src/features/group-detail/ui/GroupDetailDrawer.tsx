@@ -494,11 +494,12 @@ export default function GroupDetailDrawer({
     >
       <Spin
         loading={loading || (view === 'member' && memberLoading)}
-        className="block w-full"
+        className="use-user-detail-drawer-spin"
       >
+        <div className="use-user-detail-drawer-body">
         {view === 'main' && (
-          <div className="flex flex-col gap-[12px]">
-            <div className="flex h-[56px] items-center gap-[16px]">
+          <>
+            <div className="use-user-detail-summary flex h-[56px] items-center gap-[16px]">
               <GroupAvatar
                 name={name}
                 avatarUrl={group?.avatar_url}
@@ -728,7 +729,7 @@ export default function GroupDetailDrawer({
                 </div>
               </Tabs.TabPane>
             </Tabs>
-          </div>
+          </>
         )}
 
         {view === 'members' && (
@@ -891,6 +892,7 @@ export default function GroupDetailDrawer({
             </div>
           </div>
         )}
+        </div>
       </Spin>
     </Drawer>
   );
