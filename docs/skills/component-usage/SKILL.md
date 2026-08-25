@@ -267,8 +267,9 @@ Drawer / Modal 内的关联列表、操作记录、变更记录、登录记录�
 - 手写 Arco `Table` 时：
   1. `import '@shared/ui/biz-detail-table.less'`
   2. `className="use-biz-detail-table"`
+  3. `border={false}`（关掉 Arco `::before` 底边）
 - 样式文件：`src/shared/ui/biz-detail-table.less`
-- 视觉约定：对齐 `use-biz-table`——清 Arco 默认圆角/边框；外框 8px；表体只保留列分隔；分页在框外。
+- 视觉约定：对齐 `use-biz-table`——`border={false}` + 清 Arco 默认圆角/边框；外框 8px；表体只保留列分隔；分页在框外。
 - 不在 Drawer 内嵌套 `BizListPage`，避免卡片套卡片和分页/筛选语义混乱。
 
 ```tsx

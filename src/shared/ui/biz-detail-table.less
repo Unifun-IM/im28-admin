@@ -1,12 +1,17 @@
 /* 详情 Drawer / Modal 内 Table
- * 对齐列表 use-biz-table 的做法：清 Arco 默认边框/圆角，表体只保留列分隔。
- * 自身带外框（列表外框由 Card 提供）；分页在圆角框外。
+ * 对齐列表 use-biz-table：Table 传 border={false}（关掉 Arco 默认 wrapper 边框
+ * 与 .arco-table-container::before 底边），外框/列线由本样式绘制；分页在框外。
  */
 .use-biz-detail-table.arco-table {
   .arco-table-container {
     border: 1px solid var(--color-border-2);
     border-radius: 8px;
     overflow: hidden;
+  }
+
+  /* 兜底：即使漏传 border={false}，也去掉 Arco border 模式的底边伪元素 */
+  &.arco-table-border .arco-table-container::before {
+    display: none;
   }
 
   .arco-table-content-scroll,
@@ -66,7 +71,7 @@
     font-size: 12px;
     line-height: 20px;
     color: var(--color-text-1);
-    /* 同列表：无上下边框，仅列分隔；底边交给外框，避免末行双线 */
+    /* 同列表：无上下边框，仅列分隔；底边交给外框 */
     border-top: none !important;
     border-bottom: none !important;
     border-left: none !important;
