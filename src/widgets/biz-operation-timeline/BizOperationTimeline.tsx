@@ -1,5 +1,6 @@
 import React from 'react';
 import { Timeline } from '@arco-design/web-react';
+import './biz-operation-timeline.less';
 
 export type BizOperationTimelineItem = {
   key: React.Key;
