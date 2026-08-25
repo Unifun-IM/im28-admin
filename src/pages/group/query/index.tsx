@@ -17,10 +17,6 @@ import {
 } from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
 import { UserDetailDrawer } from '@features/user-detail';
-import {
-  UserChatModal,
-  type ChatModalTarget
-} from '@features/user-chat-view';
 import useLocale from '@shared/lib/useLocale';
 import { imLabel } from '@shared/lib/imLabels';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -78,7 +74,6 @@ export default function GroupQueryPage() {
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
-  const [chatTarget, setChatTarget] = useState<ChatModalTarget | null>(null);
 
   const keywordTypeOptions = useMemo(
     () =>
@@ -451,7 +446,7 @@ export default function GroupQueryPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 100,
+              width: 120,
               render: (_: unknown, row: GroupListRow) => {
                 const group_id = row.group?.group_id || '';
                 const moreItems = buildStatusActions(row);
@@ -489,28 +484,11 @@ export default function GroupQueryPage() {
         visible={!!detailGroupId}
         groupId={detailGroupId}
         onClose={() => setDetailGroupId(null)}
-        onViewChat={(payload) => {
-          setDetailGroupId(null);
-          setChatTarget({
-            type: 'group',
-            id: payload.groupId,
-            name: payload.groupName,
-            memberCount: payload.memberCount,
-            viewerUserId: payload.ownerId || undefined
-          });
-        }}
       />
       <UserDetailDrawer
         visible={!!detailUserId}
         userId={detailUserId}
         onClose={() => setDetailUserId(null)}
-      />
-      <UserChatModal
-        visible={!!chatTarget}
-        onClose={() => setChatTarget(null)}
-        scene="group"
-        userId={chatTarget?.viewerUserId || null}
-        target={chatTarget}
       />
     </>
   );

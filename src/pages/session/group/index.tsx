@@ -397,16 +397,6 @@ export default function GroupSessionPage() {
         visible={!!detailGroupId}
         groupId={detailGroupId}
         onClose={() => setDetailGroupId(null)}
-        onViewChat={(payload) => {
-          setDetailGroupId(null);
-          setChatTarget({
-            type: 'group',
-            id: payload.groupId,
-            name: payload.groupName,
-            memberCount: payload.memberCount,
-            viewerUserId: payload.ownerId || undefined
-          });
-        }}
       />
       <UserChatModal
         visible={!!chatTarget}

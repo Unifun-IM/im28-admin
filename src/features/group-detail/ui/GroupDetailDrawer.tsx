@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Button,
   Descriptions,
   Drawer,
   Spin,
@@ -17,12 +16,14 @@ import {
   DetailLinkRow
 } from '@shared/ui';
 import { BizOperationTimeline } from '@widgets/biz-operation-timeline';
-import { UserDetailDrawer } from '@features/user-detail';
 import { imLabel } from '@shared/lib/imLabels';
 import { getAvatarLetter } from '@shared/lib/userAvatar';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 import GroupMemberListDrawer from './GroupMemberListDrawer';
+import GroupMemberDetailDrawer, {
+  type GroupMemberDetailSeed
+} from './GroupMemberDetailDrawer';
 import '@features/user-detail/ui/user-detail-drawer.less';
 
 export type GroupDetailDrawerProps = {
@@ -30,13 +31,6 @@ export type GroupDetailDrawerProps = {
   groupId?: string | null;
   defaultTab?: 'basic' | 'logs';
   onClose: () => void;
-  /** 查看聊天：交给页面打开同一 UserChatModal（scene=group） */
-  onViewChat?: (payload: {
-    groupId: string;
-    groupName: string;
-    memberCount?: number;
-    ownerId?: string;
-  }) => void;
 };
 
 type MemberItem = {
@@ -185,14 +179,13 @@ function GroupAvatar({
 /**
  * 群详情 Drawer
  * Figma 977:22817 基本信息 / 977:22961 操作日志
- * 群主/管理员 → 独立 UserDetailDrawer；群成员 → 独立 GroupMemberListDrawer
+ * 群主/管理员/成员详情 → GroupMemberDetailDrawer；群成员列表 → GroupMemberListDrawer
  */
 export default function GroupDetailDrawer({
   visible,
   groupId,
   defaultTab = 'basic',
-  onClose,
-  onViewChat
+  onClose
 }: GroupDetailDrawerProps) {
   const t = useLocale();
   const [loading, setLoading] = useState(false);
@@ -204,13 +197,14 @@ export default function GroupDetailDrawer({
   >([]);
   const [tab, setTab] = useState<string>(defaultTab);
   const [membersListVisible, setMembersListVisible] = useState(false);
-  const [detailUserId, setDetailUserId] = useState<string | null>(null);
+  const [memberDetail, setMemberDetail] =
+    useState<GroupMemberDetailSeed | null>(null);
 
   useEffect(() => {
     if (!visible) return;
     setTab(defaultTab);
     setMembersListVisible(false);
-    setDetailUserId(null);
+    setMemberDetail(null);
     setMemberWraps([]);
   }, [visible, defaultTab, groupId]);
 
@@ -303,20 +297,24 @@ export default function GroupDetailDrawer({
       ? t['groupDetail.mute.member']
       : t['groupDetail.mute.none'];
 
-  const openUserDetail = (userId?: string | null) => {
+  const openMemberDetail = (seed?: GroupMemberDetailSeed | null) => {
+    const userId = seed?.userId;
     if (!userId) return;
-    setDetailUserId(userId);
-  };
-
-  const openChat = () => {
-    const gid = String(group?.group_id || groupId || '');
-    onViewChat?.({
-      groupId: gid,
-      groupName: String(group?.title || gid),
-      memberCount: Number(group?.member_count || 0) || undefined,
-      ownerId: String(group?.owner_user_id || detail?.owner?.user_id || '')
+    // 优先用已加载的成员/管理员种子补全入群信息
+    const fromList = members.find((m) => m.userId === userId);
+    const fromManagers = managers.find((m) => m.userId === userId);
+    const hit = fromList || fromManagers;
+    setMemberDetail({
+      userId,
+      nickname: seed?.nickname || hit?.nickname || userId,
+      avatar: seed?.avatar || hit?.avatar,
+      roleLevel: seed?.roleLevel ?? hit?.roleLevel,
+      joinTime: seed?.joinTime || hit?.joinTime,
+      adminSince: seed?.adminSince || hit?.adminSince,
+      account: seed?.account || hit?.account,
+      phone: seed?.phone || hit?.phone,
+      phoneAreaCode: seed?.phoneAreaCode || hit?.phoneAreaCode
     });
-    onClose();
   };
 
   return (
@@ -327,11 +325,7 @@ export default function GroupDetailDrawer({
       visible={visible}
       placement="right"
       title={t['groupDetail.title']}
-      footer={
-        <Button type="primary" long onClick={openChat}>
-          {t['groupDetail.action.viewChat']}
-        </Button>
-      }
+      footer={null}
       unmountOnExit
       maskClosable
       onCancel={onClose}
@@ -395,10 +389,18 @@ export default function GroupDetailDrawer({
                           value: (
                             <LinkValue
                               onClick={() =>
-                                openUserDetail(
-                                  detail?.owner?.user_id ||
-                                    group?.owner_user_id
-                                )
+                                openMemberDetail({
+                                  userId:
+                                    detail?.owner?.user_id ||
+                                    group?.owner_user_id,
+                                  nickname: ownerName,
+                                  avatar: detail?.owner?.avatar_url,
+                                  roleLevel: 100,
+                                  account: detail?.owner?.account,
+                                  phone: detail?.owner?.phone,
+                                  phoneAreaCode:
+                                    detail?.owner?.phone_area_code
+                                })
                               }
                             >
                               {ownerName}
@@ -500,10 +502,18 @@ export default function GroupDetailDrawer({
                           value: (
                             <LinkValue
                               onClick={() =>
-                                openUserDetail(
-                                  detail?.owner?.user_id ||
-                                    group?.owner_user_id
-                                )
+                                openMemberDetail({
+                                  userId:
+                                    detail?.owner?.user_id ||
+                                    group?.owner_user_id,
+                                  nickname: ownerName,
+                                  avatar: detail?.owner?.avatar_url,
+                                  roleLevel: 100,
+                                  account: detail?.owner?.account,
+                                  phone: detail?.owner?.phone,
+                                  phoneAreaCode:
+                                    detail?.owner?.phone_area_code
+                                })
                               }
                             >
                               {ownerName}
@@ -518,7 +528,19 @@ export default function GroupDetailDrawer({
                             value: (
                               <LinkValue
                                 key={a.userId || a.id}
-                                onClick={() => openUserDetail(a.userId)}
+                                onClick={() =>
+                                  openMemberDetail({
+                                    userId: a.userId,
+                                    nickname: a.nickname,
+                                    avatar: a.avatar,
+                                    roleLevel: a.roleLevel,
+                                    joinTime: a.joinTime,
+                                    adminSince: a.adminSince,
+                                    account: a.account,
+                                    phone: a.phone,
+                                    phoneAreaCode: a.phoneAreaCode
+                                  })
+                                }
                               >
                                 {String(a.nickname || '-')}
                               </LinkValue>
@@ -561,10 +583,11 @@ export default function GroupDetailDrawer({
         memberTotal={memberTotal}
         onClose={() => setMembersListVisible(false)}
       />
-      <UserDetailDrawer
-        visible={!!detailUserId}
-        userId={detailUserId}
-        onClose={() => setDetailUserId(null)}
+      <GroupMemberDetailDrawer
+        visible={!!memberDetail?.userId}
+        userId={memberDetail?.userId}
+        seed={memberDetail}
+        onClose={() => setMemberDetail(null)}
       />
     </>
   );
