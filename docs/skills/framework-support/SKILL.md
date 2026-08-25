@@ -310,7 +310,7 @@ Vite 已配置以下别名：
 - 对象摘要：传 `summary` 在 Tab 上方展示头像、名称与状态等摘要信息。
 - 详情 + 操作记录：传 `operationRecords` 会自动追加「操作记录」Tab。
 - 详情异步请求：传 `loading` 使用 Arco `Spin` 保持 Drawer 内容结构稳定。
-- 操作记录表格复用 `.use-biz-detail-table`，保持详情内表格外框、表头、单元格网格与现有组件样式一致。
+- 操作记录 / 关联列表表格复用 `.use-biz-detail-table`（`src/shared/ui/biz-detail-table.less`）：外框 8px 上下圆角一致，分页在框外；手写 Table 须 import 该 less 并加 className。
 - 默认 Drawer 宽度 720px，默认无 footer，适合只读详情场景；需要底部操作时可透传 Arco `Drawer` 的 `footer`。
 
 ## API 与 OpenAPI

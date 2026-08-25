@@ -42,6 +42,7 @@ description: Choose, compose, and extract components when generating or adjustin
 | 设置页 | `@widgets/session-settings` 的 `SettingsPageShell` |
 | 空态 | `EmptyState` |
 | 头像、状态、图标按钮 | `UserAvatar`、`StatusBadge`、`IconButton` |
+| 详情 / Modal 内圆角表格 | `className="use-biz-detail-table"` + `@shared/ui/biz-detail-table.less` |
 | 未保存离开保护 | `@features/unsaved-changes` |
 
 ## 相似 UI 抽取
@@ -254,11 +255,27 @@ API 与行为以 `package.json` 中当前安装版本、包内 TypeScript 类型
 
 ## 详情内表格
 
-详情内操作记录、变更记录、登录记录、审计记录等表格使用：
+Drawer / Modal 内的关联列表、操作记录、变更记录、登录记录、审计记录等表格统一使用详情表样式，**不要**用裸 Arco Table（否则只有表头顶角圆角，底角会被裁切成直角）：
 
-- 首选 `BizDetailDrawer.operationRecords`。
-- 自定义 Tab 内手写 Arco `Table` 时加 `className="use-biz-detail-table"`。
+- 首选 `BizDetailDrawer.operationRecords`（内部已带样式）。
+- 手写 Arco `Table` 时：
+  1. `import '@shared/ui/biz-detail-table.less'`
+  2. `className="use-biz-detail-table"`
+- 样式文件：`src/shared/ui/biz-detail-table.less`
+- 视觉约定：`.arco-table-container` 外框 `8px` 圆角 + 边框，**上下圆角一致**；分页在圆角框外。
 - 不在 Drawer 内嵌套 `BizListPage`，避免卡片套卡片和分页/筛选语义混乱。
+
+```tsx
+import '@shared/ui/biz-detail-table.less';
+
+<Table
+  className="use-biz-detail-table"
+  rowKey="id"
+  columns={columns}
+  data={list}
+  pagination={{ current, pageSize, total, showTotal: true }}
+/>
+```
 
 详情内表格列规则与列表列一致：时间用 `formatDateTime`，长文本用省略 + `Tooltip`，状态用 `StatusBadge`，文案走 locale。
 

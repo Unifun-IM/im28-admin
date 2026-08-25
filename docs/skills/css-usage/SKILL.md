@@ -72,6 +72,16 @@ description: "Apply styling when generating or changing admin UI in this repo: u
 - `global.less` 不承载只服务于某个具体业务页面的样式。跨页面公共组件使用的语义化 `use-*` 修饰类属于共享组件样式，例如 `use-biz-detail-table`，可以放入 `global.less`。
 - 不使用 `@apply` 复制一套平行于 Tailwind 的工具类；重复布局优先抽组件或 class 常量。
 
+### 详情 / Modal 内表格圆角（`use-biz-detail-table`）
+
+Drawer、Modal 内的关联列表或记录表格不要依赖 Arco 默认「仅表头顶角圆角」。统一使用：
+
+- 样式：`src/shared/ui/biz-detail-table.less`
+- 用法：先 `import '@shared/ui/biz-detail-table.less'`，再给 `Table` 加 `className="use-biz-detail-table"`
+- 效果：`.arco-table-container` 外框 `border + border-radius: 8px + overflow: hidden`，**上下圆角一致**；分页在圆角框外
+
+禁止在业务页再复制一份局部圆角 / 网格线样式。
+
 ## Tailwind CSS 使用
 
 - 保持 `tailwind.config.js` 的 `preflight: false`，避免覆盖 Arco 基础样式。

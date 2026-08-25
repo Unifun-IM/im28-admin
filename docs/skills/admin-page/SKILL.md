@@ -255,10 +255,11 @@ Figma / PRD 没有明确控件类型时，才使用以下默认映射：
 
 ### 详情内记录表格
 
-详情内操作记录、变更记录等表格必须按现有详情表格样式：
+详情内操作记录、变更记录、关联列表等表格必须按现有详情表格样式：
 
 - 使用 `BizDetailDrawer` 的 `operationRecords`。
-- 或手写 Arco `Table` 时统一加 `className="use-biz-detail-table"`。
+- 或手写 Arco `Table` 时：`import '@shared/ui/biz-detail-table.less'` + `className="use-biz-detail-table"`。
+- 圆角作用在 `.arco-table-container`（上下均为 8px），分页在圆角框外；禁止裸 Table 导致仅顶角圆角、底角直角。
 - 表格列仍按完整可读 Figma > PRD > 接口响应推导。
 - 时间字段使用 `formatDateTime`。
 - 操作内容、备注、原因等长文本使用省略 + Tooltip。
