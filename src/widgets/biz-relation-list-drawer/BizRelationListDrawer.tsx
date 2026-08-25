@@ -61,6 +61,7 @@ export default function BizRelationListDrawer<
       <Table
         className="use-biz-detail-table"
         border={false}
+        stripe
         loading={loading}
         rowKey={rowKey}
         data={data}
