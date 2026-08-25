@@ -1,57 +1,37 @@
 ---
 name: ai-code
-description: Common entry skill for Codex, Claude Code, Cursor, and other AI coding tools working in this admin framework. Routes agents to shared project rules and task-specific skills without duplicating tool-specific instructions.
+description: Route Codex, Claude Code, Cursor, and other AI coding tools to the shared project rules and the smallest relevant task-specific skill set.
 ---
 
-# AI Code Tools Skill
+# AI Code Skill Router
 
-本 skill 是本仓库给各类 AI code 工具使用的统一入口。
+本文件是 AI code 工具的统一路由。规则正文只维护在 `docs/skills/**/SKILL.md`；`AGENTS.md`、`.claude/CLAUDE.md` 和 `.cursor/rules/ai-code.mdc` 只做入口引用。
 
-适用对象：
+## 加载顺序
 
-- Codex
-- Claude Code
-- Cursor
-- 其它能读取仓库 Markdown 约定的 AI 编码助手
+所有代码任务先读 `docs/skills/project-rules/SKILL.md`，再按任务加载最小专项集合：
 
-工具私有文件只做加载入口，不保存规则正文：
-
-| 工具 | 入口 |
+| 任务 | 加载 |
 | --- | --- |
-| Codex | `AGENTS.md` |
-| Claude Code | `.claude/CLAUDE.md` |
-| Cursor | `.cursor/rules/ai-code.mdc` |
+| 了解框架定位、目录、内置能力 | `docs/framework-guide.md`；需要完整能力索引时再读 `docs/skills/framework-support/SKILL.md` |
+| 生成或调整后台页面、菜单、路由、列表、详情 | `docs/skills/admin-page/SKILL.md` + `docs/skills/component-usage/SKILL.md` + `docs/skills/css-usage/SKILL.md` |
+| 生成或更新 API / typings | `docs/skills/api-generation/SKILL.md`；需要落页时再加 `docs/skills/admin-page/SKILL.md` |
+| 修改组件或抽取重复 UI | `docs/skills/component-usage/SKILL.md`；涉及样式时加 `docs/skills/css-usage/SKILL.md` |
+| Figma 还原 | `docs/skills/figma-rules/SKILL.md`；生成页面时同时读 `docs/skills/admin-page/SKILL.md` |
+| 图标或 SVG | `docs/skills/svg-icon-usage/SKILL.md`；来自 Figma 时同时读 `docs/skills/figma-rules/SKILL.md` |
+| 仅修改 CSS、主题、Tailwind 或 Less | `docs/skills/css-usage/SKILL.md` |
 
-## 使用方式
+不要为普通任务一次性加载全部 skill；按实际工作增量补读。
 
-进入仓库或开始任务时，先按任务类型读取对应 skill。
+## 规则归属
 
-| 任务类型 | 读取 |
-| --- | --- |
-| 了解项目定位、公共索引、内置能力、目录、扩展流程、常用命令 | `docs/framework-guide.md` |
-| 了解后台框架现有能力、扩展边界、内置组件/页面/API/部署支持 | `docs/skills/framework-support/SKILL.md` |
-| 任意代码修改、样式修改、接口对接、资源处理 | `docs/skills/project-rules/SKILL.md` |
-| OpenAPI schema、API 请求函数、API typings 生成或更新 | `docs/skills/api-generation/SKILL.md` |
-| CSS、颜色、主题变量、公共样式抽取、Tailwind / Less 选型 | `docs/skills/css-usage/SKILL.md` |
-| Figma 只读对照、按稿还原、像素级验证、Figma 自定义 SVG 资源 | `docs/skills/figma-rules/SKILL.md` |
-| 生成页面时复用项目组件、正确使用 Arco、抽取相似通用 UI | `docs/skills/component-usage/SKILL.md` |
-| 页面使用图标、侧栏菜单图标、Figma 自定义 SVG、SVG 资产归属决策 | `docs/skills/svg-icon-usage/SKILL.md` |
-| 根据导航结构、完整 Figma 地址、PRD、生成接口新增或调整左侧菜单、路由、后台列表页、搜索条件、表格列、详情 Drawer、详情内操作记录 | `docs/skills/admin-page/SKILL.md` |
+- 全局范围、FSD、不可手改边界：`project-rules`
+- 页面信息来源、字段推导、路由和验收：`admin-page`
+- 组件发现、Arco 使用、组件契约和列宽：`component-usage`
+- API 生成链路：`api-generation`
+- 样式、主题变量、Tailwind / Less：`css-usage`
+- Figma 只读与视觉验证：`figma-rules`
+- 图标来源和 SVG 资产：`svg-icon-usage`
+- 已内置能力索引：`framework-support`
 
-如果任务同时命中多类，先读 `project-rules`，再读对应专项 skill，最后读具体业务 skill。涉及接口或类型生成时补读 `api-generation`；新增或修改页面样式时补读 `css-usage`；页面任务提供完整 Figma 地址时补读 `figma-rules`，并按 `admin-page` 执行 Figma > PRD > 生成接口的信息优先级；涉及菜单图标、按钮图标、空态插画或 SVG 资产时补读 `svg-icon-usage`。
-
-## 通用原则
-
-- 本仓库是管理后台基础框架，内置基础通用功能，并支持 AI 按规范生成标准后台页面。
-- 每次任务按增量处理：先查看当前未提交 git 状态，保护用户已有改动。
-- 普通任务只处理用户明确点名的范围；OpenAPI 生成保留完整生成物，有具体 PRD / Figma / 点名目标时同步该目标，没有时沿现有调用关系同步直接受影响代码。
-- OpenAPI 生成物禁止手改，API 与 typings 通过项目配置命令生成。
-- 组件决策统一遵守“组件发现 → 已有组件 → 重复 UI 抽取 → Arco Design / Arco Design Pro → 自建”；Tailwind 只做样式补位。
-- Figma 只读，对齐代码到设计稿，禁止写入或编辑 Figma。
-
-## 维护约定
-
-- 规则正文放在 `docs/skills/**/SKILL.md`。
-- 工具入口文件只引用 skill 路径，不复制正文。
-- 新增专项规则时，优先新增 `docs/skills/<skill-name>/SKILL.md`，再在本文件的路由表补入口。
-- 如果某条规则对所有任务都生效，放进 `project-rules`；如果只针对某类页面或工作流，放进专项 skill。
+新增规则时只写入唯一归属 skill，其它文件使用链接，不复制正文。

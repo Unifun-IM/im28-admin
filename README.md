@@ -34,27 +34,27 @@ Codex、Cursor、Claude Code 使用同一套仓库规则生成和维护页面，
 | Cursor | `.cursor/rules/ai-code.mdc` |
 | Claude Code | `.claude/CLAUDE.md` |
 
-工具入口只负责加载统一路由 [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md)，再根据任务读取页面生成、API、组件、CSS、Figma、SVG 等专项 skill。页面生成流程如下：
+工具入口只加载统一路由 [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md)，再按任务读取最小专项 skill。标准页面生成机制：
 
-1. **读取增量上下文**：先检查当前未提交的 git 改动，并读取现有路由、页面、组件和 API 调用关系；在已有实现上增量修改，不覆盖或格式化无关改动。
-2. **确定页面定义**：按“完整且可读取的 Figma 地址 > 当前任务 PRD > 脚本生成的 API > 现有同类页面模式”取值。Figma 或 PRD 已明确的筛选项、表格列、详情字段、Tab 和操作入口视为闭合集合；低优先级来源只补字段绑定、枚举、校验、格式和权限，不自行增加可见项。
-3. **生成 API 契约**：接口或 typings 需要新增、更新时只执行 `npm run openapi`。命令会读取当前项目的脚本、环境变量和 OpenAPI 配置并生成完整结果；`src/shared/api/admin/**` 等生成物只读，禁止手工修改接口函数或类型定义。
-4. **同步受影响代码**：完整保留生成器产生的确定性 API diff。任务给出具体 Figma、PRD、页面、路由、接口或文件时，只同步该目标和必要直接依赖；没有具体目标时，沿现有路由、生成函数 import 和类型引用更新直接受影响的调用方。已有接口变化更新已有页面；只有能明确识别为可独立落页的新业务能力时，才生成对应路由、页面及必要配套文件，辅助或动作接口不单独生成页面。
-5. **选择和抽取组件**：统一遵循“组件发现 -> 已有组件 -> 重复 UI 抽取 -> Arco Design / Arco Design Pro -> 自建”。优先使用 `BizListPage`、筛选组件、`ActionLinks`、`BizDetailDrawer` 等项目积木；发现稳定的重复 UI 时按 FSD 抽取，再由页面复用。
-6. **生成标准页面**：根据确定后的契约生成列表筛选、表格列、操作入口、详情 Drawer、locale、菜单和路由。单类详情使用纯详情展示；多接口或多类信息使用 Tab；操作记录复用 `BizDetailDrawer` / `use-biz-detail-table` 的现有样式。
+1. 检查未提交改动和现有路由、组件、API 调用关系，做增量修改。
+2. 按“完整可读 Figma > PRD > 生成接口 > 现有模式”确定闭合的可见信息集合。
+3. API / typings 只通过 `npm run openapi` 生成，并同步直接受影响的现有调用方。
+4. 按项目组件优先级生成路由、列表、详情与 locale，并在浏览器验证最终组件接入、列宽、Drawer 和交互。
 
-完整 Figma 明确展示但接口暂缺的字段，只能使用页面生成 skill 定义的 Figma 专项例外，并在交付说明中列出接口缺口；仅有 PRD 或 API 时不生成未接线控件。具体字段推导、Drawer、Tab 和接口同步规则见 [docs/skills/admin-page/SKILL.md](docs/skills/admin-page/SKILL.md)。
+完整规则见 [admin-page](docs/skills/admin-page/SKILL.md)、[component-usage](docs/skills/component-usage/SKILL.md) 与 [api-generation](docs/skills/api-generation/SKILL.md)。
 
 ## 文档入口
 
 | 内容 | 文档 |
 | --- | --- |
 | 项目公共说明 | [docs/framework-guide.md](docs/framework-guide.md) |
+| 框架能力清单 | [docs/skills/framework-support/SKILL.md](docs/skills/framework-support/SKILL.md) |
 | AI code tools 统一入口 | [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md) |
 | 通用项目规则 | [docs/skills/project-rules/SKILL.md](docs/skills/project-rules/SKILL.md) |
 | API 与 typings 生成 | [docs/skills/api-generation/SKILL.md](docs/skills/api-generation/SKILL.md) |
 | CSS、主题与 Tailwind | [docs/skills/css-usage/SKILL.md](docs/skills/css-usage/SKILL.md) |
 | Figma 规则 | [docs/skills/figma-rules/SKILL.md](docs/skills/figma-rules/SKILL.md) |
+| SVG 与图标 | [docs/skills/svg-icon-usage/SKILL.md](docs/skills/svg-icon-usage/SKILL.md) |
 | 组件选择、Arco 最佳使用与抽取 | [docs/skills/component-usage/SKILL.md](docs/skills/component-usage/SKILL.md) |
 | 页面生成 | [docs/skills/admin-page/SKILL.md](docs/skills/admin-page/SKILL.md) |
 
