@@ -284,7 +284,7 @@ Figma / PRD 未明确 Drawer 宽度时，所有生成的业务详情 Drawer 和�
 基础信息中以数量、链接、右箭头或“查看列表”形式出现的关联入口，例如好友数量、群组数量、成员数量、绑定设备数量，按以下规则生成：
 
 - 点击后打开新的关系子 Drawer，父详情 Drawer 保持打开；禁止替换父详情内容或通过 `setActiveTab` 临时增加 / 切换成关系 Tab。
-- 子 Drawer 优先复用 `BizRelationListDrawer`，使用语义化标题，独立管理请求、loading、分页、空态和列表列；在打开时按目标 ID 加载关联接口。
+- 子 Drawer 默认必须通过公开入口复用 `BizRelationListDrawer`，使用语义化标题，独立管理请求、loading、分页、空态和列表列；在打开时按目标 ID 加载关联接口。只有完整可读 Figma / PRD 明确要求公共组件无法表达的结构，并且扩展公共组件仍不合理时，才允许局部自建。
 - 父详情只保存关系 `mode` / target 和 visible 状态。关闭子 Drawer 后保留父详情原 Tab、滚动位置和已加载数据。
 - 同结构的好友 / 群组 / 成员等列表优先由一个实体关系 Drawer 通过 `mode` 复用，不为每个入口复制 Drawer。
 - 只有完整可读 Figma 或 PRD 明确将该关联列表定义为父详情的常驻 Tab 时，才按 Tab 实现；接口存在本身不构成新增 Tab 的理由。
@@ -295,8 +295,8 @@ Figma / PRD 未明确 Drawer 宽度时，所有生成的业务详情 Drawer 和�
 详情内操作记录、变更记录、关联列表等表格必须按现有详情表格样式：
 
 - 使用 `BizDetailDrawer` 的 `operationRecords`。
-- 关联列表优先 `BizRelationListDrawer`；稿面 Timeline 日志优先 `BizOperationTimeline`。
-- 或手写 Arco `Table` 时：`import '@shared/ui/biz-detail-table.less'` + `className="use-biz-detail-table"`。
+- 关联列表默认使用 `BizRelationListDrawer`；稿面 Timeline 日志优先 `BizOperationTimeline`。
+- 非关系列表的特殊记录表格，或高优先级来源明确要求公共组件无法表达的结构，确需手写 Arco `Table` 时：`import '@shared/ui/biz-detail-table.less'` + `className="use-biz-detail-table"`。
 - 圆角与边框对齐列表 `use-biz-table`：外框在 `.arco-table-container`（8px），表体只保留列分隔；分页在框外；禁止裸 Table。
 - 表格列仍按完整可读 Figma > PRD > 接口响应推导。
 - 时间字段使用 `formatDateTime`。
@@ -331,6 +331,14 @@ Figma / PRD 未明确 Drawer 宽度时，所有生成的业务详情 Drawer 和�
 
 ## 完成检查
 
+- 生成前按页面结构列出预期公共组件，至少覆盖列表壳、实体详情、关系子 Drawer、记录展示和操作列；生成后将清单与最终 import / JSX 逐项对照。公共组件复用必须以最终代码为准，不能以“仓库中存在组件”或分析中提到组件代替实际接入。
+- 对本次生成 / 修改文件执行定向搜索；将示例路径替换为真实文件，例如：
+
+  ```bash
+  rg -n "BizRelationListDrawer|<Drawer|<Table|width=|scroll=" path/to/detail.tsx path/to/relation-list.tsx
+  ```
+
+  逐个检查命中：关系子 Drawer 必须能看到 `BizRelationListDrawer` 的公开入口 import 和 JSX 调用；无明确设计依据时，不得残留为该关系列表直接组合的 `<Drawer> + <Table>`、固定像素宽度或默认 `scroll.x`。发现任一残留即视为页面生成未完成，修正后重新检查。
 - 提供完整可读 Figma 地址时，搜索字段、控件、表格列、详情、Tab、操作入口和顺序是否均以 Figma 为准。
 - 同一实体是否搜索并复用了唯一详情组件；查询、日志、黑白名单等入口是否只传目标 ID / 默认 Tab，而没有各自复制 Drawer、详情请求和字段结构。
 - 详情内数量 / 箭头触发的关联列表是否由新的子 Drawer 承载，并在关闭后保留父详情的 Tab、滚动位置和数据。

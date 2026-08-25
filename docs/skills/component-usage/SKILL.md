@@ -294,7 +294,7 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 详情基础信息中的可点击数量、带右箭头的关联值或“查看列表”操作，例如好友数量、群组数量、成员数量、绑定设备数量，点击后默认打开一个新的子 Drawer 承载关联列表：
 
 - 保留父详情 Drawer，不替换父 Drawer 内容，也不把这类点击临时切换成父详情的新 Tab；关闭子 Drawer 后应回到父详情原来的 Tab 和滚动位置。
-- 子 Drawer 优先使用 `BizRelationListDrawer`，标题使用明确的列表语义，例如“好友列表”“群组列表”；同结构的多种关系可以由一个实体关系 Drawer 通过 `mode` 区分。
+- 子 Drawer 默认必须通过 `@widgets/biz-relation-list-drawer` 的公开入口使用 `BizRelationListDrawer`，标题使用明确的列表语义，例如“好友列表”“群组列表”；同结构的多种关系可以由一个实体关系 Drawer 通过 `mode` 区分。只有完整可读 Figma / PRD 明确要求公共组件无法表达的结构，并且扩展公共组件仍不合理时，才允许局部自建。
 - 关系子 Drawer 同样默认使用视口宽度的 `50%`，不是父 Drawer 宽度的 50%；`BizRelationListDrawer` 已提供该默认值，无明确设计要求时不要覆盖。
 - 父详情只维护当前关系类型 / 目标 ID 和子 Drawer 开关；关联列表请求、loading、分页、空态和表格列由子 Drawer 自己管理，默认在打开时加载，不随父详情提前拉取完整列表。
 - 同一时刻只打开一个关系子 Drawer。关闭子 Drawer 只清理关系列表状态，不关闭或重置父详情。
@@ -302,14 +302,20 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 - 只有完整可读 Figma / PRD 明确把关联列表设计为父详情的常驻 Tab 时，才放入父详情 Tabs；不能因为存在关系接口就自动增加 Tab。
 - 因此在“基本信息 / 通讯录 / 群组 / 操作记录”这类结构中，如果通讯录和群组已经由基本信息里的好友数量、群组数量触发，则父详情只保留“基本信息”和“操作记录”，中间两个关系 Tab 不生成。
 
+关系子 Drawer 的组件复用必须落实到最终调用代码，不能只在分析中找到组件：
+
+- 关系列表实现文件应存在 `BizRelationListDrawer` 的公开入口 import 和 JSX 调用；页面或实体详情只传 `visible`、标题、关闭回调、数据、列、稳定 `rowKey` 与分页等必要参数。
+- 无明确设计依据时，关系列表实现不得为了该子 Drawer 直接组合 Arco `<Drawer>` 与 `<Table>`，不得写页面级固定像素 `width`，也不得为了凑列宽默认添加 `scroll.x`。
+- 修改已有页面时同时检查旧实现是否仍残留；完成前对本次变更文件搜索 `BizRelationListDrawer`、`<Drawer`、`<Table`、`width` 和 `scroll`，逐个确认命中符合上述边界。
+
 ## 详情内表格
 
 Drawer / Modal 内的关联列表、操作记录、变更记录、登录记录、审计记录等表格统一使用详情表样式，**不要**用裸 Arco Table（否则只有表头顶角圆角，底角会被裁切成直角）：
 
 - 首选 `BizDetailDrawer.operationRecords`（内部已带样式）。
-- 关联列表（好友 / 群聊 / 成员等）优先 `BizRelationListDrawer`（默认不设 `scroll.x`，与列表一致）。
+- 关联列表（好友 / 群聊 / 成员等）默认使用 `BizRelationListDrawer`（默认不设 `scroll.x`，与列表一致）。
 - 稿面为 Timeline 的操作日志优先 `BizOperationTimeline`。
-- 手写 Arco `Table` 时：
+- 非关系列表的特殊记录表格，或高优先级来源明确要求公共组件无法表达的结构，确需手写 Arco `Table` 时：
   1. `import '@shared/ui/biz-detail-table.less'`
   2. `className="use-biz-detail-table"`
   3. `border={false}`（关掉 Arco `::before` 底边）
