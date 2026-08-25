@@ -35,7 +35,7 @@ description: Choose, compose, and extract components when generating or adjustin
 1. 先确定详情对象的实体类型和稳定 ID，例如用户 + `user_id`、群组 + `group_id`，不能把“用户查询页详情”“用户日志页详情”当成两个实体。
 2. 搜索 `<Entity>DetailDrawer` / `<Entity>DetailModal`、相关详情接口调用方、其它列表的详情操作，以及 `widgets` / `features` 公开入口。
 3. 同一实体从查询、日志、黑名单、白名单、关联列表等不同页面进入时，默认必须复用同一个实体详情组件；页面只保存目标 ID 并传入 `visible`、`entityId`、`onClose`。
-4. 入口需要默认落在日志、关系等不同 Tab 时，通过 `defaultTab` / `initialView` 等语义化 props 表达，不复制 Drawer、详情请求、字段数组、Tab 或样式。
+4. 入口需要默认落在日志、权限等常驻 Tab 时，通过 `defaultTab` / `initialView` 等语义化 props 表达，不复制 Drawer、详情请求、字段数组、Tab 或样式；由数量 / 箭头触发的关系列表不属于常驻 Tab。
 5. Figma / PRD 明确要求同一实体在某入口展示额外信息时，优先扩展公共组件的可选 props / slots；只有对象契约、权限或交互流程本质不同，且无法共享详情主体时，才建立独立组件。
 
 当前常用项目组件：
@@ -283,10 +283,22 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 
 - 只有一类详情时不要展示 Tab；`BizDetailDrawer` 会自动渲染纯详情。
 - 基本信息 + 操作记录时直接用 `operationRecords`，让组件按现有样式生成记录 Tab。
-- 多种记录或关联信息时用语义化英文 tab key，如 `operationRecords`、`changeRecords`、`loginRecords`、`relatedUsers`。
+- 多种常驻记录信息使用语义化英文 tab key，如 `operationRecords`、`changeRecords`、`loginRecords`；关系数量钻取按下节使用子 Drawer。
 - 字段空值交给 `BizDetailDrawer` 默认展示 `--`，不要在每个字段重复写兜底，除非该字段有特殊展示。
 - Drawer 打开时拉详情；关闭时清理当前对象和临时状态。
 - 同一实体的详情 API、字段、Tab、空值、状态和样式只维护在实体详情组件中；接口变化时修改该组件，不在每个调用页面重复同步一套实现。
+
+### 详情内关系钻取
+
+详情基础信息中的可点击数量、带右箭头的关联值或“查看列表”操作，例如好友数量、群组数量、成员数量、绑定设备数量，点击后默认打开一个新的子 Drawer 承载关联列表：
+
+- 保留父详情 Drawer，不替换父 Drawer 内容，也不把这类点击临时切换成父详情的新 Tab；关闭子 Drawer 后应回到父详情原来的 Tab 和滚动位置。
+- 子 Drawer 优先使用 `BizRelationListDrawer`，标题使用明确的列表语义，例如“好友列表”“群组列表”；同结构的多种关系可以由一个实体关系 Drawer 通过 `mode` 区分。
+- 父详情只维护当前关系类型 / 目标 ID 和子 Drawer 开关；关联列表请求、loading、分页、空态和表格列由子 Drawer 自己管理，默认在打开时加载，不随父详情提前拉取完整列表。
+- 同一时刻只打开一个关系子 Drawer。关闭子 Drawer 只清理关系列表状态，不关闭或重置父详情。
+- 子 Drawer 内不嵌套 `BizListPage`；列表复用详情表格样式并提供稳定 `rowKey`，需要继续查看关联对象详情时复用对应实体详情组件。
+- 只有完整可读 Figma / PRD 明确把关联列表设计为父详情的常驻 Tab 时，才放入父详情 Tabs；不能因为存在关系接口就自动增加 Tab。
+- 因此在“基本信息 / 通讯录 / 群组 / 操作记录”这类结构中，如果通讯录和群组已经由基本信息里的好友数量、群组数量触发，则父详情只保留“基本信息”和“操作记录”，中间两个关系 Tab 不生成。
 
 ## 详情内表格
 
@@ -352,6 +364,7 @@ import '@shared/ui/biz-detail-table.less';
 - 不用 Tailwind 替代 Arco `Form`、`Grid`、`Table`、`Button`。
 - 不为单页复制 `biz-list`、`biz-detail-drawer` 已有能力。
 - 不为同一实体的不同来源页面创建平行详情 Drawer；先复用实体详情组件，再用 props 表达入口差异。
+- 不用切换父详情 Tab 或替换父 Drawer 内容来承载由数量 / 箭头触发的关系列表；此类钻取使用独立子 Drawer。
 - 不让相似通用 UI 继续散落在多个业务页面；确认稳定语义后按 FSD 抽取。
 - 不把操作记录表格做成普通列表页嵌进 Drawer。
 - 不手改 `src/shared/api/admin/**` 生成物。
