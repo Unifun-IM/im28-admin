@@ -64,7 +64,7 @@ export default function BizRelationListDrawer<
         rowKey={rowKey}
         data={data}
         columns={columns}
-        // 默认不设 scroll.x：Arco 会拆表头/表体并在底部留横向滚动条槽，与外框底边叠成双线
+        // 同列表：默认不强制 scroll.x，避免拆表 + 底部滚动条槽
         scroll={scrollX != null ? { x: scrollX } : undefined}
         pagination={pagination}
       />

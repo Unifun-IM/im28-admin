@@ -1,12 +1,6 @@
-/* 详情 Drawer / Modal 内 Table — 外框圆角 + 单元格网格（全局复用）
- * 分页在外，圆角只作用在 .arco-table-container，上下圆角一致。
- *
- * 注意：
- * 1. Arco 默认 th / header 吃 --border-radius-medium（本项目 12px），外框是 8px；
- *    必须清掉内部圆角，否则角上会露白缝。
- * 2. 外框已有 border，单元格只保留「右 + 底」网格线；末行去底边、末列去右边，
- *    避免与外框叠成双线。
- * 3. 关联列表默认不要传 scroll.x：Arco 会在表底留横向滚动条槽，看起来像多一条底边。
+/* 详情 Drawer / Modal 内 Table
+ * 对齐列表 use-biz-table 的做法：清 Arco 默认边框/圆角，表体只保留列分隔。
+ * 自身带外框（列表外框由 Card 提供）；分页在圆角框外。
  */
 .use-biz-detail-table.arco-table {
   .arco-table-container {
@@ -15,7 +9,6 @@
     overflow: hidden;
   }
 
-  /* 清掉内部 wrapper 可能带的边框，避免与外框叠线 */
   .arco-table-content-scroll,
   .arco-table-content-inner,
   .arco-table-header,
@@ -23,8 +16,11 @@
     border: none;
   }
 
-  /* 清掉 Arco 默认「仅顶角」圆角，由 container overflow 统一裁切 */
-  .arco-table-header,
+  /* 清掉 Arco 默认顶角圆角（--border-radius-medium=12px），由 container overflow 裁切 */
+  .arco-table-header {
+    border-radius: 0;
+  }
+
   .arco-table-content-scroll::before,
   .arco-table-content-scroll::after {
     border-radius: 0;
@@ -37,13 +33,8 @@
     }
   }
 
-  .arco-table-th,
-  .arco-table-td {
-    border-left: none !important;
-    border-top: none !important;
-  }
-
   .arco-table-th {
+    box-sizing: border-box;
     background: var(--color-fill-1);
     height: 32px;
     padding: 5px 12px;
@@ -51,53 +42,42 @@
     font-weight: 500;
     line-height: 22px;
     color: var(--color-text-3);
+    border-radius: 0;
+    border-top: none !important;
+    border-left: none !important;
     border-bottom: 1px solid var(--color-border-2) !important;
-    border-right: 1px solid var(--color-border-2) !important;
-  }
-
-  .arco-table-th:last-child {
-    border-right: none !important;
-  }
-
-  .arco-table-td {
-    min-height: 40px;
-    height: auto;
-    padding: 10px 12px;
-    font-size: 12px;
-    line-height: 20px;
-    color: var(--color-text-1);
-    border-bottom: 1px solid var(--color-border-2) !important;
-    border-right: 1px solid var(--color-border-2) !important;
+    border-right: 1px solid var(--color-border-2);
     vertical-align: middle;
   }
 
-  .arco-table-td:last-child {
-    border-right: none !important;
-  }
-
-  /* 末行贴外框底边；选择器尽量宽，兼容 scroll 拆表 */
-  .arco-table-tr:last-child > .arco-table-td {
-    border-bottom: none !important;
-  }
-
-  /*
-   * 若业务仍传入 scroll.x：隐藏表体横向滚动条占位高度，
-   * 否则滚动条槽会在末行与外框底边之间挤出一条缝 + 双线。
-   * 仍可用触控板 / Shift+滚轮横向滚动。
-   */
-  .arco-table-body {
-    scrollbar-width: none;
-  }
-
-  .arco-table-body::-webkit-scrollbar {
-    height: 0;
+  .arco-table-th:last-child {
+    border-right: none;
   }
 
   .arco-table-th-item {
     padding: 0;
   }
 
-  /* 分页在圆角框外，保持默认间距 */
+  .arco-table-td {
+    box-sizing: border-box;
+    min-height: 40px;
+    height: auto;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-text-1);
+    /* 同列表：无上下边框，仅列分隔；底边交给外框，避免末行双线 */
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: 1px solid var(--color-border-2);
+    vertical-align: middle;
+  }
+
+  .arco-table-td:last-child {
+    border-right: none;
+  }
+
   .arco-pagination {
     margin-top: 16px;
   }
