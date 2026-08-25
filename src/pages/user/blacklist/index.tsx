@@ -384,6 +384,12 @@ export default function Page() {
                   variant="text"
                   items={[
                     {
+                      key: 'detail',
+                      label: common['common.detail'],
+                      onClick: () =>
+                        setDetailUserId(row.user?.user_id || null)
+                    },
+                    {
                       key: 'unban',
                       label: t['blacklist.action.unban'],
                       onClick: () =>
@@ -391,12 +397,6 @@ export default function Page() {
                           userIds: [row.user?.user_id || ''],
                           variant: 'single'
                         })
-                    },
-                    {
-                      key: 'detail',
-                      label: common['common.detail'],
-                      onClick: () =>
-                        setDetailUserId(row.user?.user_id || null)
                     }
                   ]}
                 />

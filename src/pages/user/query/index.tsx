@@ -409,6 +409,11 @@ export default function UserQueryPage() {
                     variant="text"
                     items={[
                       {
+                        key: 'detail',
+                        label: common['common.detail'],
+                        onClick: () => setDetailUserId(uid)
+                      },
+                      {
                         key: 'blacklist',
                         label: disabled
                           ? t['userQuery.action.unban']
@@ -419,11 +424,6 @@ export default function UserQueryPage() {
                             [uid],
                             'single'
                           )
-                      },
-                      {
-                        key: 'detail',
-                        label: common['common.detail'],
-                        onClick: () => setDetailUserId(uid)
                       }
                     ]}
                   />
