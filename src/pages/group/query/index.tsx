@@ -16,6 +16,7 @@ import {
   postV1AdminGroupsMute
 } from '@shared/api/admin/groups';
 import { GroupDetailDrawer } from '@features/group-detail';
+import { UserDetailDrawer } from '@features/user-detail';
 import {
   UserChatModal,
   type ChatModalTarget
@@ -76,6 +77,7 @@ export default function GroupQueryPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
+  const [detailUserId, setDetailUserId] = useState<string | null>(null);
   const [chatTarget, setChatTarget] = useState<ChatModalTarget | null>(null);
 
   const keywordTypeOptions = useMemo(
@@ -413,6 +415,9 @@ export default function GroupQueryPage() {
                     copyText={ownerId}
                     avatar={row.owner?.avatar_url}
                     nameClassName="!text-[rgb(var(--link-6))]"
+                    onNameClick={
+                      ownerId ? () => setDetailUserId(ownerId) : undefined
+                    }
                   />
                 );
               }
@@ -494,6 +499,11 @@ export default function GroupQueryPage() {
             viewerUserId: payload.ownerId || undefined
           });
         }}
+      />
+      <UserDetailDrawer
+        visible={!!detailUserId}
+        userId={detailUserId}
+        onClose={() => setDetailUserId(null)}
       />
       <UserChatModal
         visible={!!chatTarget}

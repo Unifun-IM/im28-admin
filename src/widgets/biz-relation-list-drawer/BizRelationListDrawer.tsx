@@ -17,7 +17,7 @@ export type BizRelationListDrawerProps<T extends Record<string, unknown>> = {
   data: T[];
   loading?: boolean;
   rowKey: TableProps<T>['rowKey'];
-  width?: number;
+  width?: number | string;
   scrollX?: number;
   pagination?: TableProps<T>['pagination'];
   className?: string;
@@ -29,7 +29,7 @@ export type BizRelationListDrawerProps<T extends Record<string, unknown>> = {
 
 /**
  * 详情关联列表 Drawer：好友 / 群聊 / 成员等
- * 表格样式走 use-biz-detail-table（上下圆角一致，分页在框外）
+ * 默认宽 50%（与详情 Drawer 一致）；表格走 use-biz-detail-table
  */
 export default function BizRelationListDrawer<
   T extends Record<string, unknown>
@@ -41,7 +41,7 @@ export default function BizRelationListDrawer<
   data,
   loading,
   rowKey,
-  width = 880,
+  width = '50%',
   scrollX,
   pagination,
   className,

@@ -64,7 +64,7 @@ function logDetailText(
 
 /**
  * 用户详情抽屉 — Figma 1125:26019（基本信息）/ 750:23153（操作日志 Timeline）
- * 宽 640；对接 AdminAPI，交互按稿面保留
+ * 宽 50%；对接 AdminAPI，交互按稿面保留
  * @see postV1AdminUsersDetail
  * @see postV1AdminUsersOperationLogsList
  */
@@ -165,7 +165,7 @@ export default function UserDetailDrawer({
     <>
     <Drawer
       className="use-user-detail-drawer"
-      width={640}
+      width="50%"
       visible={visible}
       placement="right"
       title={t['userDetail.title']}
