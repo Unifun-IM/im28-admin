@@ -171,6 +171,7 @@ function BizDetailOperationTable<T extends Record<string, unknown>>({
       <Table
         {...tableProps}
         border={false}
+        stripe={tableProps?.stripe ?? true}
         className={cs('use-biz-detail-table', tableProps?.className)}
         columns={columns}
         data={data || []}

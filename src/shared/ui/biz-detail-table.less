@@ -83,6 +83,19 @@
     border-right: none;
   }
 
+  /* 同列表：偶数行 fill-1；Hover 优先于斑马纹 */
+  &.arco-table-stripe tbody > .arco-table-tr:nth-child(even) > .arco-table-td {
+    background-color: var(--color-fill-1);
+  }
+
+  &.arco-table-stripe tbody > .arco-table-tr:nth-child(odd) > .arco-table-td {
+    background-color: var(--color-bg-2);
+  }
+
+  tbody > .arco-table-tr:hover > .arco-table-td {
+    background-color: var(--color-fill-2) !important;
+  }
+
   .arco-pagination {
     margin-top: 16px;
   }

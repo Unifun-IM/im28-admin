@@ -80,7 +80,7 @@ description: "Apply styling when generating or changing admin UI in this repo: u
 - 用法：`import '@shared/ui/biz-detail-table.less'` + `className="use-biz-detail-table"` + **`border={false}`**（同 `BizListPage`）
 - 原因：Arco 默认 `border: true` 会加 `.arco-table-border`，用 `.arco-table-container::before` 背景画一条底边，和外框叠成双线
 - 外框：`.arco-table-container` 自带 `border + 8px 圆角 + overflow:hidden`（列表外框由 Card 提供，详情表自己画）
-- 单元格：清掉 Arco 默认边框/圆角；表头保留底边 + 列分隔；**表体只保留列分隔、无行底边**
+- 单元格：清掉 Arco 默认边框/圆角；表头保留底边 + 列分隔；**表体只保留列分隔、无行底边**；默认 `stripe`（同列表）
 - 分页在圆角框外；关联列表默认不传 `scroll.x`
 
 禁止在业务页再复制一份局部圆角 / 网格线样式。
