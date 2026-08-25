@@ -104,6 +104,7 @@ API 与行为以 `package.json` 中当前安装版本、包内 TypeScript 类型
 ### Modal、Drawer 与反馈
 
 - `Modal` 用于确认、创建、编辑和短流程；`Drawer` 用于保持列表上下文的详情或较长辅助流程。
+- 业务 Drawer 在 Figma / PRD 未明确宽度时，桌面端统一默认使用视口宽度的 `50%`。优先复用默认 `width="50%"` 的项目 Drawer，不在页面重复传参，也不无依据写死 `640px`、`880px` 等固定宽度。
 - `visible`、关闭回调、提交 loading 和目标对象由调用方控制；异步提交期间防止重复操作。
 - 简单危险操作优先 `Popconfirm` / `Modal.confirm`；多字段或多步骤操作使用业务 feature Modal。
 - 操作成功或失败使用 Arco `Message`；需要持续展示的系统级信息再使用 `Notification` / `Alert`。
@@ -255,7 +256,7 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 - 多分组详情：传多个 `sections`，不用为了普通分组强行开 Tab。
 - 多类信息或多接口：传 `tabs`，或同时传 `operationRecords` 自动追加操作记录 Tab。
 - 需要在 Tab 上方展示头像、名称、状态等对象摘要时传 `summary`，不要把摘要重复塞进 Descriptions。
-- 默认宽度 `50%`，默认无 footer；需要编辑/确认流程时再传 footer。
+- 默认宽度为视口的 `50%`，默认无 footer；`BizDetailDrawer` 已提供该默认值，页面无需重复传 `width`。只有 Figma / PRD 明确宽度时才覆盖，需要编辑/确认流程时再传 footer。
 
 `BizDetailDrawer` 是通用详情积木，不代表每个页面都应直接各拼一套 Drawer。同一业务实体已经存在跨页面详情组件时，页面必须优先使用该实体组件；实体组件内部再复用 `BizDetailDrawer`。例如用户查询、用户日志、黑名单和白名单应共用一个 `UserDetailDrawer`，入口差异只通过目标 ID 和默认 Tab 表达。
 
@@ -294,6 +295,7 @@ Figma / PRD 明确宽度时按高优先级来源；否则按以下顺序推导�
 
 - 保留父详情 Drawer，不替换父 Drawer 内容，也不把这类点击临时切换成父详情的新 Tab；关闭子 Drawer 后应回到父详情原来的 Tab 和滚动位置。
 - 子 Drawer 优先使用 `BizRelationListDrawer`，标题使用明确的列表语义，例如“好友列表”“群组列表”；同结构的多种关系可以由一个实体关系 Drawer 通过 `mode` 区分。
+- 关系子 Drawer 同样默认使用视口宽度的 `50%`，不是父 Drawer 宽度的 50%；`BizRelationListDrawer` 已提供该默认值，无明确设计要求时不要覆盖。
 - 父详情只维护当前关系类型 / 目标 ID 和子 Drawer 开关；关联列表请求、loading、分页、空态和表格列由子 Drawer 自己管理，默认在打开时加载，不随父详情提前拉取完整列表。
 - 同一时刻只打开一个关系子 Drawer。关闭子 Drawer 只清理关系列表状态，不关闭或重置父详情。
 - 子 Drawer 内不嵌套 `BizListPage`；列表复用详情表格样式并提供稳定 `rowKey`，需要继续查看关联对象详情时复用对应实体详情组件。
