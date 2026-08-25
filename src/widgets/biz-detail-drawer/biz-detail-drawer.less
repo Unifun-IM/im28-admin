@@ -22,17 +22,18 @@
     }
   }
 
+  .arco-drawer-scroll {
+    overflow: hidden;
+  }
+
   .arco-drawer-content {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
     overflow: hidden;
     padding: 0;
     background: var(--color-bg-1);
-  }
-
-  .arco-drawer-body {
-    height: 100%;
-    min-height: 0;
-    padding: 0;
-    overflow: hidden;
   }
 
   .arco-drawer-footer {
@@ -44,8 +45,11 @@
 
 .use-biz-detail-drawer-body {
   box-sizing: border-box;
+  display: flex;
   height: 100%;
   min-height: 0;
+  flex: 1;
+  flex-direction: column;
   padding: 16px;
   overflow: auto;
 }
@@ -53,28 +57,33 @@
 .use-biz-detail-drawer-spin {
   display: block;
   height: 100%;
+  min-height: 0;
 
   > .arco-spin-children {
+    display: flex;
     height: 100%;
+    min-height: 0;
+    flex-direction: column;
   }
 }
 
 .use-biz-detail-summary {
+  flex-shrink: 0;
   margin-bottom: 12px;
 }
 
 .use-biz-detail-tabs {
   display: flex;
-  min-height: 100%;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
+  overflow: hidden;
 
-  > .arco-tabs-header {
-    position: sticky;
+  /* Arco Tabs 直接子节点是 header-nav，不是 header */
+  > .arco-tabs-header-nav {
     z-index: 2;
-    top: 0;
     flex-shrink: 0;
     margin: 0 0 12px;
-    align-items: flex-end;
     background: var(--color-bg-1);
   }
 
@@ -160,6 +169,7 @@
   > .arco-tabs-content {
     min-height: 0;
     flex: 1;
+    overflow: auto;
     padding: 0;
   }
 
