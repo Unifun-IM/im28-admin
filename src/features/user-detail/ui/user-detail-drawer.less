@@ -13,36 +13,47 @@
     color: var(--color-text-1, #1d2129);
   }
 
-  .arco-drawer-content {
+  /* Arco Drawer 真实结构：scroll > header + content（无 drawer-body） */
+  .arco-drawer-scroll {
     overflow: hidden;
-    padding: 0;
   }
 
-  .arco-drawer-body {
-    height: 100%;
+  .arco-drawer-content {
+    display: flex;
     min-height: 0;
-    padding: 0;
+    flex: 1;
+    flex-direction: column;
     overflow: hidden;
+    padding: 0;
   }
 
   .use-user-detail-drawer-spin {
     display: block;
     height: 100%;
+    min-height: 0;
 
     > .arco-spin-children {
+      display: flex;
       height: 100%;
+      min-height: 0;
+      flex-direction: column;
     }
   }
 
   .use-user-detail-drawer-body {
     box-sizing: border-box;
+    display: flex;
     height: 100%;
     min-height: 0;
-    padding: 16px;
+    flex: 1;
+    flex-direction: column;
+    /* members 等无 Tabs 视图自行滚动；有 Tabs 时由 .arco-tabs-content 滚动 */
     overflow: auto;
+    padding: 16px;
   }
 
   .use-user-detail-summary {
+    flex-shrink: 0;
     margin-bottom: 12px;
   }
 
@@ -59,11 +70,14 @@
     line-height: 56px !important;
   }
 
-  /* Tabs/line — Figma 750:23400；下划线贴文字宽，不用 Arco ink（易左偏/过宽） */
+  /* Tabs/line — Figma 750:23400；下划线贴文字宽，不用 Arco ink（易左偏/过宽）
+   * Tab 头固定在 flex 布局中，仅 content 区域滚动（Arco 无 drawer-body，sticky 易失效） */
   .use-user-detail-tabs.arco-tabs {
     display: flex;
-    min-height: 100%;
+    min-height: 0;
+    flex: 1;
     flex-direction: column;
+    overflow: hidden;
 
     .arco-tabs-header,
     .arco-tabs-header-nav,
@@ -73,10 +87,8 @@
       margin-left: 0;
     }
 
-    > .arco-tabs-header {
-      position: sticky;
+    > .arco-tabs-header-nav {
       z-index: 2;
-      top: 0;
       flex-shrink: 0;
       margin: 0 0 12px;
       align-items: flex-end;
@@ -160,6 +172,7 @@
     .arco-tabs-content {
       min-height: 0;
       flex: 1;
+      overflow: auto;
       padding-top: 0;
       padding-left: 0;
       padding-right: 0;
