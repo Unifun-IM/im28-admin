@@ -311,6 +311,8 @@ Vite 已配置以下别名：
 - 详情 + 操作记录：传 `operationRecords` 会自动追加「操作记录」Tab。
 - 详情异步请求：传 `loading` 使用 Arco `Spin` 保持 Drawer 内容结构稳定。
 - 操作记录 / 关联列表表格复用 `.use-biz-detail-table`（`src/shared/ui/biz-detail-table.less`）：外框 8px 上下圆角一致，分页在框外；手写 Table 须 import 该 less 并加 className。
+- 关联列表 Drawer 使用 `@widgets/biz-relation-list-drawer`；Timeline 操作日志使用 `@widgets/biz-operation-timeline`。
+- 标准表单 Modal 壳使用 `use-biz-form-modal`；字段复制 / 链接行使用 `CopyValue` / `DetailLinkRow`。
 - 默认 Drawer 宽度 720px，默认无 footer，适合只读详情场景；需要底部操作时可透传 Arco `Drawer` 的 `footer`。
 
 ## API 与 OpenAPI
@@ -413,6 +415,10 @@ arco.css -> tailwind.css -> global.less
 - success Switch
 - Modal、Checkbox 等通用视觉补位
 - 通用详情表格 `.use-biz-detail-table`
+- 标准表单 Modal 壳 `.use-biz-form-modal`
+- 详情字段 `CopyValue` / `DetailLinkRow`
+- 关联列表 `@widgets/biz-relation-list-drawer`
+- 操作日志 Timeline `@widgets/biz-operation-timeline`
 
 ## i18n
 

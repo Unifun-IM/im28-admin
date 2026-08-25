@@ -82,6 +82,14 @@ Drawer、Modal 内的关联列表或记录表格不要依赖 Arco 默认「仅�
 
 禁止在业务页再复制一份局部圆角 / 网格线样式。
 
+### 标准表单 Modal 壳（`use-biz-form-modal`）
+
+账号 / 角色 / 白名单等标准表单弹窗：
+
+- 样式：`src/shared/ui/biz-form-modal.less`
+- 用法：`import '@shared/ui/biz-form-modal.less'` + `className="use-biz-form-modal"`；成功态加 `is-success`
+- 业务差异用额外 class 做小范围覆盖，不复制整份 header/footer/圆角壳
+
 ## Tailwind CSS 使用
 
 - 保持 `tailwind.config.js` 的 `preflight: false`，避免覆盖 Arco 基础样式。

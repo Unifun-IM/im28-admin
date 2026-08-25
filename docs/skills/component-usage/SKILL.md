@@ -39,10 +39,14 @@ description: Choose, compose, and extract components when generating or adjustin
 | 汇总与批量操作 | `DataSummary`、`TableBatchBar` |
 | 表格单元格与操作列 | `AvatarNameCell`、`DoubleLineCell`、`StatusBadge`、`ActionLinks` |
 | 纯详情、多 Tab、操作记录 | `@widgets/biz-detail-drawer` 的 `BizDetailDrawer` |
+| 详情关联列表 Drawer | `@widgets/biz-relation-list-drawer` 的 `BizRelationListDrawer` |
+| 详情操作日志 Timeline | `@widgets/biz-operation-timeline` 的 `BizOperationTimeline` |
 | 设置页 | `@widgets/session-settings` 的 `SettingsPageShell` |
 | 空态 | `EmptyState` |
 | 头像、状态、图标按钮 | `UserAvatar`、`StatusBadge`、`IconButton` |
+| 详情字段复制 / 可点链接行 | `CopyValue`、`DetailLinkRow` |
 | 详情 / Modal 内圆角表格 | `className="use-biz-detail-table"` + `@shared/ui/biz-detail-table.less` |
+| 标准表单 Modal 壳 | `className="use-biz-form-modal"` + `@shared/ui/biz-form-modal.less` |
 | 未保存离开保护 | `@features/unsaved-changes` |
 
 ## 相似 UI 抽取
@@ -258,6 +262,8 @@ API 与行为以 `package.json` 中当前安装版本、包内 TypeScript 类型
 Drawer / Modal 内的关联列表、操作记录、变更记录、登录记录、审计记录等表格统一使用详情表样式，**不要**用裸 Arco Table（否则只有表头顶角圆角，底角会被裁切成直角）：
 
 - 首选 `BizDetailDrawer.operationRecords`（内部已带样式）。
+- 关联列表（好友 / 群聊 / 成员等）优先 `BizRelationListDrawer`。
+- 稿面为 Timeline 的操作日志优先 `BizOperationTimeline`。
 - 手写 Arco `Table` 时：
   1. `import '@shared/ui/biz-detail-table.less'`
   2. `className="use-biz-detail-table"`
@@ -278,6 +284,15 @@ import '@shared/ui/biz-detail-table.less';
 ```
 
 详情内表格列规则与列表列一致：时间用 `formatDateTime`，长文本用省略 + `Tooltip`，状态用 `StatusBadge`，文案走 locale。
+
+## 标准表单 Modal
+
+账号创建、重置密码、改白名单、建角色等标准表单弹窗：
+
+- `import '@shared/ui/biz-form-modal.less'`
+- `Modal className="use-biz-form-modal"`；成功态再加 `is-success`（隐藏 header/footer）
+- 业务差异用额外 class 覆盖，不复制整份壳层 Less
+- 详情字段内联复制用 `CopyValue`；Descriptions 内跳转用 `DetailLinkRow`
 
 ## 通用页面状态
 

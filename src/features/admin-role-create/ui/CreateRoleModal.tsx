@@ -17,6 +17,7 @@ import {
 import useLocale from '@shared/lib/useLocale';
 import { buildPermModules } from '../model/permTree';
 import PermissionConfig from './PermissionConfig';
+import '@shared/ui/biz-form-modal.less';
 import './create-role-modal.less';
 
 const FormItem = Form.Item;
@@ -205,7 +206,7 @@ export default function CreateRoleModal({
 
   return (
     <Modal
-      className="use-create-role-modal"
+      className="use-biz-form-modal use-create-role-modal"
       wrapClassName="use-create-role-modal-wrap"
       title={isEdit ? t['editRole.title'] : t['createRole.title']}
       visible={visible}

@@ -3,9 +3,10 @@ import { Button, Form, Input, Modal, Result } from '@arco-design/web-react';
 import { IconCheckCircleFill } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { postV1AdminSystemUsersResetTwoFactor } from '@shared/api/admin/systemUsers';
-import iconWarning from '@app/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './reset-ga-modal.less';
 
 const FormItem = Form.Item;
@@ -97,7 +98,7 @@ export default function ResetGaModal({
         unmountOnExit
         closable={false}
         maskClosable={false}
-        className="use-reset-ga-modal"
+        className="use-biz-form-modal use-reset-ga-modal"
         wrapClassName="use-reset-ga-modal-wrap"
         style={{ width: 480 }}
         title={
@@ -156,7 +157,7 @@ export default function ResetGaModal({
         closable={false}
         maskClosable={false}
         footer={null}
-        className={cs('use-reset-ga-modal', 'is-success')}
+        className={cs('use-biz-form-modal', 'use-reset-ga-modal', 'is-success')}
         wrapClassName="use-reset-ga-modal-wrap"
         style={{ width: 780 }}
       >

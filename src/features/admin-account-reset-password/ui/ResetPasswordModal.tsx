@@ -11,9 +11,10 @@ import { IconCheckCircleFill, IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import cs from 'classnames';
 import { postV1AdminSystemUsersResetPassword } from '@shared/api/admin/systemUsers';
-import iconWarning from '@app/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './reset-password-modal.less';
 
 const FormItem = Form.Item;
@@ -126,7 +127,7 @@ export default function ResetPasswordModal({
         unmountOnExit
         closable={false}
         maskClosable={false}
-        className="use-reset-password-modal"
+        className="use-biz-form-modal use-reset-password-modal"
         wrapClassName="use-reset-password-modal-wrap"
         style={{ width: 480 }}
         title={
@@ -185,7 +186,7 @@ export default function ResetPasswordModal({
         closable={false}
         maskClosable={false}
         footer={null}
-        className={cs('use-reset-password-modal', 'is-success')}
+        className={cs('use-biz-form-modal', 'use-reset-password-modal', 'is-success')}
         wrapClassName="use-reset-password-modal-wrap"
         style={{ width: 780 }}
       >

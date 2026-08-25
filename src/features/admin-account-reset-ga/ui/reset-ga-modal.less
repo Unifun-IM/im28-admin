@@ -1,81 +1,4 @@
-/* —— 重置谷歌确认 / 成功（Figma 921:44697 / 44748）；亮/暗走 theme-tokens —— */
-.arco-modal.use-reset-ga-modal {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-border-1);
-
-  .arco-modal-header {
-    height: 48px;
-    padding: 0 24px;
-    background: var(--color-bg-1);
-    border-bottom: 1px solid var(--color-border-2);
-
-    .arco-modal-title {
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 24px;
-      color: var(--color-text-1);
-    }
-  }
-
-  .arco-modal-content {
-    padding: 12px 24px 24px;
-    background: var(--color-bg-1);
-  }
-
-  .arco-modal-footer {
-    height: 48px;
-    padding: 0 24px;
-    background: var(--color-bg-1);
-    border-top: 1px solid var(--color-border-1);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  /* TextArea 外观走 global.less `.arco-modal`（含暗色） */
-
-  .arco-btn {
-    border-radius: 6px;
-    height: 32px;
-  }
-
-  .arco-btn-primary.arco-btn-status-danger {
-    background-color: rgb(var(--danger-6));
-    border-color: rgb(var(--danger-6));
-  }
-
-  .arco-result-title {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 21px;
-    color: var(--color-text-1);
-  }
-
-  .arco-result-subtitle {
-    font-size: 12px;
-    line-height: 18px;
-    color: var(--color-text-3);
-  }
-
-  &.is-success {
-    .arco-modal-header,
-    .arco-modal-footer {
-      display: none;
-    }
-
-    .arco-modal-content {
-      padding: 24px;
-      background: var(--color-bg-2);
-    }
-
-    .arco-result {
-      padding: 24px 0 0;
-    }
-  }
-}
-
+/* 重置 GA：壳层走 use-biz-form-modal */
 .use-reset-ga-success {
   .arco-result-subtitle {
     max-width: 420px;
@@ -83,5 +6,3 @@
     text-align: center;
   }
 }
-
-

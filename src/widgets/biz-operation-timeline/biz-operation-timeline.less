@@ -1,0 +1,74 @@
+/* 详情操作日志 Timeline — BizOperationTimeline 默认样式 */
+.use-biz-operation-timeline.arco-timeline,
+.use-user-detail-timeline.arco-timeline,
+.use-group-detail-timeline.arco-timeline {
+  margin: 0;
+  padding: 0;
+
+  .arco-timeline-item {
+    min-height: 0;
+    padding-left: 0;
+    padding-bottom: 0;
+  }
+
+  .arco-timeline-item-dot-wrapper {
+    left: 0;
+    width: 7px;
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .arco-timeline-item-dot-content {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    line-height: 7px;
+  }
+
+  .arco-timeline-item-dot {
+    position: relative;
+    z-index: 1;
+    top: 0;
+    margin-top: 0;
+    width: 7px;
+    height: 7px;
+    border: none !important;
+    box-sizing: border-box;
+    border-radius: 50%;
+  }
+
+  .arco-timeline-item-dot-line {
+    position: absolute;
+    left: 50%;
+    top: 21.5px;
+    bottom: -21.5px;
+    width: 0;
+    border: none;
+    border-left: 1px solid var(--color-border-2);
+    background: transparent !important;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+  }
+
+  .arco-timeline-item-last
+    > .arco-timeline-item-dot-wrapper
+    .arco-timeline-item-dot-line {
+    display: none;
+  }
+
+  .arco-timeline-item-content-wrapper {
+    margin-left: 17px;
+    margin-bottom: 0;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .arco-timeline-item-content {
+    margin: 0;
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-text-1);
+  }
+}
