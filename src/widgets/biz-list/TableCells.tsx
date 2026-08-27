@@ -12,7 +12,7 @@ import cs from 'classnames';
 import copy from 'copy-to-clipboard';
 import useLocale from '@shared/lib/useLocale';
 import { UserAvatar } from '@shared/ui';
-import IconMoreDots from './assets/icon-more-dots.svg?react';
+import IconMoreDots from '@assets/icon/icon-more-dots.svg?react';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
@@ -273,10 +273,6 @@ export function ActionLinks({
     const moreMenu = moreItems.length
       ? buildMoreMenu(moreItems, { textOnly: true })
       : null;
-    /** 折叠态仅外露首项时，无更多也占位，保证「详情」与有更多行左对齐 */
-    const reserveMoreSlot =
-      moreMenu != null || visibleItems.length === foldedVisible;
-
     return (
       <div
         className={cs(
@@ -309,8 +305,6 @@ export function ActionLinks({
               <IconMoreDots aria-hidden />
             </button>
           </Dropdown>
-        ) : reserveMoreSlot ? (
-          <span className="inline-block size-[14px] shrink-0" aria-hidden />
         ) : null}
       </div>
     );

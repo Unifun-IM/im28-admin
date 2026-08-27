@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#635CFF',
+          DEFAULT: 'rgb(var(--primary-6))',
           1: 'rgb(var(--arcoblue-1))',
           2: 'rgb(var(--arcoblue-2))',
           3: 'rgb(var(--arcoblue-3))',
@@ -22,17 +22,19 @@ export default {
           10: 'rgb(var(--arcoblue-10))'
         },
         // 对齐 Arco / Figma token（用于布局壳层）
-        'arco-bg-1': 'var(--color-bg-1, #f7f8fa)',
-        'arco-bg-2': 'var(--color-bg-2, #fff)',
-        'arco-bg-popup': 'var(--color-bg-popup, #fff)',
-        'arco-fill-1': 'var(--color-fill-1, #f7f8fa)',
-        'arco-fill-2': 'var(--color-fill-2, #f2f3f5)',
-        'arco-border-2': 'var(--color-border-2, #e5e6eb)',
-        'arco-text-1': 'var(--color-text-1, #1d2129)',
-        'arco-text-2': 'var(--color-text-2, #4e5969)',
-        'arco-text-3': 'var(--color-text-3, #86909c)',
-        'arco-text-4': 'var(--color-text-4, #c9cdd4)',
+        'arco-bg-1': 'var(--color-bg-1)',
+        'arco-bg-2': 'var(--color-bg-2)',
+        'arco-bg-popup': 'var(--color-bg-popup)',
+        'arco-fill-1': 'var(--color-fill-1)',
+        'arco-fill-2': 'var(--color-fill-2)',
+        'arco-border-1': 'var(--color-border-1)',
+        'arco-border-2': 'var(--color-border-2)',
+        'arco-text-1': 'var(--color-text-1)',
+        'arco-text-2': 'var(--color-text-2)',
+        'arco-text-3': 'var(--color-text-3)',
+        'arco-text-4': 'var(--color-text-4)',
         'arco-success': 'rgb(var(--success-6))',
+        'arco-warning': 'rgb(var(--warning-6))',
         'arco-danger': 'rgb(var(--danger-6))'
       },
       borderRadius: {

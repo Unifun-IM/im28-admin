@@ -26,7 +26,7 @@ function isSuperAdminRole(role?: AdminAPI.SysRole) {
   return name === 'super admin' || name === '超级管理员';
 }
 
-function RolesPage() {
+export function RolesPage() {
   const t = useLocale();
   const common = t;
 
@@ -233,4 +233,6 @@ function RolesPage() {
   );
 }
 
-export default observer(RolesPage);
+const ObservedRolesPage = observer(RolesPage);
+
+export default ObservedRolesPage;

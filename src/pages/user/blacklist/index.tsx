@@ -14,7 +14,7 @@ import {
 } from '@widgets/biz-list';
 import { postV1AdminUsersBlacklistList } from '@shared/api/admin/users';
 import { BlacklistActionModal } from '@features/user-blacklist-action';
-import { UserDetailDrawer } from '@features/user-detail';
+import { UserDetailDrawer } from '@widgets/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 

@@ -17,13 +17,13 @@ import {
 } from '@entities/global-state';
 import { pageTabsStore } from '@entities/page-tabs';
 import { systemSettingsStore } from '@entities/system-settings';
-import IconDashboard from '@shared/assets/icon-dashboard.svg?react';
-import IconRisk from '@shared/assets/icon-risk.svg?react';
-import IconSession from '@shared/assets/icon-session.svg?react';
-import IconSystem from '@shared/assets/icon-system.svg?react';
-import IconTrade from '@shared/assets/icon-trade.svg?react';
-import IconUser from '@shared/assets/icon-user.svg?react';
-import Logo from '@shared/assets/logo.svg?react';
+import Logo from '@assets/common/logo.svg?react';
+import IconDashboard from '@assets/icon/icon-dashboard.svg?react';
+import IconRisk from '@assets/icon/icon-risk-control.svg?react';
+import IconSession from '@assets/icon/icon-session-management.svg?react';
+import IconSystem from '@assets/icon/icon-system.svg?react';
+import IconTrade from '@assets/icon/icon-trade-management.svg?react';
+import IconUser from '@assets/icon/icon-user-management.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import getUrlParams from '@shared/lib/getUrlParams';
 import useLocale from '@shared/lib/useLocale';
@@ -145,7 +145,10 @@ export const PageLayout = observer(function PageLayout({
       : chromeFullscreen
         ? pageTabsHeight
         : navbarHeight + headerGap + pageTabsHeight;
-  const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
+  const flattenRoutes = useMemo(
+    () => getFlattenRoutes(routes) || [],
+    [getFlattenRoutes, routes]
+  );
 
   /** 按 pathname 同步取标题，避免 breadcrumb 滞后导致 tab 标题闪一下 */
   const pageTabTitle = useMemo(() => {
@@ -333,6 +336,8 @@ export const PageLayout = observer(function PageLayout({
     }
     setBreadCrumb(routeConfig || []);
     updateMenuStatus();
+    // Menu state is intentionally recalculated only when navigation changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return (

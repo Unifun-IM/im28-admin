@@ -40,7 +40,7 @@ export default function SettingsPageShell({
     <Card
       loading={loading}
       bordered={false}
-      className="!rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]"
+      className="use-session-settings-shell !rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]"
       bodyStyle={{ padding: 12 }}
     >
       <div className="mb-0 flex items-center justify-between">
@@ -93,7 +93,9 @@ export default function SettingsPageShell({
           ref={scrollRef}
           className="max-h-[calc(100vh-220px)] min-w-0 flex-1 overflow-y-auto"
         >
-          <div className="flex flex-col gap-3">{children}</div>
+          <div className="use-session-settings-content flex flex-col gap-3">
+            {children}
+          </div>
         </div>
       </div>
     </Card>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { postV1AdminRiskIpBlacklistRemove } from '@shared/api/admin/adminfengkongguanli';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './ip-blacklist-action-modal.less';

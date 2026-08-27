@@ -1,7 +1,7 @@
 export { default as AddIpBlacklistModal } from './ui/AddIpBlacklistModal';
 export { default as ReleaseIpBlacklistModal } from './ui/ReleaseIpBlacklistModal';
 export { default as BatchReleaseIpBlacklistModal } from './ui/BatchReleaseIpBlacklistModal';
-export { parseIpList } from './ui/AddIpBlacklistModal';
+export { parseIpList } from './model/parse-ip-list';
 export type {
   AddIpBlacklistModalProps,
   AddIpBlacklistPayload

@@ -15,8 +15,8 @@ import {
   postV1AdminUsersBatchUnban,
   postV1AdminUsersUnban
 } from '@shared/api/admin/users';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
-import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
+import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
+import iconSuccess from '@assets/icon/icon-check-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './blacklist-action-modal.less';

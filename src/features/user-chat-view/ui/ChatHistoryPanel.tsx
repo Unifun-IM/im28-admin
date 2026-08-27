@@ -15,7 +15,7 @@ import {
 } from '@arco-design/web-react/icon';
 import dayjs, { Dayjs } from 'dayjs';
 import { searchChatHistory } from '../api/chatStubs';
-import ChatIconHistorySearch from '../assets/icon-chat-history-search.svg?react';
+import ChatIconHistorySearch from '@assets/icon/icon-chat-history-search.svg?react';
 import useElementHeight from './useElementHeight';
 
 export type ChatHistoryTab = 'all' | 'media' | 'file' | 'date';

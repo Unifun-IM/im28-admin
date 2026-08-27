@@ -8,7 +8,7 @@ import {
   Select
 } from '@arco-design/web-react';
 import { postV1AdminRiskIpBlacklistBatchRemove } from '@shared/api/admin/adminfengkongguanli';
-import iconSuccess from '@shared/assets/icon-check-circle-fill.svg';
+import iconSuccess from '@assets/icon/icon-check-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import './ip-blacklist-action-modal.less';

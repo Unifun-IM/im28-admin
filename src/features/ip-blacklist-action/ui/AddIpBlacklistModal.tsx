@@ -8,9 +8,10 @@ import {
   Select
 } from '@arco-design/web-react';
 import { postV1AdminRiskIpBlacklistAdd } from '@shared/api/admin/adminfengkongguanli';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import { parseIpList } from '../model/parse-ip-list';
 import './ip-blacklist-action-modal.less';
 
 const FormItem = Form.Item;
@@ -27,18 +28,6 @@ export type AddIpBlacklistModalProps = {
   onCancel: () => void;
   onSuccess?: () => void;
 };
-
-/** 逗号 / 空格 / 换行 / 分号分隔 */
-export function parseIpList(raw: string): string[] {
-  return Array.from(
-    new Set(
-      raw
-        .split(/[\s,;，；]+/)
-        .map((s) => s.trim())
-        .filter(Boolean)
-    )
-  ).slice(0, 100);
-}
 
 type FormValues = {
   ips: string;

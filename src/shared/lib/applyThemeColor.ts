@@ -7,7 +7,7 @@ export const DEFAULT_THEME_COLOR =
   defaultSettings.themeColor || '#635CFF';
 
 /**
- * Figma docs/Light.tokens.json · primary/2…7 + 更深阶
+ * Figma docs/theme/Light.tokens.json · primary/2…7 + 更深阶
  * index 0 → --arcoblue-1
  */
 const FIGMA_PRIMARY_LIGHT = [
@@ -24,7 +24,7 @@ const FIGMA_PRIMARY_LIGHT = [
 ];
 
 /**
- * Figma docs/Dark.tokens.json · primary（暗色 1 深 → 10 浅）
+ * Figma docs/theme/Dark.tokens.json · primary（暗色 1 深 → 10 浅）
  * primary/1 为透明层，色板从 primary/2 起；6 钉品牌色
  */
 const FIGMA_PRIMARY_DARK = [

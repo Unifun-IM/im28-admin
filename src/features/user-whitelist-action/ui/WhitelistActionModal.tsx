@@ -25,7 +25,7 @@ import {
   postV1AdminUsersWhitelistCreate,
   postV1AdminUsersWhitelistRemove
 } from '@shared/api/admin/users';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import { UserAvatar } from '@shared/ui';
 import useLocale from '@shared/lib/useLocale';
@@ -123,7 +123,6 @@ export default function WhitelistActionModal({
   const isAdd = mode === 'add';
   const ids = userIds.filter(Boolean);
   const isBatch = !isAdd && (variant === 'batch' || ids.length > 1);
-  const count = ids.length || 1;
   const needSearch = isAdd && ids.length === 0;
 
   const searchTypeOptions = useMemo(

@@ -1,7 +1,7 @@
 import React from 'react';
 import cs from 'classnames';
 
-import emptyStateSvg from '@shared/assets/empty-state.svg';
+import emptyStateSvg from '@assets/common/empty-state.svg';
 import useLocale from '@shared/lib/useLocale';
 
 export type EmptyStateProps = {

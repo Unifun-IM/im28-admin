@@ -51,7 +51,7 @@ function resolveTabTitle(
  * 页面打开记录快捷导航 — Figma 741:29115
  * 支持固定标签（默认最多 3）、右键菜单与壳层全屏（隐藏侧栏/Navbar，保留本栏）
  */
-function PageTabs({
+export function PageTabs({
   title,
   closable = true,
   maxPinned = MAX_PINNED_TABS,
@@ -238,4 +238,6 @@ function PageTabs({
   );
 }
 
-export default observer(PageTabs);
+const ObservedPageTabs = observer(PageTabs);
+
+export default ObservedPageTabs;

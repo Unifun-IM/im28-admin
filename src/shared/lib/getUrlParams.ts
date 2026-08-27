@@ -2,7 +2,7 @@
 import qs from 'query-string';
 import { isSSR } from './is';
 
-export type ParamsType = Record<string, any>;
+export type ParamsType = Record<string, boolean>;
 
 export default function getUrlParams(): ParamsType {
   const params = qs.parseUrl(!isSSR ? window.location.href : '').query;

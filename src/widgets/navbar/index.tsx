@@ -36,7 +36,7 @@ import useStorage from '@shared/lib/useStorage';
 import { postV1AdminAuthLogout } from '@shared/api/admin/auth';
 import { clearAuthSession, getAccessToken } from '@shared/api/request';
 import cs from 'classnames';
-import IconLogout from './assets/icon-logout.svg?react';
+import IconLogout from '@assets/icon/icon-logout.svg?react';
 import './navbar.less';
 
 export type NavbarBreadcrumbItem =

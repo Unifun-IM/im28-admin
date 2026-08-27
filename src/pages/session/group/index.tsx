@@ -11,7 +11,7 @@ import {
   StatusBadge
 } from '@widgets/biz-list';
 import { postV1AdminConversationsGroupsList } from '@shared/api/admin/adminhuihuachaxun';
-import { GroupDetailDrawer } from '@features/group-detail';
+import { GroupDetailDrawer } from '@widgets/group-detail';
 import {
   UserChatModal,
   type ChatModalTarget

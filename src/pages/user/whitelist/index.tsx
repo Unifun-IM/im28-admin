@@ -14,7 +14,7 @@ import {
 } from '@widgets/biz-list';
 import { postV1AdminUsersWhitelistList } from '@shared/api/admin/users';
 import { WhitelistActionModal } from '@features/user-whitelist-action';
-import { UserDetailDrawer } from '@features/user-detail';
+import { UserDetailDrawer } from '@widgets/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 
@@ -109,7 +109,7 @@ export default function Page() {
         });
 
         let list: WhitelistRow[] = res.data?.list || [];
-        let nextTotal = res.data?.total || 0;
+        const nextTotal = res.data?.total || 0;
 
         // 契约暂无 reason 筛选；按当前页结果本地过滤（选项待业务枚举补齐）
         if (reasonFilter) {

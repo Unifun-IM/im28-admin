@@ -15,8 +15,8 @@ import {
   postV1AdminGroupsList,
   postV1AdminGroupsMute
 } from '@shared/api/admin/groups';
-import { GroupDetailDrawer } from '@features/group-detail';
-import { UserDetailDrawer } from '@features/user-detail';
+import { GroupDetailDrawer } from '@widgets/group-detail';
+import { UserDetailDrawer } from '@widgets/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { imLabel } from '@shared/lib/imLabels';
 import { formatDateTime } from '@shared/lib/formatTime';

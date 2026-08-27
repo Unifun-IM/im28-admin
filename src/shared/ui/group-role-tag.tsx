@@ -1,4 +1,3 @@
-import React from 'react';
 import { getRoleTagColor, hexToRgba } from '@shared/lib/userAvatar';
 import useLocale from '@shared/lib/useLocale';
 
@@ -40,13 +39,4 @@ export function GroupRoleTag({
       {label}
     </span>
   );
-}
-
-/** 群主/管理员昵称用同色 */
-export function groupRoleNameStyle(
-  userId?: string | null,
-  roleLevel?: number | null
-): React.CSSProperties | undefined {
-  if (roleLevel !== 100 && roleLevel !== 60) return undefined;
-  return { color: getRoleTagColor(String(userId || '')) };
 }

@@ -11,7 +11,7 @@ import { IconCheckCircleFill, IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import cs from 'classnames';
 import { postV1AdminSystemUsersResetPassword } from '@shared/api/admin/systemUsers';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import '@shared/ui/biz-form-modal.less';

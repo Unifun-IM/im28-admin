@@ -412,7 +412,7 @@ export async function getChatMessages(params: {
       if (isHiddenMessageContentType(m.type)) return null;
 
       const sender = users.get(m.sender_id || '');
-      const body = (m.body || {}) as Record<string, any>;
+      const body = (m.body || {}) as Record<string, unknown>;
       const parsed = parseImMessageBody(m.type, body, {
         viewerUserId: userId,
         locale: resolveImLocale(),
@@ -478,7 +478,7 @@ export async function getChatMessages(params: {
   };
 }
 
-export async function searchChatHistory(_params: {
+export async function searchChatHistory(params: {
   type: string;
   id: string;
   keyword?: string;
@@ -490,6 +490,7 @@ export async function searchChatHistory(_params: {
   mediaGroups: unknown[];
   fileGroups: unknown[];
 }> {
+  void params;
   // 暂无独立搜索 Admin 契约，保持空壳
   return {
     list: [],

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Checkbox, Input, Spin } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import cs from 'classnames';
@@ -34,8 +34,10 @@ export default function PermissionConfig({
   loading
 }: PermissionConfigProps) {
   const t = useLocale();
-  const permTitle = (key: string, fallback: string) =>
-    t[`system.perm.${key}`] || fallback;
+  const permTitle = useCallback(
+    (key: string, fallback: string) => t[`system.perm.${key}`] || fallback,
+    [t]
+  );
 
   const checked = useMemo(() => new Set(value), [value]);
   const [keyword, setKeyword] = useState('');
@@ -110,7 +112,7 @@ export default function PermissionConfig({
         return null;
       })
       .filter(Boolean) as PermModule[];
-  }, [keyword, modules, t]);
+  }, [keyword, modules, permTitle]);
 
   useEffect(() => {
     if (!keyword.trim()) return;

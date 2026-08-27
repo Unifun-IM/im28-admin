@@ -23,27 +23,27 @@ import {
   getChatMessages,
   getUserChatBook
 } from '../api/chatStubs';
-import ChatEmptyLogo from '../assets/chat-empty-logo.svg?react';
-import ChatIconBubbleTailPeer from '../assets/icon-chat-bubble-tail-peer.svg?react';
-import ChatIconBubbleTailSelf from '../assets/icon-chat-bubble-tail-self.svg?react';
-import ChatIconPhoneDisabledPeer from '../assets/icon-chat-phone-disabled-peer.svg?react';
-import ChatIconPhoneDisabledSelf from '../assets/icon-chat-phone-disabled-self.svg?react';
-import ChatIconPhonePeer from '../assets/icon-chat-phone-peer.svg?react';
-import ChatIconPhoneSelf from '../assets/icon-chat-phone-self.svg?react';
-import ChatIconPlay from '../assets/icon-chat-play.svg?react';
-import ChatIconRead from '../assets/icon-chat-read.svg?react';
-import ChatIconVideoOffPeer from '../assets/icon-chat-video-off-peer.svg?react';
-import ChatIconVideoOffSelf from '../assets/icon-chat-video-off-self.svg?react';
-import ChatIconVideoPeer from '../assets/icon-chat-video-peer.svg?react';
-import ChatIconVideoSelf from '../assets/icon-chat-video-self.svg?react';
-import ChatIconClose from '../assets/icon-close.svg?react';
-import ChatIconContacts from '../assets/icon-contacts.svg?react';
-import ChatIconContactsActive from '../assets/icon-contacts-active.svg?react';
-import ChatIconPhone from '../assets/icon-phone.svg?react';
-import ChatIconPhoneActive from '../assets/icon-phone-active.svg?react';
-import ChatIconSession from '../assets/icon-session.svg?react';
-import ChatIconSessionActive from '../assets/icon-session-active.svg?react';
-import iconStar from '../assets/icon-star.svg';
+import ChatEmptyLogo from '@assets/user/query/chat-empty-logo.svg?react';
+import ChatIconBubbleTailPeer from '@assets/icon/icon-chat-bubble-tail-peer.svg?react';
+import ChatIconBubbleTailSelf from '@assets/icon/icon-chat-bubble-tail-self.svg?react';
+import ChatIconPhoneDisabledPeer from '@assets/icon/icon-chat-phone-disabled-peer.svg?react';
+import ChatIconPhoneDisabledSelf from '@assets/icon/icon-chat-phone-disabled-self.svg?react';
+import ChatIconPhonePeer from '@assets/icon/icon-chat-phone-peer.svg?react';
+import ChatIconPhoneSelf from '@assets/icon/icon-chat-phone-self.svg?react';
+import ChatIconPlay from '@assets/icon/icon-chat-play.svg?react';
+import ChatIconRead from '@assets/icon/icon-chat-read.svg?react';
+import ChatIconVideoOffPeer from '@assets/icon/icon-chat-video-off-peer.svg?react';
+import ChatIconVideoOffSelf from '@assets/icon/icon-chat-video-off-self.svg?react';
+import ChatIconVideoPeer from '@assets/icon/icon-chat-video-peer.svg?react';
+import ChatIconVideoSelf from '@assets/icon/icon-chat-video-self.svg?react';
+import ChatIconClose from '@assets/icon/icon-close.svg?react';
+import ChatIconContacts from '@assets/icon/icon-contacts.svg?react';
+import ChatIconContactsActive from '@assets/icon/icon-contacts-active.svg?react';
+import ChatIconPhone from '@assets/icon/icon-phone.svg?react';
+import ChatIconPhoneActive from '@assets/icon/icon-phone-active.svg?react';
+import ChatIconSession from '@assets/icon/icon-session.svg?react';
+import ChatIconSessionActive from '@assets/icon/icon-session-active.svg?react';
+import iconStar from '@assets/icon/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
 import './user-chat-modal.less';
 

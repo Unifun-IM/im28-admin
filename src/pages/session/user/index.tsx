@@ -11,7 +11,7 @@ import {
   StatusBadge
 } from '@widgets/biz-list';
 import { postV1AdminConversationsUsersList } from '@shared/api/admin/adminhuihuachaxun';
-import { UserDetailDrawer } from '@features/user-detail';
+import { UserDetailDrawer } from '@widgets/user-detail';
 import { UserChatModal } from '@features/user-chat-view';
 import { EmptyState } from '@shared/ui';
 import useLocale from '@shared/lib/useLocale';

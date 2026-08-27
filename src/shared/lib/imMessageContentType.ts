@@ -8,6 +8,14 @@
 
 import { imMsg, resolveImLocale } from '@shared/lib/imLabels';
 
+type MessageBody = Record<string, unknown>;
+
+function asMessageBody(value: unknown): MessageBody | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as MessageBody)
+    : undefined;
+}
+
 /** 与 Admin MessageType 对齐；1203+ / 2101 等为 IM 历史兼容 */
 export const MessageContentType = {
   Text: 101,
@@ -261,9 +269,10 @@ function localeOf(opts?: ParseMessageBodyOptions) {
   return opts?.locale || resolveImLocale();
 }
 
-function nested(body: Record<string, any>, ...keys: string[]) {
+function nested(body: MessageBody, ...keys: string[]): MessageBody | undefined {
   for (const key of keys) {
-    if (body[key] && typeof body[key] === 'object') return body[key];
+    const value = asMessageBody(body[key]);
+    if (value) return value;
   }
   return undefined;
 }
@@ -273,17 +282,18 @@ function nested(body: Record<string, any>, ...keys: string[]) {
  * Admin 约定：key=rtc.call.summary，data 为 JSON（含 status_text / duration_seconds / call_type）。
  */
 function parseCustomCall(
-  custom?: Record<string, any>,
+  custom?: MessageBody,
   opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody | null {
   if (!custom) return null;
   const t = localeOf(opts);
-  let data: Record<string, any> = custom;
+  let data: MessageBody = custom;
   const raw = pickStr(custom.data, custom.Data);
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') data = parsed;
+      const parsedBody = asMessageBody(parsed);
+      if (parsedBody) data = parsedBody;
     } catch {
       /* ignore */
     }
@@ -375,7 +385,7 @@ export function isAdminSystemMessageType(type?: number): boolean {
 /** rtc.call.* → 可读文案；call_type 区分音视频 */
 function formatRtcCallSystemText(
   eventType: string,
-  extra: Record<string, any>,
+  extra: MessageBody,
   opts?: ParseMessageBodyOptions
 ): string {
   const t = localeOf(opts);
@@ -404,7 +414,7 @@ function formatRtcCallSystemText(
 /** 群系统 event_type → 可读文案（system.text 为空时） */
 function formatGroupSystemText(
   eventType: string,
-  extra: Record<string, any>,
+  extra: MessageBody,
   opts?: ParseMessageBodyOptions
 ): string | undefined {
   const t = localeOf(opts);
@@ -468,7 +478,7 @@ function guessNameFromApplicationMsg(msg?: string): string | undefined {
  */
 function formatFriendSystemText(
   eventType: string,
-  extra: Record<string, any>,
+  extra: MessageBody,
   opts?: ParseMessageBodyOptions
 ): string | undefined {
   const t = localeOf(opts);
@@ -536,7 +546,7 @@ function formatFriendSystemText(
 /** event_type → 展示文案；未识别时返回 undefined，由上层继续兜底 */
 function formatSystemEventText(
   eventType: string,
-  extra: Record<string, any>,
+  extra: MessageBody,
   opts?: ParseMessageBodyOptions
 ): string | undefined {
   const t = localeOf(opts);
@@ -633,25 +643,18 @@ function defaultSystemTextByType(
  * @see AdminAPI.SystemMessage / SystemMessageBody
  */
 function parseSystemMessageBody(
-  system?: Record<string, any> | null,
-  body: Record<string, any> = {},
+  system?: MessageBody | null,
+  body: MessageBody = {},
   type?: number,
   opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody {
   // 1) body.system  2) 传入的 system  3) body 本身像 SystemMessage
-  const sys: Record<string, any> =
-    system && typeof system === 'object' && !Array.isArray(system)
-      ? system
-      : body.system && typeof body.system === 'object'
-        ? body.system
-        : pickStr(body.event_type, body.text)
-          ? body
-          : {};
+  const sys: MessageBody =
+    asMessageBody(system) ||
+    asMessageBody(body.system) ||
+    (pickStr(body.event_type, body.text) ? body : {});
 
-  const extra =
-    sys.extra && typeof sys.extra === 'object' && !Array.isArray(sys.extra)
-      ? sys.extra
-      : {};
+  const extra = asMessageBody(sys.extra) || {};
 
   const eventType = pickStr(sys.event_type, sys.eventType);
   /** 兼容兜底文本，禁止用于业务分支 */
@@ -720,11 +723,12 @@ function parseSystemMessageBody(
 }
 
 function parseForwardOrigin(
-  body: Record<string, any>
+  body: MessageBody
 ): Pick<ParsedChatMessageBody, 'forwardFromName' | 'forwardFromAvatar'> {
   const origin =
-    nested(body, 'forward_origin', 'forwardOrigin') || body.forward_origin;
-  if (!origin || typeof origin !== 'object') return {};
+    nested(body, 'forward_origin', 'forwardOrigin') ||
+    asMessageBody(body.forward_origin);
+  if (!origin) return {};
   return {
     forwardFromName: pickStr(origin.name, origin.nickname, origin.user_id),
     forwardFromAvatar: pickStr(origin.avatar_url, origin.avatarUrl)
@@ -734,7 +738,7 @@ function parseForwardOrigin(
 /** IM contentType + body → 查聊天气泡类型 */
 export function mapMessageContentTypeToUi(
   type?: number,
-  body: Record<string, any> = {}
+  body: MessageBody = {}
 ): ImChatUiMsgType {
   if (type == null) return 'text';
   if (isNotificationMessageContentType(type)) return 'system';
@@ -758,7 +762,9 @@ export function mapMessageContentTypeToUi(
     case MessageContentType.CustomFace: {
       // 115：有 url 时按图片气泡展示表情贴纸
       const face =
-        nested(body, 'emoji', 'faceElem', 'face_elem') || body.emoji || body;
+        nested(body, 'emoji', 'faceElem', 'face_elem') ||
+        asMessageBody(body.emoji) ||
+        body;
       const url = pickStr(face?.url, body.url);
       return url ? 'image' : 'text';
     }
@@ -780,7 +786,7 @@ export function mapMessageContentTypeToUi(
  */
 export function parseImMessageBody(
   type: number | undefined,
-  body: Record<string, any> = {},
+  body: MessageBody = {},
   opts?: ParseMessageBodyOptions
 ): ParsedChatMessageBody {
   const forward = parseForwardOrigin(body);
@@ -799,6 +805,7 @@ export function parseImMessageBody(
   /** Admin：emoji；IM 兼容 faceElem */
   const faceElem = nested(body, 'emoji', 'faceElem', 'face_elem');
   const customElem = nested(body, 'custom', 'customElem', 'custom_elem');
+  const markdownElem = asMessageBody(body.markdown);
   /** Admin 系统通知统一为 body.system */
   const systemElem = nested(body, 'system', 'notificationElem', 'notification_elem');
 
@@ -813,7 +820,7 @@ export function parseImMessageBody(
           textElem?.content,
           body.content,
           body.text,
-          body.markdown?.text,
+          markdownElem?.text,
           typeof body.markdown === 'string' ? body.markdown : undefined
         )
       };
@@ -858,13 +865,14 @@ export function parseImMessageBody(
 
     case MessageContentType.Picture: {
       const list = Array.isArray(pictureElem?.list) ? pictureElem.list : [];
-      const first = list[0] || {};
+      const first = asMessageBody(list[0]) || {};
       const source =
-        pictureElem?.sourcePicture ||
-        pictureElem?.source_picture ||
-        pictureElem?.bigPicture ||
-        pictureElem?.big_picture ||
+        asMessageBody(pictureElem?.sourcePicture) ||
+        asMessageBody(pictureElem?.source_picture) ||
+        asMessageBody(pictureElem?.bigPicture) ||
+        asMessageBody(pictureElem?.big_picture) ||
         first;
+      const snapshot = asMessageBody(pictureElem?.snapshotPicture);
       return {
         ...forward,
         content: '',
@@ -880,7 +888,7 @@ export function parseImMessageBody(
         thumbnailUrl: pickStr(
           first?.thumbnail_url,
           source?.thumbnail_url,
-          pictureElem?.snapshotPicture?.url
+          snapshot?.url
         )
       };
     }
@@ -975,8 +983,10 @@ export function parseImMessageBody(
             : card.group_id
               ? 'group'
               : 'user';
-      const group = card.group || (kind === 'group' ? card : undefined);
-      const user = card.user || (kind === 'user' ? card : undefined);
+      const group =
+        asMessageBody(card.group) || (kind === 'group' ? card : undefined);
+      const user =
+        asMessageBody(card.user) || (kind === 'user' ? card : undefined);
       if (kind === 'group') {
         return {
           ...forward,
@@ -1089,7 +1099,7 @@ export function parseImMessageBody(
       {
         const content = pickStr(
           typeof textElem?.text === 'string' ? textElem.text : undefined,
-          body.markdown?.text,
+          markdownElem?.text,
           typeof body.text === 'string' ? body.text : undefined,
           body.content
         );

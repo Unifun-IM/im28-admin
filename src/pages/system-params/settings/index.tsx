@@ -113,10 +113,11 @@ function ReplaceTrigger({ label }: { label: string }) {
 }
 
 /** 注册表单字段但不渲染 UI（供 logo_url 等自定义上传字段） */
-function FormSilentValue(_props: {
+function FormSilentValue(props: {
   value?: string;
   onChange?: (value?: string) => void;
 }) {
+  void props;
   return null;
 }
 

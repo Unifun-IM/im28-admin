@@ -3,7 +3,7 @@ import { Button, Form, Input, Modal, Result } from '@arco-design/web-react';
 import { IconCheckCircleFill } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import { postV1AdminSystemUsersResetTwoFactor } from '@shared/api/admin/systemUsers';
-import iconWarning from '@shared/assets/icon-exclamation-circle-fill.svg';
+import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
 import '@shared/ui/biz-form-modal.less';

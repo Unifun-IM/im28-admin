@@ -30,7 +30,7 @@ import { formatDateTime } from '@shared/lib/formatTime';
 
 const FormItem = Form.Item;
 
-function AccountsPage() {
+export function AccountsPage() {
   const t = useLocale();
   const common = t;
   const [form] = Form.useForm<AdminAPI.ListSysUserRequest>();
@@ -268,4 +268,6 @@ function AccountsPage() {
   );
 }
 
-export default observer(AccountsPage);
+const ObservedAccountsPage = observer(AccountsPage);
+
+export default ObservedAccountsPage;

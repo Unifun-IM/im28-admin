@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import checkLogin from '@shared/lib/checkLogin';
 import useLocale from '@shared/lib/useLocale';
-import loginBannerBg from './assets/login-banner-bg.svg';
-import loginLogo from './assets/login-logo.svg';
+import loginBannerBg from '@assets/login/login-banner-bg.svg';
+import loginLogo from '@assets/login/login-logo.svg';
 import LoginForm from './form';
 import './login.less';
 
@@ -25,8 +25,8 @@ function Login() {
   }
 
   return (
-    <div className="use-login-page flex h-screen bg-[var(--color-bg-1,#f7f8fa)]">
-      <div className="use-login-banner relative box-border flex h-full w-[524px] shrink-0 overflow-hidden p-[64px] text-white max-[900px]:hidden">
+    <div className="use-login-page flex h-screen bg-[var(--color-bg-1)]">
+      <div className="use-login-banner relative box-border flex h-full w-[524px] shrink-0 overflow-hidden p-[64px] text-[var(--color-text-white)] max-[900px]:hidden">
         <img
           src={loginBannerBg}
           alt=""
@@ -36,21 +36,21 @@ function Login() {
         <div className="relative z-[1] flex h-full w-[396px] flex-col justify-between">
           <div className="flex items-center gap-[16px]">
             <img src={loginLogo} alt="" className="block size-[24px]" />
-            <span className="text-[20px] font-bold leading-[28px] text-white">
+            <span className="text-[20px] font-bold leading-[28px] text-[var(--color-text-white)]">
               {t['login.panel.brand']}
             </span>
           </div>
           <div className="flex flex-col gap-[21px]">
-            <h1 className="m-0 text-[31.5px] font-semibold leading-[39.375px] text-white">
+            <h1 className="m-0 text-[31.5px] font-semibold leading-[39.375px] text-[var(--color-text-white)]">
               {t['login.panel.titleLine1']}
               <br />
               {t['login.panel.titleLine2']}
             </h1>
-            <p className="m-0 max-w-[336px] text-[12.25px] leading-[19.906px] text-white/80">
+            <p className="m-0 max-w-[336px] text-[12.25px] leading-[19.906px] text-[var(--color-text-white)] opacity-80">
               {t['login.panel.desc']}
             </p>
           </div>
-          <div className="flex h-[14px] items-center gap-[14px] text-[10.5px] font-medium leading-[14px] text-white/70">
+          <div className="flex h-[14px] items-center gap-[14px] text-[10.5px] font-medium leading-[14px] text-[var(--color-text-white)] opacity-70">
             <span>{t['login.panel.copyright']}</span>
             <span>•</span>
             <span>{t['login.panel.privacy']}</span>
@@ -58,8 +58,8 @@ function Login() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-[var(--color-bg-1,#f7f8fa)] px-[24px] pb-[40px]">
-        <div className="w-[360px]">
+      <div className="box-border flex min-w-0 flex-1 items-center justify-center bg-[var(--color-bg-1)] px-[24px] pb-[40px]">
+        <div className="w-full max-w-[360px]">
           <LoginForm />
         </div>
       </div>

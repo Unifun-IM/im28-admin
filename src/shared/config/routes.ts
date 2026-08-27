@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import auth, { type AuthParams } from '@shared/lib/authentication';
 
@@ -158,41 +158,33 @@ export const generatePermission = (role: string) => {
   return result;
 };
 
+function filterRoutes(
+  routeList: IRoute[],
+  userPermission: Record<string, string[]>,
+  result: IRoute[] = []
+): IRoute[] {
+  for (const route of routeList) {
+    const { requiredPermissions, oneOfPerm } = route;
+    const visible = requiredPermissions
+      ? auth({ requiredPermissions, oneOfPerm }, userPermission)
+      : true;
+    if (!visible) continue;
+
+    if (route.children?.length) {
+      const children = filterRoutes(route.children, userPermission);
+      if (children.length) result.push({ ...route, children });
+    } else {
+      result.push({ ...route });
+    }
+  }
+  return result;
+}
+
 const useRoute = (userPermission: Record<string, string[]>): [IRoute[], string] => {
-  const filterRoute = (routeList: IRoute[], arr: IRoute[] = []): IRoute[] => {
-    if (!routeList.length) {
-      return [];
-    }
-    for (const route of routeList) {
-      const { requiredPermissions, oneOfPerm } = route;
-      let visible = true;
-      if (requiredPermissions) {
-        visible = auth({ requiredPermissions, oneOfPerm }, userPermission);
-      }
-
-      if (!visible) {
-        continue;
-      }
-      if (route.children && route.children.length) {
-        const newRoute = { ...route, children: [] as IRoute[] };
-        filterRoute(route.children, newRoute.children);
-        if (newRoute.children.length) {
-          arr.push(newRoute);
-        }
-      } else {
-        arr.push({ ...route });
-      }
-    }
-
-    return arr;
-  };
-
-  const [permissionRoute, setPermissionRoute] = useState(routes);
-
-  useEffect(() => {
-    const newRoutes = filterRoute(routes);
-    setPermissionRoute(newRoutes);
-  }, [JSON.stringify(userPermission)]);
+  const permissionRoute = useMemo(
+    () => filterRoutes(routes, userPermission),
+    [userPermission]
+  );
 
   const defaultRoute = useMemo(() => {
     const hasKey = (list: IRoute[], key: string): boolean =>

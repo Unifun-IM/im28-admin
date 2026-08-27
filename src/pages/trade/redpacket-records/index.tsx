@@ -51,7 +51,9 @@ export default function RedpacketRecordsPage() {
     [t]
   );
 
-  const fetchData = useCallback(async (_p = page, _size = pageSize) => {
+  const fetchData = useCallback(async (p = page, size = pageSize) => {
+    void p;
+    void size;
     setLoading(true);
     try {
       setData([]);
@@ -62,7 +64,7 @@ export default function RedpacketRecordsPage() {
   }, [page, pageSize]);
 
   useEffect(() => {
-    fetchData(1, pageSize);
+    fetchData();
     setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

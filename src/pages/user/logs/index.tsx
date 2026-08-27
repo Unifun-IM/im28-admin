@@ -10,7 +10,7 @@ import {
   FilterSelect
 } from '@widgets/biz-list';
 import { postV1AdminUsersOperationLogsList } from '@shared/api/admin/users';
-import { UserDetailDrawer } from '@features/user-detail';
+import { UserDetailDrawer } from '@widgets/user-detail';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
 
