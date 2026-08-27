@@ -127,6 +127,6 @@ npm run openapi
 3. 交互流程放 `features`，复合 UI 放 `widgets`，跨页面状态放 `entities`。
 4. locale 放 `src/shared/locale` 并合并入口。
 5. API 变化执行 `npm run openapi`。
-6. 一级菜单图标放 `src/app/assets` 并在 `PageLayout.getIconFromKey` 注册。
+6. 一级菜单图标放 `src/assets/icon` 并在 `PageLayout.getIconFromKey` 注册。
 
 页面生成流程见 `admin-page`。

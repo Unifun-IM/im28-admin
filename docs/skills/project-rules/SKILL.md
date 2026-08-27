@@ -20,7 +20,7 @@ description: Apply repository-wide constraints for task scope, incremental chang
 - 依赖方向为 `pages -> widgets/features -> entities -> shared`；`app` 和 `src/main.tsx` 负责装配。
 - 同层切片组合只能走目标 `index.ts` 公开入口；禁止深层导入、循环依赖和 widget / feature 互相依赖。
 - `shared` 不依赖更高层。需要共享的业务无关能力下沉到 `shared`，跨页面复合 UI 放 `widgets`，用户动作放 `features`。
-- `src/app/assets` 是静态 SVG 例外：各层可引用 `@app/assets/*.svg`，不得借此依赖其它 app 代码。
+- `src/assets` 是图片静态资源根目录，不属于 FSD 业务层；各层只通过 `@assets/*` 引用，不把图片散落到 `app`、`pages`、`widgets`、`features`、`entities` 或 `shared`。
 - 不在 `src/` 新增遗留根目录 `components`、`containers`、`services`、`utils`、`hooks`。
 
 组件发现、Arco 使用和抽取规则见 `component-usage`。
@@ -30,7 +30,7 @@ description: Apply repository-wide constraints for task scope, incremental chang
 - Figma 只读，禁止写入稿面；页面生成的信息优先级由 `admin-page` 定义。
 - `src/shared/api/admin/**`、生成索引和 typings 只允许由 `npm run openapi` 生成，禁止手改。
 - 新增或修改颜色必须使用主题 CSS 变量；Tailwind 保持 `preflight: false`，不得重做 Arco Form / Grid / Table。
-- 所有 icon SVG 与通用 SVG 的归属和引用遵守 `svg-icon-usage`。
+- 图片静态资源、icon SVG 与通用 SVG 的归属和引用遵守 `svg-icon-usage`。
 
 ## OpenAPI 范围例外
 

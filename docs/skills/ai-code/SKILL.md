@@ -18,7 +18,7 @@ description: Route Codex, Claude Code, Cursor, and other AI coding tools to the 
 | 生成或更新 API / typings | `docs/skills/api-generation/SKILL.md`；需要落页时再加 `docs/skills/admin-page/SKILL.md` |
 | 修改组件或抽取重复 UI | `docs/skills/component-usage/SKILL.md`；涉及样式时加 `docs/skills/css-usage/SKILL.md` |
 | Figma 还原 | `docs/skills/figma-rules/SKILL.md`；生成页面时同时读 `docs/skills/admin-page/SKILL.md` |
-| 图标或 SVG | `docs/skills/svg-icon-usage/SKILL.md`；来自 Figma 时同时读 `docs/skills/figma-rules/SKILL.md` |
+| 图片静态资源、图标或 SVG | `docs/skills/svg-icon-usage/SKILL.md`；来自 Figma 时同时读 `docs/skills/figma-rules/SKILL.md` |
 | 仅修改 CSS、主题、Tailwind 或 Less | `docs/skills/css-usage/SKILL.md` |
 
 不要为普通任务一次性加载全部 skill；按实际工作增量补读。
@@ -31,7 +31,7 @@ description: Route Codex, Claude Code, Cursor, and other AI coding tools to the 
 - API 生成链路：`api-generation`
 - 样式、主题变量、Tailwind / Less：`css-usage`
 - Figma 只读与视觉验证：`figma-rules`
-- 图标来源和 SVG 资产：`svg-icon-usage`
+- 图片静态资源归属、图标来源和 SVG 使用：`svg-icon-usage`
 - 已内置能力索引：`framework-support`
 
 新增规则时只写入唯一归属 skill，其它文件使用链接，不复制正文。

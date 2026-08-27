@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cs from 'classnames';
 import useLocale from '@shared/lib/useLocale';
-import arrowIcon from '@app/assets/icon-arrow.svg';
-import checkIcon from '@app/assets/icon-check.svg';
+import arrowIcon from '@assets/icon/icon-arrow.svg';
+import checkIcon from '@assets/icon/icon-check.svg';
 import './login.less';
 
 export type SlideCaptchaProps = {

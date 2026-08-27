@@ -12,7 +12,7 @@ import cs from 'classnames';
 import copy from 'copy-to-clipboard';
 import useLocale from '@shared/lib/useLocale';
 import { UserAvatar } from '@shared/ui';
-import IconMoreDots from '@app/assets/icon-more-dots.svg?react';
+import IconMoreDots from '@assets/icon/icon-more-dots.svg?react';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 

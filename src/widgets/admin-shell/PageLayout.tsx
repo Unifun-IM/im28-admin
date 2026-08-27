@@ -16,9 +16,9 @@ import {
 } from '@entities/global-state';
 import { pageTabsStore } from '@entities/page-tabs';
 import { systemSettingsStore } from '@entities/system-settings';
-import IconDashboard from '@app/assets/icon-dashboard.svg?react';
-import IconSystem from '@app/assets/icon-system.svg?react';
-import Logo from '@app/assets/logo.svg?react';
+import Logo from '@assets/common/logo.svg?react';
+import IconDashboard from '@assets/icon/icon-dashboard.svg?react';
+import IconSystem from '@assets/icon/icon-system.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import getUrlParams from '@shared/lib/getUrlParams';
 import useLocale from '@shared/lib/useLocale';

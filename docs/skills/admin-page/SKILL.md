@@ -50,7 +50,7 @@ description: Generate or update admin navigation, routes, lists, filters, detail
 - 菜单展示名走 locale。
 - 叶子路由 key 对应 `src/pages/<route.key>/index.tsx`。
 - 只有可独立访问的业务能力创建菜单；详情、动作和记录接口不创建独立菜单。
-- 一级菜单图标按 `svg-icon-usage` 放入 `src/app/assets` 并注册。
+- 一级菜单图标按 `svg-icon-usage` 放入 `src/assets/icon` 并注册。
 
 ## 语义化命名
 

@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import checkLogin from '@shared/lib/checkLogin';
 import useLocale from '@shared/lib/useLocale';
-import loginBannerBg from './assets/login-banner-bg.svg';
-import loginLogo from './assets/login-logo.svg';
+import loginBannerBg from '@assets/login/login-banner-bg.svg';
+import loginLogo from '@assets/login/login-logo.svg';
 import LoginForm from './form';
 import './login.less';
 

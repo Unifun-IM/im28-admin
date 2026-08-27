@@ -49,7 +49,8 @@
 
 ```text
 src/
-  app/           # 应用入口、Providers、路由装配、全部 icon SVG 与通用 SVG
+  app/           # 应用入口、Providers、路由装配与全局样式
+  assets/        # 图片静态资源：icon / common / 按页面组织的目录
   pages/         # 页面：login / dashboard / system / system-params / exception
   widgets/       # 后台壳层、顶栏、多页签、通用列表、详情 Drawer、设置页壳等复合 UI
   features/      # 通用交互：账号/角色/GA/个人中心/未保存守卫
@@ -57,7 +58,7 @@ src/
   shared/        # api / lib / locale / config / ui
 ```
 
-依赖方向：`pages -> widgets/features -> entities -> shared`。`src/main.tsx` 属于 app 装配入口，可以导入 `@app` 的样式与公开模块。widget 组合其它 widget、feature 复用其它 feature 时只能通过目标切片的 `index.ts` 公开入口；禁止同层深层导入、循环依赖，以及 widget 与 feature 互相依赖。所有 icon SVG 及通用 SVG 统一放在 `src/app/assets`，允许各层直接引用其中的静态资产，但不得借此依赖 `app` 下的代码模块。禁止在 `src/` 下新增遗留根目录 `components`、`containers`、`services`、`utils`、`hooks`。
+依赖方向：`pages -> widgets/features -> entities -> shared`。`src/main.tsx` 属于 app 装配入口，可以导入 `@app` 的样式与公开模块。widget 组合其它 widget、feature 复用其它 feature 时只能通过目标切片的 `index.ts` 公开入口；禁止同层深层导入、循环依赖，以及 widget 与 feature 互相依赖。图片静态资源统一放在 `src/assets`，各层通过 `@assets/*` 引用；图标放 `icon`，跨页面公共资源放 `common`，其余按页面路由组织。禁止在 `src/` 下新增遗留根目录 `components`、`containers`、`services`、`utils`、`hooks`。
 
 ## 内置菜单
 

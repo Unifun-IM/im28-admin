@@ -1,80 +1,83 @@
 ---
 name: svg-icon-usage
-description: Choose Arco icons or local SVG assets, keep all icon SVGs and common SVGs in src/app/assets, and use semantic names and imports.
+description: Organize static image assets under src/assets, choose Arco or local SVG icons, and place icons, shared images, and page-owned images in the correct directories.
 ---
 
-# SVG Icon Usage
+# Static Image And SVG Icon Usage
 
-来自 Figma 的图标先读 `figma-rules`。
+处理图片静态资源、图标或 SVG 时使用本 skill；资源来自 Figma 时同时读取 `figma-rules`。
 
 ## 先发现再选择
 
-搜索整个源码，避免漏掉历史散落资产：
+先搜索源码中的全部图片，避免重复资产和历史散落目录：
 
 ```bash
-rg --files src | rg '\.svg$'
+rg --files src | rg '\.(svg|png|jpe?g|gif|webp|avif|ico)$'
 ```
 
-决策顺序：
+图标来源按以下顺序决定：
 
-1. Figma 明确自定义 / 品牌视觉：复用视觉一致的本地 SVG；没有时落地 Figma 导出 SVG。
+1. Figma 明确的自定义或品牌视觉：复用视觉一致的本地图标；没有时落地 Figma 导出 SVG。
 2. 没有定制要求的标准动作：使用 `@arco-design/web-react/icon` 或项目组件内置图标。
-3. Arco 无法表达：复用语义和视觉都匹配的本地 SVG。
-4. 照片、复杂纹理等不适合矢量的内容才使用位图。
+3. Arco 无法表达：复用语义和视觉都匹配的本地图标。
 
-不要为同一语义和视觉重复资产，不用近似图标替代 Figma 定制图标，不凭记忆手写 SVG path。
+照片、复杂纹理等使用合适的位图格式；图标、Logo 和可缩放简单图形优先 SVG。不要为同一语义重复资产，不用近似图标替代 Figma 定制图标，不凭记忆手写 SVG path。
 
-## 资产归属
+## 统一目录
 
-- 所有 icon SVG：`src/app/assets/icon-*.svg`，无论只被一个页面还是多个切片使用。
-- 通用 Logo、空态和通用插画：`src/app/assets/*.svg`。
-- 页面 / feature / widget 私有的非 icon 背景、插画、Logo：可与消费者共置；形成稳定通用语义后迁入 `src/app/assets`。
-- `src/shared/assets` 不保存通用 SVG。
+所有由源码导入的图片静态资源统一放在 `src/assets`，禁止散落到 `app`、`pages`、`widgets`、`features`、`entities` 或 `shared`：
 
-`src/app/assets` 是静态资产的 FSD 例外：各层可引用 `@app/assets/*`，不得引用其它 app 代码。
+```text
+src/assets/
+  icon/           # 全局所有图标，不区分调用层和使用次数
+  common/         # 应用壳或多个页面复用的 Logo、空态、插画、背景
+  <route-key>/    # 单页面资源；嵌套路由按 key 继续分目录
+```
 
-发现历史散落 icon SVG 时，复用前迁入 `src/app/assets` 并更新本次范围内调用方；范围外调用方只报告。
+归属判断：
+
+- 视觉职责是图标：放 `src/assets/icon`，包括 SVG 和必要的位图图标。
+- 应用壳使用或被多个页面复用：放 `src/assets/common`。
+- 只属于一个页面：放 `src/assets/<route-key>`，例如登录页放 `src/assets/login`，`users/query` 页面放 `src/assets/users/query`。
+- 页面资源形成稳定跨页面复用后迁入 `common`；不要复制到多个页面目录。
+
+`src/assets` 是静态资源根目录，不是 FSD 业务层。各层可以导入图片文件，但不能借此引用其它层的代码。`public` 只用于必须保持固定公开 URL、不能经过 Vite 构建导入的文件，不作为普通页面资源目录。
 
 ## 命名与引用
 
-文件名使用语义化英文并全局唯一：
+文件名使用语义化英文和 kebab-case，禁止拼音、接口路径碎片、Figma 自动编号和无意义缩写：
 
-- 动作：`icon-copy.svg`
-- 菜单：`icon-risk-control.svg`
-- 状态：`icon-warning-fill.svg`
-- 业务：`icon-user-group.svg`
+- `icon-copy.svg`
+- `icon-risk-control.svg`
+- `empty-state.svg`
+- `login-banner-bg.svg`
 
-禁止拼音、接口路径碎片和 Figma 自动无意义名称。
-
-React 图标：
+统一通过 `@assets/*` 引用，不使用跨层相对路径：
 
 ```tsx
-import IconRiskControl from '@app/assets/icon-risk-control.svg?react';
+import IconRiskControl from '@assets/icon/icon-risk-control.svg?react';
+import emptyState from '@assets/common/empty-state.svg';
+import loginBanner from '@assets/login/login-banner-bg.svg';
 ```
 
-图片 / 背景：
-
-```tsx
-import emptyState from '@app/assets/empty-state.svg';
-```
-
-- 不把完整 SVG 内联 TSX，不提交远程 asset URL。
-- 单色操作图标优先 `currentColor`，由 class / token 控制颜色和尺寸。
-- 品牌、多色插画保留原色；暗色需要验证可见性。
+- 需要 React 组件能力的 SVG 使用 `?react`；作为 `img`、背景或 URL 时使用普通导入。
+- 不把完整 SVG path 内联到 TSX，不提交远程 asset URL 或大段 base64。
+- 单色操作图标优先 `currentColor`，由 class 和主题 token 控制颜色与尺寸。
+- 品牌、多色插画保留原色，并验证浅色、暗色背景下的可见性。
 
 ## 菜单图标
 
 新增一级菜单图标：
 
-1. 放入 `src/app/assets/icon-<menu-key>.svg`。
-2. 在 `src/widgets/admin-shell/PageLayout.tsx` 以 `?react` 导入。
+1. 放入 `src/assets/icon/icon-<menu-key>.svg`。
+2. 在 `src/widgets/admin-shell/PageLayout.tsx` 通过 `@assets/icon/...svg?react` 导入。
 3. 在 `getIconFromKey` 按 route key 注册。
-4. 复用现有侧栏 icon 样式。
+4. 复用现有侧栏图标尺寸和颜色样式。
 
-## 验收
+## 迁移与验收
 
-- 是否先搜索整个 `src` 并避免重复资产。
-- 来源是否符合 Figma 定制 > Arco 标准动作 > 本地 SVG。
-- 所有 icon SVG 与通用 SVG 是否位于 `src/app/assets`。
-- 命名、import、currentColor 和暗色是否正确。
-- 是否没有内联 path、远程 URL 或第二套图标库。
+- 发现 `src/assets` 外的图片时，将资产和本次涉及的全部引用一起迁移；不保留旧副本或旧别名。
+- 检查 `rg -n 'src/app/assets|@app/assets|pages/.*/assets' src docs` 无遗留结果。
+- 检查图标全部位于 `src/assets/icon`，跨页面资源位于 `common`，其余目录能对应页面 route key。
+- 检查文件名、`@assets` import、`currentColor` 和暗色可见性。
+- 运行 typecheck、相关测试和 build，确认 Vite 与 SVGR 均能解析新路径。
