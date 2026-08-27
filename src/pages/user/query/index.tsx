@@ -418,6 +418,7 @@ export default function UserQueryPage() {
                         label: disabled
                           ? t['userQuery.action.unban']
                           : t['userQuery.action.ban'],
+                        danger: !disabled,
                         onClick: () =>
                           openBlacklistModal(
                             disabled ? 'remove' : 'add',
