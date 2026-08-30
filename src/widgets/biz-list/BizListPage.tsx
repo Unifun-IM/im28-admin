@@ -140,7 +140,6 @@ function BizListPage<T extends Record<string, unknown>>({
     [tableProps.columns, lang]
   );
 
-  const hasFixedRight = columns.some((col) => col.fixed === 'right');
   /** 有选择列时默认左侧固定；配置了 batchActions 时仅批量模式下展示 */
   const rowSelection = useMemo(() => {
     if (!tableProps.rowSelection) return undefined;
@@ -150,8 +149,6 @@ function BizListPage<T extends Record<string, unknown>>({
       ...tableProps.rowSelection
     };
   }, [tableProps.rowSelection, needsBatchEntry, batchSelectMode]);
-  const hasFixedSelection = Boolean(rowSelection?.fixed);
-
   const pagination = resolveBizPagination(
     tableProps.pagination as false | undefined | Record<string, unknown>,
     displayData.length
@@ -159,12 +156,11 @@ function BizListPage<T extends Record<string, unknown>>({
 
   const scroll = useMemo(() => {
     const incoming = tableProps.scroll || {};
-    if (!hasFixedRight && !hasFixedSelection) return incoming;
     return {
       x: true as const,
       ...incoming
     };
-  }, [hasFixedRight, hasFixedSelection, tableProps.scroll]);
+  }, [tableProps.scroll]);
 
   const batchTheme = batchActions?.theme || 'light';
   const batchInToolbar = batchTheme === 'light';
@@ -172,7 +168,7 @@ function BizListPage<T extends Record<string, unknown>>({
   return (
     <div
       className={cs(
-        'flex flex-col gap-4',
+        'min-w-0 flex flex-col gap-4',
         tableFullscreen && 'use-biz-list-fullscreen min-h-0 flex-1',
         className
       )}
@@ -196,7 +192,7 @@ function BizListPage<T extends Record<string, unknown>>({
       ) : null}
       <Card
         className={cs(
-          'use-biz-table-card relative !p-0',
+          'use-biz-table-card relative min-w-0 !p-0',
           // 无分页时裁切底角，避免末行方角顶出卡片圆角；有分页保留 visible 以便固定列阴影
           pagination === false ? 'overflow-hidden' : 'overflow-visible',
           tableFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
@@ -210,7 +206,7 @@ function BizListPage<T extends Record<string, unknown>>({
           enableFullscreen ||
           hasRowSelection) && (
           <div className="use-biz-table-toolbar relative max-md:h-auto max-md:flex-wrap">
-            <div className="flex min-w-0 items-center gap-3">
+            <div className="flex min-w-0 max-w-full items-center gap-3">
               {title != null && title !== '' && (
                 <div className="use-biz-table-toolbar-title">{title}</div>
               )}
@@ -224,7 +220,7 @@ function BizListPage<T extends Record<string, unknown>>({
                 </div>
               )}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 max-md:w-full max-md:shrink max-md:justify-start">
               {(onRefresh || enableFullscreen) && (
                 <div className="flex items-center gap-2">
                   {onRefresh && (

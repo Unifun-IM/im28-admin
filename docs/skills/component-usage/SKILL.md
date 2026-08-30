@@ -5,7 +5,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 
 # Component Usage
 
-本文件只定义“使用什么组件以及如何使用”。页面可见字段、来源优先级和路由由 `admin-page` 决定；颜色和样式实现由 `css-usage` 决定。
+本文件只定义“使用什么组件以及如何使用”。页面可见字段、来源优先级和路由由 `admin-page` 决定；视觉与响应式结果由 `design-system` 决定，颜色和样式实现由 `css-usage` 决定。
 
 ## 决策顺序
 
@@ -75,7 +75,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 2. 先确定最终 zh-CN / en-US 表头、枚举、时间格式和动态操作文案。
 3. 按真实单元格计算头像、状态点、复制 / 排序图标、操作槽位、间距和 padding。
 4. 主要内容列使用较大权重；状态、数量和操作列明显更小。
-5. 只有真实内容总宽超过可用区时才设置横向滚动；不能用 `scroll.x` 掩盖错误比例。
+5. 公共列表负责在真实内容超宽时提供表格内部滚动；调用页不覆写默认 `scroll.x`，也不能用滚动掩盖错误列宽比例。
 
 无设计宽度时可从以下范围开始，再以浏览器实测修正：
 
@@ -113,7 +113,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 - `tabs`：不同类型信息。
 - `operationRecords`：追加操作记录 Tab。
 - `summary`：Tab 上方对象摘要。
-- 默认宽度 50%，默认无 footer。
+- 桌面默认宽度 50%，`md` 以下由公共组件适配为全宽；默认无 footer。
 - 多 Tab 时由公共组件保持 Tab 头固定、内容区独立滚动，并统一 Drawer / Tab 的主题背景；业务详情不得复制或覆盖这套滚动和背景样式。
 
 同一实体有多个入口时，抽成唯一 `<Entity>DetailDrawer`，内部复用 `BizDetailDrawer`；入口只传 ID、visible、onClose 和可选 defaultTab。
@@ -122,7 +122,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 
 - 用于详情数量、右箭头和“查看列表”触发的好友、群组、成员、设备等关系列表。
 - 保留父 Drawer，不替换父内容、不增加临时 Tab。
-- 默认视口 50%；调用方不写固定像素宽度，不默认传 `scroll.x`。
+- 桌面默认视口 50%，`md` 以下由公共组件适配为全宽；调用方不写固定像素宽度，不默认传 `scroll.x`。
 - 同结构关系列表用一个组件加语义化 `mode`。
 - 实现文件必须存在公开入口 import 和 JSX 调用；无明确设计例外时禁止直接组合 Arco Drawer + Table。
 
@@ -142,3 +142,4 @@ description: Discover, reuse, compose, and extract project components for admin 
 - 每列是否有非零宽度并通过真实内容验证。
 - Drawer、关系钻取、记录表格和设置卡片是否使用对应公共契约。
 - loading、empty、error、locale、主题和关键交互状态是否完整。
+- 响应式缺口是否在公共组件集中修复，而不是由调用页重复覆盖。

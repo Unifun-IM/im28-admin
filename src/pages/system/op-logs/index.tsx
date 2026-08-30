@@ -244,6 +244,7 @@ function OpLogsPage() {
           },
           {
             title: t['opLogs.col.content'],
+            width: 240,
             ellipsis: true,
             render: (_: unknown, row: AdminAPI.AdminSystemOperationLogWrap) =>
               row.log?.operation_content || '--'

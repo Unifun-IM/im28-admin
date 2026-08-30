@@ -58,8 +58,8 @@ function Login() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-[var(--color-bg-1,#f7f8fa)] px-[24px] pb-[40px]">
-        <div className="w-[360px]">
+      <div className="box-border flex min-w-0 flex-1 items-center justify-center bg-[var(--color-bg-1,#f7f8fa)] px-[24px] pb-[40px]">
+        <div className="w-full max-w-[360px]">
           <LoginForm />
         </div>
       </div>

@@ -105,7 +105,7 @@ export default function TableBatchBar({
   return (
     <div
       className={cs(
-        'use-table-batch-bar flex h-8 items-center overflow-clip rounded-[8px]',
+        'use-table-batch-bar flex h-8 max-w-full items-center overflow-x-auto overflow-y-hidden rounded-[8px]',
         isLight
           ? 'use-table-batch-bar-light border border-solid border-[var(--color-fill-3,#e5e6eb)] bg-[var(--color-bg-1,#f7f8fa)]'
           : 'use-table-batch-bar-dark border border-[rgba(255,255,255,0.12)] bg-[#171a21] shadow-popover',
@@ -146,7 +146,7 @@ export default function TableBatchBar({
           onChange={onShowSelectedOnlyChange}
         />
       </div>
-      <div className="flex items-center">
+      <div className="flex shrink-0 items-center">
         {onArchive && (
           <BatchBarAction
             tone={actionTone}

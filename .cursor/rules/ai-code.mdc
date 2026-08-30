@@ -5,10 +5,4 @@ alwaysApply: true
 
 # AI Code 统一入口
 
-开始任务前读取：
-
-- `docs/framework-guide.md`
-- `docs/skills/ai-code/SKILL.md`
-- `docs/skills/project-rules/SKILL.md`
-
-再按 `ai-code` 的任务路由读取对应专项 skill。规则正文只维护在 `docs/skills/**/SKILL.md`，本文件不复制具体规则。
+开始任务只读取 `docs/skills/ai-code/SKILL.md`，由它加载公共规则、项目上下文和当前任务所需的最小专项 skill。规则正文不在本入口重复维护。

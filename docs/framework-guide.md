@@ -8,9 +8,14 @@
 
 | 内容 | 文档 |
 | --- | --- |
+| 当前项目定位、业务边界、术语与产品约束 | `PROJECT.md` |
+| 当前项目设计目标、体验与视觉差异 | `DESIGN.md` |
 | 框架现有能力清单 | `docs/skills/framework-support/SKILL.md` |
 | AI code tools 统一入口 | `docs/skills/ai-code/SKILL.md` |
 | 通用项目规则 | `docs/skills/project-rules/SKILL.md` |
+| 文字需求 / PRD 到项目上下文 | `docs/skills/project-context/SKILL.md` |
+| 技术栈、工具链与依赖边界 | `docs/skills/tech-stack/SKILL.md` |
+| 设计语言、尺度与响应式 | `docs/skills/design-system/SKILL.md` |
 | API 与 typings 生成 | `docs/skills/api-generation/SKILL.md` |
 | CSS、主题与 Tailwind | `docs/skills/css-usage/SKILL.md` |
 | Figma 只读与按稿还原 | `docs/skills/figma-rules/SKILL.md` |
@@ -36,14 +41,7 @@
 
 ## 技术栈
 
-- React 18 + TypeScript + Vite 5
-- React Router v6
-- Arco Design React + `@arco-themes/react-arco-pro`
-- MobX / `mobx-react-lite`
-- Less / Less Modules
-- Tailwind CSS v3，`preflight: false`，用于 Arco 标准组件之外的布局与装饰
-- `@umijs/openapi` 生成 Admin 网关接口
-- Vitest + Testing Library + jsdom
+技术基线、各工具职责、依赖变更边界和质量命令统一维护在 `docs/skills/tech-stack/SKILL.md`；精确依赖版本以 `package.json` 和 `package-lock.json` 为准。
 
 ## 目录结构
 
@@ -81,14 +79,10 @@ src/
 
 ## 核心约定
 
-- 组件决策统一遵守：组件发现 → 已有组件 → 重复 UI 抽取 → Arco Design / Arco Design Pro → 自建。
-- 颜色、公共样式抽取与 Tailwind / Less 选型见 `docs/skills/css-usage/SKILL.md`。
-- Figma 只读；按稿还原规则见 `docs/skills/figma-rules/SKILL.md`。
-- OpenAPI 生成物 `src/shared/api/admin/**` 禁止手改。
-- ESLint 不检查 OpenAPI 生成目录；生成物问题应修正 OpenAPI 源或生成配置后重新生成，不能为通过 lint 手工修改生成文件。
-- API 与 typings 必须按项目配置执行生成命令，具体流程见 `docs/skills/api-generation/SKILL.md`。
-- 业务页 / feature 直接使用生成函数与 `AdminAPI` 字段名，避免新增业务字段映射层。
-- 普通任务严格限定用户点名范围；OpenAPI 工作流的完整生成与现有调用方同步范围见 `docs/skills/api-generation/SKILL.md`。
+- AI code 的启动、上下文归一和最小 skill 路由见 `docs/skills/ai-code/SKILL.md`。
+- 任务范围、增量修改、FSD 与 git 约束见 `docs/skills/project-rules/SKILL.md`。
+- 页面来源、导航、字段和落页流程见 `docs/skills/admin-page/SKILL.md`。
+- 设计、组件、CSS、API、Figma 和静态资源分别由对应专项 skill 维护，本文不复制规则正文。
 
 ## 常用命令
 

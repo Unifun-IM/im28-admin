@@ -8,6 +8,7 @@ import {
 } from '@arco-design/web-react';
 import cs from 'classnames';
 import '@shared/ui/biz-detail-table.less';
+import './biz-relation-list-drawer.less';
 
 export type BizRelationListDrawerProps<T extends Record<string, unknown>> = {
   visible: boolean;
@@ -29,7 +30,7 @@ export type BizRelationListDrawerProps<T extends Record<string, unknown>> = {
 
 /**
  * 详情关联列表 Drawer：好友 / 群聊 / 成员等
- * 默认宽 50%（与详情 Drawer 一致）；表格走 use-biz-detail-table
+ * 桌面默认宽 50%，窄屏由公共样式切为全宽；表格走 use-biz-detail-table
  */
 export default function BizRelationListDrawer<
   T extends Record<string, unknown>

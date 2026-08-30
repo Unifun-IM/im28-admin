@@ -46,5 +46,8 @@ describe('SettingsPageShell', () => {
     expect(content).toBeTruthy();
     expect(form).toBeTruthy();
     expect(form?.querySelectorAll(':scope > [id]').length).toBe(2);
+    expect(container.querySelector('.use-session-settings-layout')).toBeTruthy();
+    expect(container.querySelector('.use-session-settings-nav')).toBeTruthy();
+    expect(container.querySelector('.use-session-settings-scroll')).toBeTruthy();
   });
 });

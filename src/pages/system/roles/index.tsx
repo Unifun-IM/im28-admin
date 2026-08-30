@@ -143,24 +143,28 @@ function RolesPage() {
             {
               title: t['roles.col.code'],
               dataIndex: 'role.code',
+              width: 160,
               render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
                 row.role?.code || '--'
             },
             {
               title: t['roles.col.name'],
               dataIndex: 'role.name',
+              width: 160,
               render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
                 row.role?.name || '--'
             },
             {
               title: common['common.description'],
               dataIndex: 'role.description',
+              width: 280,
               render: (_: unknown, row: AdminAPI.SysRoleWrap) =>
                 row.role?.description || '--'
             },
             {
               title: t['roles.col.isEnable'],
               dataIndex: 'role.is_enable',
+              width: 88,
               ellipsis: false,
               render: (_: unknown, row: AdminAPI.SysRoleWrap) => (
                 <StatusBadge

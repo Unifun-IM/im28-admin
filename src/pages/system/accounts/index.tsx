@@ -146,24 +146,28 @@ function AccountsPage() {
             {
               title: common['common.username'],
               dataIndex: 'sys_user.username',
+              width: 160,
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 row.sys_user?.username || '--'
             },
             {
               title: t['accounts.col.displayName'],
               dataIndex: 'sys_user.display_name',
+              width: 160,
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 row.sys_user?.display_name || '--'
             },
             {
               title: t['accounts.col.roles'],
               dataIndex: 'rbac.roles',
+              width: 180,
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 (row.rbac?.roles || []).join(', ') || '--'
             },
             {
               title: common['common.status'],
               dataIndex: 'sys_user.status',
+              width: 88,
               render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <Switch
                   checked={row.sys_user?.status === 'active'}
@@ -174,12 +178,13 @@ function AccountsPage() {
             {
               title: t['accounts.col.lastLoginAt'],
               dataIndex: 'sys_user.last_login_at',
+              width: 192,
               render: (_: unknown, row: AdminAPI.SysUserWrap) =>
                 formatDateTime(row.sys_user?.last_login_at)
             },
             {
               title: t['accounts.col.ipWhitelist'],
-              width: 140,
+              width: 160,
               render: (_: unknown, row: AdminAPI.SysUserWrap) => {
                 const list = row.sys_user?.ip_whitelist || [];
                 if (!list.length) return t['accounts.ipWhitelist.empty'];

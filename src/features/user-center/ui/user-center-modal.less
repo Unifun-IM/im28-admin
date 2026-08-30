@@ -124,4 +124,38 @@
   }
 }
 
+@media (max-width: 768px) {
+  .arco-modal.use-user-center-modal {
+    height: calc(100vh - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
+    border-radius: 12px;
+
+    .arco-modal-content {
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .use-user-center-profile {
+      width: 100%;
+      flex-direction: row;
+      justify-content: flex-start;
+      padding-right: 40px;
+    }
+
+    .use-user-center-avatar {
+      width: 72px !important;
+      height: 72px !important;
+      flex: 0 0 72px;
+    }
+
+    .use-user-center-details {
+      width: 100%;
+      flex: none;
+      gap: 16px;
+      padding-right: 0;
+    }
+  }
+}
 

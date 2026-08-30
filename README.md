@@ -24,7 +24,7 @@ npm run typecheck
 
 `npm run openapi` 是统一生成入口，会读取当前项目配置生成对应的 API 与 typings。
 
-## AI Code 页面生成机制
+## AI Code 使用机制
 
 Codex、Cursor、Claude Code 使用同一套仓库规则生成和维护页面，不分别维护实现约定：
 
@@ -34,23 +34,45 @@ Codex、Cursor、Claude Code 使用同一套仓库规则生成和维护页面，
 | Cursor | `.cursor/rules/ai-code.mdc` |
 | Claude Code | `.claude/CLAUDE.md` |
 
-工具入口只加载统一路由 [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md)，再按任务读取最小专项 skill。标准页面生成机制：
+三个工具入口都只指向 [ai-code router](docs/skills/ai-code/SKILL.md)，不复制规则或预加载全部文档。Router 会先保护工作树并读取必要上下文，再为当前任务选择一个主 skill。
 
-1. 检查未提交改动和现有路由、组件、API 调用关系，做增量修改。
-2. 按“完整可读 Figma > PRD > 生成接口 > 现有模式”确定闭合的可见信息集合。
-3. API / typings 只通过 `npm run openapi` 生成，并同步直接受影响的现有调用方。
-4. 按项目组件优先级生成路由、列表、详情与 locale，并在浏览器验证最终组件接入、列宽、Drawer 和交互。
+### 最短链路
 
-完整规则见 [admin-page](docs/skills/admin-page/SKILL.md)、[component-usage](docs/skills/component-usage/SKILL.md) 与 [api-generation](docs/skills/api-generation/SKILL.md)。
+1. 理解用户文字输入，只读取点名或与目标直接相关的 PRD、Figma、代码和接口。
+2. 稳定产品要求发生变化时，由 [project-context](docs/skills/project-context/SKILL.md) 增量更新 [PROJECT.md](PROJECT.md)。
+3. 稳定设计要求发生变化时，由 [design-system](docs/skills/design-system/SKILL.md) 基于最新 `PROJECT.md` 增量更新 [DESIGN.md](DESIGN.md)。
+4. 选择一个主 skill 生成代码；页面任务由 [admin-page](docs/skills/admin-page/SKILL.md) 主导，并按需补读 API、组件、CSS、Figma 或资源 skill。
+5. 按改动风险运行类型、测试、构建和浏览器验证，最后检查 diff 与用户点名范围。
+
+普通修复、单页临时要求和纯 API 生成不重写 `PROJECT.md` / `DESIGN.md`。上下文文件只保存跨页面、后续任务仍有效的已确认结论。
+
+### 最佳实践
+
+- **一个入口，一个主 skill**：从 `ai-code` 路由，不一次性加载全部 skills；主 skill 明确需要时才增加专项上下文。
+- **区分产品与设计**：`PROJECT.md` 只保存产品定位、范围、导航和术语；`DESIGN.md` 只保存项目设计方向和稳定视觉差异。
+- **尊重权威来源**：页面字段与来源优先级只看 `admin-page`；Figma 读取和还原只看 `figma-rules`；不要在 README 或其它 skill 复制精确顺序。
+- **接口生成优先**：API 和 typings 只通过 `npm run openapi` 更新，生成物、同步范围和失败处理只看 `api-generation`，不手改类型兜底。
+- **项目组件优先**：按 `component-usage` 完成组件发现、复用和抽取，再使用 Arco；列宽、Drawer 和关系钻取沿用公共契约。
+- **设计与实现分离**：视觉结果由 `DESIGN.md` 和 `design-system` 决定；主题变量、Tailwind / Less 和样式归属由 `css-usage` 决定。
+- **保持增量**：先检查未提交改动，只修改点名目标和必要直接依赖；不把邻近问题、文档清理或重构顺手扩入任务。
+- **验证真实结果**：类型和测试不能替代浏览器检查。可见 UI 需要验证目标视口、主题、最长文案、滚动、弹层和关键交互。
+- **文档也要去重**：新规则只写入唯一归属 skill；其它文件使用链接。发现冲突时先确定所有者，再删除旧副本。
+
+完整路由和规则归属见 [ai-code](docs/skills/ai-code/SKILL.md)。
 
 ## 文档入口
 
 | 内容 | 文档 |
 | --- | --- |
+| 当前项目定位、业务边界、术语与产品约束 | [PROJECT.md](PROJECT.md) |
+| 当前项目设计目标、体验与视觉差异 | [DESIGN.md](DESIGN.md) |
 | 项目公共说明 | [docs/framework-guide.md](docs/framework-guide.md) |
 | 框架能力清单 | [docs/skills/framework-support/SKILL.md](docs/skills/framework-support/SKILL.md) |
 | AI code tools 统一入口 | [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md) |
 | 通用项目规则 | [docs/skills/project-rules/SKILL.md](docs/skills/project-rules/SKILL.md) |
+| 文字需求 / PRD 到项目上下文 | [docs/skills/project-context/SKILL.md](docs/skills/project-context/SKILL.md) |
+| 技术栈、工具链与依赖边界 | [docs/skills/tech-stack/SKILL.md](docs/skills/tech-stack/SKILL.md) |
+| 设计语言、尺度与响应式 | [docs/skills/design-system/SKILL.md](docs/skills/design-system/SKILL.md) |
 | API 与 typings 生成 | [docs/skills/api-generation/SKILL.md](docs/skills/api-generation/SKILL.md) |
 | CSS、主题与 Tailwind | [docs/skills/css-usage/SKILL.md](docs/skills/css-usage/SKILL.md) |
 | Figma 规则 | [docs/skills/figma-rules/SKILL.md](docs/skills/figma-rules/SKILL.md) |

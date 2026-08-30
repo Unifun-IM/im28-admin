@@ -9,28 +9,21 @@ description: Look up the capabilities currently built into this admin framework,
 
 ## 定位
 
-`admin-scaffold` 是基于 React、TypeScript、Vite 和 Arco Design Pro 的管理后台框架，内置基础后台能力与 AI 标准页面生成规范，不是空白脚手架。
-
-技术栈：
-
-- React 18、TypeScript、Vite 5、React Router v6
-- Arco Design React / Arco Design Pro
-- MobX、Less、Tailwind CSS 3（`preflight: false`）
-- `@umijs/openapi`
-- Vitest、Testing Library、jsdom
+`admin-scaffold` 是管理后台基础框架，内置基础后台能力与 AI 标准页面生成规范，不是空白脚手架。技术选择、工具职责和依赖边界见 `tech-stack`。
 
 ## 目录与装配
 
 | 层 | 职责 |
 | --- | --- |
-| `src/app` | Providers、路由装配、全局样式、全部 icon SVG 与通用 SVG |
+| `src/app` | Providers、路由装配与全局样式 |
+| `src/assets` | `icon`、`common` 和按页面组织的图片静态资源 |
 | `src/pages` | 路由页面 |
 | `src/widgets` | 后台壳层和跨页面复合 UI |
 | `src/features` | 用户动作与业务流程 |
 | `src/entities` | 全局实体状态 |
 | `src/shared` | API、配置、locale、lib、通用 UI |
 
-Vite 已配置 `@app`、`@pages`、`@widgets`、`@features`、`@entities`、`@shared` 和 `@` 别名。
+Vite 已配置 `@app`、`@assets`、`@pages`、`@widgets`、`@features`、`@entities`、`@shared` 和 `@` 别名。
 
 ## 路由与后台壳层
 
@@ -38,7 +31,7 @@ Vite 已配置 `@app`、`@pages`、`@widgets`、`@features`、`@entities`、`@sh
 - 页面发现：`src/app/router/get-flatten-routes.ts` 通过 `import.meta.glob` 加载 `src/pages/**/index.tsx`
 - 支持 `requiredPermissions`、`oneOfPerm` 菜单权限
 - `@widgets/admin-shell` 提供侧栏、Navbar、面包屑、多页签、页面预加载、NProgress、壳层全屏、表格全屏和 Settings Drawer
-- 模板 fallback 菜单：看板 + 系统管理；没有外部导航说明时，业务一级菜单插在末位 `system` 前
+- 当前模板 fallback 菜单为看板 + 系统管理
 
 ## 登录与系统管理
 
@@ -77,7 +70,7 @@ Vite 已配置 `@app`、`@pages`、`@widgets`、`@features`、`@entities`、`@sh
 
 `biz-list` 内置 `BizListPage`、`SearchFilterBar`、`Filter*`、`DataSummary`、`TableBatchBar`、`ActionLinks`、`AvatarNameCell` 和 `DoubleLineCell`。默认分页为 15，支持 15 / 30 / 50，普通列默认省略，操作列可固定在右侧。
 
-`BizDetailDrawer` 支持 `fields`、`sections`、`summary`、`tabs`、`operationRecords` 和 loading；详情与关系 Drawer 默认宽度为视口 50%，默认无 footer。
+`BizDetailDrawer` 支持 `fields`、`sections`、`summary`、`tabs`、`operationRecords` 和 loading；详情与关系 Drawer 具有公共响应式默认值，精确契约见 `component-usage`。
 
 组件选择和精确契约以 `component-usage` 为准。
 

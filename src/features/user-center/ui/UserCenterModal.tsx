@@ -148,13 +148,13 @@ export default function UserCenterModal({
         <button
           type="button"
           aria-label={common['common.close']}
-          className="absolute right-6 top-6 z-10 inline-flex size-8 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-2 hover:text-arco-text-1"
+          className="absolute right-6 top-6 z-10 inline-flex size-8 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-2 hover:text-arco-text-1 max-md:right-4 max-md:top-4"
           onClick={onCancel}
         >
           <IconClose className="text-base" />
         </button>
 
-        <div className="flex w-[108px] shrink-0 flex-col items-center gap-[15px]">
+        <div className="use-user-center-profile flex w-[108px] shrink-0 flex-col items-center gap-[15px]">
           <Avatar
             size={108}
             className="use-user-center-avatar !bg-[rgb(var(--primary-6))]"
@@ -188,7 +188,7 @@ export default function UserCenterModal({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-6 pr-8">
+        <div className="use-user-center-details flex min-w-0 flex-1 flex-col gap-6 pr-8">
           <div className="flex flex-col gap-3">
             <div className="border-0 border-b border-solid border-[var(--color-border-2)] py-3">
               <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
@@ -227,7 +227,7 @@ export default function UserCenterModal({
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-between gap-3 whitespace-nowrap">
+              <div className="flex items-center justify-between gap-3 whitespace-nowrap max-md:flex-wrap max-md:whitespace-normal">
                 <span className="text-[14px] leading-[21px] text-arco-text-1">
                   {name}
                 </span>
@@ -255,7 +255,7 @@ export default function UserCenterModal({
             <div className="text-[14px] leading-[21px] text-arco-text-1">
               {t['userCenter.password']}
             </div>
-            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-[12px] leading-5">
+            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-[12px] leading-5 max-md:flex-wrap max-md:whitespace-normal">
               <span className="text-arco-text-3">**********</span>
               <button
                 type="button"
@@ -271,7 +271,7 @@ export default function UserCenterModal({
             <div className="text-[14px] leading-[21px] text-arco-text-1">
               {t['userCenter.ga']}
             </div>
-            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-[12px] leading-5">
+            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-[12px] leading-5 max-md:flex-wrap max-md:whitespace-normal">
               <span className="text-arco-text-3">******</span>
               <button
                 type="button"

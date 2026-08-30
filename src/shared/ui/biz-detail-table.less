@@ -3,6 +3,8 @@
  * 与 .arco-table-container::before 底边），外框/列线由本样式绘制；分页在框外。
  */
 .use-biz-detail-table.arco-table {
+  min-width: 0;
+
   .arco-table-container {
     border: 1px solid var(--color-border-2);
     border-radius: 8px;
@@ -98,5 +100,21 @@
 
   .arco-pagination {
     margin-top: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .use-biz-detail-table.arco-table {
+    max-width: 100%;
+
+    .arco-table-container,
+    .arco-table-content-scroll {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .arco-pagination {
+      min-width: max-content;
+    }
   }
 }
