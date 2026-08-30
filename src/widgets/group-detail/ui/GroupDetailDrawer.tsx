@@ -13,7 +13,8 @@ import {
 import {
   StatusBadge,
   UserAvatar,
-  DetailLinkRow
+  DetailLinkRow,
+  RESPONSIVE_DETAIL_COLUMNS
 } from '@shared/ui';
 import { BizOperationTimeline } from '@widgets/biz-operation-timeline';
 import { imLabel } from '@shared/lib/imLabels';
@@ -376,7 +377,7 @@ export default function GroupDetailDrawer({
                     <Descriptions
                       className="use-user-detail-descriptions"
                       border
-                      column={2}
+                      column={RESPONSIVE_DETAIL_COLUMNS}
                       size="small"
                       tableLayout="fixed"
                       data={[
@@ -462,7 +463,7 @@ export default function GroupDetailDrawer({
                     <Descriptions
                       className="use-user-detail-descriptions"
                       border
-                      column={2}
+                      column={RESPONSIVE_DETAIL_COLUMNS}
                       size="small"
                       tableLayout="fixed"
                       data={[
@@ -493,7 +494,7 @@ export default function GroupDetailDrawer({
                     <Descriptions
                       className="use-user-detail-descriptions"
                       border
-                      column={2}
+                      column={RESPONSIVE_DETAIL_COLUMNS}
                       size="small"
                       tableLayout="fixed"
                       data={[

@@ -9,3 +9,4 @@ export {
 export { groupRoleNameStyle } from './group-role-style';
 export { CopyValue, type CopyValueProps } from './copy-value';
 export { DetailLinkRow, type DetailLinkRowProps } from './detail-link-row';
+export { RESPONSIVE_DETAIL_COLUMNS } from './detail-layout';

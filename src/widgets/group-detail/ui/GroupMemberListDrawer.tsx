@@ -138,7 +138,7 @@ export default function GroupMemberListDrawer({
                     className="flex min-h-[56px] w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
                     onClick={() => setDetailSeed(m)}
                   >
-                    <div className="flex items-center gap-[16px]">
+                    <div className="flex min-w-0 flex-1 items-center gap-[16px]">
                       <UserAvatar
                         size={40}
                         className="use-user-detail-avatar shrink-0 !text-[14px]"
@@ -146,10 +146,10 @@ export default function GroupMemberListDrawer({
                         name={m.nickname}
                         src={m.avatar}
                       />
-                      <div>
-                        <div className="flex items-center gap-1">
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-1">
                           <span
-                            className="text-[14px] font-medium leading-[21px] text-arco-text-2"
+                            className="truncate text-[14px] font-medium leading-[21px] text-arco-text-2"
                             style={groupRoleNameStyle(m.userId, m.roleLevel)}
                           >
                             {m.nickname || '-'}

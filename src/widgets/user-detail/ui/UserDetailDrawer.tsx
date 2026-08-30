@@ -9,7 +9,13 @@ import {
   postV1AdminUsersDetail,
   postV1AdminUsersOperationLogsList
 } from '@shared/api/admin/users';
-import { StatusBadge, UserAvatar, CopyValue, DetailLinkRow } from '@shared/ui';
+import {
+  StatusBadge,
+  UserAvatar,
+  CopyValue,
+  DetailLinkRow,
+  RESPONSIVE_DETAIL_COLUMNS
+} from '@shared/ui';
 import { BizOperationTimeline } from '@widgets/biz-operation-timeline';
 import useLocale from '@shared/lib/useLocale';
 import { formatDateTime } from '@shared/lib/formatTime';
@@ -212,7 +218,7 @@ export default function UserDetailDrawer({
                   <Descriptions
                     className="use-user-detail-descriptions"
                     border
-                    column={2}
+                    column={RESPONSIVE_DETAIL_COLUMNS}
                     size="small"
                     tableLayout="fixed"
                     data={[
@@ -256,7 +262,7 @@ export default function UserDetailDrawer({
                   <Descriptions
                     className="use-user-detail-descriptions"
                     border
-                    column={2}
+                    column={RESPONSIVE_DETAIL_COLUMNS}
                     size="small"
                     tableLayout="fixed"
                     data={[

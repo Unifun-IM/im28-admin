@@ -326,6 +326,76 @@
   }
 }
 
+.use-chat-mobile-header {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .use-user-chat-modal-wrap {
+    .arco-modal.use-user-chat-modal {
+      width: calc(100vw - 32px) !important;
+      max-width: calc(100vw - 32px);
+      height: calc(100vh - 32px) !important;
+      height: calc(100dvh - 32px) !important;
+      max-height: calc(100vh - 32px) !important;
+      max-height: calc(100dvh - 32px) !important;
+      border-radius: 12px;
+    }
+
+    .arco-modal.use-user-chat-modal .arco-modal-content {
+      border-radius: 12px;
+    }
+  }
+
+  .arco-modal.use-user-chat-modal {
+    .use-user-chat-shell {
+      border-radius: 12px;
+    }
+
+    .use-user-chat-nav {
+      width: 56px;
+    }
+
+    .use-user-chat-side {
+      width: calc(100% - 56px);
+    }
+
+    .use-user-chat-main {
+      display: none;
+    }
+
+    .use-user-chat-shell.is-detail-active {
+      .use-user-chat-side {
+        display: none;
+      }
+
+      .use-user-chat-main {
+        display: flex;
+      }
+    }
+
+    .use-chat-mobile-header {
+      box-sizing: border-box;
+      display: flex;
+      width: 100%;
+      height: 56px;
+      flex-shrink: 0;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--color-border-2);
+    }
+
+    .use-chat-group-profile {
+      padding-right: 16px;
+      padding-left: 16px;
+
+      .use-chat-group-profile-spacer {
+        display: none;
+      }
+    }
+  }
+}
+
 
 
 /* 聊天内视频预览：高于查聊天 Modal */

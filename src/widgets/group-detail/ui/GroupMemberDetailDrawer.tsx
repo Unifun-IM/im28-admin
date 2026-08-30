@@ -6,7 +6,8 @@ import {
   GroupRoleTag,
   groupRoleNameStyle,
   StatusBadge,
-  UserAvatar
+  UserAvatar,
+  RESPONSIVE_DETAIL_COLUMNS
 } from '@shared/ui';
 import { imLabel } from '@shared/lib/imLabels';
 import useLocale from '@shared/lib/useLocale';
@@ -148,7 +149,7 @@ export default function GroupMemberDetailDrawer({
               <Descriptions
                 className="use-user-detail-descriptions"
                 border
-                column={2}
+                column={RESPONSIVE_DETAIL_COLUMNS}
                 size="small"
                 tableLayout="fixed"
                 data={[

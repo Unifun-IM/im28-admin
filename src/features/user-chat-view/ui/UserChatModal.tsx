@@ -546,8 +546,12 @@ export default function UserChatModal({
         maxHeight: 'calc(100vh - 80px)'
       }}
     >
-      <div className="use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[var(--color-bg-1)]">
-        <aside className="flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-[var(--color-border-2)] bg-[var(--color-bg-1)] py-3">
+      <div
+        className={`use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[var(--color-bg-1)]${
+          chat || profile ? ' is-detail-active' : ''
+        }`}
+      >
+        <aside className="use-user-chat-nav flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-[var(--color-border-2)] bg-[var(--color-bg-1)] py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
@@ -650,7 +654,7 @@ export default function UserChatModal({
           </div>
         </section>
 
-        <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-bg-1)]">
+        <section className="use-user-chat-main flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-bg-1)]">
           {chat ? (
             <ChatPane
               peer={chat}
@@ -659,9 +663,17 @@ export default function UserChatModal({
               onBack={leaveChat}
             />
           ) : profile?.kind === 'group' ? (
-            <GroupProfile peer={profile} onEnterChat={enterGroupChat} />
+            <GroupProfile
+              peer={profile}
+              onBack={() => setProfile(null)}
+              onEnterChat={enterGroupChat}
+            />
           ) : profile ? (
-            <FriendDetail peer={profile} onSendMessage={sendMessage} />
+            <FriendDetail
+              peer={profile}
+              onBack={() => setProfile(null)}
+              onSendMessage={sendMessage}
+            />
           ) : (
             /* 通讯录/通话空态 — Figma 977:23156 右侧灰底居中 Logo */
             <div className="flex min-h-0 flex-1 items-center justify-center bg-[var(--color-bg-1)]">
@@ -1030,13 +1042,16 @@ function ContactRow({
 /** 通讯录好友详情 — Figma 977:24413 */
 function FriendDetail({
   peer,
+  onBack,
   onSendMessage
 }: {
   peer: ChatPeer;
+  onBack: () => void;
   onSendMessage: (p: ChatPeer) => void;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-bg-1)]">
+      <MobileDetailHeader onBack={onBack} />
       <div className="flex flex-col items-center gap-4 px-4 pb-4 pt-6">
         <UserAvatar
           size={80}
@@ -1104,14 +1119,17 @@ function FriendDetail({
 /** 通讯录群详情 — Figma 977:23441 / 977:23257 */
 function GroupProfile({
   peer,
+  onBack,
   onEnterChat
 }: {
   peer: ChatPeer;
+  onBack: () => void;
   onEnterChat: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[var(--color-bg-1)] px-20">
-      <div className="h-14 w-full shrink-0" />
+    <div className="use-chat-group-profile flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[var(--color-bg-1)] px-20">
+      <MobileDetailHeader onBack={onBack} />
+      <div className="use-chat-group-profile-spacer h-14 w-full shrink-0" />
       <div className="flex w-full flex-col items-center pb-4">
         <div className="flex flex-col items-center gap-4">
           <GroupAvatar avatars={peer.avatars} name={peer.name} size={80} />
@@ -1145,6 +1163,21 @@ function GroupProfile({
           进入群聊
         </Button>
       </div>
+    </div>
+  );
+}
+
+function MobileDetailHeader({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="use-chat-mobile-header">
+      <button
+        type="button"
+        aria-label="返回列表"
+        className="inline-flex size-8 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-arco-text-1"
+        onClick={onBack}
+      >
+        <IconRight className="rotate-180 text-[16px]" />
+      </button>
     </div>
   );
 }
