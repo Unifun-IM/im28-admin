@@ -248,7 +248,7 @@ export default function CreateRoleModal({
         className="use-create-role-form"
       >
         <Row gutter={12}>
-          <Col span={12}>
+          <Col span={12} xs={24} md={12}>
             <FormItem
               field="name"
               label={t['createRole.field.name']}
@@ -266,7 +266,7 @@ export default function CreateRoleModal({
               />
             </FormItem>
           </Col>
-          <Col span={12}>
+          <Col span={12} xs={24} md={12}>
             <FormItem
               field="description"
               label={t['createRole.field.description']}

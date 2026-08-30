@@ -142,3 +142,62 @@
     font-weight: 500;
   }
 }
+
+@media (max-width: 768px) {
+  .use-session-settings-header {
+    align-items: flex-start;
+  }
+
+  .use-session-settings-actions {
+    margin-left: auto;
+  }
+
+  .use-session-settings-nav {
+    box-sizing: border-box;
+    overflow-x: auto;
+  }
+
+  .use-session-settings-anchor.arco-anchor {
+    min-width: max-content;
+
+    .arco-anchor-list {
+      flex-direction: row;
+      gap: 8px;
+    }
+
+    .arco-anchor-link-title {
+      width: auto;
+      padding-right: 12px !important;
+      padding-left: 12px !important;
+      white-space: nowrap;
+    }
+  }
+
+  .use-session-settings-shell .arco-form {
+    .arco-form-item {
+      display: block;
+      padding: 8px 0;
+    }
+
+    .arco-form-label-item {
+      width: 100% !important;
+      padding: 0 0 8px !important;
+      flex: none !important;
+    }
+
+    .arco-form-item-wrapper,
+    .arco-form-item-control-wrapper {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  .use-session-settings-radio.arco-radio-group {
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .arco-radio {
+      min-width: 120px;
+    }
+  }
+}

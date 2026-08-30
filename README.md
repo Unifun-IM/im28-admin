@@ -26,7 +26,7 @@ npm run typecheck
 
 本地通过 `VITE_API_BASE_URL` 指定网关；生产环境通过 `BACKEND_URL` 指定上游，默认 `http://im28-api-gateway:8080`。
 
-## AI Code 页面生成
+## AI Code 使用机制
 
 Codex、Cursor、Claude Code 共用同一套仓库规则，不分别维护页面实现约定：
 
@@ -36,15 +36,31 @@ Codex、Cursor、Claude Code 共用同一套仓库规则，不分别维护页面
 | Cursor | `.cursor/rules/ai-code.mdc` |
 | Claude Code | `.claude/CLAUDE.md` |
 
-工具入口先加载 [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md)，再按任务读取最小专项 skill。页面生成和更新流程：
+三个工具入口都只指向 [ai-code router](docs/skills/ai-code/SKILL.md)，不复制规则或预加载全部文档。Router 会先保护工作树并读取必要上下文，再为当前任务选择一个主 skill。
 
-1. 检查未提交改动、现有路由、组件和 API 调用关系，执行增量修改。
-2. 按“完整可读 Figma > PRD > 生成接口 > 现有模式”确定字段、导航和交互。
-3. API / typings 只通过 `npm run openapi` 生成；接口变化时同步直接受影响的现有页面。
-4. 按“组件发现 > 已有组件 > 重复 UI 抽取 > Arco > 自建”生成列表、详情和操作流程。
-5. 在浏览器验证路由、主题、列宽、Drawer、资源加载和关键交互。
+### 最短链路
 
-完整规则见 [admin-page](docs/skills/admin-page/SKILL.md)、[component-usage](docs/skills/component-usage/SKILL.md) 和 [api-generation](docs/skills/api-generation/SKILL.md)。
+1. 理解用户文字输入，只读取点名或与目标直接相关的 PRD、Figma、代码和接口。
+2. 稳定产品要求发生变化时，由 [project-context](docs/skills/project-context/SKILL.md) 增量更新 [PROJECT.md](PROJECT.md)。
+3. 稳定设计要求发生变化时，由 [design-system](docs/skills/design-system/SKILL.md) 基于最新 `PROJECT.md` 增量更新 [DESIGN.md](DESIGN.md)。
+4. 选择一个主 skill 生成代码；页面任务由 [admin-page](docs/skills/admin-page/SKILL.md) 主导，并按需补读 API、组件、CSS、Figma 或资源 skill。
+5. 按改动风险运行类型、测试、构建和浏览器验证，最后检查 diff 与用户点名范围。
+
+普通修复、单页临时要求和纯 API 生成不重写 `PROJECT.md` / `DESIGN.md`。上下文文件只保存跨页面、后续任务仍有效的已确认结论。
+
+### 最佳实践
+
+- **一个入口，一个主 skill**：从 `ai-code` 路由，不一次性加载全部 skills；主 skill 明确需要时才增加专项上下文。
+- **区分产品与设计**：`PROJECT.md` 只保存产品定位、范围、导航和术语；`DESIGN.md` 只保存项目设计方向和稳定视觉差异。
+- **尊重权威来源**：页面字段与来源优先级只看 `admin-page`；Figma 读取和还原只看 `figma-rules`；不要在 README 或其它 skill 复制精确顺序。
+- **接口生成优先**：API 和 typings 只通过 `npm run openapi` 更新，生成物、同步范围和失败处理只看 `api-generation`，不手改类型兜底。
+- **项目组件优先**：按 `component-usage` 完成组件发现、复用和抽取，再使用 Arco；列宽、Drawer 和关系钻取沿用公共契约。
+- **设计与实现分离**：视觉结果由 `DESIGN.md` 和 `design-system` 决定；主题变量、Tailwind / Less 和样式归属由 `css-usage` 决定。
+- **保持增量**：先检查未提交改动，只修改点名目标和必要直接依赖；不把邻近问题、文档清理或重构顺手扩入任务。
+- **验证真实结果**：类型和测试不能替代浏览器检查。可见 UI 需要验证目标视口、主题、最长文案、滚动、弹层和关键交互。
+- **文档也要去重**：新规则只写入唯一归属 skill；其它文件使用链接。发现冲突时先确定所有者，再删除旧副本。
+
+完整路由和规则归属见 [ai-code](docs/skills/ai-code/SKILL.md)。
 
 ## IM 业务范围
 
@@ -77,14 +93,19 @@ src/
 
 | 内容 | 文档 |
 | --- | --- |
-| 框架说明 | [docs/framework-guide.md](docs/framework-guide.md) |
-| 框架能力 | [docs/skills/framework-support/SKILL.md](docs/skills/framework-support/SKILL.md) |
-| AI Code 路由 | [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md) |
-| 项目规则 | [docs/skills/project-rules/SKILL.md](docs/skills/project-rules/SKILL.md) |
-| 页面生成 | [docs/skills/admin-page/SKILL.md](docs/skills/admin-page/SKILL.md) |
-| API 生成 | [docs/skills/api-generation/SKILL.md](docs/skills/api-generation/SKILL.md) |
-| 组件与 Arco | [docs/skills/component-usage/SKILL.md](docs/skills/component-usage/SKILL.md) |
+| 当前项目定位、业务边界、术语与产品约束 | [PROJECT.md](PROJECT.md) |
+| 当前项目设计目标、体验与视觉差异 | [DESIGN.md](DESIGN.md) |
+| 项目公共说明 | [docs/framework-guide.md](docs/framework-guide.md) |
+| 框架能力清单 | [docs/skills/framework-support/SKILL.md](docs/skills/framework-support/SKILL.md) |
+| AI code tools 统一入口 | [docs/skills/ai-code/SKILL.md](docs/skills/ai-code/SKILL.md) |
+| 通用项目规则 | [docs/skills/project-rules/SKILL.md](docs/skills/project-rules/SKILL.md) |
+| 文字需求 / PRD 到项目上下文 | [docs/skills/project-context/SKILL.md](docs/skills/project-context/SKILL.md) |
+| 技术栈、工具链与依赖边界 | [docs/skills/tech-stack/SKILL.md](docs/skills/tech-stack/SKILL.md) |
+| 设计语言、尺度与响应式 | [docs/skills/design-system/SKILL.md](docs/skills/design-system/SKILL.md) |
+| API 与 typings 生成 | [docs/skills/api-generation/SKILL.md](docs/skills/api-generation/SKILL.md) |
 | CSS、主题与 Tailwind | [docs/skills/css-usage/SKILL.md](docs/skills/css-usage/SKILL.md) |
-| Figma | [docs/skills/figma-rules/SKILL.md](docs/skills/figma-rules/SKILL.md) |
-| SVG 与静态资源 | [docs/skills/svg-icon-usage/SKILL.md](docs/skills/svg-icon-usage/SKILL.md) |
+| Figma 规则 | [docs/skills/figma-rules/SKILL.md](docs/skills/figma-rules/SKILL.md) |
+| SVG 与图标 | [docs/skills/svg-icon-usage/SKILL.md](docs/skills/svg-icon-usage/SKILL.md) |
+| 组件选择、Arco 最佳使用与抽取 | [docs/skills/component-usage/SKILL.md](docs/skills/component-usage/SKILL.md) |
+| 页面生成 | [docs/skills/admin-page/SKILL.md](docs/skills/admin-page/SKILL.md) |
 | IM 消息类型 | [docs/消息类型说明.md](docs/消息类型说明.md) |

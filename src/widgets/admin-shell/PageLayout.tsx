@@ -104,6 +104,7 @@ export const PageLayout = observer(function PageLayout({
 
   const [breadcrumb, setBreadCrumb] = useState<NavbarBreadcrumbItem[]>([]);
   const [collapsed, setCollapsed] = useState(false);
+  const [siderBroken, setSiderBroken] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(defaultSelectedKeys);
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
   const [headerScrolled, setHeaderScrolled] = useState(false);
@@ -188,6 +189,7 @@ export const PageLayout = observer(function PageLayout({
   }
 
   function toggleCollapse() {
+    if (siderBroken) return;
     setCollapsed((value) => !value);
   }
 
@@ -374,7 +376,11 @@ export const PageLayout = observer(function PageLayout({
               collapsed={collapsed}
               collapsedWidth={hideChrome ? 0 : COLLAPSED_WIDTH}
               collapsible
-              onCollapse={setCollapsed}
+              onBreakpoint={(broken) => {
+                setSiderBroken(broken);
+                if (broken) setCollapsed(true);
+              }}
+              onCollapse={(next) => setCollapsed(siderBroken ? true : next)}
               trigger={null}
               width={hideChrome ? 0 : menuWidth}
             >
@@ -412,7 +418,12 @@ export const PageLayout = observer(function PageLayout({
                   {renderRoutes(locale)(routes, 1)}
                 </Menu>
               </div>
-              <div className={styles['collapse-btn']} onClick={toggleCollapse}>
+              <div
+                className={cs(styles['collapse-btn'], {
+                  [styles['collapse-btn-responsive']]: siderBroken
+                })}
+                onClick={toggleCollapse}
+              >
                 {collapsed ? <IconDoubleRight /> : <IconMenuFold />}
               </div>
             </Sider>

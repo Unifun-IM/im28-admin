@@ -77,7 +77,7 @@ import loginBanner from '@assets/login/login-banner-bg.svg';
 ## 迁移与验收
 
 - 发现 `src/assets` 外的图片时，将资产和本次涉及的全部引用一起迁移；不保留旧副本或旧别名。
-- 检查 `rg -n 'src/app/assets|@app/assets|pages/.*/assets' src docs` 无遗留结果。
+- 检查 `rg -n 'src/app/assets|@app/assets|pages/.*/assets' src docs -g '!docs/skills/svg-icon-usage/SKILL.md'` 无遗留结果。
 - 检查图标全部位于 `src/assets/icon`，跨页面资源位于 `common`，其余目录能对应页面 route key。
 - 检查文件名、`@assets` import、`currentColor` 和暗色可见性。
 - 运行 typecheck、相关测试和 build，确认 Vite 与 SVGR 均能解析新路径。

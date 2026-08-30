@@ -5,7 +5,7 @@ description: Style admin UI with project theme variables, Tailwind for ordinary 
 
 # CSS Usage
 
-只约束本次新增或修改的样式；除非用户点名，不批量清理历史样式。
+只定义“样式如何实现”；视觉层级、尺度与响应式结果由 `design-system` 定义。只约束本次新增或修改的样式；除非用户点名，不批量清理历史样式。
 
 ## 决策顺序
 
@@ -61,6 +61,7 @@ Tailwind：
 
 - 保持 `preflight: false`。
 - 用于 flex / grid、间距、尺寸、定位、排版、响应式和简单状态。
+- 响应式断点和目标行为遵循 `design-system`，不新增语义近似的任意断点。
 - 类名必须静态可扫描；条件样式使用显式映射和 `classnames`。
 - Figma 精确尺寸可用任意值，颜色仍必须引用主题变量。
 - 样式入口顺序保持 `arco.css -> tailwind.css -> global.less`。
@@ -84,3 +85,4 @@ Less：
 - Tailwind / Less 职责是否正确，类名是否可静态扫描。
 - 公共样式是否有稳定语义和正确 FSD 归属。
 - 浏览器是否检查关键视口、主题、Hover / Active、弹层和滚动状态。
+- 响应式结果是否满足 `design-system`，公共组件问题是否在公共层修复。

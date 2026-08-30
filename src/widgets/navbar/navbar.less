@@ -60,6 +60,36 @@
   }
 }
 
+@media (max-width: 768px) {
+  .use-navbar-search {
+    display: none;
+  }
+
+  .use-navbar-breadcrumb {
+    min-width: 0;
+    overflow: hidden;
+
+    .arco-breadcrumb-item:not(:last-child),
+    .arco-breadcrumb-item-separator:not(:last-child) {
+      display: none;
+    }
+
+    .arco-breadcrumb-item:last-child {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+
+      > span,
+      > span > span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
 .use-navbar-badge {
   .arco-badge-number {
     min-width: 16px;

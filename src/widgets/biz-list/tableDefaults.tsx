@@ -41,7 +41,8 @@ export function normalizeBizColumns<T>(
 
     return {
       ...col,
-      ellipsis: col.ellipsis ?? true
+      ellipsis: col.ellipsis ?? true,
+      width: col.width ?? 160
     };
   });
 }

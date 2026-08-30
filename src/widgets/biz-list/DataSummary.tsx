@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 import { Tooltip } from '@arco-design/web-react';
 import { IconDown, IconQuestionCircle, IconUp } from '@arco-design/web-react/icon';
 import cs from 'classnames';
@@ -64,17 +64,6 @@ export default function DataSummary({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const cols = resolveColumns(items.length, columns);
 
-  const cells = useMemo(() => {
-    const list = [...items];
-    const remainder = list.length % cols;
-    if (remainder !== 0) {
-      for (let i = 0; i < cols - remainder; i += 1) {
-        list.push({ label: '', value: '' });
-      }
-    }
-    return list;
-  }, [items, cols]);
-
   if (!items.length) return null;
 
   if (collapsed) {
@@ -116,26 +105,16 @@ export default function DataSummary({
         )}
       </div>
       <div
-        className="grid w-full"
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        className="use-biz-summary-grid grid w-full"
+        style={{ '--biz-summary-columns': cols } as CSSProperties}
       >
-        {cells.map((item, index) => {
-          const empty = !item.label && (item.value === '' || item.value == null);
-          const isLastCol = (index + 1) % cols === 0;
-          const isLastRow = index >= cells.length - cols;
-          const cellBorder = cs(
-            'box-border flex h-[32px] min-w-0 items-center justify-between gap-[8px] border-solid border-arco-border-2 px-[12px]',
-            !isLastCol && 'border-r',
-            !isLastRow && 'border-b'
-          );
-
-          if (empty) {
-            return <div key={`empty-${index}`} className={cellBorder} aria-hidden />;
-          }
-
+        {items.map((item, index) => {
           const tone = resolveTone(item.value, item.tone);
           return (
-            <div key={`${item.label}-${index}`} className={cellBorder}>
+            <div
+              key={`${item.label}-${index}`}
+              className="use-biz-summary-cell box-border flex h-[32px] min-w-0 items-center justify-between gap-[8px] bg-[var(--color-bg-2)] px-[12px]"
+            >
               <div className="flex min-w-0 flex-1 items-center gap-[4px]">
                 <span className="truncate text-[12px] leading-[20px] text-arco-text-3">
                   {item.label}

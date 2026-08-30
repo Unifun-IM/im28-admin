@@ -1,38 +1,38 @@
 ---
 name: admin-page
-description: Generate or update admin navigation, routes, lists, filters, detail drawers, relation drawers, and records from explicit navigation, readable Figma, PRD, and generated Admin OpenAPI.
+description: Generate or update admin navigation, routes, lists, filters, detail drawers, relation drawers, and records from explicit navigation, readable Figma, PRD, PROJECT.md, and generated Admin OpenAPI.
 ---
 
 # Admin Page Generation
 
-开始前读取 `project-rules`、`component-usage` 和 `css-usage`；涉及 API 生成时读 `api-generation`，提供完整 Figma 地址时读 `figma-rules`。
+本 skill 负责页面信息架构、字段推导、路由和落页流程。开始前沿用 `ai-code` 已加载的 `PROJECT.md`；可见 UI 读取 `DESIGN.md` 和 `design-system`，写 JSX 前读取 `component-usage`，新增或修改样式时读取 `css-usage`。接口生成和 Figma 读取分别交给对应专项 skill。
 
 ## 信息来源
 
 页面可见信息按以下优先级确定：
 
-1. 完整且可只读访问的 Figma 地址
-2. 当前任务 PRD / 产品说明
-3. 脚本生成的 Admin OpenAPI 与 `AdminAPI` 类型
-4. 现有同类页面模式
+1. 完整且可只读访问、明确对应目标页面的 Figma
+2. 当前用户文字要求和当前任务 PRD / 产品说明
+3. `PROJECT.md` 中已确认的项目级信息架构、术语与跨页面约束
+4. 脚本生成的 Admin OpenAPI 与 `AdminAPI` 类型
+5. 现有同类页面模式
 
 规则：
 
 - 高优先级来源明确列出的筛选项、列、详情字段、分组、Tab 和操作是闭合集合；低优先级来源只补字段绑定、枚举、格式、校验、权限和请求契约，不追加可见项。
 - 只有整个区域未提供或明确标注待补时，才由下一优先级来源定义该区域。
-- Figma / PRD 决定展示内容；生成接口决定真实可请求和可提交的数据。
+- Figma / 当前需求决定展示内容；生成接口决定真实可请求和可提交的数据。
+- `PROJECT.md` 补充跨任务稳定的项目默认值，不能覆盖当前任务中更具体的 Figma / PRD，也不能定义接口中不存在的请求契约。
 - 完整 Figma 明确展示但接口缺失的字段，可以保留空值或局部 UI 壳，并在交付中列出契约缺口；不得虚构请求参数、响应或修改生成类型。该例外不适用于只有 PRD / API 的页面。
 - Figma 地址不可读时必须说明，不能假装已读取。
 
 ## 增量生成
 
-1. 先检查未提交 git、现有路由、页面、公开组件和 API 调用方。
-2. 接口变化先按 `api-generation` 执行 `npm run openapi`，保留完整生成 diff。
-3. 已有接口签名变化时，更新点名目标；没有明确目标时沿现有 import 和类型引用同步直接调用方。
-4. 没有调用方的新接口，只有能识别为独立管理对象、列表能力或明确菜单目标时才生成路由和页面。
-5. 详情、创建、更新、状态动作、上传、鉴权和记录接口不单独落页。
-6. 接口契约不足时报告缺口，不创建 `ApiNotReady`、mock 页面或“接口未就绪”占位组件。
-7. 不覆盖用户已有改动，不格式化或重构无关文件。
+1. 检查现有路由、页面、公开组件和 API 调用方。
+2. 接口变化先完整执行 `api-generation`，生成 diff 和调用方同步范围不在本 skill 重复定义。
+3. 只有独立管理对象、列表能力或明确菜单目标生成路由和页面；详情、动作、上传、鉴权和记录能力进入所属页面。
+4. 接口契约不足时报告缺口，不创建 `ApiNotReady`、mock 页面或“接口未就绪”占位组件。
+5. 不覆盖用户已有改动，不格式化或重构无关文件。
 
 ## 导航与路由
 
@@ -41,8 +41,9 @@ description: Generate or update admin navigation, routes, lists, filters, detail
 1. 用户显式提供的导航树
 2. 完整可读 Figma 侧栏
 3. PRD 导航说明
-4. 现有 `src/shared/config/routes.ts`
-5. 接口语义推导
+4. `PROJECT.md` 中已确认的项目导航与模块顺序
+5. 现有 `src/shared/config/routes.ts`
+6. 接口语义推导
 
 没有顺序说明时保持现有业务菜单顺序，新增业务一级菜单放在 `system` 前，使“系统”保持最后一组。
 
@@ -63,18 +64,11 @@ description: Generate or update admin navigation, routes, lists, filters, detail
 
 ### 1. 建立组件清单
 
-写 JSX 前列出目标页面需要的公共组件，并搜索公开入口和现有调用方。标准页面通常包含：
-
-- 列表：`BizListPage`、`Filter*`、`ActionLinks`
-- 实体详情：已有 `<Entity>DetailDrawer`，否则 `BizDetailDrawer`
-- 关系钻取：`BizRelationListDrawer`
-- 记录：`BizDetailDrawer.operationRecords` 或 `BizOperationTimeline`
-
-最终代码必须出现对应 import 和 JSX；仅在分析中找到组件不算完成。
+按 `component-usage` 搜索公开组件和现有调用方，列出本页需要的列表、筛选、详情、关系和记录组件。最终 import 与 JSX 必须真实使用选定组件；只在分析中提到不算完成。
 
 ### 2. 读取接口
 
-- 只使用 `src/shared/api/admin/**` 的生成函数与 `AdminAPI` 类型。
+- 使用 `api-generation` 产出的请求函数与 `AdminAPI` 类型。
 - 先区分列表、详情、创建、更新、动作和记录接口，再按页面职责接线。
 - 列表保留 `page` / `page_size`；搜索和重置回到第 1 页。
 - 详情在 Drawer 打开后按目标 ID 拉取；关闭时清理临时 target。
@@ -91,7 +85,7 @@ Figma / PRD 未定义整个筛选区域时，按请求字段语义选择：
 | 日期时间范围 | `FilterDateRange` |
 | 数字范围 | Arco `InputNumber` |
 
-默认一行四项；控件放在 Arco `Form.Item` 和 `FilterField` 内，不用 Tailwind 重做 Form / Grid。
+筛选布局与响应式列数遵循 `design-system`，筛选组件和 Arco Form 契约遵循 `component-usage`。
 
 ### 4. 生成表格
 
@@ -117,13 +111,13 @@ Figma / PRD 未定义列集合时：
 - 同类信息分组：多个 `sections`，不为普通分组创建 Tab。
 - 多接口或明显不同类型的信息：`tabs`；操作记录可用 `operationRecords`。
 - 摘要信息放 `summary`，不重复塞入 Descriptions。
-- Figma / PRD 未明确宽度时使用组件默认的视口 50%，不在调用页重复传 `width`。
+- Figma / 当前需求未明确宽度时沿用公共组件默认值；调用页不重复传 `width`。
 
 关系数量、右箭头和“查看列表”打开新的 `BizRelationListDrawer`，保留父详情的 Tab、滚动位置和数据。关系列表不是默认常驻 Tab；“基本信息 / 通讯录 / 群组 / 操作记录”中，通讯录和群组由数量钻取时，父详情只保留“基本信息 / 操作记录”。
 
 打开后承载独立、较长或可继续操作内容的列表 / 详情操作，使用新的 Drawer，不把临时内容插入当前详情或临时增加 Tab。
 
-关系 Drawer 默认视口 50%，不写固定 `640px` / `880px`，不默认添加 `scroll.x`。只有高优先级来源明确且公共组件无法合理扩展时才允许自建。
+关系 Drawer 的宽度、表格滚动和自建边界遵循 `component-usage`。
 
 ### 6. 记录与 locale
 
@@ -138,15 +132,10 @@ Figma / PRD 未定义列集合时：
 - 路由、页面、locale、API 调用和权限是否完整接线。
 - 预期组件是否真实出现在 import / JSX；没有裸组件残留。
 - 实体详情是否唯一复用；关系入口是否使用子 Drawer 而非临时 Tab。
-- Drawer 是否保持默认 50%，没有无依据固定像素宽度。
+- Drawer 是否沿用 `component-usage` 的公共契约，没有无依据固定像素宽度。
 - 列宽是否基于最终中英文文案和真实内容验证，操作列没有截断或显著空白。
-- API 和 typings 是否仍完全由生成命令维护。
+- 页面是否按 `design-system` 验证窄屏、桌面、浅色、暗色与最长文案，且响应式修复位于公共层级。
+- 页面是否符合 `PROJECT.md` 的产品边界、术语、导航和跨页面产品约束，且没有把单页推断反写成项目事实。
+- 页面是否符合 `DESIGN.md` 的项目设计方向与适用范围，且没有跳过设计归一直接从 PRD 推断全局风格。
+- 涉及接口时是否完成 `api-generation` 的验收。
 - 浏览器是否验证目标流程、空态、最长内容、滚动、主题和关键视口。
-
-关系 Drawer 可定向检查：
-
-```bash
-rg -n "BizRelationListDrawer|<Drawer|<Table|width=|scroll=" path/to/detail.tsx path/to/relation-list.tsx
-```
-
-无设计例外时，裸 `Drawer + Table`、固定像素宽度或默认 `scroll.x` 命中表示生成未完成。

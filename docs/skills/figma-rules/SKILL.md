@@ -13,7 +13,7 @@ Figma 在本项目中只读。允许读取设计上下文、截图、metadata �
 
 ## 页面定义
 
-完整可读 Figma 是页面可见信息的最高优先级；具体 Figma > PRD > 生成接口顺序和闭合集合规则见 `admin-page`。
+页面可见信息的来源优先级和闭合集合只由 `admin-page` 定义。项目级设计规范由 `DESIGN.md` 补充，Figma 未定义的视觉状态继续遵循 `DESIGN.md` 和 `design-system`。
 
 - 提取字段、顺序、状态、交互、组件层级和响应式行为。
 - 提取尺寸、间距、圆角、字号、字重和颜色 token。

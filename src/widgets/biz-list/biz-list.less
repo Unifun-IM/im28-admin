@@ -8,6 +8,15 @@
   box-shadow: none;
 }
 
+.use-biz-summary-grid {
+  grid-template-columns: repeat(
+    var(--biz-summary-columns, 3),
+    minmax(0, 1fr)
+  );
+  gap: 1px;
+  background: var(--color-border-2);
+}
+
 /* —— 业务列表：筛选区（Arco Card + Form + Grid；视觉 token） —— */
 .use-biz-filter-bar {
   .arco-card-body {
@@ -439,6 +448,21 @@
       justify-content: flex-start;
       align-items: center;
     }
+
+    .use-biz-filter-actions > .arco-space {
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+  }
+
+  .use-biz-summary-grid {
+    --biz-summary-columns: 2 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .use-biz-summary-grid {
+    --biz-summary-columns: 1 !important;
   }
 }
 
@@ -664,6 +688,20 @@
     /* 批量操作 / 新建等与筛选「查询」同为 8px 圆角 */
     .arco-btn {
       border-radius: 8px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .use-biz-table-toolbar {
+      align-items: flex-start;
+      min-height: 56px;
+      height: auto;
+    }
+
+    .use-biz-table-toolbar .arco-space {
+      max-width: 100%;
+      flex-wrap: wrap;
+      row-gap: 8px;
     }
   }
 
@@ -1064,6 +1102,18 @@
     padding: 8px 12px;
   }
 
+  @media (max-width: 768px) {
+    .arco-table-pagination {
+      justify-content: flex-start;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .arco-pagination {
+      min-width: max-content;
+    }
+  }
+
   .arco-pagination {
     display: inline-flex;
     align-items: center;
@@ -1154,4 +1204,3 @@
     line-height: 1;
   }
 }
-
