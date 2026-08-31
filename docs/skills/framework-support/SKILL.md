@@ -30,7 +30,7 @@ Vite 已配置 `@app`、`@assets`、`@pages`、`@widgets`、`@features`、`@enti
 - 路由配置：`src/shared/config/routes.ts`
 - 页面发现：`src/app/router/get-flatten-routes.ts` 通过 `import.meta.glob` 加载 `src/pages/**/index.tsx`
 - 支持 `requiredPermissions`、`oneOfPerm` 菜单权限
-- `@widgets/admin-shell` 提供侧栏、Navbar、面包屑、多页签、页面预加载、NProgress、壳层全屏、表格全屏和 Settings Drawer
+- `@widgets/admin-shell` 提供桌面侧栏与多页签、移动遮罩导航与当前页顶栏，以及面包屑、页面预加载、NProgress、壳层全屏、表格全屏和 Settings Drawer
 - 当前模板 fallback 菜单为看板 + 系统管理
 
 ## 登录与系统管理

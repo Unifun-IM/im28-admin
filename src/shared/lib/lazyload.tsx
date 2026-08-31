@@ -7,12 +7,11 @@ type PageModule = {
 };
 
 export default function lazyload(loader: () => Promise<unknown>) {
-  const Component = loadable(loader as () => Promise<PageModule>, {
+  return loadable(loader as () => Promise<PageModule>, {
     fallback: (
       <div className="flex min-h-[200px] size-full items-center justify-center">
         <Spin />
       </div>
     )
   });
-  return Component;
 }

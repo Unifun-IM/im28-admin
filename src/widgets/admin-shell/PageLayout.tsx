@@ -146,6 +146,12 @@ export const PageLayout = observer(function PageLayout({
     setMobileMenuVisible(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (isMobile && chromeFullscreen) {
+      pageTabsStore.setChromeFullscreen(false);
+    }
+  }, [chromeFullscreen, isMobile]);
+
   const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
   const menuMap = useRef<Map<string, { menuItem?: boolean; subMenu?: boolean }>>(
     new Map()
@@ -173,9 +179,11 @@ export const PageLayout = observer(function PageLayout({
     ? 0
     : tableFullscreen
       ? 0
-      : chromeFullscreen
+      : chromeFullscreen && !isMobile
         ? pageTabsHeight
-        : navbarHeight + headerGap + pageTabsHeight;
+        : isMobile
+          ? navbarHeight
+          : navbarHeight + headerGap + pageTabsHeight;
   const flattenRoutes = useMemo(
     () => getFlattenRoutes(routes) || [],
     [getFlattenRoutes, routes]
@@ -379,7 +387,7 @@ export const PageLayout = observer(function PageLayout({
         className={cs(styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar,
           [styles['layout-navbar-chrome-fullscreen']]:
-            showNavbar && chromeFullscreen && !tableFullscreen,
+            showNavbar && chromeFullscreen && !isMobile && !tableFullscreen,
           [styles['layout-navbar-table-fullscreen']]:
             showNavbar && tableFullscreen,
           [styles['layout-navbar-scrolled']]: headerScrolled
@@ -398,7 +406,7 @@ export const PageLayout = observer(function PageLayout({
             }
           />
         </div>
-        {showNavbar && !tableFullscreen ? (
+        {showNavbar && !isMobile && !tableFullscreen ? (
           <PageTabs title={pageTabTitle} />
         ) : null}
       </div>
