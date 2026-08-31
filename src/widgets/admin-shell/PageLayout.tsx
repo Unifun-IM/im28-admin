@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu } from '@arco-design/web-react';
+import { Drawer, Layout, Menu } from '@arco-design/web-react';
 import {
   IconDoubleRight,
   IconMenuFold
@@ -36,6 +36,26 @@ const Content = Layout.Content;
 /** Figma 862:20168：常规 240 / 最小 56；贴边全高，无外边距 */
 const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 56;
+const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
+
+function useMobileLayout() {
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      Boolean(window.matchMedia?.(MOBILE_MEDIA_QUERY).matches)
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const update = () => setIsMobile(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener('change', update);
+    return () => mediaQuery.removeEventListener('change', update);
+  }, []);
+
+  return isMobile;
+}
 
 export type PageLayoutProps = {
   /** 由 app 注入：页面模块发现与懒加载 */
@@ -81,6 +101,7 @@ export const PageLayout = observer(function PageLayout({
   const chromeFullscreen = pageTabsStore.chromeFullscreen;
   const tableFullscreen = pageTabsStore.tableFullscreen;
   const hideChrome = pageTabsStore.hideChrome;
+  const isMobile = useMobileLayout();
 
   const [routes, defaultRoute] = useRoute(userInfo?.permissions || {});
   const defaultSelectedKeys = [currentComponent || defaultRoute];
@@ -93,6 +114,7 @@ export const PageLayout = observer(function PageLayout({
   const [selectedKeys, setSelectedKeys] = useState<string[]>(defaultSelectedKeys);
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
     if (!hideChrome) return;
@@ -106,6 +128,7 @@ export const PageLayout = observer(function PageLayout({
   /* 切页时退出表格全屏，避免非列表页没有退出入口 */
   useEffect(() => {
     pageTabsStore.setTableFullscreen(false);
+    setMobileMenuVisible(false);
   }, [pathname]);
 
   const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
@@ -119,10 +142,17 @@ export const PageLayout = observer(function PageLayout({
   const showNavbar = settings.navbar && urlParams.navbar !== false;
   const showMenu = settings.menu && urlParams.menu !== false;
   const showFooter = settings.footer && urlParams.footer !== false;
+
+  useEffect(() => {
+    if (!isMobile || hideChrome || !showMenu) {
+      setMobileMenuVisible(false);
+    }
+  }, [hideChrome, isMobile, showMenu]);
+
   const expandedWidth = settings.menuWidth || EXPANDED_WIDTH;
   const menuWidth = collapsed ? COLLAPSED_WIDTH : expandedWidth;
   /** 侧栏占位：任一全屏时为 0，带动画收起 */
-  const siderOccupied = showMenu && !hideChrome ? menuWidth : 0;
+  const siderOccupied = showMenu && !hideChrome && !isMobile ? menuWidth : 0;
   /** 表格全屏：顶栏全隐；壳层全屏：仅保留 PageTabs */
   const headerHeight = !showNavbar
     ? 0
@@ -157,6 +187,7 @@ export const PageLayout = observer(function PageLayout({
   }, [breadcrumb, flattenRoutes, locale, pathname]);
 
   function onClickMenuItem(key: string) {
+    setMobileMenuVisible(false);
     const currentRoute = flattenRoutes.find((r) => r.key === key);
     if (!currentRoute?.component) {
       navigate(`/${key}`);
@@ -340,14 +371,59 @@ export const PageLayout = observer(function PageLayout({
             show={showNavbar}
             breadcrumb={breadcrumb}
             onOpenUserCenter={onOpenUserCenter}
+            onOpenMenu={
+              isMobile && showMenu && !hideChrome
+                ? () => setMobileMenuVisible(true)
+                : undefined
+            }
           />
         </div>
         {showNavbar && !tableFullscreen ? (
           <PageTabs title={pageTabTitle} />
         ) : null}
       </div>
+      {showMenu && isMobile && !hideChrome ? (
+        <Drawer
+          className={styles['mobile-menu-drawer']}
+          wrapClassName={styles['mobile-menu-drawer-wrap']}
+          width="min(86vw, 320px)"
+          placement="left"
+          title={
+            <div className={styles['mobile-menu-title']}>
+              {systemSettingsStore.logoUrl ? (
+                <img src={systemSettingsStore.logoUrl} alt="" />
+              ) : (
+                <Logo />
+              )}
+              <span>
+                {systemSettingsStore.systemName || locale['common.appName']}
+              </span>
+            </div>
+          }
+          footer={null}
+          visible={mobileMenuVisible}
+          escToExit
+          maskClosable
+          unmountOnExit
+          onCancel={() => setMobileMenuVisible(false)}
+        >
+          <div className={styles['mobile-menu-wrapper']}>
+            <Menu
+              className={styles.sideMenu}
+              collapse={false}
+              levelIndent={0}
+              onClickMenuItem={onClickMenuItem}
+              onClickSubMenu={(_, keys) => setOpenKeys(keys)}
+              openKeys={openKeys}
+              selectedKeys={selectedKeys}
+            >
+              {renderRoutes(locale)(routes, 1)}
+            </Menu>
+          </div>
+        </Drawer>
+      ) : null}
       <Layout>
-          {showMenu && (
+          {showMenu && !isMobile && (
             <Sider
               breakpoint="xl"
               className={cs(styles['layout-sider'], {
