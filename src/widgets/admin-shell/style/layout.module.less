@@ -82,6 +82,77 @@
   }
 }
 
+.mobile-menu-drawer-wrap {
+  z-index: 1001;
+}
+
+.mobile-menu-drawer {
+  background-color: var(--color-bg-2, #fff);
+
+  :global(.arco-drawer-scroll) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  :global(.arco-drawer-header) {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    height: @sider-logo-height;
+    padding: 0 12px 0 16px;
+    border-bottom-color: var(--color-border-2, rgba(0, 0, 0, 0.08));
+  }
+
+  :global(.arco-drawer-header-title) {
+    min-width: 0;
+  }
+
+  :global(.arco-drawer-content) {
+    flex: 1;
+    min-height: 0;
+    padding: 8px 0 0;
+    overflow: hidden;
+  }
+}
+
+.mobile-menu-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+
+  svg,
+  img {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  img {
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-text-1, #1d2129);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.mobile-menu-wrapper {
+  height: 100%;
+  min-height: 0;
+  padding: 0 8px 16px;
+  overflow: auto;
+}
+
 /* —— Figma 862:20168：贴边全高 240，仅右边框，无圆角/外边距 —— */
 .layout-sider {
   position: fixed;

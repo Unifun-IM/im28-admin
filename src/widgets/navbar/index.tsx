@@ -19,7 +19,8 @@ import {
   IconLoading,
   IconSettings,
   IconObliqueLine,
-  IconSearch
+  IconSearch,
+  IconMenu
 } from '@arco-design/web-react/icon';
 import {
   useGlobalSelector,
@@ -50,9 +51,15 @@ export type NavbarProps = {
   show: boolean;
   breadcrumb?: NavbarBreadcrumbItem[];
   onOpenUserCenter?: () => void;
+  onOpenMenu?: () => void;
 };
 
-function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
+function Navbar({
+  show,
+  breadcrumb = [],
+  onOpenUserCenter,
+  onOpenMenu
+}: NavbarProps) {
   const t = useLocale();
   const locale = useLocale();
   const { userInfo, userLoading, settings } = useGlobalSelector(
@@ -154,6 +161,14 @@ function Navbar({ show, breadcrumb = [], onOpenUserCenter }: NavbarProps) {
   return (
     <div className="box-border flex h-[44px] shrink-0 items-center justify-between gap-[12px] bg-transparent">
       <div className="flex min-w-0 flex-1 items-center">
+        {onOpenMenu ? (
+          <IconButton
+            className="use-navbar-menu-trigger"
+            icon={<IconMenu />}
+            aria-label={t['navbar.openMenu']}
+            onClick={onOpenMenu}
+          />
+        ) : null}
         {breadcrumb.length > 0 && (
           <Breadcrumb
             className="use-navbar-breadcrumb"
