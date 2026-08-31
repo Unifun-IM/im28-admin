@@ -1,3 +1,25 @@
+/* —— 消息面板 —— */
+.use-message-box {
+  width: 384px;
+  max-width: calc(100vw - 32px);
+  max-height: min(520px, calc(100dvh - 76px));
+}
+
+.use-message-box-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .use-message-box {
+    width: calc(100vw - 32px);
+  }
+}
+
 /* —— 消息面板空态 —— */
 .use-message-empty {
   .arco-result-subtitle {
