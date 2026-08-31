@@ -55,7 +55,7 @@ function toRfc3339(value: unknown): string | undefined {
  * 系统操作日志 — Figma 793:38382
  * @see postV1AdminSystemOperationLogsList
  */
-function OpLogsPage() {
+export function OpLogsPage() {
   const t = useLocale();
   const [form] = Form.useForm<OpLogsForm>();
   const [loading, setLoading] = useState(false);
@@ -265,4 +265,6 @@ function OpLogsPage() {
   );
 }
 
-export default observer(OpLogsPage);
+const ObservedOpLogsPage = observer(OpLogsPage);
+
+export default ObservedOpLogsPage;

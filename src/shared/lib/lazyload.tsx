@@ -1,29 +1,17 @@
-import React from 'react';
 import loadable from '@loadable/component';
 import { Spin } from '@arco-design/web-react';
+import type React from 'react';
 
-function LoadingComponent() {
-  return (
-    <div
-      style={{
-        alignItems: 'center',
-        display: 'flex',
-        height: '100%',
-        justifyContent: 'center',
-        minHeight: 200,
-        width: '100%'
-      }}
-    >
-      <Spin />
-    </div>
-  );
-}
+type PageModule = {
+  default: React.ComponentType<Record<string, never>>;
+};
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function lazyload(loader: any) {
-  const Component = loadable(loader, {
-    fallback: <LoadingComponent />
-  }) as any;
-  Component.preload = loader;
-  return Component;
+export default function lazyload(loader: () => Promise<unknown>) {
+  return loadable(loader as () => Promise<PageModule>, {
+    fallback: (
+      <div className="flex min-h-[200px] size-full items-center justify-center">
+        <Spin />
+      </div>
+    )
+  });
 }

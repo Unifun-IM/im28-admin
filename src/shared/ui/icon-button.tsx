@@ -8,7 +8,8 @@ export type IconButtonProps = ButtonProps & {
 };
 
 const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
-  const { icon, className, tip: _tip, active, ...rest } = props;
+  const { icon, className, tip, active, ...rest } = props;
+  void tip;
 
   return (
     <Button

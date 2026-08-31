@@ -1,5 +1,5 @@
 import { comparer, reaction } from 'mobx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   globalStore,
@@ -21,14 +21,21 @@ export type GlobalAction = UpdateSettingsAction | UpdateUserInfoAction;
 
 /** MobX globalStore 的 React 订阅 / 派发钩子 */
 export function useGlobalSelector<T>(selector: (state: GlobalState) => T): T {
-  const select = () => selector(globalStore.snapshot);
-  const [selected, setSelected] = useState(select);
+  const selectorRef = useRef(selector);
+  selectorRef.current = selector;
+  const [selected, setSelected] = useState(() =>
+    selectorRef.current(globalStore.snapshot)
+  );
 
   useEffect(() => {
-    return reaction(select, setSelected, {
-      equals: comparer.structural,
-      fireImmediately: true
-    });
+    return reaction(
+      () => selectorRef.current(globalStore.snapshot),
+      setSelected,
+      {
+        equals: comparer.structural,
+        fireImmediately: true
+      }
+    );
   }, []);
 
   return selected;

@@ -69,7 +69,7 @@ export type BizListPageProps<T = Record<string, unknown>> = {
 };
 
 /** 标准业务列表：筛选 → 汇总 → 表格（含标题栏 / 批量条 / 表格全屏） */
-function BizListPage<T extends Record<string, unknown>>({
+export function BizListPage<T extends Record<string, unknown>>({
   form,
   filter,
   onSearch,
@@ -100,8 +100,11 @@ function BizListPage<T extends Record<string, unknown>>({
   const needsBatchEntry = Boolean(batchActions);
   const inBatchSelect = !needsBatchEntry || batchSelectMode;
   const hasRowSelection = Boolean(tableProps.rowSelection) && inBatchSelect;
-  const selectedRowKeys = (tableProps.rowSelection?.selectedRowKeys ||
-    []) as (string | number)[];
+  const selectedRowKeys = useMemo(
+    () =>
+      (tableProps.rowSelection?.selectedRowKeys || []) as (string | number)[],
+    [tableProps.rowSelection?.selectedRowKeys]
+  );
   const selectedCount = selectedRowKeys.length;
 
   const exitBatchSelect = () => {
@@ -392,4 +395,6 @@ function BizListPage<T extends Record<string, unknown>>({
   );
 }
 
-export default observer(BizListPage);
+const ObservedBizListPage = observer(BizListPage);
+
+export default ObservedBizListPage;

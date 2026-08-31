@@ -68,6 +68,10 @@ describe('PageLayout', () => {
     );
 
     expect(container.querySelector('.arco-layout-sider')).toBeNull();
+    expect(container.querySelector('.use-page-tabs')).toBeNull();
+    expect(
+      container.querySelector('[data-layout-content]')?.getAttribute('style')
+    ).toContain('padding-top: 44px');
     fireEvent.click(screen.getByRole('button', { name: '打开导航' }));
     expect(document.querySelector('.arco-drawer')).toBeTruthy();
   });

@@ -131,6 +131,12 @@ export const PageLayout = observer(function PageLayout({
     setMobileMenuVisible(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (isMobile && chromeFullscreen) {
+      pageTabsStore.setChromeFullscreen(false);
+    }
+  }, [chromeFullscreen, isMobile]);
+
   const routeMap = useRef<Map<string, NavbarBreadcrumbItem[]>>(new Map());
   const menuMap = useRef<Map<string, { menuItem?: boolean; subMenu?: boolean }>>(
     new Map()
@@ -158,10 +164,15 @@ export const PageLayout = observer(function PageLayout({
     ? 0
     : tableFullscreen
       ? 0
-      : chromeFullscreen
+      : chromeFullscreen && !isMobile
         ? pageTabsHeight
-        : navbarHeight + headerGap + pageTabsHeight;
-  const flattenRoutes = useMemo(() => getFlattenRoutes(routes) || [], [routes]);
+        : isMobile
+          ? navbarHeight
+          : navbarHeight + headerGap + pageTabsHeight;
+  const flattenRoutes = useMemo(
+    () => getFlattenRoutes(routes) || [],
+    [getFlattenRoutes, routes]
+  );
 
   /** 按 pathname 同步取标题，避免 breadcrumb 滞后导致 tab 标题闪一下 */
   const pageTabTitle = useMemo(() => {
@@ -351,6 +362,8 @@ export const PageLayout = observer(function PageLayout({
     }
     setBreadCrumb(routeConfig || []);
     updateMenuStatus();
+    // Menu state is intentionally recalculated only when navigation changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return (
@@ -359,7 +372,7 @@ export const PageLayout = observer(function PageLayout({
         className={cs(styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar,
           [styles['layout-navbar-chrome-fullscreen']]:
-            showNavbar && chromeFullscreen && !tableFullscreen,
+            showNavbar && chromeFullscreen && !isMobile && !tableFullscreen,
           [styles['layout-navbar-table-fullscreen']]:
             showNavbar && tableFullscreen,
           [styles['layout-navbar-scrolled']]: headerScrolled
@@ -378,7 +391,7 @@ export const PageLayout = observer(function PageLayout({
             }
           />
         </div>
-        {showNavbar && !tableFullscreen ? (
+        {showNavbar && !isMobile && !tableFullscreen ? (
           <PageTabs title={pageTabTitle} />
         ) : null}
       </div>

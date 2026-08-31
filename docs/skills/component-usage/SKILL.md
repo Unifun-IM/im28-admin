@@ -17,6 +17,8 @@ description: Discover, reuse, compose, and extract project components for admin 
 
 不能因为直接写 JSX 更快，就绕过项目组件已有的样式、空态、分页、主题和交互。
 
+公共组件已经提供响应式契约时，调用页只传业务数据和状态，不根据 `window.innerWidth` 分叉两套 JSX。确需把并排桌面流程转换为移动单面板时，在对应公共 widget 内集中维护活动面板与返回契约，视觉行为仍以 `design-system` 为准。
+
 ## 组件发现与抽取
 
 - 检查 `src/shared/ui/index.ts`、相关 `widgets/*/index.ts`、`features/*/index.ts`。
