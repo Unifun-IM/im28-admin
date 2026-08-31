@@ -1,4 +1,4 @@
-import { normalizeBizColumns } from './tableDefaults';
+import { normalizeBizColumns, resolveBizPagination } from './tableDefaults';
 
 describe('normalizeBizColumns', () => {
   it('gives every visible column a non-zero base width', () => {
@@ -31,5 +31,27 @@ describe('normalizeBizColumns', () => {
 
     expect(columns[0].width).toBe(240);
     expect(columns[1].width).toBe(72);
+  });
+
+  it('uses compact pagination on mobile without changing page behavior', () => {
+    const pagination = resolveBizPagination(
+      {
+        current: 2,
+        pageSize: 30,
+        total: 120,
+        onChange: () => undefined
+      },
+      15,
+      { compact: true }
+    );
+
+    expect(pagination).toMatchObject({
+      current: 2,
+      pageSize: 30,
+      total: 120,
+      simple: true,
+      showTotal: false,
+      sizeCanChange: false
+    });
   });
 });
