@@ -19,4 +19,17 @@ describe('normalizeBizColumns', () => {
 
     expect(columns[0].width).toBe(280);
   });
+
+  it('compacts action columns on mobile without changing data columns', () => {
+    const columns = normalizeBizColumns(
+      [
+        { title: 'Name', dataIndex: 'name', width: 240 },
+        { title: 'Action', dataIndex: 'op', width: 200 }
+      ],
+      { compactActions: true }
+    );
+
+    expect(columns[0].width).toBe(240);
+    expect(columns[1].width).toBe(72);
+  });
 });

@@ -26,6 +26,7 @@ import IconTrade from '@assets/icon/icon-trade-management.svg?react';
 import IconUser from '@assets/icon/icon-user-management.svg?react';
 import useRoute, { type IRoute } from '@shared/config/routes';
 import getUrlParams from '@shared/lib/getUrlParams';
+import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import useLocale from '@shared/lib/useLocale';
 import Footer from '@widgets/footer';
 import Navbar, { type NavbarBreadcrumbItem } from '@widgets/navbar';
@@ -41,26 +42,6 @@ const Content = Layout.Content;
 /** Figma 862:20168：常规 240 / 最小 56；贴边全高，无外边距 */
 const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 56;
-const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
-
-function useMobileLayout() {
-  const [isMobile, setIsMobile] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      Boolean(window.matchMedia?.(MOBILE_MEDIA_QUERY).matches)
-  );
-
-  useEffect(() => {
-    if (!window.matchMedia) return;
-    const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
-    const update = () => setIsMobile(mediaQuery.matches);
-    update();
-    mediaQuery.addEventListener('change', update);
-    return () => mediaQuery.removeEventListener('change', update);
-  }, []);
-
-  return isMobile;
-}
 
 export type PageLayoutProps = {
   /** 由 app 注入：页面模块发现与懒加载 */
@@ -116,7 +97,7 @@ export const PageLayout = observer(function PageLayout({
   const chromeFullscreen = pageTabsStore.chromeFullscreen;
   const tableFullscreen = pageTabsStore.tableFullscreen;
   const hideChrome = pageTabsStore.hideChrome;
-  const isMobile = useMobileLayout();
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY);
 
   const [routes, defaultRoute] = useRoute(userInfo?.permissions || {});
   const defaultSelectedKeys = [currentComponent || defaultRoute];

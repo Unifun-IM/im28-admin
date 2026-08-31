@@ -21,6 +21,7 @@ import './biz-list.less';
 import { pageTabsStore } from '@entities/page-tabs';
 import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
+import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import { EmptyState } from '@shared/ui';
 import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';
@@ -90,6 +91,7 @@ export function BizListPage<T extends Record<string, unknown>>({
 }: BizListPageProps<T>) {
   const { lang } = useContext(GlobalContext);
   const t = useLocale();
+  const compactActions = useMediaQuery(MOBILE_MEDIA_QUERY);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   /** 有 batchActions 时：点「批量操作」后才进入选择模式 */
   const [batchSelectMode, setBatchSelectMode] = useState(false);
@@ -137,10 +139,11 @@ export function BizListPage<T extends Record<string, unknown>>({
   const columns = useMemo(
     () =>
       normalizeBizColumns(
-        (tableProps.columns || []) as TableColumnProps<T>[]
+        (tableProps.columns || []) as TableColumnProps<T>[],
+        { compactActions }
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- lang 变化时需重算 i18n 表头
-    [tableProps.columns, lang]
+    [compactActions, tableProps.columns, lang]
   );
 
   /** 有选择列时默认左侧固定；配置了 batchActions 时仅批量模式下展示 */

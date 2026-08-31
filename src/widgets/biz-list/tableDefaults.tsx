@@ -2,6 +2,7 @@ import type { TableColumnProps } from '@arco-design/web-react';
 
 export const BIZ_PAGE_SIZE = 15;
 export const BIZ_PAGE_SIZE_OPTIONS = [15, 30, 50];
+export const COMPACT_ACTION_COLUMN_WIDTH = 72;
 
 /** 是否为操作列（默认右侧固定） */
 export function isActionColumn<T>(col: TableColumnProps<T>): boolean {
@@ -26,7 +27,8 @@ export function isActionColumn<T>(col: TableColumnProps<T>): boolean {
  * - 操作列默认 fixed: right、align: center，关闭省略；投影由 Arco Table fixed + 横向滚动标准机制提供
  */
 export function normalizeBizColumns<T>(
-  columns: TableColumnProps<T>[] = []
+  columns: TableColumnProps<T>[] = [],
+  options: { compactActions?: boolean } = {}
 ): TableColumnProps<T>[] {
   return columns.map((col) => {
     if (isActionColumn(col)) {
@@ -34,7 +36,9 @@ export function normalizeBizColumns<T>(
         ...col,
         fixed: col.fixed ?? 'right',
         ellipsis: false,
-        width: col.width ?? 108,
+        width: options.compactActions
+          ? COMPACT_ACTION_COLUMN_WIDTH
+          : col.width ?? 108,
         align: col.align ?? 'center'
       };
     }
