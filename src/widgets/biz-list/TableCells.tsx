@@ -10,6 +10,7 @@ import {
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import copy from 'copy-to-clipboard';
+import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import useLocale from '@shared/lib/useLocale';
 import { UserAvatar } from '@shared/ui';
 import IconMoreDots from '@assets/icon/icon-more-dots.svg?react';
@@ -174,7 +175,7 @@ export type ActionLinksProps = {
   items: ActionLinkItem[];
   /**
    * 折叠后外露条数。
-   * - text：仅当 items.length > 3 时折叠为「外露 + 更多」，默认外露 1
+   * - text：仅当 items.length > 2 时折叠为「外露 + 更多」，默认外露 1
    * - icon：默认 3（含「更多」占位；溢出时可见数 = maxVisible - 1）
    */
   maxVisible?: number;
@@ -183,8 +184,8 @@ export type ActionLinksProps = {
   className?: string;
 };
 
-/** text：超过 3 项才折叠，折叠后外露条数 */
-const TEXT_FOLD_WHEN_OVER = 3;
+/** text：超过 2 项时只保留首要动作，其余收进更多 */
+const TEXT_FOLD_WHEN_OVER = 2;
 const DEFAULT_TEXT_FOLDED_VISIBLE = 1;
 /** icon：最多 3 个槽位 */
 const DEFAULT_ICON_MAX_VISIBLE = 3;
@@ -198,6 +199,9 @@ const TEXT_BTN =
 /** 更多触发器 — Figma interactive-button/more 14×14 */
 const MORE_BTN =
   'inline-flex size-[14px] shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:size-[14px]';
+
+const COMPACT_ACTION_BTN =
+  'inline-flex size-[32px] shrink-0 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0 text-arco-text-2 hover:bg-arco-fill-2 hover:text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-sm';
 
 function resolveActionIcon(item: ActionLinkItem): React.ReactNode {
   if (item.icon) return item.icon;
@@ -251,7 +255,8 @@ function buildMoreMenu(
 
 /**
  * 表格操作列
- * - text：≤3 全部展示；>3 折叠为「首项 + 更多」（群组查询通用做法）
+ * - 移动端：单操作直接使用图标，多操作统一收进一个 32px 更多菜单
+ * - text：≤2 全部展示；>2 折叠为「首项 + 更多」
  * - icon：最多 3 个槽位（含更多）
  */
 export function ActionLinks({
@@ -261,6 +266,47 @@ export function ActionLinks({
   className
 }: ActionLinksProps) {
   const t = useLocale();
+  const compact = useMediaQuery(MOBILE_MEDIA_QUERY);
+
+  if (compact) {
+    const onlyItem = items.length === 1 ? items[0] : undefined;
+    const compactMenu = items.length > 1 ? buildMoreMenu(items) : null;
+
+    return (
+      <div className={cs('flex w-full items-center justify-center', className)}>
+        {onlyItem ? (
+          <button
+            type="button"
+            className={cs(
+              COMPACT_ACTION_BTN,
+              onlyItem.danger && 'hover:!text-arco-danger'
+            )}
+            disabled={onlyItem.disabled}
+            aria-label={
+              typeof onlyItem.label === 'string' ? onlyItem.label : onlyItem.key
+            }
+            onClick={(e) => {
+              e.stopPropagation();
+              onlyItem.onClick?.();
+            }}
+          >
+            {resolveActionIcon(onlyItem)}
+          </button>
+        ) : compactMenu ? (
+          <Dropdown droplist={compactMenu} position="br" trigger="click">
+            <button
+              type="button"
+              className={COMPACT_ACTION_BTN}
+              aria-label={t['common.more']}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <IconMore />
+            </button>
+          </Dropdown>
+        ) : null}
+      </div>
+    );
+  }
 
   if (variant === 'text') {
     const foldedVisible = Math.max(

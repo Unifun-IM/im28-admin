@@ -194,7 +194,7 @@ export function AccountsPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 240,
+              width: 160,
               render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <ActionLinks
                   variant="text"
