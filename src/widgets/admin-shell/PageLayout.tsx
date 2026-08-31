@@ -203,7 +203,8 @@ export const PageLayout = observer(function PageLayout({
   const paddingStyle = { ...paddingLeft, ...paddingTop };
   const navbarStyle = {
     left: siderOccupied,
-    width: siderOccupied ? `calc(100% - ${siderOccupied}px)` : '100%'
+    width: siderOccupied ? `calc(100% - ${siderOccupied}px)` : '100%',
+    height: headerHeight
   };
 
   function renderRoutes(localeMap: Record<string, string>) {
@@ -359,6 +360,7 @@ export const PageLayout = observer(function PageLayout({
           [styles['layout-navbar-scrolled']]: headerScrolled
         })}
         style={navbarStyle}
+        data-layout-navbar
       >
         <div className={styles['layout-navbar-main']}>
           <Navbar

@@ -34,6 +34,9 @@ describe('PageLayout', () => {
 
     expect(container.querySelector('.arco-layout')).toBeTruthy();
     expect(container.querySelector('.arco-layout-sider, .arco-menu')).toBeTruthy();
+    expect(
+      container.querySelector('[data-layout-navbar]')?.getAttribute('style')
+    ).toContain('height: 86px');
   });
 
   it('uses an overlay navigation drawer on mobile', () => {
@@ -69,6 +72,9 @@ describe('PageLayout', () => {
 
     expect(container.querySelector('.arco-layout-sider')).toBeNull();
     expect(container.querySelector('.use-page-tabs')).toBeNull();
+    expect(
+      container.querySelector('[data-layout-navbar]')?.getAttribute('style')
+    ).toContain('height: 44px');
     expect(
       container.querySelector('[data-layout-content]')?.getAttribute('style')
     ).toContain('padding-top: 44px');

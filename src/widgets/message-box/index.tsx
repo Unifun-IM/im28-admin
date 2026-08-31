@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import groupBy from 'lodash/groupBy';
 import { Trigger, Spin, Button, Switch } from '@arco-design/web-react';
 import useLocale from '@shared/lib/useLocale';
+import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import cs from 'classnames';
 import MessageList, { MessageListType } from './list';
 import './message-box.less';
@@ -47,7 +48,7 @@ function DropContent() {
   ];
 
   return (
-    <div className="flex max-h-[520px] w-96 flex-col overflow-hidden rounded-xl bg-arco-bg-popup shadow-popover">
+    <div className="use-message-box flex flex-col overflow-hidden rounded-xl bg-arco-bg-popup shadow-popover">
       <div className="box-border flex h-12 items-center justify-between gap-2 border-b border-arco-border-2 bg-arco-bg-popup p-2">
         <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-arco-text-1">
           {t['message.box.title']}
@@ -58,13 +59,13 @@ function DropContent() {
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-auto p-2">
-        <div className="mb-2 flex items-center gap-2">
+        <div className="use-message-box-tabs mb-2 flex items-center gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
               className={cs(
-                'h-6 cursor-pointer appearance-none rounded-sm border-0 bg-transparent px-2 text-xs leading-5 text-arco-text-2 hover:text-arco-text-1',
+                'h-6 shrink-0 cursor-pointer appearance-none rounded-sm border-0 bg-transparent px-2 text-xs leading-5 text-arco-text-2 hover:text-arco-text-1',
                 activeTab === tab.key && 'bg-arco-fill-2 text-arco-text-1'
               )}
               onClick={() => setActiveTab(tab.key)}
@@ -110,13 +111,17 @@ function MessageBox({
   children: React.ReactNode;
   onVisibleChange?: (visible: boolean) => void;
 }) {
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY);
+
   return (
     <Trigger
       trigger="click"
       popup={() => <DropContent />}
       position="br"
       unmountOnExit={false}
+      containerScrollToClose
       popupAlign={{ bottom: 4 }}
+      boundaryDistance={isMobile ? { left: 16, bottom: 16 } : undefined}
       onVisibleChange={onVisibleChange}
     >
       {children}
