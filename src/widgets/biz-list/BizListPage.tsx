@@ -157,7 +157,8 @@ export function BizListPage<T extends Record<string, unknown>>({
   }, [tableProps.rowSelection, needsBatchEntry, batchSelectMode]);
   const pagination = resolveBizPagination(
     tableProps.pagination as false | undefined | Record<string, unknown>,
-    displayData.length
+    displayData.length,
+    { compact: compactActions }
   );
 
   const scroll = useMemo(() => {
@@ -174,7 +175,7 @@ export function BizListPage<T extends Record<string, unknown>>({
   return (
     <div
       className={cs(
-        'min-w-0 flex flex-col gap-4',
+        'flex w-full min-w-0 max-w-full flex-col gap-4 overflow-x-hidden',
         tableFullscreen && 'use-biz-list-fullscreen min-h-0 flex-1',
         className
       )}
@@ -198,7 +199,7 @@ export function BizListPage<T extends Record<string, unknown>>({
       ) : null}
       <Card
         className={cs(
-          'use-biz-table-card relative min-w-0 !p-0',
+          'use-biz-table-card relative w-full min-w-0 max-w-full !p-0',
           // 无分页时裁切底角，避免末行方角顶出卡片圆角；有分页保留 visible 以便固定列阴影
           pagination === false ? 'overflow-hidden' : 'overflow-visible',
           tableFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
@@ -370,8 +371,8 @@ export function BizListPage<T extends Record<string, unknown>>({
         )}
         <div
           className={cs(
-            'relative',
-            tableFullscreen && 'min-h-0 flex-1 overflow-auto'
+            'relative min-w-0 max-w-full overflow-x-hidden',
+            tableFullscreen && 'min-h-0 flex-1 overflow-y-auto'
           )}
         >
           <Table

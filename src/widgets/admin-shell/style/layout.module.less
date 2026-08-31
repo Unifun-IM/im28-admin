@@ -9,6 +9,11 @@
   width: 100%;
   height: 100%;
   min-width: 0;
+  overflow-x: clip;
+
+  > :global(.arco-layout) {
+    min-width: 0;
+  }
 }
 
 .layout-navbar {
@@ -644,8 +649,10 @@
 .layout-content {
   background-color: var(--color-bg-1, #f7f8fa);
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   min-height: 100vh;
+  overflow-x: clip;
   transition:
     padding-left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
     padding-top 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
@@ -653,8 +660,18 @@
 }
 
 .layout-content-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   padding: 12px;
+  overflow-x: clip;
+
+  :global(.arco-layout-content) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
 }
 
 /* 表格全屏：主区撑满视口，供列表页仅展示表格 */

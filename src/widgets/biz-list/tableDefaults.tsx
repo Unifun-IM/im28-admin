@@ -54,7 +54,8 @@ export function normalizeBizColumns<T>(
 /** total ≤ 15 时不展示分页器；默认 15 条/页，可选 15/30/50 */
 export function resolveBizPagination(
   pagination: false | undefined | Record<string, unknown>,
-  dataLength: number
+  dataLength: number,
+  options: { compact?: boolean } = {}
 ): false | Record<string, unknown> {
   if (pagination === false) return false;
 
@@ -68,11 +69,20 @@ export function resolveBizPagination(
   const sizeOptions =
     (incoming.sizeOptions as number[] | undefined) || BIZ_PAGE_SIZE_OPTIONS;
 
-  return {
+  const resolved = {
     showTotal: true,
     sizeCanChange: true,
     pageSize: BIZ_PAGE_SIZE,
     ...incoming,
     sizeOptions
+  };
+
+  if (!options.compact) return resolved;
+
+  return {
+    ...resolved,
+    simple: true,
+    showTotal: false,
+    sizeCanChange: false
   };
 }

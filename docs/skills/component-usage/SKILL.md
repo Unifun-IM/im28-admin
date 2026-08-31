@@ -66,6 +66,8 @@ description: Discover, reuse, compose, and extract project components for admin 
 - `toolbar` 随批量模式隐藏；`toolbarAlways` 始终展示。
 - 时间使用 `formatDateTime`，图片使用 Avatar / Image，长文本使用省略 + Tooltip。
 - 操作列使用 `ActionLinks`，不要手写一排 Button。
+- 页面壳层不承载横向滚动；字段确实超宽时只允许 Table 内容区横向滚动。表格全屏外层只处理纵向滚动，避免嵌套横向滚动条。
+- `md` 及以下分页由公共列表切换为 `simple` H5 形态；业务页不得用横向滚动保存桌面分页器。
 
 ## 列宽
 
@@ -77,7 +79,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 2. 先确定最终 zh-CN / en-US 表头、枚举、时间格式和动态操作文案。
 3. 按真实单元格计算头像、状态点、复制 / 排序图标、操作槽位、间距和 padding。
 4. 主要内容列使用较大权重；状态、数量和操作列明显更小。
-5. 公共列表负责在真实内容超宽时提供表格内部滚动；调用页不覆写默认 `scroll.x`，也不能用滚动掩盖错误列宽比例。
+5. 优先通过准确列宽、操作折叠和紧凑分页让内容适配；仍然超宽时才由表格内容区提供唯一横向滚动。调用页不覆写默认 `scroll.x`，也不能用页面滚动掩盖错误列宽比例。
 
 无设计宽度时可从以下范围开始，再以浏览器实测修正：
 
