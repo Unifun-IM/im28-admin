@@ -351,9 +351,16 @@ body {
 }
 
 @media (max-width: 768px) {
+  .arco-modal-wrapper {
+    box-sizing: border-box;
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
   .arco-modal {
-    width: calc(100vw - 32px) !important;
-    max-width: calc(100vw - 32px);
+    max-width: 100%;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
     margin-right: auto;
     margin-left: auto;
   }
@@ -366,6 +373,12 @@ body {
   }
 
   .arco-modal-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .arco-modal-content,
+  .arco-modal-body {
     min-width: 0;
     overflow-wrap: anywhere;
   }

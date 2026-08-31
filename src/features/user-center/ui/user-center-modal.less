@@ -126,19 +126,30 @@
 
 @media (max-width: 768px) {
   .arco-modal.use-user-center-modal {
-    height: calc(100vh - 32px) !important;
+    width: 480px !important;
+    height: auto !important;
+    min-height: 0 !important;
     max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
     border-radius: 12px;
 
     .arco-modal-content {
+      box-sizing: border-box;
+      height: auto;
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
       flex-direction: column;
       gap: 16px;
       padding: 16px;
+      overflow-x: hidden;
       overflow-y: auto;
     }
 
     .use-user-center-profile {
+      box-sizing: border-box;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
       flex-direction: row;
       justify-content: flex-start;
       padding-right: 40px;
@@ -151,11 +162,13 @@
     }
 
     .use-user-center-details {
+      box-sizing: border-box;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
       flex: none;
       gap: 16px;
       padding-right: 0;
     }
   }
 }
-
