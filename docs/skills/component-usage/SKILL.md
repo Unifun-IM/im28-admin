@@ -7,6 +7,8 @@ description: Discover, reuse, compose, and extract project components for admin 
 
 本文件只定义“使用什么组件以及如何使用”。页面可见字段、来源优先级和路由由 `admin-page` 决定；视觉与响应式结果由 `design-system` 决定，颜色和样式实现由 `css-usage` 决定。
 
+组件决策以 `design-system` 已形成的交互契约为验收条件。现有组件只有在完整覆盖必要任务流、状态反馈、权限内操作和响应式行为时才算“能表达”；不得为了复用组件而改变已确认交互。
+
 ## 决策顺序
 
 1. 搜索公开组件、现有调用方和业务中散落的相似 UI。
@@ -16,6 +18,8 @@ description: Discover, reuse, compose, and extract project components for admin 
 5. 项目组件和 Arco 都无法表达时才自建。
 
 不能因为直接写 JSX 更快，就绕过项目组件已有的样式、空态、分页、主题和交互。
+
+现有组件不能满足交互契约时，先判断缺口是否属于该公共组件的稳定职责：属于则扩展组件并验证现有调用方；多个页面出现同一稳定模式时按 FSD 抽取；仅当前业务需要时使用 Arco 组合；项目组件和 Arco 都无法表达时再自建。
 
 公共组件已经提供响应式契约时，调用页只传业务数据和状态，不根据 `window.innerWidth` 分叉两套 JSX。确需把并排桌面流程转换为移动单面板时，在对应公共 widget 内集中维护活动面板与返回契约，视觉行为仍以 `design-system` 为准。
 
