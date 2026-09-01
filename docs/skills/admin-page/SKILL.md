@@ -5,7 +5,7 @@ description: Generate or update admin navigation, routes, lists, filters, detail
 
 # Admin Page Generation
 
-本 skill 负责页面信息架构、字段推导、路由和落页流程。开始前沿用 `ai-code` 已加载的 `PROJECT.md`；可见 UI 读取 `DESIGN.md` 和 `design-system`，写 JSX 前读取 `component-usage`，新增或修改样式时读取 `css-usage`。接口生成和 Figma 读取分别交给对应专项 skill。
+本 skill 属于技术负责人组织的工程执行阶段，负责页面信息架构、字段推导、路由和落页流程，不反向改写产品或设计决策。开始前沿用 `ai-code` 已加载的 `PROJECT.md`；可见 UI 读取 `DESIGN.md` 和 `design-system`，写 JSX 前读取 `component-usage`，新增或修改样式时读取 `css-usage`。接口生成和 Figma 读取分别交给对应专项 skill。
 
 ## 信息来源
 

@@ -8,8 +8,9 @@
 
 | 内容 | 文档 |
 | --- | --- |
-| 当前项目定位、业务边界、术语与产品约束 | `PROJECT.md` |
-| 当前项目设计目标、体验与视觉差异 | `DESIGN.md` |
+| 产品经理：项目定位、业务边界、术语与产品约束 | `PROJECT.md` |
+| 设计总监：设计目标、体验与视觉差异 | `DESIGN.md` |
+| 技术负责人：工程执行入口与职责编排 | `AGENTS.md` |
 | 框架现有能力清单 | `docs/skills/framework-support/SKILL.md` |
 | AI code tools 统一入口 | `docs/skills/ai-code/SKILL.md` |
 | 通用项目规则 | `docs/skills/project-rules/SKILL.md` |
@@ -22,7 +23,7 @@
 | 项目组件、Arco 最佳使用与组件抽取 | `docs/skills/component-usage/SKILL.md` |
 | SVG 图标决策 | `docs/skills/svg-icon-usage/SKILL.md` |
 | 标准后台列表 / 详情页生成 | `docs/skills/admin-page/SKILL.md` |
-| Codex 项目入口 | `AGENTS.md` |
+| Codex 技术负责人入口 | `AGENTS.md` |
 | Claude Code 项目入口 | `.claude/CLAUDE.md` |
 | Cursor 薄规则入口 | `.cursor/rules/ai-code.mdc` |
 
@@ -79,6 +80,7 @@ src/
 
 ## 核心约定
 
+- AI code 以 `PROJECT.md`、`DESIGN.md`、`AGENTS.md` 分别承载产品经理、设计总监和技术负责人职责；决策按产品 -> 设计 -> 工程顺序收敛。
 - AI code 的启动、上下文归一和最小 skill 路由见 `docs/skills/ai-code/SKILL.md`。
 - 任务范围、增量修改、FSD 与 git 约束见 `docs/skills/project-rules/SKILL.md`。
 - 页面来源、导航、字段和落页流程见 `docs/skills/admin-page/SKILL.md`。

@@ -1,11 +1,11 @@
 ---
 name: project-context
-description: Synthesize explicit user requirements and relevant PRD documents into the durable product context in PROJECT.md before design specification or code generation.
+description: Act as the product-manager context layer by synthesizing explicit requirements and relevant PRDs into durable product decisions in PROJECT.md before design or implementation.
 ---
 
 # Project Context
 
-本 skill 只负责把输入需求归一为当前项目的产品上下文 `PROJECT.md`。视觉规范由 `design-system` 生成到 `DESIGN.md`，页面和代码由后续专项 skill 处理。
+本 skill 承担产品经理的上下文维护职责，只负责把输入需求归一为 `PROJECT.md` 中可持续复用的产品决策。视觉规范由设计总监角色的 `design-system` 生成到 `DESIGN.md`，工程落地由 `AGENTS.md` 路由后续专项 skill 处理。
 
 ## 触发条件
 
@@ -28,6 +28,8 @@ description: Synthesize explicit user requirements and relevant PRD documents in
 多个来源冲突时，当前用户明确要求高于旧 PRD 和旧 `PROJECT.md`。页面可见字段的精确来源优先级只由 `admin-page` 定义。
 
 ## PROJECT.md 内容边界
+
+把 `PROJECT.md` 当成产品经理的决策记录：回答“为谁做、为什么做、做什么、做到什么边界”，不回答“界面具体怎么画”或“代码具体怎么写”。
 
 只记录稳定、项目特有且后续任务仍需遵守的信息：
 

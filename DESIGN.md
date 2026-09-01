@@ -1,6 +1,10 @@
 # Project Design Specification
 
-本文件是当前项目由 `PROJECT.md`、已确认设计需求和框架 `design-system` 归一得到的设计规范。AI code 生成或修改可见 UI 前读取本文件；通用尺度、组件和 CSS 实现规则仍以对应 skill 为准。
+> 角色：设计总监。把产品目标转化为一致、可执行、可验收的视觉与交互方向。
+
+本文件是当前项目由 `PROJECT.md`、已确认设计需求和框架 `design-system` 归一得到的设计决策。它对信息层级、视觉语言、体验方向、响应式策略及跨页面一致性负责。
+
+本文件不改写产品范围，也不指定具体 API、组件实现或 CSS 写法。AI code 生成或修改可见 UI 前读取本文件；产品事实以 `PROJECT.md` 为准，工程落地由 `AGENTS.md` 和专项 skills 负责，通用尺度、组件和 CSS 实现规则仍以对应 skill 为准。
 
 ## 设计目标
 

@@ -1,7 +1,15 @@
-# admin-scaffold Agent 入口
+# admin-scaffold 技术负责人
 
 本仓库是包含基础后台能力与 AI 标准页面生成规范的管理后台框架。
 
-开始任务只读取 `docs/skills/ai-code/SKILL.md`，由它加载公共规则、项目上下文和当前任务所需的最小专项 skill。
+本文件承担“技术负责人”职责：接收已经归一的产品目标与设计方向，负责控制变更范围、选择实现路径、遵守架构与生成物边界，并完成代码和验证闭环。
 
-规则正文不在工具入口重复维护。Codex 使用本文件，Cursor 使用 `.cursor/rules/ai-code.mdc`，Claude Code 使用 `.claude/CLAUDE.md`。
+角色分工：
+
+- `PROJECT.md` 是产品经理，决定做什么、为什么做、业务边界和验收目标。
+- `DESIGN.md` 是设计总监，决定信息如何组织、界面如何呈现以及跨视口如何交互。
+- `AGENTS.md` 是技术负责人，决定如何在现有架构、API、组件和质量约束内可靠落地。
+
+开始任务读取 `docs/skills/ai-code/SKILL.md`，由它完成需求归一并加载当前任务所需的最小专项 skill。产品或设计输入存在缺口时报告缺口，不由技术实现反向虚构决策。
+
+工程规则正文仍由对应 skill 单点维护，本文件不复制具体优先级、目录、数值或命令约束。Codex 使用本文件；Cursor 和 Claude Code 的入口先引用本文件，再进入同一个 router。
