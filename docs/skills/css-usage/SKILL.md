@@ -33,16 +33,18 @@ Tailwind 不替代 Arco Form、Grid、Table、Button、Select。
 
 新增或修改样式时先使用已有语义：
 
-| 类别 | 语义变量 |
-| --- | --- |
-| 字体 | `--font-family-body` |
-| 字号 | `--font-size-caption`、`--font-size-body`、`--font-size-title`、`--font-size-page-title` |
-| 行高 | 与字号角色对应的 `--line-height-*`；紧凑正文 / 辅助文案使用对应 `-compact` |
+| 类别 | 语义变量                                                                                        |
+| ---- | ----------------------------------------------------------------------------------------------- |
+| 字体 | `--font-family-body`                                                                            |
+| 字号 | `--font-size-caption`、`--font-size-body`、`--font-size-title`、`--font-size-page-title`        |
+| 行高 | 与字号角色对应的 `--line-height-*`；紧凑正文 / 辅助文案使用对应 `-compact`                      |
 | 圆角 | `--radius-compact`、`--radius-control`、`--radius-surface`、`--radius-overlay`、`--radius-full` |
-| 阴影 | `--shadow-popup`、`--shadow-overlay`、`--shadow-sticky` |
-| 动效 | `--motion-duration-*` 与 `--motion-ease-*` |
+| 阴影 | `--shadow-popup`、`--shadow-overlay`、`--shadow-sticky`                                         |
+| 动效 | `--motion-duration-*` 与 `--motion-ease-*`                                                      |
 
 Arco 的 `--border-radius-*` 是上述圆角 token 的兼容别名；Tailwind 的字体、圆角、阴影和动效扩展必须映射同一来源，不能再维护平行数值。
+
+Tailwind 排版别名按角色使用：`text-xs`、`text-caption-compact`、`text-sm`、`text-body`、`text-title`、`text-page-title`。圆角同样按角色选择：紧凑元素 `rounded-sm`、普通控件 `rounded`、业务面 `rounded-lg`、浮层 `rounded-xl`。即使两个 token 当前数值相同，也不能按数值相等混用语义。
 
 ### 抽取边界
 
@@ -58,30 +60,32 @@ Arco 的 `--border-radius-*` 是上述圆角 token 的兼容别名；Tailwind �
 
 常用语义：
 
-| 语义 | Tailwind / CSS |
-| --- | --- |
-| 页面、卡片、弹层 | `bg-arco-bg-1` / `bg-arco-bg-2` / `var(--color-bg-*)` |
-| 填充、Hover | `bg-arco-fill-1` / `bg-arco-fill-2` |
-| 文案 | `text-arco-text-1` / `-2` / `-3` |
-| 边框 | `border-arco-border-1` / `-2` |
-| 品牌色 | `text-primary` / `bg-primary` / `rgb(var(--primary-6))` |
-| 状态 | `text-arco-success` / `warning` / `danger` |
+| 语义             | Tailwind / CSS                                                                |
+| ---------------- | ----------------------------------------------------------------------------- |
+| 页面、卡片、弹层 | `bg-arco-bg-1` / `bg-arco-bg-2` / `var(--color-bg-*)`                         |
+| 填充、Hover      | `bg-arco-fill-1` / `bg-arco-fill-2`                                           |
+| 文案             | `text-arco-text-1` / `-2` / `-3`                                              |
+| 边框             | `border-arco-border-1` / `-2`                                                 |
+| 品牌色           | `text-primary` / `bg-primary` / `rgb(var(--primary-6))`                       |
+| 状态             | `text-arco-success` / `warning` / `danger`                                    |
+| 固定深色反色面   | `bg-arco-bg-inverse`、`text-arco-text-inverse*`、`border-arco-border-inverse` |
 
 - 禁止新增固定 hex、`rgba(0, 0, 0, *)`、`text-white` 或仅适用于浅色的颜色。
 - RGB 三元组变量必须包在 `rgb()` / `rgba()` 中。
 - 缺少语义变量时同时定义浅色和暗色值；多处使用再映射 Tailwind。
 - 不复制一套暗色组件样式，让同一语义变量自动切换。
+- Canvas / 图表库不能可靠解析 CSS `var()` 时，从 `getComputedStyle` 读取计算后的主题变量，并在主题变化后刷新；不得把固定颜色重新写进图表配置。
 
 ## 样式归属
 
-| 场景 | 位置 |
-| --- | --- |
-| 普通页面布局 / 装饰 | JSX 中 Tailwind |
-| widget / feature 复杂样式 | 切片局部 Less |
+| 场景                               | 位置                                          |
+| ---------------------------------- | --------------------------------------------- |
+| 普通页面布局 / 装饰                | JSX 中 Tailwind                               |
+| widget / feature 复杂样式          | 切片局部 Less                                 |
 | 跨页面 Arco 修饰、portal、基础设施 | `src/app/styles/global.less` 的语义化 `use-*` |
-| 业务无关基础 UI | `src/shared/ui` |
-| 跨页面复合 UI | `src/widgets` |
-| 用户动作流程 | `src/features` |
+| 业务无关基础 UI                    | `src/shared/ui`                               |
+| 跨页面复合 UI                      | `src/widgets`                                 |
+| 用户动作流程                       | `src/features`                                |
 
 不要因 class 偶然相同抽象；不要在 global.less 放单业务页面样式；不要用 `@apply` 建立平行工具类体系。
 

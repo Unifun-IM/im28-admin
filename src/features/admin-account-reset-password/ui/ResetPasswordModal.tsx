@@ -152,10 +152,10 @@ export default function ResetPasswordModal({
           </div>
         }
       >
-        <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+        <p className="m-0 text-sm text-arco-text-1">
           {t['resetPassword.target'].replace('{name}', displayLabel)}
         </p>
-        <ul className="m-0 mt-3 list-disc pl-[21px] text-[14px] leading-[21px] text-arco-text-1">
+        <ul className="m-0 mt-3 list-disc pl-[21px] text-sm text-arco-text-1">
           <li>{t['resetPassword.bullet.1']}</li>
           <li>{t['resetPassword.bullet.2']}</li>
           <li>{t['resetPassword.bullet.3']}</li>
@@ -186,7 +186,11 @@ export default function ResetPasswordModal({
         closable={false}
         maskClosable={false}
         footer={null}
-        className={cs('use-biz-form-modal', 'use-reset-password-modal', 'is-success')}
+        className={cs(
+          'use-biz-form-modal',
+          'use-reset-password-modal',
+          'is-success'
+        )}
         wrapClassName="use-reset-password-modal-wrap"
         style={{ width: 780 }}
       >
@@ -203,7 +207,7 @@ export default function ResetPasswordModal({
               </span>
             }
           />
-          <div className="use-reset-password-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[var(--color-border-2)] p-3 text-[12px] leading-[1.5] text-arco-text-1">
+          <div className="use-reset-password-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[var(--color-border-2)] p-3 text-caption-compact text-arco-text-1">
             <div className="flex items-center gap-6">
               <span className="w-[120px] shrink-0">
                 {t['resetPassword.success.username']}
@@ -213,9 +217,7 @@ export default function ResetPasswordModal({
                 <button
                   type="button"
                   className="inline-flex size-[14px] shrink-0 items-center justify-center border-0 bg-transparent p-0 text-[rgb(var(--primary-6))]"
-                  onClick={() =>
-                    result?.username && copyText(result.username)
-                  }
+                  onClick={() => result?.username && copyText(result.username)}
                 >
                   <IconCopy />
                 </button>

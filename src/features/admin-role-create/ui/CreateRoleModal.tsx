@@ -63,9 +63,7 @@ export default function CreateRoleModal({
   const [form] = Form.useForm<CreateRoleForm>();
   const [submitting, setSubmitting] = useState(false);
   const [permLoading, setPermLoading] = useState(false);
-  const [permCatalog, setPermCatalog] = useState<AdminAPI.SysPermission[]>(
-    []
-  );
+  const [permCatalog, setPermCatalog] = useState<AdminAPI.SysPermission[]>([]);
   const isEnable = Form.useWatch('is_enable', form);
   const editingId = role?.role?.id;
   const isEdit = editingId != null;
@@ -217,7 +215,7 @@ export default function CreateRoleModal({
       style={{ width: 780 }}
       footer={
         <div className="flex w-full flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[14px] text-arco-text-1">
+          <div className="flex items-center gap-2 text-sm text-arco-text-1">
             <span>{t['createRole.field.enableRole']}</span>
             <Switch
               className="use-switch-success"

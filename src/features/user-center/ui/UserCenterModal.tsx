@@ -129,7 +129,7 @@ export default function UserCenterModal({
   };
 
   const linkBtn =
-    'cursor-pointer border-0 bg-transparent p-0 text-[12px] leading-5 text-[rgb(var(--link-6))] hover:opacity-80';
+    'cursor-pointer border-0 bg-transparent p-0 text-xs text-[rgb(var(--link-6))] hover:opacity-80';
 
   return (
     <>
@@ -168,7 +168,7 @@ export default function UserCenterModal({
           <button
             type="button"
             disabled={avatarUploading}
-            className="cursor-pointer border-0 bg-transparent p-0 text-center text-[14px] leading-[21px] text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer border-0 bg-transparent p-0 text-center text-sm text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => fileRef.current?.click()}
           >
             {avatarUploading
@@ -191,7 +191,7 @@ export default function UserCenterModal({
         <div className="use-user-center-details flex min-w-0 flex-1 flex-col gap-6 pr-8">
           <div className="flex flex-col gap-3">
             <div className="border-0 border-b border-solid border-[var(--color-border-2)] py-3">
-              <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
+              <span className="text-sm font-medium text-arco-text-1">
                 {t['userCenter.name']}
               </span>
             </div>
@@ -216,7 +216,7 @@ export default function UserCenterModal({
                 </button>
                 <button
                   type="button"
-                  className="cursor-pointer border-0 bg-transparent p-0 text-[12px] leading-5 text-arco-text-3"
+                  className="cursor-pointer border-0 bg-transparent p-0 text-xs text-arco-text-3"
                   disabled={nameSaving}
                   onClick={() => {
                     setDraftName(name);
@@ -228,9 +228,7 @@ export default function UserCenterModal({
               </div>
             ) : (
               <div className="flex items-center justify-between gap-3 whitespace-nowrap max-md:flex-wrap max-md:whitespace-normal">
-                <span className="text-[14px] leading-[21px] text-arco-text-1">
-                  {name}
-                </span>
+                <span className="text-sm text-arco-text-1">{name}</span>
                 <button
                   type="button"
                   className={linkBtn}
@@ -246,16 +244,16 @@ export default function UserCenterModal({
           </div>
 
           <div className="border-0 border-b border-solid border-[var(--color-border-2)] py-3">
-            <span className="text-[14px] font-medium leading-[21px] text-arco-text-1">
+            <span className="text-sm font-medium text-arco-text-1">
               {t['userCenter.security']}
             </span>
           </div>
 
           <div className="flex w-full flex-col">
-            <div className="text-[14px] leading-[21px] text-arco-text-1">
+            <div className="text-sm text-arco-text-1">
               {t['userCenter.password']}
             </div>
-            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-[12px] leading-5 max-md:flex-wrap max-md:whitespace-normal">
+            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-xs max-md:flex-wrap max-md:whitespace-normal">
               <span className="text-arco-text-3">**********</span>
               <button
                 type="button"
@@ -268,10 +266,8 @@ export default function UserCenterModal({
           </div>
 
           <div className="flex w-full flex-col">
-            <div className="text-[14px] leading-[21px] text-arco-text-1">
-              {t['userCenter.ga']}
-            </div>
-            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-[12px] leading-5 max-md:flex-wrap max-md:whitespace-normal">
+            <div className="text-sm text-arco-text-1">{t['userCenter.ga']}</div>
+            <div className="flex items-start justify-between gap-3 whitespace-nowrap text-xs max-md:flex-wrap max-md:whitespace-normal">
               <span className="text-arco-text-3">******</span>
               <button
                 type="button"

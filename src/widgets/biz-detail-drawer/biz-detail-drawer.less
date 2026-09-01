@@ -122,7 +122,8 @@
       height: 2px;
       background: transparent;
       content: '';
-      transition: background-color var(--motion-duration-hover) ease;
+      transition: background-color var(--motion-duration-hover)
+        var(--motion-ease-standard);
     }
 
     &:hover {
@@ -220,7 +221,7 @@
     background: var(--color-fill-1);
     color: var(--color-text-3);
     font-weight: 500;
-    line-height: 22px;
+    line-height: var(--line-height-body);
     white-space: nowrap;
   }
 

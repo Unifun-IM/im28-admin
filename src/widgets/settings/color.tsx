@@ -52,7 +52,7 @@ function ColorPanel() {
           />
         ))}
       </ul>
-      <Typography.Paragraph style={{ fontSize: 12 }}>
+      <Typography.Paragraph className="text-xs">
         {locale['settings.color.tooltip']}
       </Typography.Paragraph>
     </div>

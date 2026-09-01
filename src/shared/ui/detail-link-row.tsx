@@ -22,7 +22,7 @@ export function DetailLinkRow({
     return (
       <button
         type="button"
-        className={`cursor-pointer border-0 bg-transparent p-0 text-[14px] leading-[21px] text-[rgb(var(--link-6))] ${
+        className={`cursor-pointer border-0 bg-transparent p-0 text-sm text-[rgb(var(--link-6))] ${
           className || ''
         }`.trim()}
         onClick={onClick}
@@ -40,9 +40,7 @@ export function DetailLinkRow({
       }`.trim()}
       onClick={onClick}
     >
-      <span className="text-[14px] leading-[21px] text-[rgb(var(--link-6))]">
-        {children}
-      </span>
+      <span className="text-sm text-[rgb(var(--link-6))]">{children}</span>
       <IconRight className="text-[14px] text-arco-text-3" />
     </button>
   );

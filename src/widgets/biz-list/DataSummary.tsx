@@ -1,6 +1,10 @@
 import React, { useState, type CSSProperties } from 'react';
 import { Tooltip } from '@arco-design/web-react';
-import { IconDown, IconQuestionCircle, IconUp } from '@arco-design/web-react/icon';
+import {
+  IconDown,
+  IconQuestionCircle,
+  IconUp
+} from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import useLocale from '@shared/lib/useLocale';
 
@@ -71,7 +75,7 @@ export default function DataSummary({
       <button
         type="button"
         className={cs(
-          'use-biz-summary box-border flex h-[32px] w-full cursor-pointer items-center justify-center gap-[4px] px-[12px] text-[12px] leading-[20px] text-arco-text-1',
+          'use-biz-summary box-border flex h-[32px] w-full cursor-pointer items-center justify-center gap-[4px] px-[12px] text-xs text-arco-text-1',
           className
         )}
         onClick={() => setCollapsed(false)}
@@ -90,13 +94,13 @@ export default function DataSummary({
       )}
     >
       <div className="box-border flex h-[32px] items-center justify-between gap-[10px] border-b border-arco-border-2 px-[12px]">
-        <span className="min-w-0 flex-1 text-[12px] font-normal leading-[20px] text-arco-text-1">
+        <span className="min-w-0 flex-1 text-xs font-normal text-arco-text-1">
           {resolvedTitle}
         </span>
         {collapsible && (
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-[4px] border-0 bg-transparent p-0 text-[12px] leading-[20px] text-arco-text-2 hover:text-arco-text-1"
+            className="inline-flex cursor-pointer items-center gap-[4px] border-0 bg-transparent p-0 text-xs text-arco-text-2 hover:text-arco-text-1"
             onClick={() => setCollapsed(true)}
           >
             {t['common.collapse']}
@@ -116,7 +120,7 @@ export default function DataSummary({
               className="use-biz-summary-cell box-border flex h-[32px] min-w-0 items-center justify-between gap-[8px] bg-[var(--color-bg-2)] px-[12px]"
             >
               <div className="flex min-w-0 flex-1 items-center gap-[4px]">
-                <span className="truncate text-[12px] leading-[20px] text-arco-text-3">
+                <span className="truncate text-xs text-arco-text-3">
                   {item.label}
                 </span>
                 {item.tip != null && item.tip !== '' && (
@@ -127,7 +131,7 @@ export default function DataSummary({
               </div>
               <span
                 className={cs(
-                  'shrink-0 text-[12px] leading-[20px] tabular-nums',
+                  'shrink-0 text-xs tabular-nums',
                   tone === 'success' && 'text-[rgb(var(--success-6))]',
                   tone === 'danger' && 'text-[rgb(var(--danger-6))]',
                   tone === 'default' && 'text-arco-text-1'

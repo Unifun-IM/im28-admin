@@ -85,7 +85,9 @@
   border-radius: var(--radius-control);
   border: 1px solid var(--color-border-2);
   background: var(--color-fill-2);
-  transition: background-color 0.35s ease, border-color 0.35s ease;
+  transition: background-color var(--motion-duration-state)
+      var(--motion-ease-standard),
+    border-color var(--motion-duration-state) var(--motion-ease-standard);
 
   /* 成功：浅绿底 + border/2，整条不为实心绿 */
   &.is-verified {
@@ -102,8 +104,10 @@
   }
 
   &:not(.is-dragging) .use-login-slide__fill {
-    transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-      background-color 0.35s ease, opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: width var(--motion-duration-layout)
+        var(--motion-ease-emphasized),
+      background-color var(--motion-duration-state) var(--motion-ease-standard),
+      opacity var(--motion-duration-layout) var(--motion-ease-emphasized);
   }
 
   &.is-verified .use-login-slide__fill {
@@ -133,7 +137,7 @@
       to right,
       var(--color-text-2) 0%,
       var(--color-text-2) 40%,
-      #fff 50%,
+      var(--color-text-white) 50%,
       var(--color-text-2) 60%,
       var(--color-text-2) 100%
     );
@@ -163,15 +167,18 @@
     border-radius: var(--radius-control);
     cursor: grab;
     background: rgb(var(--primary-6));
-    box-shadow: 0 2px 8px rgba(99, 92, 255, 0.28);
-    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-      background-color 0.3s ease, box-shadow 0.3s ease, margin 0.32s ease;
+    box-shadow: 0 2px 8px rgba(var(--primary-6), 0.28);
+    transition: transform var(--motion-duration-layout)
+        var(--motion-ease-emphasized),
+      background-color var(--motion-duration-state) var(--motion-ease-standard),
+      box-shadow var(--motion-duration-state) var(--motion-ease-standard),
+      margin var(--motion-duration-layout) var(--motion-ease-emphasized);
 
     &:active,
     &.is-dragging {
       cursor: grabbing;
       transition: none;
-      box-shadow: 0 4px 12px rgba(99, 92, 255, 0.36);
+      box-shadow: 0 4px 12px rgba(var(--primary-6), 0.36);
     }
 
     /* 成功：贴右，success/6 + 白勾 */

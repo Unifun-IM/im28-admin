@@ -45,7 +45,7 @@ export default function BizOperationTimeline({
               : 'var(--color-neutral-3, #c9cdd4)'
           }
         >
-          <div className="flex items-start gap-[12px] text-[12px] leading-[20px]">
+          <div className="flex items-start gap-[12px] text-xs">
             <span
               className="shrink-0 whitespace-nowrap text-arco-text-3"
               style={{ width: timeWidth }}

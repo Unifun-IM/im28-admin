@@ -33,7 +33,7 @@ export default function UnsavedChangesModal({
       title={
         <span className="inline-flex items-center gap-2">
           <IconExclamationCircleFill className="text-[20px] text-[rgb(var(--warning-6))]" />
-          <span className="text-[16px] font-medium leading-6 text-arco-text-1">
+          <span className="text-title font-medium text-arco-text-1">
             {t['unsaved.title']}
           </span>
         </span>
@@ -54,9 +54,7 @@ export default function UnsavedChangesModal({
         </div>
       }
     >
-      <p className="m-0 text-[14px] leading-[22px] text-arco-text-2">
-        {t['unsaved.content']}
-      </p>
+      <p className="m-0 text-body text-arco-text-2">{t['unsaved.content']}</p>
     </Modal>
   );
 }

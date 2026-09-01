@@ -154,7 +154,9 @@ export type DoubleLineCellProps = {
 export function DoubleLineCell({ primary, secondary }: DoubleLineCellProps) {
   return (
     <div className="flex min-w-0 flex-col justify-center gap-[4px]">
-      <TruncateText className="text-[10px] leading-[10px]">{primary}</TruncateText>
+      <TruncateText className="text-[10px] leading-[10px]">
+        {primary}
+      </TruncateText>
       {secondary != null && secondary !== '' && (
         <TruncateText className="text-[10px] leading-[10px] text-arco-text-3">
           {secondary}
@@ -195,7 +197,7 @@ const ICON_BTN =
   'inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0 text-arco-text-2 hover:bg-arco-fill-2 hover:text-arco-text-1 disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-xs';
 
 const TEXT_BTN =
-  'inline-flex cursor-pointer items-center border-0 bg-transparent p-0 text-[12px] leading-[12px] text-[rgb(var(--primary-6))] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40';
+  'inline-flex cursor-pointer items-center border-0 bg-transparent p-0 text-[length:var(--font-size-caption)] leading-none text-[rgb(var(--primary-6))] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40';
 
 /** 更多触发器 — Figma interactive-button/more 14×14 */
 const MORE_BTN =
@@ -212,7 +214,8 @@ function resolveActionIcon(item: ActionLinkItem): React.ReactNode {
     return <IconDelete />;
   if (key.includes('detail') || key.includes('view') || key.includes('详情'))
     return <IconEye />;
-  if (key.includes('setting') || key.includes('config')) return <IconSettings />;
+  if (key.includes('setting') || key.includes('config'))
+    return <IconSettings />;
   if (key.includes('more') || key.includes('更多')) return <IconMore />;
   return <IconSettings />;
 }
@@ -234,9 +237,7 @@ function buildMoreMenu(
         <Menu.Item
           key={item.key}
           disabled={item.disabled}
-          className={
-            item.danger ? '!text-[rgb(var(--danger-6))]' : undefined
-          }
+          className={item.danger ? '!text-[rgb(var(--danger-6))]' : undefined}
         >
           {opts?.textOnly ? (
             item.label
@@ -331,7 +332,10 @@ export function ActionLinks({
           <button
             key={item.key}
             type="button"
-            className={cs(TEXT_BTN, item.danger && '!text-[rgb(var(--danger-6))]')}
+            className={cs(
+              TEXT_BTN,
+              item.danger && '!text-[rgb(var(--danger-6))]'
+            )}
             disabled={item.disabled}
             onClick={(e) => {
               e.stopPropagation();
@@ -365,10 +369,7 @@ export function ActionLinks({
 
   return (
     <div
-      className={cs(
-        'flex w-full items-center justify-start gap-2',
-        className
-      )}
+      className={cs('flex w-full items-center justify-start gap-2', className)}
     >
       {visibleItems.map((item) => (
         <Tooltip key={item.key} content={item.label}>

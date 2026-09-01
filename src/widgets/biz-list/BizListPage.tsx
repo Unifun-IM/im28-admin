@@ -106,7 +106,7 @@ export function BizListPage<T extends Record<string, unknown>>({
   const [batchSelectMode, setBatchSelectMode] = useState(false);
   const tableFullscreen = pageTabsStore.tableFullscreen;
   const enableFullscreen =
-    showFullscreen ?? (title != null && title !== '' || Boolean(onRefresh));
+    showFullscreen ?? ((title != null && title !== '') || Boolean(onRefresh));
 
   const needsBatchEntry = Boolean(batchActions);
   const inBatchSelect = !needsBatchEntry || batchSelectMode;
@@ -248,7 +248,8 @@ export function BizListPage<T extends Record<string, unknown>>({
           'use-biz-table-card relative w-full min-w-0 max-w-full !p-0',
           // 无分页时裁切底角，避免末行方角顶出卡片圆角；有分页保留 visible 以便固定列阴影
           pagination === false ? 'overflow-hidden' : 'overflow-visible',
-          tableFullscreen && 'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
+          tableFullscreen &&
+            'use-biz-table-card-fullscreen flex min-h-0 flex-1 flex-col'
         )}
         bordered={false}
       >
@@ -265,7 +266,7 @@ export function BizListPage<T extends Record<string, unknown>>({
               )}
               {/* 无批量条时，标题旁兜底展示已选数量 */}
               {hasRowSelection && !batchActions && selectedCount > 0 && (
-                <div className="text-sm leading-[21px] text-arco-text-3">
+                <div className="text-sm text-arco-text-3">
                   {t['common.selectedCount'].replace(
                     '{n}',
                     String(selectedCount)
@@ -297,9 +298,7 @@ export function BizListPage<T extends Record<string, unknown>>({
                       <Button
                         type="secondary"
                         className="use-biz-table-icon-btn"
-                        icon={
-                          tableFullscreen ? <IconShrink /> : <IconExpand />
-                        }
+                        icon={tableFullscreen ? <IconShrink /> : <IconExpand />}
                         aria-pressed={tableFullscreen}
                         onClick={() => pageTabsStore.toggleTableFullscreen()}
                       />

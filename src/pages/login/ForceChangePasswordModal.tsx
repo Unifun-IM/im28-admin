@@ -82,13 +82,13 @@ export default function ForceChangePasswordModal({
       style={{ width: 780 }}
     >
       <div className="box-border flex h-[48px] items-center border-0 border-b border-solid border-[var(--color-border-2)] px-[24px]">
-        <span className="text-[16px] font-medium leading-6 text-[var(--color-text-1,#1d2129)]">
+        <span className="text-title font-medium text-arco-text-1">
           {t['login.forcePwd.title']}
         </span>
       </div>
 
       <div className="box-border flex max-h-[680px] flex-col gap-[24px] overflow-auto px-[24px] pb-[60px] pt-[12px]">
-        <p className="m-0 text-[14px] leading-[21px] text-black">
+        <p className="m-0 text-sm text-arco-text-1">
           {t['login.forcePwd.desc']}
         </p>
 
@@ -187,7 +187,7 @@ export default function ForceChangePasswordModal({
           </Form.Item>
         </Form>
 
-        <div className="text-[14px] leading-[21px] text-black">
+        <div className="text-sm text-arco-text-1">
           <p className="m-0">{t['login.forcePwd.rulesTitle']}</p>
           <ul className="m-0 list-disc pl-[21px]">
             <li>{t['login.forcePwd.rule.len']}</li>

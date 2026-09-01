@@ -123,10 +123,10 @@ export default function ResetGaModal({
           </div>
         }
       >
-        <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+        <p className="m-0 text-sm text-arco-text-1">
           {t['resetGa.target'].replace('{name}', displayLabel)}
         </p>
-        <ul className="m-0 mt-3 list-disc pl-[21px] text-[14px] leading-[21px] text-arco-text-1">
+        <ul className="m-0 mt-3 list-disc pl-[21px] text-sm text-arco-text-1">
           <li>{t['resetGa.bullet.1']}</li>
           <li>{t['resetGa.bullet.2']}</li>
           <li>{t['resetGa.bullet.3']}</li>

@@ -44,9 +44,8 @@
     font-size: var(--font-size-body);
     font-weight: 400;
     line-height: var(--line-height-body);
-    transition:
-      color var(--motion-duration-hover) ease,
-      background-color var(--motion-duration-hover) ease;
+    transition: color var(--motion-duration-hover) var(--motion-ease-standard),
+      background-color var(--motion-duration-hover) var(--motion-ease-standard);
   }
 
   .arco-tabs-header-title:hover {
@@ -123,9 +122,7 @@
   color: var(--color-text-3, #86909c);
 }
 
-.use-page-tabs
-  .arco-tabs-header-title-active
-  .use-page-tab-pin {
+.use-page-tabs .arco-tabs-header-title-active .use-page-tab-pin {
   color: rgb(var(--primary-6));
 }
 
@@ -153,9 +150,7 @@
   }
 }
 
-.use-page-tabs
-  .arco-tabs-header-title-active
-  .arco-tabs-close-icon {
+.use-page-tabs .arco-tabs-header-title-active .arco-tabs-close-icon {
   color: rgb(var(--primary-6));
 }
 

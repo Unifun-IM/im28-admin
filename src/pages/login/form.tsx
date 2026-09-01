@@ -1,9 +1,4 @@
-import {
-  Form,
-  Input,
-  Button,
-  Message
-} from '@arco-design/web-react';
+import { Form, Input, Button, Message } from '@arco-design/web-react';
 import { FormInstance } from '@arco-design/web-react/es/Form';
 import React, { useRef, useState } from 'react';
 
@@ -15,9 +10,7 @@ import {
   postV1AdminAuthTwoFactorVerify
 } from '@shared/api/admin/auth';
 import { setAuthTokens } from '@shared/api/request';
-import {
-  isIpAccessDeniedError
-} from '@shared/lib/ipAccessDenied';
+import { isIpAccessDeniedError } from '@shared/lib/ipAccessDenied';
 import useLocale from '@shared/lib/useLocale';
 
 import ForceChangePasswordModal from './ForceChangePasswordModal';
@@ -30,9 +23,7 @@ import { mapLoginToast } from './mapLoginToast';
 import SlideCaptcha from './SlideCaptcha';
 
 type PendingAuth = {
-  next_step: NonNullable<
-    AdminAPI.SysUserLoginEnvelope['data']
-  >['next_step'];
+  next_step: NonNullable<AdminAPI.SysUserLoginEnvelope['data']>['next_step'];
   pre_auth_token: string;
 };
 
@@ -225,7 +216,9 @@ export default function LoginForm() {
 
   const otpauthUri = setup?.otpauth_uri;
   const qrUrl = otpauthUri
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUri)}`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+        otpauthUri
+      )}`
     : undefined;
 
   const bindVisible =
@@ -237,7 +230,7 @@ export default function LoginForm() {
         <div className="text-[36px] font-bold leading-[44px] text-[var(--color-text-1,#1d2129)]">
           {t['login.form.title']}
         </div>
-        <div className="text-[12px] leading-[18px] text-[var(--color-text-3,#86909c)]">
+        <div className="text-caption-compact text-arco-text-3">
           {t['login.form.subTitle']}
         </div>
       </div>
@@ -253,7 +246,9 @@ export default function LoginForm() {
           <Form.Item
             field="username"
             className="!mb-0"
-            rules={[{ required: true, message: t['login.form.userName.errMsg'] }]}
+            rules={[
+              { required: true, message: t['login.form.userName.errMsg'] }
+            ]}
           >
             <Input
               prefix={
@@ -266,7 +261,9 @@ export default function LoginForm() {
           <Form.Item
             field="password"
             className="!mb-0"
-            rules={[{ required: true, message: t['login.form.password.errMsg'] }]}
+            rules={[
+              { required: true, message: t['login.form.password.errMsg'] }
+            ]}
           >
             <Input.Password
               prefix={

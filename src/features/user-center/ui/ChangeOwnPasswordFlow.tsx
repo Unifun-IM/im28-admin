@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Form,
-  Input,
-  Modal,
-  Result
-} from '@arco-design/web-react';
+import { Button, Form, Input, Modal, Result } from '@arco-design/web-react';
 import { IconCheckCircleFill, IconClose } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import {
@@ -154,10 +148,10 @@ export default function ChangeOwnPasswordFlow({
           </div>
         }
       >
-        <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+        <p className="m-0 text-sm text-arco-text-1">
           {t['userCenter.pwdConfirm.desc']}
         </p>
-        <ul className="m-0 mt-3 list-disc pl-[21px] text-[14px] leading-[21px] text-arco-text-1">
+        <ul className="m-0 mt-3 list-disc pl-[21px] text-sm text-arco-text-1">
           <li>{t['userCenter.pwdConfirm.bullet.1']}</li>
           <li>{t['userCenter.pwdConfirm.bullet.2']}</li>
         </ul>
@@ -300,7 +294,7 @@ export default function ChangeOwnPasswordFlow({
             />
           </FormItem>
         </Form>
-        <div className="mt-1 text-[14px] leading-[21px] text-arco-text-1">
+        <div className="mt-1 text-sm text-arco-text-1">
           <p className="m-0">{t['userCenter.pwdForm.rulesTitle']}</p>
           <ul className="m-0 list-disc pl-[21px]">
             <li>{t['userCenter.pwdForm.rule.1']}</li>
@@ -337,7 +331,7 @@ export default function ChangeOwnPasswordFlow({
             extra={
               <Button
                 type="primary"
-                className="!min-w-[100px] !rounded-lg"
+                className="!min-w-[100px]"
                 onClick={onRelogin}
               >
                 {t['userCenter.pwdSuccess.relogin']}

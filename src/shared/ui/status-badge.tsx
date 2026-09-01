@@ -19,11 +19,13 @@ export function StatusBadge({ status, text, className }: StatusBadgeProps) {
   return (
     <span
       className={cs(
-        'use-status-badge inline-flex items-center gap-[8px] text-[12px] leading-[20px] text-arco-text-1',
+        'use-status-badge inline-flex items-center gap-[8px] text-xs text-arco-text-1',
         className
       )}
     >
-      <i className={cs('size-[6px] shrink-0 rounded-full', STATUS_DOT[status])} />
+      <i
+        className={cs('size-[6px] shrink-0 rounded-full', STATUS_DOT[status])}
+      />
       {text}
     </span>
   );

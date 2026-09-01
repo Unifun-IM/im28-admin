@@ -55,8 +55,7 @@ export default function PermissionConfig({
 
   const allKeys = useMemo(() => collectAllPermKeys(modules), [modules]);
   const allChecked = allKeys.length > 0 && allKeys.every((k) => checked.has(k));
-  const allIndeterminate =
-    !allChecked && allKeys.some((k) => checked.has(k));
+  const allIndeterminate = !allChecked && allKeys.some((k) => checked.has(k));
 
   const expandableKeys = useMemo(
     () =>
@@ -133,12 +132,11 @@ export default function PermissionConfig({
       res.id != null
         ? [res.key, ...actionKeys]
         : actionKeys.length
-          ? actionKeys
-          : res.key
-            ? [res.key]
-            : [];
-    const resAll =
-      resKeys.length > 0 && resKeys.every((k) => checked.has(k));
+        ? actionKeys
+        : res.key
+        ? [res.key]
+        : [];
+    const resAll = resKeys.length > 0 && resKeys.every((k) => checked.has(k));
     const resSome = !resAll && resKeys.some((k) => checked.has(k));
 
     return (
@@ -153,7 +151,7 @@ export default function PermissionConfig({
             disabled={!resKeys.length}
             onChange={(v) => toggleMany(resKeys, v)}
           />
-          <span className="truncate text-[14px] leading-[21px] text-arco-text-2">
+          <span className="truncate text-sm text-arco-text-2">
             {permTitle(res.key, res.title)}
           </span>
         </div>
@@ -181,7 +179,7 @@ export default function PermissionConfig({
                   setKeys(next);
                 }}
               >
-                <span className="break-words text-[14px] text-arco-text-2">
+                <span className="break-words text-sm text-arco-text-2">
                   {permTitle(a.key, a.title)}
                 </span>
               </Checkbox>
@@ -193,7 +191,7 @@ export default function PermissionConfig({
   };
 
   return (
-    <div className="use-role-perm-config min-w-0 max-w-full overflow-hidden rounded-xl border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)]">
+    <div className="use-role-perm-config min-w-0 max-w-full overflow-hidden rounded-lg border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)]">
       <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-[var(--color-border-2)] px-4 py-2 max-md:items-start max-md:flex-col">
         <div className="flex min-w-0 flex-1 items-center gap-3 max-md:w-full max-md:flex-wrap">
           <Input
@@ -217,7 +215,7 @@ export default function PermissionConfig({
         <button
           type="button"
           disabled={!expandableKeys.length || loading}
-          className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-[14px] font-medium leading-[21px] text-[rgb(var(--primary-6))] disabled:cursor-not-allowed disabled:opacity-40"
+          className="shrink-0 cursor-pointer border-0 bg-transparent p-0 text-sm font-medium text-primary disabled:cursor-not-allowed disabled:opacity-40"
           onClick={() => {
             const nextOpen = !allExpanded;
             setExpanded(
@@ -237,14 +235,13 @@ export default function PermissionConfig({
             <Spin />
           </div>
         ) : filterModules.length === 0 ? (
-          <div className="px-4 py-8 text-center text-[14px] text-arco-text-3">
+          <div className="px-4 py-8 text-center text-sm text-arco-text-3">
             {t['common.empty']}
           </div>
         ) : (
           filterModules.map((mod, index) => {
             const keys = collectModuleKeys(mod);
-            const modAll =
-              keys.length > 0 && keys.every((k) => checked.has(k));
+            const modAll = keys.length > 0 && keys.every((k) => checked.has(k));
             const modSome = !modAll && keys.some((k) => checked.has(k));
             const open = expanded[mod.key] !== false;
             const hasChildren = !mod.leaf && (mod.resources?.length || 0) > 0;
@@ -266,14 +263,14 @@ export default function PermissionConfig({
                       disabled={!keys.length}
                       onChange={(v) => toggleMany(keys, v)}
                     />
-                    <span className="truncate text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    <span className="truncate text-sm font-medium text-arco-text-1">
                       {permTitle(mod.key, mod.title)}
                     </span>
                   </div>
                   {hasChildren ? (
                     <button
                       type="button"
-                      className="inline-flex shrink-0 cursor-pointer items-center gap-4 border-0 bg-transparent p-0 text-[14px] font-medium text-arco-text-3"
+                      className="inline-flex shrink-0 cursor-pointer items-center gap-4 border-0 bg-transparent p-0 text-sm font-medium text-arco-text-3"
                       onClick={() =>
                         setExpanded((s) => ({ ...s, [mod.key]: !open }))
                       }

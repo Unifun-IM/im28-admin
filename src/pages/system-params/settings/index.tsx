@@ -308,8 +308,8 @@ export default function SystemParamsPage() {
               <FormSilentValue />
             </Form.Item>
             <Form.Item label={t['paramsSettings.field.logo']}>
-              <div className="rounded-xl border border-solid border-[var(--color-border-2)] px-3 py-2">
-                <p className="m-0 mb-2 text-[12px] leading-3 text-arco-text-3">
+              <div className="rounded-lg border border-solid border-[var(--color-border-2)] px-3 py-2">
+                <p className="m-0 mb-2 text-caption-compact text-arco-text-3">
                   {t['paramsSettings.logo.tip']}
                 </p>
                 <div className="flex items-start gap-3">
@@ -340,10 +340,7 @@ export default function SystemParamsPage() {
               </div>
             </Form.Item>
 
-            <Form.Item
-              field="locale"
-              label={t['paramsSettings.field.locale']}
-            >
+            <Form.Item field="locale" label={t['paramsSettings.field.locale']}>
               <Select
                 options={[
                   { label: common['common.lang.zh'], value: 'zh-CN' },
