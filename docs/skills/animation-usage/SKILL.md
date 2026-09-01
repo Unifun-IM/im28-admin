@@ -19,10 +19,10 @@ description: Design and implement purposeful UI motion, route transitions, state
 
 ## 场景规则
 
-- 路由页面的进入动效由公共 shell 统一承载，业务页面不重复实现。使用轻微的 opacity / transform 入场，不叠加退出动画；刷新数据使用 Loading / Skeleton，不重播页面入场。
+- 路由页面的进入动效由公共 shell 统一承载，业务页面不重复实现。高信息密度后台默认使用短时纯 opacity 淡入，不移动或缩放整个页面，也不叠加退出动画；刷新数据使用 Loading / Skeleton，不重播页面入场。
 - Drawer、Modal、Dropdown、Tooltip 等优先使用 Arco 自带动效。弹层内部内容不得再整体播放一次进入动画。
 - Hover、选中、展开和布局变化优先使用 transition；复杂关键帧留在所属组件，不为一次效果新增全局 token。
-- 优先动画 opacity 和 transform。仅当真实布局变化需要空间连续性时才动画尺寸或位置属性，并检查重排成本。
+- 普通状态反馈优先动画 opacity；只有方向、层级或空间关系对理解交互确有帮助时才动画局部元素的 transform。仅当真实布局变化需要空间连续性时才动画尺寸或位置属性，并检查重排成本。
 - 不对每张卡片、每行表格或每个表单项做级联入场；后台高频操作以稳定、快速、可扫描为先。
 - 动效不得延迟可点击、焦点、错误提示或加载状态，不得改变键盘与触控流程。移动端保持同一信息反馈，可适当缩短位移和时长。
 
