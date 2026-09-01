@@ -14,6 +14,10 @@ import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import useLocale from '@shared/lib/useLocale';
 import { UserAvatar } from '@shared/ui';
 import IconMoreDots from '@assets/icon/icon-more-dots.svg?react';
+import {
+  DEFAULT_TEXT_ACTION_FOLDED_VISIBLE,
+  TEXT_ACTION_FOLD_WHEN_OVER
+} from './tableDefaults';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
@@ -184,9 +188,6 @@ export type ActionLinksProps = {
   className?: string;
 };
 
-/** text：最多 3 项全部展示；超过后只保留首要动作，其余收进更多 */
-const TEXT_FOLD_WHEN_OVER = 3;
-const DEFAULT_TEXT_FOLDED_VISIBLE = 1;
 /** icon：最多 3 个槽位 */
 const DEFAULT_ICON_MAX_VISIBLE = 3;
 
@@ -311,9 +312,9 @@ export function ActionLinks({
   if (variant === 'text') {
     const foldedVisible = Math.max(
       0,
-      maxVisible ?? DEFAULT_TEXT_FOLDED_VISIBLE
+      maxVisible ?? DEFAULT_TEXT_ACTION_FOLDED_VISIBLE
     );
-    const needFold = items.length > TEXT_FOLD_WHEN_OVER;
+    const needFold = items.length > TEXT_ACTION_FOLD_WHEN_OVER;
     const visibleItems = needFold ? items.slice(0, foldedVisible) : items;
     const moreItems = needFold ? items.slice(foldedVisible) : [];
     const moreMenu = moreItems.length
@@ -322,7 +323,7 @@ export function ActionLinks({
     return (
       <div
         className={cs(
-          'flex w-full items-center justify-center gap-[8px]',
+          'flex w-full items-center justify-start gap-[8px]',
           className
         )}
       >
@@ -365,7 +366,7 @@ export function ActionLinks({
   return (
     <div
       className={cs(
-        'flex w-full items-center justify-center gap-2',
+        'flex w-full items-center justify-start gap-2',
         className
       )}
     >

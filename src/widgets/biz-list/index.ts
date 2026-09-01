@@ -23,11 +23,13 @@ export {
 export {
   BIZ_PAGE_SIZE,
   BIZ_PAGE_SIZE_OPTIONS,
+  getTextActionColumnWidth,
   isActionColumn,
   normalizeBizColumns,
   resolveBizPagination
 } from './tableDefaults';
 export type { SummaryItem } from './DataSummary';
+export type { ActionLabelSlot } from './tableDefaults';
 export type { FilterFieldProps, SearchFilterBarProps } from './SearchFilterBar';
 export type { FilterKeywordInputProps } from './FilterKeywordInput';
 export type { FilterInputProps } from './FilterInput';

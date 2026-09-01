@@ -854,11 +854,11 @@
   }
 
   .arco-table-th.arco-table-col-fixed-right {
-    text-align: center;
+    text-align: left;
 
     .arco-table-th-item,
     .arco-table-cell-with-sorter {
-      justify-content: center;
+      justify-content: flex-start;
       padding-left: 12px;
       padding-right: 12px;
     }
@@ -926,13 +926,13 @@
   .arco-table-td.arco-table-col-fixed-right {
     padding-left: 12px;
     padding-right: 12px;
-    text-align: center;
+    text-align: left;
 
     .arco-table-cell,
     .arco-table-cell-wrap-value {
       display: flex;
       width: 100%;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
     }
   }
@@ -1103,6 +1103,24 @@
   }
 
   @media (max-width: 768px) {
+    .arco-table-th.arco-table-col-fixed-right {
+      text-align: center;
+
+      .arco-table-th-item,
+      .arco-table-cell-with-sorter {
+        justify-content: center;
+      }
+    }
+
+    .arco-table-td.arco-table-col-fixed-right {
+      text-align: center;
+
+      .arco-table-cell,
+      .arco-table-cell-wrap-value {
+        justify-content: center;
+      }
+    }
+
     .arco-table-pagination {
       justify-content: center;
       max-width: 100%;

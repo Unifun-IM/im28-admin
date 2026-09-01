@@ -30,6 +30,7 @@ describe('ActionLinks text layout', () => {
     const { container } = renderActions([{ key: 'detail', label: '详情' }]);
 
     expect(screen.getByRole('button', { name: '详情' })).toBeTruthy();
+    expect(container.firstElementChild?.className).toContain('justify-start');
     expect(container.querySelector('span[aria-hidden]')).toBeNull();
     expect(screen.queryByRole('button', { name: '更多' })).toBeNull();
   });
@@ -83,6 +84,7 @@ describe('ActionLinks text layout', () => {
     const trigger = screen.getByRole('button', { name: '更多' });
     expect(trigger).toBeTruthy();
     expect(trigger.className).toContain('size-[32px]');
+    expect(trigger.parentElement?.className).toContain('justify-center');
     expect(screen.queryByRole('button', { name: '详情' })).toBeNull();
     expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
   });
