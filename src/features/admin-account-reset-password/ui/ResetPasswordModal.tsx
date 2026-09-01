@@ -137,7 +137,7 @@ export default function ResetPasswordModal({
           </div>
         }
         footer={
-          <div className="flex justify-end gap-2">
+          <div className="flex w-full flex-wrap justify-end gap-2">
             <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>
