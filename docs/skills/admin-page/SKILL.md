@@ -32,7 +32,8 @@ description: Generate or update admin navigation, routes, lists, filters, detail
 2. 接口变化先完整执行 `api-generation`，生成 diff 和调用方同步范围不在本 skill 重复定义。
 3. 只有独立管理对象、列表能力或明确菜单目标生成路由和页面；详情、动作、上传、鉴权和记录能力进入所属页面。
 4. 接口契约不足时报告缺口，不创建 `ApiNotReady`、mock 页面或“接口未就绪”占位组件。
-5. 不覆盖用户已有改动，不格式化或重构无关文件。
+5. 现有页面组织不能承载已确认需求时，先按 `design-system` 形成交互契约，再按 `component-usage` 处理能力缺口；不复制不合适的旧页面，也不为迁就组件删减需求。
+6. 不覆盖用户已有改动，不格式化或重构无关文件。
 
 ## 导航与路由
 
