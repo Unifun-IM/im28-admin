@@ -2,7 +2,7 @@
 .use-biz-filter-bar.arco-card,
 .use-biz-summary,
 .use-biz-table-card.arco-card {
-  border-radius: 8px;
+  border-radius: var(--radius-surface);
   border: 1px solid var(--color-border-2);
   background-color: var(--color-bg-2, #fff);
   box-shadow: none;
@@ -58,7 +58,7 @@
   }
 
   .arco-form-label-item > label {
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     font-weight: 400;
     color: var(--color-text-2, #4e5969);
     line-height: 12px;
@@ -67,7 +67,7 @@
   /* 带 hint 的标签（Figma 811:22055：标题 text/1 14 + 提示 text/3 12） */
   .arco-form-label-item:has(.use-biz-filter-label-hint) {
     height: auto;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
     min-height: 21px;
 
     > label {
@@ -75,15 +75,15 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 4px;
-      line-height: 21px;
+      line-height: var(--line-height-body-compact);
     }
   }
 
   .use-biz-filter-action-text.arco-btn {
     padding: 0;
     height: 32px;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
     color: rgb(var(--primary-6));
   }
 
@@ -100,7 +100,7 @@
     width: 80px;
     min-width: 80px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
   }
 
   .use-biz-filter-label-row {
@@ -112,15 +112,15 @@
   }
 
   .use-biz-filter-label-title {
-    font-size: 14px;
-    line-height: 21px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
     font-weight: 400;
     color: var(--color-text-1);
   }
 
   .use-biz-filter-label-hint {
-    font-size: 12px;
-    line-height: 18px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption-compact);
     font-weight: 400;
     color: var(--color-text-3);
   }
@@ -158,7 +158,7 @@
   .arco-input-group-addafter {
     background-color: var(--color-bg-1);
     border: 1px solid transparent;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     min-height: 32px;
     box-shadow: none;
     caret-color: rgb(var(--primary-6));
@@ -168,7 +168,7 @@
   .arco-input-group:has(.arco-input-group-addbefore) > .arco-input-inner-wrapper {
     background-color: transparent;
     border: none;
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 var(--radius-control) var(--radius-control) 0;
     min-height: 32px;
     box-shadow: none;
   }
@@ -195,14 +195,14 @@
   .arco-select-single .arco-select-view-placeholder,
   .arco-select-view-input,
   .arco-picker-input input {
-    font-size: 14px;
+    font-size: var(--font-size-body);
     line-height: 32px;
     color: var(--color-text-1);
     caret-color: rgb(var(--primary-6));
   }
 
   .arco-input {
-    font-size: 14px;
+    font-size: var(--font-size-body);
     line-height: 32px;
     height: 100%;
     padding: 0;
@@ -249,7 +249,7 @@
     width: 100%;
     background: var(--color-bg-1);
     border: 1px solid transparent;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     padding: 0;
     overflow: hidden;
     box-shadow: none;
@@ -267,7 +267,7 @@
   .arco-input-group-addbefore {
     width: auto;
     white-space: nowrap;
-    border-radius: 8px 0 0 8px;
+    border-radius: var(--radius-control) 0 0 var(--radius-control);
     border: none;
     border-right: 1px solid var(--color-border-2);
     padding: 0 11px;
@@ -293,7 +293,7 @@
 
     .arco-select-view-value,
     .arco-select-view-placeholder {
-      font-size: 14px;
+      font-size: var(--font-size-body);
       line-height: 32px;
       color: var(--color-text-1);
     }
@@ -307,7 +307,7 @@
   }
 
   .arco-input-group-addbefore + .arco-input-inner-wrapper {
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 var(--radius-control) var(--radius-control) 0;
   }
 
   /* TextArea 视觉在 .arco-textarea 上（wrapper 仅布局） */
@@ -322,12 +322,12 @@
   .arco-textarea {
     background-color: var(--color-bg-1);
     border: 1px solid transparent;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     box-shadow: none;
     min-height: 32px;
     padding: 5px 12px;
-    font-size: 14px;
-    line-height: 22px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
     color: var(--color-text-1);
     resize: vertical;
     caret-color: rgb(var(--primary-6));
@@ -358,7 +358,7 @@
   .use-biz-filter-search-icon {
     color: var(--color-text-3);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--font-size-body);
   }
 
   .use-biz-filter-search-icon:hover {
@@ -380,14 +380,14 @@
   .arco-select-view-tag {
     background: var(--color-bg-2, #fff);
     border: 1px solid var(--color-fill-3, #e5e6eb);
-    border-radius: 4px;
+    border-radius: var(--radius-compact);
     color: var(--color-text-1);
     margin: 0 4px 0 0;
     height: 24px;
-    line-height: 22px;
+    line-height: var(--line-height-body);
     padding: 0 8px;
     font-weight: 500;
-    font-size: 14px;
+    font-size: var(--font-size-body);
   }
 
   .arco-select-view-tag .arco-icon-hover {
@@ -398,7 +398,7 @@
   .arco-picker-suffix,
   .arco-input-clear-icon {
     color: var(--color-text-3, #86909c);
-    font-size: 12px;
+    font-size: var(--font-size-caption);
   }
 
   .arco-picker-range {
@@ -470,8 +470,8 @@
 .arco-select-popup:has(.use-biz-filter-dropdown) {
   padding: 4px !important;
   border: none !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  border-radius: var(--radius-overlay) !important;
+  box-shadow: var(--shadow-popup) !important;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -498,7 +498,7 @@
       padding-left: 12px;
       background: var(--color-bg-2, #fff);
       border: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
-      border-radius: 8px;
+      border-radius: var(--radius-control);
     }
 
     .arco-input-group-prefix {
@@ -530,8 +530,8 @@
     margin: 0 !important;
     padding: 0 8px !important;
     border-radius: 6px;
-    line-height: 22px;
-    font-size: 14px;
+    line-height: var(--line-height-body);
+    font-size: var(--font-size-body);
     color: var(--color-text-1, #1d2129);
     background: transparent !important;
   }
@@ -562,8 +562,8 @@
     padding: 0 8px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
-    line-height: 22px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
     color: var(--color-text-1, #1d2129);
 
     .arco-checkbox {
@@ -579,8 +579,8 @@
     height: 22px;
     margin-top: 0;
     padding: 0 8px;
-    font-size: 14px;
-    line-height: 22px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
     color: rgb(var(--primary-6));
     cursor: pointer;
   }
@@ -687,7 +687,7 @@
 
     /* 批量操作 / 新建等与筛选「查询」同为 8px 圆角 */
     .arco-btn {
-      border-radius: 8px;
+      border-radius: var(--radius-control);
     }
   }
 
@@ -706,9 +706,9 @@
   }
 
   .use-biz-table-toolbar-title {
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 500;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
     color: var(--color-text-1, #1d2129);
   }
 
@@ -718,7 +718,7 @@
     min-width: 32px;
     padding: 0;
     border: 1px solid var(--color-border-2);
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background: transparent;
     color: var(--color-text-2, #4e5969);
   }
@@ -732,7 +732,7 @@
     height: 32px;
     padding: 0 12px;
     border: 1px solid var(--color-border-2);
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background: var(--color-fill-2, #f2f3f5);
     color: var(--color-text-2, #4e5969);
   }
@@ -777,9 +777,9 @@
     height: 40px;
     /* padding 统一放在 th-item / cell-with-sorter，避免有排序列时双重叠加变高 */
     padding: 0 !important;
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 400;
-    line-height: 22px;
+    line-height: var(--line-height-body);
     color: var(--color-text-3, #86909c);
     border-bottom: 1px solid var(--color-border-2) !important;
     border-right: 1px solid var(--color-border-2);
@@ -794,13 +794,13 @@
     align-items: center;
     height: 40px;
     padding: 9px 16px;
-    line-height: 22px;
+    line-height: var(--line-height-body);
   }
 
   .arco-table-th-item-title {
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 400;
-    line-height: 22px;
+    line-height: var(--line-height-body);
     color: var(--color-text-3, #86909c);
   }
 
@@ -869,7 +869,7 @@
     min-height: 40px;
     /* Figma：pl-16 pr-17 py-9 */
     padding: 9px 17px 9px 16px;
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     line-height: 12px;
     color: var(--color-text-1, #1d2129);
     /* 单元格无上下边框，仅保留列分隔 */
@@ -945,7 +945,7 @@
     max-width: 100%;
     min-width: 0;
     overflow: hidden;
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     line-height: 12px;
   }
 
@@ -960,14 +960,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     line-height: 12px;
   }
 
   /* 表内状态点：跟随单元格 12px（Figma badge/status 高 20） */
   .arco-table-td .use-status-badge {
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
   }
 
   /* 空状态：去掉 Arco 默认 min-height 挤压，居中展示插画 */
@@ -1128,8 +1128,8 @@
     align-items: center;
     height: 32px;
     margin: 0;
-    font-size: 14px;
-    line-height: 22px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
     color: var(--color-text-1, #1d2129);
   }
 
@@ -1157,7 +1157,7 @@
     border-radius: 2px;
     background: transparent;
     color: var(--color-text-2, #4e5969);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 600;
     vertical-align: middle;
   }
@@ -1165,7 +1165,7 @@
   /* 当前页 — Figma 602:34981：fill-1 底 + text-1 加粗 + 圆角 8 */
   .arco-pagination-item-active {
     background: var(--color-fill-1, #f7f8fa);
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     color: var(--color-text-1, #1d2129);
     font-weight: 700;
   }
@@ -1174,7 +1174,7 @@
       .arco-pagination-item-active
     ) {
     background: var(--color-fill-1, #f7f8fa);
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     color: var(--color-text-1, #1d2129);
   }
 
@@ -1200,7 +1200,7 @@
     padding: 0 12px;
     background: var(--color-fill-2, #f2f3f5);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     color: var(--color-text-1, #1d2129);
     line-height: 1;
   }

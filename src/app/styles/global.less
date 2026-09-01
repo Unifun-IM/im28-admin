@@ -73,7 +73,9 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-size: 14px;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   background-color: var(--color-bg-1);
   color: var(--color-text-1);
 }
@@ -99,7 +101,7 @@ body {
   }
 
   html::view-transition-new(*) {
-    animation: theme-vt-clip 0.5s ease-in both;
+    animation: theme-vt-clip var(--motion-duration-theme) ease-in both;
   }
 
   html::view-transition-old(root) {
@@ -112,7 +114,7 @@ body {
 
   /* 切到暗色后：旧层（亮色）反向收缩，露出下层暗色 */
   html.dark::view-transition-old(*) {
-    animation: theme-vt-clip 0.5s ease-in reverse both;
+    animation: theme-vt-clip var(--motion-duration-theme) ease-in reverse both;
   }
 
   html.dark::view-transition-new(*) {
@@ -134,9 +136,9 @@ body {
 .arco-trigger-popup .arco-menu,
 .arco-menu-pop-slide {
   padding: 8px !important;
-  border-radius: 12px !important;
+  border-radius: var(--radius-overlay) !important;
   border: 1px solid var(--color-border-2, #e5e6eb);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: var(--shadow-popup) !important;
   background: var(--color-bg-popup, #fff) !important;
 
   .arco-menu-item {
@@ -144,9 +146,9 @@ body {
     height: 32px !important;
     margin: 0;
     padding: 0 12px !important;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     color: var(--color-text-1, #1d2129);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     line-height: 32px;
 
     &:hover,
@@ -168,13 +170,13 @@ body {
 .arco-menu-item-tooltip {
   .arco-tooltip-content {
     padding: 5px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     border: 1px solid var(--color-border-2, #e5e6eb);
     background: var(--color-bg-popup, #fff);
     color: var(--color-text-1, #1d2129);
-    font-size: 14px;
-    line-height: 22px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+    box-shadow: var(--shadow-popup);
   }
 
   .arco-tooltip-arrow {
@@ -186,9 +188,9 @@ body {
 /* 全局 Message — Figma 602:35325；暗色用 popup 底色，避免白底+浅字不可见 */
 .arco-message-wrapper .arco-message {
   padding: 9px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-overlay);
   background: var(--color-bg-popup, #fff);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-popup);
   border: 1px solid var(--color-border-2, transparent);
 
   .arco-message-icon {
@@ -198,8 +200,8 @@ body {
   }
 
   .arco-message-content {
-    font-size: 14px;
-    line-height: 21px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
     color: var(--color-text-1, #1d2129);
   }
 }
@@ -257,7 +259,7 @@ body {
   .arco-picker {
     background-color: var(--color-bg-2);
     border: 1px solid var(--color-border-2);
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     min-height: 32px;
     box-shadow: none;
     color: var(--color-text-1);
@@ -274,8 +276,8 @@ body {
     box-sizing: border-box;
     min-height: 50px;
     padding: 4px 12px;
-    font-size: 14px;
-    line-height: 21px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
     color: var(--color-text-1);
     caret-color: rgb(var(--primary-6));
     resize: vertical;

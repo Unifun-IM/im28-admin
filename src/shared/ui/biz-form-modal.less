@@ -3,9 +3,9 @@
  * 用法：Modal className="use-biz-form-modal"，成功态再加 "is-success"
  */
 .arco-modal.use-biz-form-modal {
-  border-radius: 12px;
+  border-radius: var(--radius-overlay);
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-overlay);
   border: 1px solid var(--color-border-1);
 
   .arco-modal-header {
@@ -15,9 +15,9 @@
     border-bottom: 1px solid var(--color-border-2);
 
     .arco-modal-title {
-      font-size: 16px;
+      font-size: var(--font-size-title);
       font-weight: 500;
-      line-height: 24px;
+      line-height: var(--line-height-title);
       color: var(--color-text-1);
     }
   }
@@ -52,15 +52,15 @@
   }
 
   .arco-result-title {
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 500;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
     color: var(--color-text-1);
   }
 
   .arco-result-subtitle {
-    font-size: 12px;
-    line-height: 18px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption-compact);
     color: var(--color-text-3);
   }
 

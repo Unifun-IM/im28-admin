@@ -27,13 +27,13 @@
   /* Figma 741:29115：顶栏白底，与内容区 fill-1 区分 */
   background-color: var(--color-bg-2, #fff);
   transition:
-    left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    height 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    gap 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    padding 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    background-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    box-shadow 0.2s ease;
+    left var(--motion-duration-layout) var(--motion-ease-layout),
+    width var(--motion-duration-layout) var(--motion-ease-layout),
+    height var(--motion-duration-layout) var(--motion-ease-layout),
+    gap var(--motion-duration-layout) var(--motion-ease-layout),
+    padding var(--motion-duration-layout) var(--motion-ease-layout),
+    background-color var(--motion-duration-state) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fade) ease;
   display: flex;
   flex-direction: column;
   gap: @header-navbar-gap;
@@ -42,7 +42,7 @@
     background-color: var(--color-bg-navbar-scrolled);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-sticky);
   }
 
   &-hidden {
@@ -78,9 +78,9 @@
   overflow: hidden;
   opacity: 1;
   transition:
-    height 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    opacity 0.2s ease,
-    margin 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
+    height var(--motion-duration-layout) var(--motion-ease-layout),
+    opacity var(--motion-duration-fade) ease,
+    margin var(--motion-duration-layout) var(--motion-ease-layout);
 
   .layout-navbar-chrome-fullscreen &,
   .layout-navbar-table-fullscreen & {
@@ -147,9 +147,9 @@
     min-width: 0;
     overflow: hidden;
     color: var(--color-text-1, #1d2129);
-    font-size: 16px;
+    font-size: var(--font-size-title);
     font-weight: 600;
-    line-height: 24px;
+    line-height: var(--line-height-title);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -176,11 +176,11 @@
   border-radius: 0;
   overflow: hidden;
   transition:
-    width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    min-width 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    opacity 0.2s ease,
-    transform 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    border-color 0.2s ease;
+    width var(--motion-duration-layout) var(--motion-ease-layout),
+    min-width var(--motion-duration-layout) var(--motion-ease-layout),
+    opacity var(--motion-duration-fade) ease,
+    transform var(--motion-duration-layout) var(--motion-ease-layout),
+    border-color var(--motion-duration-fade) ease;
 
   ::-webkit-scrollbar {
     width: 12px;
@@ -251,7 +251,7 @@
     min-width: 0;
     font-size: 18px;
     font-weight: 600;
-    line-height: 24px;
+    line-height: var(--line-height-title);
     color: var(--color-text-1, #1d2129);
     white-space: nowrap;
     overflow: hidden;
@@ -307,10 +307,10 @@
     min-height: 32px;
     margin-bottom: 4px;
     padding: 5px 12px !important;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
     border-radius: 2px;
     color: var(--color-text-2, #4e5969) !important;
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 400;
     background: transparent !important;
 
@@ -366,7 +366,7 @@
   /* 选中叶子：primary-1 + primary-6，圆角 8 */
   :global(.arco-menu-item.arco-menu-selected),
   :global(.arco-menu-item.arco-menu-selected:hover) {
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
     color: rgb(var(--primary-6)) !important;
     font-weight: 500;
@@ -401,7 +401,7 @@
 
   :global(.arco-menu-icon-suffix) {
     color: var(--color-text-3, #86909c) !important;
-    font-size: 12px;
+    font-size: var(--font-size-caption);
   }
 
   /* L1 展开区：左侧竖线 + 12px 内边距，避免二级项背景贴线 */
@@ -418,7 +418,7 @@
       padding-left: 12px !important;
       padding-right: 12px !important;
       gap: 0;
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
 
@@ -430,7 +430,7 @@
 
     > :global(.arco-menu-item.arco-menu-selected),
     > :global(.arco-menu-item.arco-menu-selected:hover) {
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
       color: rgb(var(--primary-6)) !important;
       font-weight: 500;
@@ -449,7 +449,7 @@
       gap: 0;
       margin-bottom: 4px;
       padding: 5px 12px 5px 12px !important;
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       color: var(--color-text-3, #86909c) !important;
       background: transparent !important;
       font-weight: 400;
@@ -484,7 +484,7 @@
       padding-left: 12px !important;
       padding-right: 16px !important;
       margin-bottom: 4px;
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       color: var(--color-text-2, #4e5969) !important;
       background: transparent !important;
       font-weight: 400;
@@ -510,7 +510,7 @@
   }
 
   :global(.arco-menu-pop-header) {
-    border-radius: 8px;
+    border-radius: var(--radius-control);
   }
 
   /* 折叠：仅图标；选中 primary-light / primary-6 */
@@ -553,7 +553,7 @@
       &:hover {
         height: 40px !important;
         min-height: 40px;
-        border-radius: 12px;
+        border-radius: var(--radius-overlay);
         background-color: var(--color-fill-2, #f2f3f5) !important;
         color: var(--color-text-1, #1d2129) !important;
       }
@@ -563,7 +563,7 @@
     :global(.arco-menu-pop-header.arco-menu-selected) {
       height: 40px !important;
       min-height: 40px;
-      border-radius: 12px;
+      border-radius: var(--radius-overlay);
       background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
       color: rgb(var(--primary-6)) !important;
       font-weight: 400;
@@ -593,7 +593,7 @@
   margin-left: auto;
   background-color: var(--color-fill-1, #f7f8fa);
   color: var(--color-text-3, #86909c);
-  border-radius: 4px;
+  border-radius: var(--radius-compact);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -658,8 +658,8 @@
   min-height: 100vh;
   overflow-x: clip;
   transition:
-    padding-left 0.28s cubic-bezier(0.34, 0.69, 0.1, 1),
-    padding-top 0.28s cubic-bezier(0.34, 0.69, 0.1, 1);
+    padding-left var(--motion-duration-layout) var(--motion-ease-layout),
+    padding-top var(--motion-duration-layout) var(--motion-ease-layout);
   box-sizing: border-box;
 }
 

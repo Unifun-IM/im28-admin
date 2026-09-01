@@ -8,9 +8,9 @@
 
   .arco-drawer-header-title {
     color: var(--color-text-1);
-    font-size: 16px;
+    font-size: var(--font-size-title);
     font-weight: 500;
-    line-height: 24px;
+    line-height: var(--line-height-title);
   }
 
   .arco-drawer-close-icon {
@@ -110,9 +110,9 @@
     padding: 9px 0;
     background-color: transparent !important;
     color: var(--color-text-2);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 400;
-    line-height: 22px;
+    line-height: var(--line-height-body);
 
     &::after {
       position: absolute;
@@ -122,7 +122,7 @@
       height: 2px;
       background: transparent;
       content: '';
-      transition: background-color 0.15s ease;
+      transition: background-color var(--motion-duration-hover) ease;
     }
 
     &:hover {
@@ -188,15 +188,15 @@
   .arco-descriptions-title {
     margin: 0 0 12px;
     color: var(--color-text-1);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 500;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
   }
 
   .arco-descriptions-body {
     overflow: hidden;
     border: 1px solid var(--color-border-2);
-    border-radius: 8px;
+    border-radius: var(--radius-surface);
     background: var(--color-bg-2);
   }
 
@@ -209,8 +209,8 @@
     min-height: 32px;
     padding: 5px 12px;
     border-color: var(--color-border-2) !important;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
     vertical-align: middle;
   }
 
@@ -226,8 +226,8 @@
 
   .arco-descriptions-item-value {
     color: var(--color-text-1);
-    font-size: 14px;
-    line-height: 21px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
     word-break: break-word;
   }
 }
@@ -243,9 +243,9 @@
 .use-biz-detail-operation-title {
   margin-bottom: 8px;
   color: var(--color-text-1);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   font-weight: 600;
-  line-height: 22px;
+  line-height: var(--line-height-body);
 }
 
 @media (max-width: 768px) {

@@ -38,13 +38,15 @@
     /* 右侧固定预留关闭区，有无 × 宽度一致，避免切换跳动 */
     padding: 5px 28px 5px 12px;
     border: none;
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--radius-control) var(--radius-control) 0 0;
     background-color: transparent;
     color: var(--color-text-3, #86909c);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 400;
-    line-height: 22px;
-    transition: color 0.15s ease, background-color 0.15s ease;
+    line-height: var(--line-height-body);
+    transition:
+      color var(--motion-duration-hover) ease,
+      background-color var(--motion-duration-hover) ease;
   }
 
   .arco-tabs-header-title:hover {
@@ -70,7 +72,7 @@
     background-color: var(--color-bg-1, #f7f8fa);
     box-shadow: 0 1px 0 0 var(--color-bg-1, #f7f8fa);
     color: rgb(var(--primary-6));
-    line-height: 22px;
+    line-height: var(--line-height-body);
 
     &::before,
     &::after {
@@ -117,7 +119,7 @@
 .use-page-tab-pin {
   flex-shrink: 0;
   width: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-3, #86909c);
 }
 
@@ -176,9 +178,9 @@
   width: 32px;
   height: 32px;
   margin: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-compact);
   color: var(--color-text-2, #4e5969);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   line-height: 1;
   cursor: pointer;
 
@@ -237,7 +239,7 @@
   height: 32px;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-compact);
   background: transparent;
   color: var(--color-text-2, #4e5969);
   line-height: 1;
@@ -255,7 +257,7 @@
     left: 50%;
     width: 20px;
     height: 20px;
-    border-radius: 4px;
+    border-radius: var(--radius-compact);
     background: transparent;
     transform: translate(-50%, -50%);
   }
@@ -270,6 +272,6 @@
     position: relative;
     z-index: 1;
     display: block;
-    font-size: 14px;
+    font-size: var(--font-size-body);
   }
 }
