@@ -678,15 +678,23 @@
   }
 }
 
-@keyframes page-fade-in {
-  from {
+@keyframes page-enter {
+  0% {
     opacity: 0;
+  }
+
+  55% {
+    opacity: 0.78;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 
 .page-transition {
-  animation: page-fade-in var(--motion-duration-fade)
-    var(--motion-ease-standard) backwards;
+  animation: page-enter var(--motion-duration-page-enter)
+    var(--motion-ease-emphasized) backwards;
 }
 
 /* 表格全屏：主区撑满视口，供列表页仅展示表格 */
