@@ -35,7 +35,6 @@
 
   /* 输入：卡片底 + border-2 + 圆角 8（暗亮色走 token） */
   .arco-input-inner-wrapper,
-  .arco-input-number,
   .arco-select-view {
     background: var(--color-bg-2);
     border: 1px solid var(--color-border-2);
@@ -44,17 +43,31 @@
   }
 
   .arco-input-inner-wrapper:hover,
-  .arco-input-number:hover,
   .arco-select-view:hover {
     background: var(--color-bg-2);
     border-color: var(--color-border-3);
   }
 
-  .arco-input-inner-wrapper.arco-input-focus,
-  .arco-input-number.arco-input-number-focus,
+  .arco-input-inner-wrapper.arco-input-inner-wrapper-focus,
+  .arco-input-inner-wrapper:focus-within,
   .arco-select-view-focus {
     background: var(--color-bg-2);
     border-color: rgb(var(--primary-6));
+    box-shadow: none;
+  }
+
+  .arco-input-inner-wrapper-error,
+  .arco-input-inner-wrapper-error:hover,
+  .arco-input-inner-wrapper-error:focus-within {
+    background: var(--color-bg-2);
+    border-color: rgb(var(--danger-6));
+  }
+
+  .arco-input-inner-wrapper-disabled,
+  .arco-input-inner-wrapper-disabled:hover {
+    background: var(--color-fill-2);
+    border-color: var(--color-border-2);
+    color: var(--color-text-4);
   }
 
   .arco-input,

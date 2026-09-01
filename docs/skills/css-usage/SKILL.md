@@ -105,6 +105,7 @@ Less：
 
 - 详情表格：`@shared/ui/biz-detail-table.less` + `use-biz-detail-table`
 - 标准表单 Modal：`@shared/ui/biz-form-modal.less` + `use-biz-form-modal`
+- 设置页表单：`@widgets/session-settings` 统一控件视觉；`InputNumber` 的 `.arco-input-number` 只是布局外壳，边框、背景和焦点态只落在内部 `.arco-input-inner-wrapper`，不能同时装饰两层。
 
 具体组件契约见 `component-usage`，业务页不要复制这些壳层样式。
 
