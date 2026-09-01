@@ -11,6 +11,7 @@ import { postV1AdminRiskIpBlacklistBatchRemove } from '@shared/api/admin/adminfe
 import iconSuccess from '@assets/icon/icon-check-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './ip-blacklist-action-modal.less';
 
 const FormItem = Form.Item;
@@ -117,7 +118,7 @@ export default function BatchReleaseIpBlacklistModal({
   return (
     <>
       <Modal
-        className="use-ip-blacklist-action-modal"
+        className="use-biz-form-modal use-ip-blacklist-action-modal"
         wrapClassName="use-ip-blacklist-action-modal-wrap"
         visible={visible && step === 'form'}
         onCancel={onCancel}
@@ -132,7 +133,7 @@ export default function BatchReleaseIpBlacklistModal({
           </span>
         }
         footer={
-          <div className="flex w-full justify-end gap-2">
+          <div className="flex w-full flex-wrap justify-end gap-2">
             <Button type="outline" className="min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>

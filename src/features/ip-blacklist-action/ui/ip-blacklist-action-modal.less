@@ -1,39 +1,5 @@
 /* 添加 / 解除 IP 黑名单 — Figma 979:44120 / 979:41995；亮/暗走 theme-tokens */
 .arco-modal.use-ip-blacklist-action-modal {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-border-1);
-
-  .arco-modal-header {
-    height: 48px;
-    padding: 0 24px;
-    background: var(--color-bg-1);
-    border-bottom: 1px solid var(--color-border-2);
-
-    .arco-modal-title {
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 24px;
-      color: var(--color-text-1);
-    }
-  }
-
-  .arco-modal-content {
-    padding: 12px 24px 24px;
-    background: var(--color-bg-1);
-  }
-
-  .arco-modal-footer {
-    height: 48px;
-    padding: 0 24px;
-    background: var(--color-bg-1);
-    border-top: 1px solid var(--color-border-1);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
   .use-ip-blacklist-action-form {
     .arco-form-item {
       margin-bottom: 12px;
@@ -51,11 +17,5 @@
 
     /* Select / TextArea 外观走 global.less `.arco-modal`（含暗色） */
   }
-
-  .arco-btn-primary.arco-btn-status-danger {
-    background-color: rgb(var(--danger-6));
-    border-color: rgb(var(--danger-6));
-  }
 }
-
 

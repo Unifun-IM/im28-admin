@@ -4,6 +4,7 @@ import { postV1AdminRiskIpBlacklistRemove } from '@shared/api/admin/adminfengkon
 import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './ip-blacklist-action-modal.less';
 
 const FormItem = Form.Item;
@@ -82,7 +83,7 @@ export default function ReleaseIpBlacklistModal({
   return (
     <>
       <Modal
-        className="use-ip-blacklist-action-modal"
+        className="use-biz-form-modal use-ip-blacklist-action-modal"
         wrapClassName="use-ip-blacklist-action-modal-wrap"
         visible={visible && step === 'form'}
         onCancel={onCancel}
@@ -97,7 +98,7 @@ export default function ReleaseIpBlacklistModal({
           </span>
         }
         footer={
-          <div className="flex w-full justify-end gap-2">
+          <div className="flex w-full flex-wrap justify-end gap-2">
             <Button type="outline" className="min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>
