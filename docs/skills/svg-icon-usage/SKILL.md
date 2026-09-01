@@ -64,6 +64,7 @@ import loginBanner from '@assets/login/login-banner-bg.svg';
 - 不把完整 SVG path 内联到 TSX，不提交远程 asset URL 或大段 base64。
 - 单色操作图标优先 `currentColor`，由 class 和主题 token 控制颜色与尺寸。
 - 品牌、多色插画保留原色，并验证浅色、暗色背景下的可见性。
+- `<img>` 或 CSS 背景加载的 SVG 不会继承宿主页面变量。多色插画明确需要跟随主题时，使用 `?react` 内联，并让 SVG 的语义色读取由宿主 class 提供的局部 CSS 变量；SVG 内保留原始颜色作为回退，不把纹理、遮罩和明暗结构机械主题化。
 
 ## 菜单图标
 

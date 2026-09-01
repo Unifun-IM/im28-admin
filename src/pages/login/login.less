@@ -1,3 +1,11 @@
+/* 登录背景的彩色层跟随运行时主题色；SVG 内保留原始颜色作为回退。 */
+.use-login-banner {
+  --login-banner-base-start: rgb(var(--primary-5));
+  --login-banner-base-end: rgb(var(--primary-3));
+  --login-banner-glow-start: rgb(var(--primary-6));
+  --login-banner-glow-end: rgb(var(--primary-2));
+}
+
 /* —— 登录表单：Figma 602:35261 —— */
 .use-login-form {
   .arco-form-item {

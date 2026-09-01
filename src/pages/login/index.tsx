@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import checkLogin from '@shared/lib/checkLogin';
 import useLocale from '@shared/lib/useLocale';
-import loginBannerBg from '@assets/login/login-banner-bg.svg';
+import LoginBannerBg from '@assets/login/login-banner-bg.svg?react';
 import loginLogo from '@assets/login/login-logo.svg';
 import LoginForm from './form';
 import './login.less';
@@ -27,11 +27,10 @@ function Login() {
   return (
     <div className="use-login-page flex h-screen bg-[var(--color-bg-1,#f7f8fa)]">
       <div className="use-login-banner relative box-border flex h-full w-[524px] shrink-0 overflow-hidden p-[64px] text-white max-[900px]:hidden">
-        <img
-          src={loginBannerBg}
-          alt=""
-          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
+        <LoginBannerBg
+          className="pointer-events-none absolute inset-0 block size-full max-w-none"
           aria-hidden
+          focusable="false"
         />
         <div className="relative z-[1] flex h-full w-[396px] flex-col justify-between">
           <div className="flex items-center gap-[16px]">
