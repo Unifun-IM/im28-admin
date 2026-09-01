@@ -34,7 +34,7 @@ describe('ActionLinks text layout', () => {
     expect(screen.queryByRole('button', { name: '更多' })).toBeNull();
   });
 
-  it('keeps the more trigger when more than two actions are folded', () => {
+  it('shows all three desktop text actions without a more trigger', () => {
     renderActions(
       ['详情', '封禁', '升级'].map((label, index) => ({
         key: String(index),
@@ -43,8 +43,24 @@ describe('ActionLinks text layout', () => {
     );
 
     expect(screen.getByRole('button', { name: '详情' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '封禁' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '升级' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '更多' })).toBeNull();
+  });
+
+  it('shows two desktop text actions before the more trigger when over three', () => {
+    renderActions(
+      ['详情', '编辑', '封禁', '删除'].map((label, index) => ({
+        key: String(index),
+        label
+      }))
+    );
+
+    expect(screen.getByRole('button', { name: '详情' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '编辑' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '更多' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: '封禁' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
   });
 
   it('uses one compact menu trigger for multiple mobile actions', () => {
