@@ -140,7 +140,7 @@ export default function CreateAccountModal({
       onCancel={onCancel}
       footer={
         step === 'success' ? null : (
-          <div className="flex w-full items-center justify-end gap-2">
+          <div className="flex w-full flex-wrap items-center justify-end gap-2">
             <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>

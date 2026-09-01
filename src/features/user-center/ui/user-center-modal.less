@@ -44,48 +44,8 @@
 
 /* 改密确认 / 表单 / 成功 — Figma 979:40720 / 40879 / 40992 */
 .arco-modal.use-change-own-pwd-modal {
-  border-radius: var(--radius-overlay);
-  overflow: hidden;
-  box-shadow: var(--shadow-overlay);
-  border: 1px solid var(--color-border-1, #f2f3f5);
-
-  .arco-modal-header {
-    height: 48px;
-    padding: 0 24px;
-    background: var(--color-bg-1, #f7f8fa);
-    border-bottom: 1px solid var(--color-border-2);
-
-    .arco-modal-title {
-      width: 100%;
-      font-size: var(--font-size-title);
-      font-weight: 500;
-      line-height: var(--line-height-title);
-      color: var(--color-text-1, #1d2129);
-    }
-  }
-
-  .arco-modal-content {
-    padding: 12px 24px 24px;
-    background: var(--color-bg-1, #f7f8fa);
-  }
-
-  .arco-modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    height: 48px;
-    padding: 0 24px;
-    background: var(--color-bg-1, #f7f8fa);
-    border-top: 1px solid var(--color-border-1, #f2f3f5);
-  }
-
-  .arco-btn {
-    height: 32px;
-  }
-
-  .arco-btn-primary.arco-btn-status-danger {
-    background-color: rgb(var(--danger-6));
-    border-color: rgb(var(--danger-6));
+  .arco-modal-title {
+    width: 100%;
   }
 
   .use-change-own-pwd-fields {
@@ -97,31 +57,6 @@
     .arco-input-password {
       background: var(--color-bg-2);
       border-radius: var(--radius-control);
-    }
-  }
-
-  .arco-result-title {
-    font-size: var(--font-size-body);
-    font-weight: 500;
-    line-height: var(--line-height-body-compact);
-    color: var(--color-text-1, #1d2129);
-  }
-
-  .arco-result-subtitle {
-    font-size: var(--font-size-caption);
-    line-height: var(--line-height-caption-compact);
-    color: var(--color-text-3, #86909c);
-  }
-
-  &.is-success {
-    .arco-modal-header,
-    .arco-modal-footer {
-      display: none;
-    }
-
-    .arco-modal-content {
-      padding: 24px;
-      background: var(--color-bg-2, #fff);
     }
   }
 }

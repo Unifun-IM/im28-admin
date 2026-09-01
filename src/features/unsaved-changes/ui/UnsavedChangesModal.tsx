@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Modal } from '@arco-design/web-react';
 import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 
 export type UnsavedChangesModalProps = {
   visible: boolean;
@@ -21,6 +22,7 @@ export default function UnsavedChangesModal({
 
   return (
     <Modal
+      className="use-biz-form-modal"
       visible={visible}
       onCancel={onStay}
       closable={false}
@@ -37,7 +39,7 @@ export default function UnsavedChangesModal({
         </span>
       }
       footer={
-        <div className="flex justify-end gap-2">
+        <div className="flex w-full flex-wrap justify-end gap-2">
           <Button className="min-w-[80px]" onClick={onStay}>
             {t['unsaved.stay']}
           </Button>

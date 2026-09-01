@@ -58,6 +58,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 - 文本 / 数字 / 枚举 / boolean / 日期 / 上传分别使用 Input、InputNumber、Select、Switch / Checkbox、DatePicker、Upload。
 - Table 提供稳定唯一 `rowKey`；loading、pagination、selection 和 scroll 使用组件 props。
 - Modal 用于确认和短表单；Drawer 用于保持上下文的详情和较长流程。
+- 标准表单 / 确认 Modal 使用 `use-biz-form-modal`；自定义 `footer` 的根容器占满可用宽度并允许换行，按钮组在桌面右对齐、窄屏长文案下保持可达。
 - 危险操作使用 Popconfirm / Modal.confirm；多字段流程使用 feature Modal。
 - 反馈使用 Message；持续系统信息再用 Notification / Alert。
 - 优先通过 Arco props 和语义化 `use-*` class 补视觉，不依赖未公开 DOM 实现业务逻辑。

@@ -15,6 +15,7 @@ import {
 import iconWarning from '@assets/icon/icon-exclamation-circle-fill.svg';
 import { GaVerifyModal } from '@features/ga-verify';
 import useLocale from '@shared/lib/useLocale';
+import '@shared/ui/biz-form-modal.less';
 import './user-center-modal.less';
 
 const FormItem = Form.Item;
@@ -125,7 +126,7 @@ export default function ChangeOwnPasswordFlow({
         unmountOnExit
         closable={false}
         maskClosable={false}
-        className="use-change-own-pwd-modal"
+        className="use-biz-form-modal use-change-own-pwd-modal"
         wrapClassName="use-user-center-modal-wrap"
         style={{ width: 480 }}
         title={
@@ -135,7 +136,7 @@ export default function ChangeOwnPasswordFlow({
           </div>
         }
         footer={
-          <div className="flex justify-end gap-2">
+          <div className="flex w-full flex-wrap justify-end gap-2">
             <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>
@@ -177,7 +178,7 @@ export default function ChangeOwnPasswordFlow({
         unmountOnExit
         closable={false}
         maskClosable={false}
-        className="use-change-own-pwd-modal use-change-own-pwd-form"
+        className="use-biz-form-modal use-change-own-pwd-modal use-change-own-pwd-form"
         wrapClassName="use-user-center-modal-wrap"
         style={{ width: 780 }}
         title={
@@ -194,7 +195,7 @@ export default function ChangeOwnPasswordFlow({
           </div>
         }
         footer={
-          <div className="flex justify-end gap-2">
+          <div className="flex w-full flex-wrap justify-end gap-2">
             <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>
@@ -318,7 +319,11 @@ export default function ChangeOwnPasswordFlow({
         closable={false}
         maskClosable={false}
         footer={null}
-        className={cs('use-change-own-pwd-modal', 'is-success')}
+        className={cs(
+          'use-biz-form-modal',
+          'use-change-own-pwd-modal',
+          'is-success'
+        )}
         wrapClassName="use-user-center-modal-wrap"
         style={{ width: 780 }}
       >
