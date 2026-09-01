@@ -48,7 +48,7 @@ describe('ActionLinks text layout', () => {
     expect(screen.queryByRole('button', { name: '更多' })).toBeNull();
   });
 
-  it('shows two desktop text actions before the more trigger when over three', () => {
+  it('shows one desktop text action before the more trigger when over three', () => {
     renderActions(
       ['详情', '编辑', '封禁', '删除'].map((label, index) => ({
         key: String(index),
@@ -57,8 +57,8 @@ describe('ActionLinks text layout', () => {
     );
 
     expect(screen.getByRole('button', { name: '详情' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '编辑' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '更多' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '编辑' })).toBeNull();
     expect(screen.queryByRole('button', { name: '封禁' })).toBeNull();
     expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
   });
