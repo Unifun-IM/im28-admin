@@ -71,6 +71,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 - 时间使用 `formatDateTime`，图片使用 Avatar / Image，长文本使用省略 + Tooltip。
 - 操作列使用 `ActionLinks`，不要手写一排 Button。
 - 页面壳层不承载横向滚动；字段确实超宽时只允许 Table 内容区横向滚动。表格全屏外层只处理纵向滚动，避免嵌套横向滚动条。
+- 空数据、短数据和无分页状态只改变分页与底部边界，不得把 Table 内容区设为 `overflow: hidden`；超宽列在这些状态下仍必须支持鼠标、触控板和触摸横向滚动。
 - `md` 及以下分页由公共列表切换为 `simple` H5 形态；业务页不得用横向滚动保存桌面分页器。
 
 ## 列宽

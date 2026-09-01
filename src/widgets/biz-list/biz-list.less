@@ -899,7 +899,12 @@
     .arco-table-body {
       border-bottom: none;
       border-radius: 0 0 8px 8px;
-      overflow: hidden;
+    }
+
+    .arco-table-content-inner {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* 末行贴卡片底边时补齐圆角，避免方角露白 */
