@@ -488,7 +488,11 @@ export const PageLayout = observer(function PageLayout({
             data-layout-content
           >
             <div className={styles['layout-content-wrapper']}>
-              <Content>
+              <Content
+                className={styles['page-transition']}
+                data-page-transition
+                key={pathname}
+              >
                 <Routes>
                   {flattenRoutes.map((route) => (
                     <Route

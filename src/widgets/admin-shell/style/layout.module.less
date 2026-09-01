@@ -678,6 +678,23 @@
   }
 }
 
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-enter var(--motion-duration-fade)
+    var(--motion-ease-emphasized) both;
+}
+
 /* 表格全屏：主区撑满视口，供列表页仅展示表格 */
 .layout-content-table-fullscreen {
   .layout-content-wrapper {

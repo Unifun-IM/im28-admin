@@ -130,6 +130,26 @@ body {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html::view-transition-old(*),
+  html::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* 侧栏折叠时二级菜单浮层（portal 渲染，需全局样式）
  * 勿用 .arco-menu-pop：折叠态一级项也带该类，会误伤侧栏图标
  */

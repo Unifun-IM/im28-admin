@@ -45,6 +45,7 @@ description: Orchestrate AI coding through the project's product manager, design
 | API / typings 生成或接口变更同步 | `docs/skills/api-generation/SKILL.md` |
 | 组件发现、复用、抽取、Arco、列宽 | `docs/skills/component-usage/SKILL.md` |
 | CSS、主题变量、Tailwind、Less | `docs/skills/css-usage/SKILL.md` |
+| 动效、页面切换、状态反馈、减少动态效果 | `docs/skills/animation-usage/SKILL.md` |
 | Figma 读取、还原与视觉对比 | `docs/skills/figma-rules/SKILL.md` |
 | 图片静态资源、SVG、图标 | `docs/skills/svg-icon-usage/SKILL.md` |
 | 技术选型、依赖、构建、路由、状态、测试 | `docs/skills/tech-stack/SKILL.md` |
@@ -64,6 +65,7 @@ description: Orchestrate AI coding through the project's product manager, design
 - 组件发现、Arco 使用、组件契约和列宽：`component-usage`
 - API 生成链路：`api-generation`
 - 样式、主题变量、Tailwind / Less：`css-usage`
+- 动效意图、时序、页面切换与 reduced motion：`animation-usage`
 - Figma 只读与视觉验证：`figma-rules`
 - 图片静态资源归属、图标来源和 SVG 使用：`svg-icon-usage`
 - 已内置能力索引：`framework-support`
