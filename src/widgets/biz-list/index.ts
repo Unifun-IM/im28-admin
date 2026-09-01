@@ -23,9 +23,11 @@ export {
 export {
   BIZ_PAGE_SIZE,
   BIZ_PAGE_SIZE_OPTIONS,
+  DEFAULT_AUXILIARY_COLUMN_WIDTH,
   getTextActionColumnWidth,
   isActionColumn,
   normalizeBizColumns,
+  resolveBizTableLayout,
   resolveBizPagination
 } from './tableDefaults';
 export type { SummaryItem } from './DataSummary';

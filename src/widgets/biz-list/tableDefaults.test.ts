@@ -1,6 +1,7 @@
 import {
   getTextActionColumnWidth,
   normalizeBizColumns,
+  resolveBizTableLayout,
   resolveBizPagination
 } from './tableDefaults';
 
@@ -25,6 +26,18 @@ describe('normalizeBizColumns', () => {
     expect(columns[0].width).toBe(280);
   });
 
+  it('raises narrow columns to the current-language header width', () => {
+    const zhColumns = normalizeBizColumns([
+      { title: '启用状态', dataIndex: 'status', width: 88 }
+    ]);
+    const enColumns = normalizeBizColumns([
+      { title: 'Enabled status', dataIndex: 'status', width: 88 }
+    ]);
+
+    expect(zhColumns[0].width).toBeGreaterThan(88);
+    expect(enColumns[0].width).toBeGreaterThan(zhColumns[0].width as number);
+  });
+
   it('compacts action columns on mobile without changing data columns', () => {
     const columns = normalizeBizColumns(
       [
@@ -37,6 +50,50 @@ describe('normalizeBizColumns', () => {
     expect(columns[0].width).toBe(240);
     expect(columns[1].width).toBe(72);
     expect(columns[1].align).toBe('center');
+  });
+
+  it('keeps compact columns fixed and assigns wide-table space to content columns', () => {
+    const layout = resolveBizTableLayout(
+      [
+        { title: 'Group', dataIndex: 'group', width: 240 },
+        { title: 'Owner', dataIndex: 'owner', width: 220 },
+        { title: 'Members', dataIndex: 'members', width: 80 },
+        { title: 'Status', dataIndex: 'status', width: 96 },
+        { title: 'Created at', dataIndex: 'createdAt', width: 200 },
+        { title: 'Action', dataIndex: 'op', width: 160 }
+      ],
+      { auxiliaryColumnWidth: 40 }
+    );
+
+    expect(layout.scrollX).toBe(1049);
+    expect(layout.columns[0].width).toMatch(/^calc\(/u);
+    expect(layout.columns[1].width).toMatch(/^calc\(/u);
+    expect(layout.columns[2].width).toBe(93);
+    expect(layout.columns[3].width).toBe(96);
+    expect(layout.columns[4].width).toMatch(/^calc\(/u);
+    expect(layout.columns[5].width).toBe(160);
+  });
+
+  it('preserves unsupported custom widths instead of guessing a layout', () => {
+    const layout = resolveBizTableLayout([
+      { title: 'Name', dataIndex: 'name', width: '30%' },
+      { title: 'Action', dataIndex: 'op', width: 120 }
+    ]);
+
+    expect(layout.scrollX).toBe(true);
+    expect(layout.columns[0].width).toBe('30%');
+    expect(layout.columns[1].width).toBe(120);
+  });
+
+  it('still keeps the action width fixed when every content column is compact', () => {
+    const layout = resolveBizTableLayout([
+      { title: 'Status', dataIndex: 'status', width: 96 },
+      { title: 'Action', dataIndex: 'op', width: 120 }
+    ]);
+
+    expect(layout.scrollX).toBe(216);
+    expect(layout.columns[0].width).toMatch(/^calc\(/u);
+    expect(layout.columns[1].width).toBe(120);
   });
 
   it('calculates text action widths from visible slots and dynamic labels', () => {

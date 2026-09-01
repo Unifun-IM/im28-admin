@@ -27,7 +27,8 @@ import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';
 import TableBatchBar from './TableBatchBar';
 import {
-  normalizeBizColumns,
+  DEFAULT_AUXILIARY_COLUMN_WIDTH,
+  resolveBizTableLayout,
   resolveBizPagination
 } from './tableDefaults';
 
@@ -135,17 +136,6 @@ export function BizListPage<T extends Record<string, unknown>>({
     selectedRowKeys
   ]);
 
-  // 依赖 lang：切换语言后强制按新表头文案规范化列
-  const columns = useMemo(
-    () =>
-      normalizeBizColumns(
-        (tableProps.columns || []) as TableColumnProps<T>[],
-        { compactActions }
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- lang 变化时需重算 i18n 表头
-    [compactActions, tableProps.columns, lang]
-  );
-
   /** 有选择列时默认左侧固定；配置了 batchActions 时仅批量模式下展示 */
   const rowSelection = useMemo(() => {
     if (!tableProps.rowSelection) return undefined;
@@ -155,6 +145,25 @@ export function BizListPage<T extends Record<string, unknown>>({
       ...tableProps.rowSelection
     };
   }, [tableProps.rowSelection, needsBatchEntry, batchSelectMode]);
+  const auxiliaryColumnWidth =
+    (rowSelection
+      ? rowSelection.columnWidth ?? DEFAULT_AUXILIARY_COLUMN_WIDTH
+      : 0) +
+    (tableProps.expandedRowRender
+      ? tableProps.expandProps?.width ?? DEFAULT_AUXILIARY_COLUMN_WIDTH
+      : 0);
+
+  // 依赖 lang：切换语言后强制按新表头文案规范化列
+  const tableLayout = useMemo(
+    () =>
+      resolveBizTableLayout(
+        (tableProps.columns || []) as TableColumnProps<T>[],
+        { compactActions, auxiliaryColumnWidth }
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- lang 变化时需重算 i18n 表头
+    [auxiliaryColumnWidth, compactActions, tableProps.columns, lang]
+  );
+  const columns = tableLayout.columns;
   const pagination = resolveBizPagination(
     tableProps.pagination as false | undefined | Record<string, unknown>,
     displayData.length,
@@ -164,10 +173,10 @@ export function BizListPage<T extends Record<string, unknown>>({
   const scroll = useMemo(() => {
     const incoming = tableProps.scroll || {};
     return {
-      x: true as const,
+      x: tableLayout.scrollX,
       ...incoming
     };
-  }, [tableProps.scroll]);
+  }, [tableLayout.scrollX, tableProps.scroll]);
 
   const batchTheme = batchActions?.theme || 'light';
   const batchInToolbar = batchTheme === 'light';

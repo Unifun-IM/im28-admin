@@ -795,6 +795,7 @@
     font-weight: 400;
     line-height: var(--line-height-body);
     color: var(--color-text-3, #86909c);
+    white-space: nowrap;
   }
 
   /*
@@ -836,6 +837,7 @@
   .arco-table-th:last-child,
   .arco-table-th.arco-table-col-fixed-right {
     border-right: none;
+    box-shadow: inset -1px 0 0 var(--color-border-2);
   }
 
   /* 左右固定列勿裁切 ::after 投影（与操作列一致） */
@@ -913,6 +915,7 @@
   .arco-table-td:last-child,
   .arco-table-td.arco-table-col-fixed-right {
     border-right: none;
+    box-shadow: inset -1px 0 0 var(--color-border-2);
   }
 
   /* 操作列 padding；投影交给 Arco fixed（left-last / right-first ::after） */
