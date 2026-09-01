@@ -236,7 +236,7 @@ export default function BlacklistActionModal({
       >
         <div className="use-blacklist-action-header">
           <img alt="" src={isAdd ? iconWarning : iconSuccess} />
-          <span className="text-[16px] font-medium leading-6 text-arco-text-1">
+          <span className="text-title font-medium text-arco-text-1">
             {titleText}
           </span>
         </div>

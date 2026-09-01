@@ -190,14 +190,14 @@ export default function UserDetailDrawer({
               src={user?.avatar_url}
             />
             <div className="min-w-0">
-              <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-arco-text-1">
+              <div className="truncate text-title font-bold text-arco-text-1">
                 {nickname}
               </div>
               <div className="mt-[2px]">
                 <StatusBadge
                   status={accountStatusBadge}
                   text={accountStatusLabel}
-                  className="!text-[14px] !leading-[21px] !text-arco-text-2"
+                  className="!text-sm !text-arco-text-2"
                 />
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function UserDetailDrawer({
                   items={timelineItems}
                   empty={
                     !loading ? (
-                      <div className="py-8 text-center text-[12px] text-arco-text-3">
+                      <div className="py-8 text-center text-caption-compact text-arco-text-3">
                         {t['userDetail.logs.empty']}
                       </div>
                     ) : null

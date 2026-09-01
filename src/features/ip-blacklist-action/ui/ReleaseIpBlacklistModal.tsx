@@ -112,7 +112,7 @@ export default function ReleaseIpBlacklistModal({
           </div>
         }
       >
-        <p className="m-0 mb-3 text-[14px] leading-[21px] text-arco-text-1">
+        <p className="m-0 mb-3 text-sm text-arco-text-1">
           {t['ipBlacklist.release.tip'].replace('{ip}', ip || '--')}
         </p>
         <Form

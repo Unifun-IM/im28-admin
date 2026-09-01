@@ -150,7 +150,7 @@ export default function AddIpBlacklistModal({
           </div>
         }
       >
-        <p className="m-0 mb-3 text-[14px] leading-[21px] text-arco-text-1">
+        <p className="m-0 mb-3 text-sm text-arco-text-1">
           {t['ipBlacklist.add.tip']}
         </p>
         <Form
@@ -164,7 +164,7 @@ export default function AddIpBlacklistModal({
             label={
               <span className="inline-flex flex-wrap items-center gap-1">
                 <span>{t['ipBlacklist.add.field.ip']}</span>
-                <span className="text-[12px] font-normal leading-[18px] text-arco-text-3">
+                <span className="text-caption-compact font-normal text-arco-text-3">
                   {t['ipBlacklist.add.field.ipHint']}
                 </span>
               </span>

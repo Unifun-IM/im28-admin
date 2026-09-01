@@ -57,12 +57,12 @@ function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
   return (
     <span
       className={`inline-flex shrink-0 items-center gap-0.5 text-[10px] leading-[1.3] ${
-        isSelf ? 'text-white/40' : 'text-[var(--color-text-3)]'
+        isSelf ? 'text-arco-text-inverse-subtle' : 'text-arco-text-3'
       }`}
     >
       {time}
       {isSelf ? (
-        <span className="relative inline-flex size-3 shrink-0 items-center justify-center overflow-hidden text-white">
+        <span className="relative inline-flex size-3 shrink-0 items-center justify-center overflow-hidden text-arco-text-inverse">
           <ChatIconRead className="h-[6px] w-[11px] max-w-none" aria-hidden />
         </span>
       ) : null}
@@ -76,8 +76,8 @@ function BubbleMeta({ time, isSelf }: { time?: string; isSelf: boolean }) {
  */
 function bubbleShell(isSelf: boolean, withSenderName = false) {
   const base = isSelf
-    ? 'relative max-w-full rounded-xl bg-[rgb(var(--primary-6))] px-2 py-1.5 text-[14px] leading-[1.3] text-white'
-    : 'relative max-w-full rounded-xl border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] px-2 py-1.5 text-[14px] leading-[1.3] text-[var(--color-text-1)]';
+    ? 'relative max-w-full rounded-xl bg-primary px-2 py-1.5 text-sm text-arco-text-inverse'
+    : 'relative max-w-full rounded-xl border border-solid border-arco-border-2 bg-arco-bg-2 px-2 py-1.5 text-sm text-arco-text-1';
   if (withSenderName) {
     return `${base} inline-flex flex-col items-start gap-1`;
   }
@@ -547,16 +547,16 @@ export default function UserChatModal({
       }}
     >
       <div
-        className={`use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-[var(--color-bg-1)]${
+        className={`use-user-chat-shell flex h-full min-h-0 w-full overflow-hidden rounded-[24px] bg-arco-bg-1${
           chat || profile ? ' is-detail-active' : ''
         }`}
       >
-        <aside className="use-user-chat-nav flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-[var(--color-border-2)] bg-[var(--color-bg-1)] py-3">
+        <aside className="use-user-chat-nav flex h-full min-h-0 w-[64px] shrink-0 flex-col items-center border-r border-solid border-arco-border-2 bg-arco-bg-1 py-3">
           <div className="flex w-full flex-col items-center gap-8">
             <button
               type="button"
               aria-label="关闭"
-              className="use-chat-nav-close inline-flex h-[40px] w-[40px] min-h-[40px] min-w-[40px] cursor-pointer items-center justify-center rounded-[8px] border-0 bg-[var(--color-fill-3)] p-0"
+              className="use-chat-nav-close inline-flex h-[40px] w-[40px] min-h-[40px] min-w-[40px] cursor-pointer items-center justify-center rounded border-0 bg-arco-fill-3 p-0"
               onClick={onClose}
             >
               <ChatIconClose className="h-[20px] w-[20px]" aria-hidden />
@@ -599,8 +599,8 @@ export default function UserChatModal({
           </div>
         </aside>
 
-        <section className="use-user-chat-side flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]">
-          <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-[var(--color-border-2)] px-4 py-2">
+        <section className="use-user-chat-side flex h-full min-h-0 w-[320px] shrink-0 flex-col overflow-hidden border-r border-solid border-arco-border-2 bg-arco-bg-2">
+          <div className="flex h-14 shrink-0 items-center gap-2 border-b border-solid border-arco-border-2 px-4 py-2">
             <Input
               allowClear
               value={keyword}
@@ -613,7 +613,7 @@ export default function UserChatModal({
               <button
                 type="button"
                 aria-label="添加"
-                className="inline-flex size-8 shrink-0 cursor-default items-center justify-center rounded-md border-0 bg-[var(--color-fill-2)] p-0 text-arco-text-2"
+                className="inline-flex size-8 shrink-0 cursor-default items-center justify-center rounded border-0 bg-arco-fill-2 p-0 text-arco-text-2"
               >
                 <IconPlus className="text-[16px]" />
               </button>
@@ -632,7 +632,7 @@ export default function UserChatModal({
                 onSelect={onSelectSession}
               />
             ) : nav === 'calls' ? (
-              <div className="flex h-full items-center justify-center px-4 text-center text-[14px] text-arco-text-3">
+              <div className="flex h-full items-center justify-center px-4 text-center text-sm text-arco-text-3">
                 暂无通话记录
               </div>
             ) : (
@@ -654,7 +654,7 @@ export default function UserChatModal({
           </div>
         </section>
 
-        <section className="use-user-chat-main flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-bg-1)]">
+        <section className="use-user-chat-main flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-arco-bg-1">
           {chat ? (
             <ChatPane
               peer={chat}
@@ -676,7 +676,7 @@ export default function UserChatModal({
             />
           ) : (
             /* 通讯录/通话空态 — Figma 977:23156 右侧灰底居中 Logo */
-            <div className="flex min-h-0 flex-1 items-center justify-center bg-[var(--color-bg-1)]">
+            <div className="flex min-h-0 flex-1 items-center justify-center bg-arco-bg-1">
               <ChatEmptyLogo
                 className="use-chat-empty-logo pointer-events-none size-20 select-none"
                 aria-hidden
@@ -729,11 +729,16 @@ function GroupAvatar({
   size?: number;
 }) {
   const tiles = (avatars || []).slice(0, 4);
-  const palette = ['#7B61FF', '#12D2AC', '#307AF2', '#FF8A65'];
+  const palette = [
+    'rgb(var(--primary-6))',
+    'rgb(var(--success-6))',
+    'rgb(var(--blue-6))',
+    'rgb(var(--warning-6))'
+  ];
   if (tiles.length >= 4) {
     return (
       <div
-        className="grid shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-hidden rounded-full bg-[var(--color-fill-2,#eee)]"
+        className="grid shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-hidden rounded-full bg-arco-fill-2"
         style={{ width: size, height: size }}
       >
         {tiles.map((src, i) => (
@@ -745,7 +750,7 @@ function GroupAvatar({
   // 无头像时用色块拼贴，贴近稿里的群头像观感
   return (
     <div
-      className="grid shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-hidden rounded-full bg-[var(--color-fill-2,#eee)]"
+      className="grid shrink-0 grid-cols-2 grid-rows-2 gap-[2px] overflow-hidden rounded-full bg-arco-fill-2"
       style={{ width: size, height: size }}
       title={name}
     >
@@ -773,7 +778,7 @@ function OnlineAvatar({
     <span className="relative shrink-0">
       <UserAvatar userId={id} name={name} src={src} size={size} />
       {online ? (
-        <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-solid border-white bg-[rgb(var(--success-6))]" />
+        <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-solid border-arco-border-inverse bg-arco-success" />
       ) : null}
     </span>
   );
@@ -790,7 +795,7 @@ function SessionList({
 }) {
   if (!items.length) {
     return (
-      <div className="px-4 py-10 text-center text-[14px] text-arco-text-3">
+      <div className="px-4 py-10 text-center text-sm text-arco-text-3">
         暂无会话
       </div>
     );
@@ -806,8 +811,8 @@ function SessionList({
               type="button"
               className={`flex w-full cursor-pointer items-center gap-4 border-0 pl-4 text-left ${
                 selected
-                  ? 'bg-[var(--color-fill-2)]'
-                  : 'bg-transparent hover:bg-[var(--color-fill-1)]'
+                  ? 'bg-arco-fill-2'
+                  : 'bg-transparent hover:bg-arco-fill-1'
               }`}
               onClick={() => onSelect(item)}
             >
@@ -822,22 +827,22 @@ function SessionList({
                   online={item.online}
                 />
               )}
-              <div className="flex min-w-0 flex-1 items-center border-b border-solid border-[var(--color-border-2)] py-4 pr-4">
+              <div className="flex min-w-0 flex-1 items-center border-b border-solid border-arco-border-2 py-4 pr-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <Text className="!m-0 min-w-0 flex-1 truncate text-[16px] leading-[1.5] !text-arco-text-1">
+                    <Text className="!m-0 min-w-0 flex-1 truncate text-title !text-arco-text-1">
                       {item.name}
                     </Text>
                     <div className="flex shrink-0 items-center gap-1">
                       {item.muted ? (
                         <IconMute className="text-[12px] text-arco-text-3" />
                       ) : null}
-                      <span className="text-[10px] leading-[1.3] text-[var(--color-text-3)]">
+                      <span className="text-[10px] leading-[1.3] text-arco-text-3">
                         {item.time}
                       </span>
                     </div>
                   </div>
-                  <p className="m-0 truncate text-[12px] leading-[1.3] text-[var(--color-text-3)]">
+                  <p className="m-0 truncate text-caption-compact text-arco-text-3">
                     {item.lastMessage}
                   </p>
                 </div>
@@ -874,11 +879,11 @@ function SectionHeader({
         <IconRight className="shrink-0 text-[16px] text-arco-text-2" />
       )}
       <span className="flex h-full min-w-0 flex-1 items-center gap-3 pr-4">
-        <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.5] text-arco-text-1">
+        <span className="min-w-0 flex-1 truncate text-title text-arco-text-1">
           {title}
         </span>
         {count != null ? (
-          <span className="shrink-0 text-[12px] leading-[1.3] text-[var(--color-text-3)]">
+          <span className="shrink-0 text-caption-compact text-arco-text-3">
             {count}
           </span>
         ) : null}
@@ -930,23 +935,23 @@ function ContactsPanel({
               type="button"
               className={`flex w-full cursor-pointer items-center gap-4 border-0 py-0 pl-9 pr-0 text-left ${
                 g.id === activeId
-                  ? 'bg-[var(--color-fill-2)]'
-                  : 'bg-transparent hover:bg-[var(--color-fill-1)]'
+                  ? 'bg-arco-fill-2'
+                  : 'bg-transparent hover:bg-arco-fill-1'
               }`}
               onClick={() => onSelect(g)}
             >
               <GroupAvatar avatars={g.avatars} name={g.name} size={32} />
-              <div className="flex min-h-[72px] min-w-0 flex-1 items-center gap-2 border-b border-solid border-[var(--color-border-2)] pr-4">
+              <div className="flex min-h-[72px] min-w-0 flex-1 items-center gap-2 border-b border-solid border-arco-border-2 pr-4">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[16px] text-arco-text-1">
+                  <div className="truncate text-title text-arco-text-1">
                     {g.name}
                   </div>
-                  <div className="truncate text-[12px] text-arco-text-3">
+                  <div className="truncate text-caption-compact text-arco-text-3">
                     {g.sub || `ID：${g.id}`}
                   </div>
                 </div>
                 {!groupsOnly && g.unread ? (
-                  <span className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--danger-6))] px-1 text-[10px] font-semibold leading-none text-white">
+                  <span className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-arco-danger px-1 text-[10px] font-semibold leading-none text-arco-text-inverse">
                     {g.unread > 99 ? '99+' : g.unread}
                   </span>
                 ) : null}
@@ -971,7 +976,7 @@ function ContactsPanel({
                 <>
                   <div className="flex items-center gap-1 py-2 pl-9 pr-4">
                     <img src={iconStar} alt="" className="size-3" />
-                    <span className="text-[14px] text-arco-text-2">星标</span>
+                    <span className="text-sm text-arco-text-2">星标</span>
                   </div>
                   {starred.map((c) => (
                     <ContactRow
@@ -985,7 +990,7 @@ function ContactsPanel({
               ) : null}
               {sections.map((sec) => (
                 <div key={sec.letter}>
-                  <div className="py-2 pl-9 pr-4 text-[14px] text-arco-text-2">
+                  <div className="py-2 pl-9 pr-4 text-sm text-arco-text-2">
                     {sec.letter}
                   </div>
                   {sec.items.map((c) => (
@@ -1020,8 +1025,8 @@ function ContactRow({
       type="button"
       className={`flex w-full cursor-pointer items-center gap-4 border-0 py-0 pl-9 pr-0 text-left ${
         selected
-          ? 'bg-[var(--color-fill-2)]'
-          : 'bg-transparent hover:bg-[var(--color-fill-1)]'
+          ? 'bg-arco-fill-2'
+          : 'bg-transparent hover:bg-arco-fill-1'
       }`}
       onClick={() => onSelect(peer)}
     >
@@ -1032,8 +1037,8 @@ function ContactRow({
         size={32}
         online={peer.online}
       />
-      <div className="flex min-h-14 min-w-0 flex-1 items-center border-b border-solid border-[var(--color-border-2)] pr-4">
-        <span className="truncate text-[16px] text-arco-text-1">{peer.name}</span>
+      <div className="flex min-h-14 min-w-0 flex-1 items-center border-b border-solid border-arco-border-2 pr-4">
+        <span className="truncate text-title text-arco-text-1">{peer.name}</span>
       </div>
     </button>
   );
@@ -1050,7 +1055,7 @@ function FriendDetail({
   onSendMessage: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-bg-1)]">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-arco-bg-1">
       <MobileDetailHeader onBack={onBack} />
       <div className="flex flex-col items-center gap-4 px-4 pb-4 pt-6">
         <UserAvatar
@@ -1060,21 +1065,21 @@ function FriendDetail({
           src={peer.avatar}
         />
         <div className="flex flex-col items-center gap-2">
-          <p className="m-0 text-center text-[18px] font-medium leading-[1.5] text-arco-text-1">
+          <p className="m-0 text-center text-title font-medium text-arco-text-1">
             {peer.name}
           </p>
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[var(--color-fill-2)] px-2 py-1"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-arco-fill-2 px-2 py-1"
             onClick={() => {
               copy(peer.id);
               Message.success('已复制');
             }}
           >
-            <span className="text-[12px] leading-none text-[rgb(var(--link-6))]">
+            <span className="text-caption-compact text-primary">
               ID：{peer.id}
             </span>
-            <IconCopy className="text-[12px] text-[rgb(var(--link-6))]" />
+            <IconCopy className="text-[12px] text-primary" />
           </button>
         </div>
       </div>
@@ -1083,7 +1088,7 @@ function FriendDetail({
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !bg-[rgb(var(--primary-6))] !text-[14px] hover:!bg-[rgb(var(--primary-7))]"
+          className="!h-12 !bg-primary !text-sm hover:!bg-primary-7"
           onClick={() => onSendMessage(peer)}
         >
           发消息
@@ -1091,22 +1096,22 @@ function FriendDetail({
       </div>
 
       <div className="px-4 pb-6">
-        <div className="overflow-hidden rounded-xl bg-[var(--color-bg-2)]">
-          <div className="flex items-center border-b border-solid border-[var(--color-border-2)] px-4 py-4">
-            <span className="flex-1 text-[14px] text-arco-text-1">备注名</span>
-            <span className="text-[14px] text-[var(--color-text-3)]">
+        <div className="overflow-hidden rounded-xl bg-arco-bg-2">
+          <div className="flex items-center border-b border-solid border-arco-border-2 px-4 py-4">
+            <span className="flex-1 text-sm text-arco-text-1">备注名</span>
+            <span className="text-sm text-arco-text-3">
               {peer.remark || '添加备注'}
             </span>
           </div>
-          <div className="flex items-center border-b border-solid border-[var(--color-border-2)] px-4 py-4">
-            <span className="flex-1 text-[14px] text-arco-text-1">来源</span>
-            <span className="text-[14px] text-arco-text-2">
+          <div className="flex items-center border-b border-solid border-arco-border-2 px-4 py-4">
+            <span className="flex-1 text-sm text-arco-text-1">来源</span>
+            <span className="text-sm text-arco-text-2">
               {peer.source || '通过ID添加'}
             </span>
           </div>
           <div className="flex items-center px-4 py-4">
-            <span className="flex-1 text-[14px] text-arco-text-1">添加时间</span>
-            <span className="text-[14px] text-arco-text-2">
+            <span className="flex-1 text-sm text-arco-text-1">添加时间</span>
+            <span className="text-sm text-arco-text-2">
               {peer.addedAt || '--'}
             </span>
           </div>
@@ -1127,28 +1132,28 @@ function GroupProfile({
   onEnterChat: (p: ChatPeer) => void;
 }) {
   return (
-    <div className="use-chat-group-profile flex h-full min-h-0 flex-col items-center overflow-y-auto bg-[var(--color-bg-1)] px-20">
+    <div className="use-chat-group-profile flex h-full min-h-0 flex-col items-center overflow-y-auto bg-arco-bg-1 px-20">
       <MobileDetailHeader onBack={onBack} />
       <div className="use-chat-group-profile-spacer h-14 w-full shrink-0" />
       <div className="flex w-full flex-col items-center pb-4">
         <div className="flex flex-col items-center gap-4">
           <GroupAvatar avatars={peer.avatars} name={peer.name} size={80} />
           <div className="flex flex-col items-center gap-2">
-            <p className="m-0 text-center text-[18px] font-medium leading-[1.5] text-arco-text-1">
+            <p className="m-0 text-center text-title font-medium text-arco-text-1">
               {peer.name}
             </p>
             <button
               type="button"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[var(--color-fill-2)] px-2 py-1"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-arco-fill-2 px-2 py-1"
               onClick={() => {
                 copy(peer.id);
                 Message.success('已复制');
               }}
             >
-              <span className="text-[12px] leading-none text-[rgb(var(--link-6))]">
+              <span className="text-caption-compact text-primary">
                 ID：{peer.id}
               </span>
-              <IconCopy className="text-[16px] text-[rgb(var(--link-6))]" />
+              <IconCopy className="text-[16px] text-primary" />
             </button>
           </div>
         </div>
@@ -1157,7 +1162,7 @@ function GroupProfile({
         <Button
           type="primary"
           long
-          className="!h-12 !rounded-xl !bg-[rgb(var(--primary-6))] !text-[14px] !font-medium hover:!bg-[rgb(var(--primary-7))]"
+          className="!h-12 !bg-primary !text-sm !font-medium hover:!bg-primary-7"
           onClick={() => onEnterChat(peer)}
         >
           进入群聊
@@ -1259,8 +1264,8 @@ function ChatPane({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--color-bg-1)]">
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-solid border-[var(--color-border-2)] bg-[var(--color-bg-1)] px-4">
+    <div className="flex h-full min-h-0 flex-col bg-arco-bg-1">
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-solid border-arco-border-2 bg-arco-bg-1 px-4">
         <button
           type="button"
           aria-label="返回"
@@ -1280,20 +1285,20 @@ function ChatPane({
           />
         )}
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[16px] font-medium leading-[18px] text-arco-text-1">
+          <div className="truncate text-title font-medium text-arco-text-1">
             {title}
           </div>
           {isGroup && peer.onlineCount != null ? (
-            <div className="mt-0.5 flex items-center gap-1 text-[12px] leading-3 text-arco-text-3">
+            <div className="mt-0.5 flex items-center gap-1 text-caption-compact text-arco-text-3">
               <span className="size-2 rounded-full bg-[rgb(var(--success-6))]" />
               {peer.onlineCount}人在线
             </div>
           ) : !isGroup ? (
-            <div className="mt-0.5 flex items-center gap-1 text-[12px] leading-3 text-arco-text-3">
+            <div className="mt-0.5 flex items-center gap-1 text-caption-compact text-arco-text-3">
               <span
                 className={`size-2 rounded-full ${
                   peer.online === false
-                    ? 'bg-[var(--color-text-4,#c9cdd4)]'
+                    ? 'bg-[var(--color-fill-4)]'
                     : 'bg-[rgb(var(--success-6))]'
                 }`}
               />
@@ -1360,11 +1365,11 @@ function MessageRow({
     return (
       <div className="flex justify-center px-4 py-1">
         {relative ? (
-          <span className="rounded-xl px-1 text-[12px] leading-[1.3] text-[var(--color-text-3)]">
+          <span className="rounded-xl px-1 text-caption-compact text-arco-text-3">
             {label}
           </span>
         ) : (
-          <span className="rounded-full bg-black px-1.5 py-1 text-[12px] leading-none text-white">
+          <span className="rounded-full bg-arco-bg-black px-1.5 py-1 text-[length:var(--font-size-caption)] leading-none text-arco-text-inverse">
             {label}
           </span>
         )}
@@ -1374,7 +1379,7 @@ function MessageRow({
 
   if (msg.msgType === 'system') {
     return (
-      <div className="px-4 py-1 text-center text-[12px] leading-4 text-[var(--color-text-3)]">
+      <div className="px-4 py-1 text-center text-caption-compact text-arco-text-3">
         {msg.content}
       </div>
     );
@@ -1412,7 +1417,7 @@ function MessageRow({
 function BubbleSenderName({ name }: { name?: string }) {
   if (!name) return null;
   return (
-    <p className="m-0 text-[10px] font-medium leading-[1.5] text-[var(--color-text-2)]">
+    <p className="m-0 text-[10px] font-medium leading-[1.5] text-arco-text-2">
       {name}
     </p>
   );
@@ -1432,7 +1437,7 @@ function ForwardHeader({
   return (
     <div
       className={`mb-1 flex items-center gap-1 text-[10px] leading-none ${
-        isSelf ? 'text-white' : 'text-[var(--color-text-2)]'
+        isSelf ? 'text-arco-text-inverse' : 'text-arco-text-2'
       }`}
     >
       <span>转发自</span>
@@ -1452,7 +1457,7 @@ function BubbleText({ text, isSelf }: { text?: string; isSelf: boolean }) {
         /^(https?:\/\/|www\.)/i.test(part) ? (
           <span
             key={i}
-            className={isSelf ? 'text-[#b5c7ff]' : 'text-[rgb(var(--link-6))]'}
+            className={isSelf ? 'text-arco-link-inverse' : 'text-primary'}
           >
             {part}
           </span>
@@ -1466,14 +1471,14 @@ function BubbleText({ text, isSelf }: { text?: string; isSelf: boolean }) {
 
 function fileExtBadge(name?: string): { label: string; color: string } {
   const ext = (name || '').split('.').pop()?.toLowerCase() || '';
-  if (['doc', 'docx'].includes(ext)) return { label: 'DOC', color: '#0072a2' };
+  if (['doc', 'docx'].includes(ext)) return { label: 'DOC', color: 'rgb(var(--blue-6))' };
   if (['xls', 'xlsx', 'csv'].includes(ext))
-    return { label: 'XLS', color: '#1d6f42' };
-  if (ext === 'pdf') return { label: 'PDF', color: '#c62828' };
-  if (['ppt', 'pptx'].includes(ext)) return { label: 'PPT', color: '#d24726' };
+    return { label: 'XLS', color: 'rgb(var(--success-6))' };
+  if (ext === 'pdf') return { label: 'PDF', color: 'rgb(var(--danger-6))' };
+  if (['ppt', 'pptx'].includes(ext)) return { label: 'PPT', color: 'rgb(var(--warning-6))' };
   if (['zip', 'rar', '7z'].includes(ext))
-    return { label: 'ZIP', color: '#6a1b9a' };
-  return { label: (ext || 'FILE').slice(0, 4).toUpperCase(), color: '#546e7a' };
+    return { label: 'ZIP', color: 'rgb(var(--primary-6))' };
+  return { label: (ext || 'FILE').slice(0, 4).toUpperCase(), color: 'var(--color-text-2)' };
 }
 
 /** 同时只播一条语音 */
@@ -1496,7 +1501,7 @@ function ImageBubble({ msg }: { msg: ChatMsg }) {
     <>
       <button
         type="button"
-        className="relative m-0 max-w-[180px] cursor-zoom-in overflow-hidden rounded-xl border-0 bg-[var(--color-fill-2)] p-0"
+        className="relative m-0 max-w-[180px] cursor-zoom-in overflow-hidden rounded-xl border-0 bg-arco-fill-2 p-0"
         disabled={!full}
         onClick={() => full && setPreview(true)}
         aria-label="预览图片"
@@ -1508,11 +1513,11 @@ function ImageBubble({ msg }: { msg: ChatMsg }) {
             className="block max-h-[240px] w-full object-cover"
           />
         ) : (
-          <div className="flex size-[180px] items-center justify-center text-center text-[12px] text-arco-text-3">
+          <div className="flex size-[180px] items-center justify-center text-center text-caption-compact text-arco-text-3">
             图片
           </div>
         )}
-        <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-black/35 px-1">
+        <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-[var(--color-mask-1)] px-1">
           <BubbleMeta time={msg.time} isSelf />
         </span>
       </button>
@@ -1537,7 +1542,7 @@ function VideoBubble({ msg }: { msg: ChatMsg }) {
     <>
       <button
         type="button"
-        className="relative m-0 flex size-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-0 bg-[rgba(0,0,0,0.45)] p-0 text-white"
+        className="relative m-0 flex size-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-0 bg-[var(--color-mask-1)] p-0 text-arco-text-inverse"
         disabled={!src}
         onClick={() => {
           if (!src) {
@@ -1556,7 +1561,7 @@ function VideoBubble({ msg }: { msg: ChatMsg }) {
           />
         ) : null}
         <ChatIconPlay
-          className="relative z-[1] size-10 text-white"
+          className="relative z-[1] size-10 text-arco-text-inverse"
           aria-hidden
         />
         <span className="pointer-events-none absolute bottom-2 right-2">
@@ -1581,7 +1586,7 @@ function VideoBubble({ msg }: { msg: ChatMsg }) {
             controls
             autoPlay
             playsInline
-            className="block max-h-[70vh] w-full bg-black"
+            className="block max-h-[70vh] w-full bg-arco-bg-black"
           />
         ) : null}
       </Modal>
@@ -1801,18 +1806,18 @@ function Bubble({
       <>
         <div className="flex items-center gap-1">
           <span
-            className="inline-flex size-6 shrink-0 items-center justify-center rounded-[3px] text-[8px] font-semibold text-white"
+            className="inline-flex size-6 shrink-0 items-center justify-center rounded-[3px] text-[8px] font-semibold text-arco-text-inverse"
             style={{ background: badge.color }}
           >
             {badge.label}
           </span>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[14px] leading-[1.3]">
+            <div className="truncate text-sm">
               {msg.fileName || msg.content}
             </div>
             <div
-              className={`text-[12px] leading-[1.3] ${
-                isSelf ? 'text-white/40' : 'text-[var(--color-text-3)]'
+              className={`text-caption-compact ${
+                isSelf ? 'text-arco-text-inverse-subtle' : 'text-arco-text-3'
               }`}
             >
               {msg.fileSize || ''}
@@ -1868,16 +1873,16 @@ function Bubble({
   if (msg.msgType === 'location') {
     return wrap(
       <>
-        <div className="w-[200px] overflow-hidden rounded-lg bg-[var(--color-fill-2)]">
-          <div className="flex h-[88px] items-center justify-center bg-gradient-to-b from-[#dfe9f5] to-[#c5d4e8] text-[12px] text-arco-text-3">
+        <div className="w-[200px] overflow-hidden rounded-lg bg-arco-fill-2">
+          <div className="flex h-[88px] items-center justify-center bg-arco-fill-2 text-caption-compact text-arco-text-3">
             地图
           </div>
-          <div className="border-t border-solid border-[var(--color-border-2)] px-2 py-1.5">
-            <div className="truncate text-[14px] leading-[1.3] text-arco-text-1">
+          <div className="border-t border-solid border-arco-border-2 px-2 py-1.5">
+            <div className="truncate text-sm text-arco-text-1">
               {msg.locationName || msg.content || '位置'}
             </div>
             {msg.locationAddress ? (
-              <div className="truncate text-[12px] leading-[1.3] text-[var(--color-text-3)]">
+              <div className="truncate text-caption-compact text-arco-text-3">
                 {msg.locationAddress}
               </div>
             ) : null}
@@ -1893,8 +1898,8 @@ function Bubble({
     const action = isSelf ? '去聊天' : isGroup ? '加入群' : '发消息';
     return wrap(
       <>
-        <div className="w-[232px] overflow-hidden rounded-lg bg-[var(--color-fill-2)]">
-          <div className="flex flex-col gap-2 border-b border-solid border-[var(--color-border-2)] px-2 py-2">
+        <div className="w-[232px] overflow-hidden rounded-lg bg-arco-fill-2">
+          <div className="flex flex-col gap-2 border-b border-solid border-arco-border-2 px-2 py-2">
             <div className="flex items-start gap-2">
               {isGroup ? (
                 <GroupAvatar
@@ -1910,21 +1915,21 @@ function Bubble({
                 />
               )}
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[14px] leading-none text-arco-text-1">
+                <div className="truncate text-[length:var(--font-size-body)] leading-none text-arco-text-1">
                   {msg.cardName || msg.content || '--'}
                 </div>
-                <div className="mt-1 truncate text-[12px] leading-none text-[var(--color-text-3)]">
+                <div className="mt-1 truncate text-[length:var(--font-size-caption)] leading-none text-arco-text-3">
                   ID：{msg.cardId || '--'}
                 </div>
               </div>
             </div>
             {msg.cardDesc ? (
-              <p className="m-0 line-clamp-3 text-[12px] leading-[1.5] text-[var(--color-text-2)]">
+              <p className="m-0 line-clamp-3 text-caption-compact text-arco-text-2">
                 {msg.cardDesc}
               </p>
             ) : null}
           </div>
-          <div className="py-2 text-center text-[12px] leading-none text-arco-text-1">
+          <div className="py-2 text-center text-[length:var(--font-size-caption)] leading-none text-arco-text-1">
             {action}
           </div>
         </div>
@@ -1937,16 +1942,16 @@ function Bubble({
     return wrap(
       <>
         <div
-          className={`mb-0.5 w-full rounded border-l-2 px-1 text-[12px] leading-[1.5] ${
+          className={`mb-0.5 w-full rounded border-l-2 px-1 text-caption-compact ${
             isSelf
-              ? 'border-[#b5c7ff] bg-white/20'
-              : 'border-[var(--color-border-3)] bg-[var(--color-fill-2)]'
+              ? 'border-arco-link-inverse bg-arco-fill-inverse-heavy'
+              : 'border-[var(--color-border-3)] bg-arco-fill-2'
           }`}
         >
           {msg.quoteSender ? (
             <div
               className={`truncate ${
-                isSelf ? 'text-[#b5c7ff]' : 'text-[var(--color-text-3)]'
+                isSelf ? 'text-arco-link-inverse' : 'text-arco-text-3'
               }`}
             >
               {msg.quoteSender}
@@ -1954,7 +1959,7 @@ function Bubble({
           ) : null}
           <div
             className={`truncate ${
-              isSelf ? 'text-white' : 'text-[var(--color-text-2)]'
+              isSelf ? 'text-arco-text-inverse' : 'text-arco-text-2'
             }`}
           >
             {msg.quoteText || '引用消息'}
@@ -1975,13 +1980,13 @@ function Bubble({
     return wrap(
       <>
         <div className="min-w-[160px]">
-          <div className="text-[14px] font-medium leading-[1.3]">
+          <div className="text-sm font-medium">
             {msg.content || '合并消息'}
           </div>
           {msg.quoteText ? (
             <pre
-              className={`m-0 mt-1 whitespace-pre-wrap text-[12px] leading-[1.4] ${
-                isSelf ? 'text-white/70' : 'text-[var(--color-text-3)]'
+              className={`m-0 mt-1 whitespace-pre-wrap text-caption-compact ${
+                isSelf ? 'text-arco-text-inverse-muted' : 'text-arco-text-3'
               }`}
             >
               {msg.quoteText}

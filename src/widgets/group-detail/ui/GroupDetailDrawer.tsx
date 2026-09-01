@@ -160,7 +160,7 @@ function GroupAvatar({
   }
   const cells = Array.from({ length: 9 }, (_, i) => members[i]);
   return (
-    <div className="box-border grid size-[56px] shrink-0 grid-cols-3 grid-rows-3 gap-[1.4px] overflow-hidden rounded-[8.4px] bg-[var(--color-fill-3)]">
+    <div className="box-border grid size-[56px] shrink-0 grid-cols-3 grid-rows-3 gap-[1.4px] overflow-hidden rounded-[8.4px] bg-arco-fill-3">
       {cells.map((m, i) => (
         <div
           key={m?.id || i}
@@ -341,7 +341,7 @@ export default function GroupDetailDrawer({
                 members={members}
               />
               <div className="min-w-0">
-                <div className="truncate text-[17.5px] font-bold leading-[24.5px] text-arco-text-1">
+                <div className="truncate text-title font-bold text-arco-text-1">
                   {name}
                 </div>
                 <div className="mt-[2px]">
@@ -356,7 +356,7 @@ export default function GroupDetailDrawer({
                             : 'default'
                     }
                     text={status || '-'}
-                    className="!text-[14px] !leading-[21px] !text-arco-text-2"
+                    className="!text-sm !text-arco-text-2"
                   />
                 </div>
               </div>
@@ -371,7 +371,7 @@ export default function GroupDetailDrawer({
               <Tabs.TabPane key="basic" title={t['groupDetail.tab.basic']}>
                 <div className="flex flex-col gap-[12px] pt-[12px]">
                   <div>
-                    <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    <div className="mb-[12px] text-sm font-medium text-arco-text-1">
                       {t['groupDetail.section.basic']}
                     </div>
                     <Descriptions
@@ -433,7 +433,7 @@ export default function GroupDetailDrawer({
                   </div>
 
                   <div>
-                    <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    <div className="mb-[12px] text-sm font-medium text-arco-text-1">
                       {t['groupDetail.section.members']}
                     </div>
                     <Descriptions
@@ -457,7 +457,7 @@ export default function GroupDetailDrawer({
                   </div>
 
                   <div>
-                    <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    <div className="mb-[12px] text-sm font-medium text-arco-text-1">
                       {t['groupDetail.section.settings']}
                     </div>
                     <Descriptions
@@ -488,7 +488,7 @@ export default function GroupDetailDrawer({
                   </div>
 
                   <div>
-                    <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+                    <div className="mb-[12px] text-sm font-medium text-arco-text-1">
                       {t['groupDetail.section.manage']}
                     </div>
                     <Descriptions
@@ -565,7 +565,7 @@ export default function GroupDetailDrawer({
                     }))}
                     empty={
                       !loading ? (
-                        <div className="py-8 text-center text-[12px] text-arco-text-3">
+                        <div className="py-8 text-center text-caption-compact text-arco-text-3">
                           {t['groupDetail.logs.empty']}
                         </div>
                       ) : null

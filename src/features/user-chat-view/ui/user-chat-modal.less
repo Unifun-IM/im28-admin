@@ -24,7 +24,7 @@
     max-width: 90vw;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-overlay);
     border: none;
     padding: 0;
     /* 高度链：modal → content → body → 三栏 */
@@ -138,12 +138,12 @@
     height: 32px;
     background: var(--color-fill-2);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     padding: 0 12px;
 
     .arco-input {
-      font-size: 16px;
-      line-height: 24px;
+      font-size: var(--font-size-title);
+      line-height: var(--line-height-title);
       color: var(--color-text-1);
 
       &::placeholder {
@@ -164,9 +164,9 @@
     align-items: flex-start;
 
     .arco-alert-content {
-      font-size: 12px;
-      line-height: 18px;
-      color: var(--color-text-1, #1d2129);
+      font-size: var(--font-size-caption);
+      line-height: var(--line-height-caption-compact);
+      color: var(--color-text-1);
     }
   }
 
@@ -174,7 +174,7 @@
     height: 40px;
     background: var(--color-fill-2);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     padding: 0 12px;
     box-shadow: none;
 
@@ -196,8 +196,8 @@
     }
 
     .arco-input {
-      font-size: 16px;
-      line-height: 24px;
+      font-size: var(--font-size-title);
+      line-height: var(--line-height-title);
       color: var(--color-text-1);
 
       &::placeholder {
@@ -210,19 +210,19 @@
     height: 40px;
     background: rgb(var(--primary-6));
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     padding: 0 12px;
-    font-size: 16px;
+    font-size: var(--font-size-title);
     font-weight: 400;
     line-height: 1.5;
-    color: var(--color-text-white);
+    color: var(--color-text-inverse);
 
     &:hover,
     &:focus,
     &:active {
       background: rgb(var(--primary-7));
       border: none;
-      color: var(--color-text-white);
+      color: var(--color-text-inverse);
     }
   }
 
@@ -245,9 +245,9 @@
       height: 48px;
       margin: 0;
       padding: 0 16px;
-      font-size: 16px;
+      font-size: var(--font-size-title);
       font-weight: 400;
-      line-height: 24px;
+      line-height: var(--line-height-title);
       color: var(--color-text-3);
 
       /* Figma：选中下划线 16×3 居中圆角条，不用 Arco ink（强制宽度会左偏） */
@@ -261,21 +261,22 @@
         border-radius: 999px;
         background: transparent;
         transform: translateX(-50%);
-        transition: background-color 0.15s ease;
+        transition: background-color var(--motion-duration-hover)
+          var(--motion-ease-standard);
       }
     }
 
     .arco-tabs-header-title:hover {
-      color: var(--color-text-1, #1d2129);
+      color: var(--color-text-1);
     }
 
     .arco-tabs-header-title-active,
     .arco-tabs-header-title-active:hover {
-      color: var(--color-text-1, #1d2129);
+      color: var(--color-text-1);
       font-weight: 400;
 
       &::after {
-        background: var(--color-text-1, #1d2129);
+        background: var(--color-text-1);
       }
     }
 
@@ -339,17 +340,17 @@
       height: calc(100dvh - 32px) !important;
       max-height: calc(100vh - 32px) !important;
       max-height: calc(100dvh - 32px) !important;
-      border-radius: 12px;
+      border-radius: var(--radius-overlay);
     }
 
     .arco-modal.use-user-chat-modal .arco-modal-content {
-      border-radius: 12px;
+      border-radius: var(--radius-overlay);
     }
   }
 
   .arco-modal.use-user-chat-modal {
     .use-user-chat-shell {
-      border-radius: 12px;
+      border-radius: var(--radius-overlay);
     }
 
     .use-user-chat-nav {
@@ -396,8 +397,6 @@
   }
 }
 
-
-
 /* 聊天内视频预览：高于查聊天 Modal */
 .use-chat-video-preview-modal-wrap {
   z-index: 1100 !important;
@@ -406,7 +405,7 @@
 .use-chat-video-preview-modal {
   .arco-modal-content {
     padding: 0 !important;
-    background: #000;
+    background: var(--color-bg-black);
     overflow: hidden;
   }
 
@@ -429,7 +428,7 @@
   color: var(--color-text-1);
 
   &.is-self {
-    color: var(--color-text-white);
+    color: var(--color-text-inverse);
     transform: scaleX(-1);
   }
 

@@ -449,7 +449,7 @@ export default function WhitelistActionModal({
                         src={user.avatar_url}
                       />
                       <div className="min-w-0 flex flex-col gap-1">
-                        <span className="truncate text-[12px] leading-none text-arco-text-1">
+                        <span className="truncate text-caption-compact text-arco-text-1">
                           {user.nickname || user.account || uid || '—'}
                         </span>
                         <span className="truncate text-[10px] leading-none text-arco-text-3">
@@ -461,7 +461,7 @@ export default function WhitelistActionModal({
                   );
                 })
               ) : (
-                <div className="px-3 py-2 text-[12px] text-arco-text-3">
+                <div className="px-3 py-2 text-caption-compact text-arco-text-3">
                   {t['whitelistAction.search.empty']}
                 </div>
               )}
@@ -479,7 +479,7 @@ export default function WhitelistActionModal({
               src={selectedUser.avatar_url}
             />
             <div className="min-w-0 flex flex-col gap-1">
-              <span className="truncate text-[12px] leading-none text-arco-text-1">
+              <span className="truncate text-caption-compact text-arco-text-1">
                 {selectedUser.nickname ||
                   selectedUser.account ||
                   selectedUser.user_id}
@@ -507,7 +507,7 @@ export default function WhitelistActionModal({
 
   const renderAddForm = () => (
     <>
-      <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+      <p className="m-0 text-sm text-arco-text-1">
         {t['whitelistAction.desc.add']}
       </p>
 
@@ -561,7 +561,7 @@ export default function WhitelistActionModal({
 
   const renderRemoveForm = () => (
     <>
-      <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+      <p className="m-0 text-sm text-arco-text-1">
         {t['whitelistAction.desc.remove']}
       </p>
       <Form
@@ -616,7 +616,7 @@ export default function WhitelistActionModal({
           </span>
         }
       />
-      <div className="use-whitelist-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[var(--color-border-2,rgba(0,0,0,0.08))] p-3 text-[12px] leading-[1.5] text-arco-text-1">
+      <div className="use-whitelist-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-arco-border-2 p-3 text-caption-compact text-arco-text-1">
         <div className="flex items-center gap-6">
           <span className="w-[120px] shrink-0">
             {t['whitelistAction.success.userId']}
@@ -632,7 +632,7 @@ export default function WhitelistActionModal({
             </button>
           </div>
         </div>
-        <div className="my-[6px] h-px w-full bg-[var(--color-border-2,rgba(0,0,0,0.08))]" />
+        <div className="my-[6px] h-px w-full bg-arco-border-2" />
         <div className="flex items-center gap-6">
           <span className="w-[120px] shrink-0">
             {t['whitelistAction.success.account']}
@@ -648,7 +648,7 @@ export default function WhitelistActionModal({
             </button>
           </div>
         </div>
-        <div className="my-[6px] h-px w-full bg-[var(--color-border-2,rgba(0,0,0,0.08))]" />
+        <div className="my-[6px] h-px w-full bg-arco-border-2" />
         <div className="flex items-center gap-6">
           <span className="w-[120px] shrink-0">
             {t['whitelistAction.success.password']}
@@ -704,7 +704,7 @@ export default function WhitelistActionModal({
               {!isAdd ? (
                 <img alt="" src={iconWarning} className="size-5 shrink-0" />
               ) : null}
-              <span className="text-[16px] font-medium leading-6 text-arco-text-1">
+              <span className="text-title font-medium text-arco-text-1">
                 {isAdd
                   ? t['whitelistAction.title.add']
                   : t['whitelistAction.title.remove']}

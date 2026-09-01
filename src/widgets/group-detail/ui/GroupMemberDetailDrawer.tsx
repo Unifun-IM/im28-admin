@@ -125,7 +125,7 @@ export default function GroupMemberDetailDrawer({
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1">
                   <span
-                    className="truncate text-[17.5px] font-bold leading-[24.5px] text-arco-text-1"
+                    className="truncate text-title font-bold text-arco-text-1"
                     style={groupRoleNameStyle(displayUserId, roleLevel)}
                   >
                     {displayName}
@@ -136,14 +136,14 @@ export default function GroupMemberDetailDrawer({
                   <StatusBadge
                     status={onlineOk ? 'success' : 'default'}
                     text={imLabel(t, 'online', memberOnline)}
-                    className="!text-[14px] !leading-[21px] !text-arco-text-2"
+                    className="!text-sm !text-arco-text-2"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <div className="mb-[12px] text-[14px] font-medium leading-[21px] text-arco-text-1">
+              <div className="mb-[12px] text-sm font-medium text-arco-text-1">
                 {t['groupDetail.member.section.basic']}
               </div>
               <Descriptions

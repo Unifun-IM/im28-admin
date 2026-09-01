@@ -1,8 +1,8 @@
 /* 白名单操作弹窗 — Figma 805:20062 / 966:19453 / 805:20148；亮/暗走 theme-tokens */
 .arco-modal.use-whitelist-action-modal {
-  border-radius: 12px;
+  border-radius: var(--radius-overlay);
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-overlay);
   border: 1px solid var(--color-border-1);
 
   .arco-modal-content {
@@ -45,7 +45,6 @@
   }
 
   .arco-btn {
-    border-radius: 6px;
     height: 32px;
   }
 
@@ -79,13 +78,13 @@
       gap: 0;
       padding-bottom: 8px;
       margin-bottom: 0;
-      line-height: 21px;
+      line-height: var(--line-height-body-compact);
     }
 
     .arco-form-label-item > label {
       color: var(--color-text-1);
-      font-size: 14px;
-      line-height: 21px;
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-body-compact);
     }
 
     .arco-form-item-symbol {
@@ -113,8 +112,8 @@
 
     .arco-select-view-value,
     .arco-select-view-value-mirror {
-      font-size: 14px;
-      line-height: 22px;
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-body);
     }
 
     /* 搜索组合框：左类型 | 右输入 — Figma 966:19453 */
@@ -126,7 +125,7 @@
       overflow: hidden;
       background: var(--color-bg-2);
       border: 1px solid var(--color-border-2);
-      border-radius: 8px;
+      border-radius: var(--radius-control);
     }
 
     .use-whitelist-search-combo:focus-within {
@@ -166,8 +165,8 @@
     }
 
     .use-whitelist-search-combo .arco-input {
-      font-size: 14px;
-      line-height: 22px;
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-body);
       height: 100%;
       color: var(--color-text-1);
       caret-color: rgb(var(--primary-6));
@@ -193,8 +192,8 @@
       }
 
       .arco-radio-text {
-        font-size: 14px;
-        line-height: 21px;
+        font-size: var(--font-size-body);
+        line-height: var(--line-height-body-compact);
         color: var(--color-text-1);
       }
     }
@@ -203,11 +202,11 @@
   .use-whitelist-unreg-tip {
     margin-top: 8px;
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background: rgba(var(--warning-6), 0.12);
     color: rgb(var(--warning-6));
-    font-size: 12px;
-    line-height: 18px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption-compact);
   }
 
   .use-whitelist-search-block {
@@ -233,9 +232,9 @@
     max-height: 240px;
     overflow: auto;
     padding: 8px;
-    border-radius: 12px;
+    border-radius: var(--radius-overlay);
     background: var(--color-bg-2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-popup);
   }
 
   .use-whitelist-search-option {
@@ -246,7 +245,7 @@
     min-height: 40px;
     padding: 4px 12px;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     background: transparent;
     cursor: pointer;
     text-align: left;
@@ -266,21 +265,21 @@
     margin-top: 0;
     padding: 4px 12px;
     min-height: 40px;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     background: var(--color-fill-2);
     color: var(--color-text-1);
   }
 
   .arco-result-title {
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 500;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
     color: var(--color-text-1);
   }
 
   .arco-result-subtitle {
-    font-size: 12px;
-    line-height: 18px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption-compact);
     color: var(--color-text-3);
   }
 
@@ -301,14 +300,5 @@
     max-width: 420px;
     margin: 0 auto;
     text-align: center;
-  }
-}
-
-
-body[arco-theme='dark'] {
-  .arco-modal.use-whitelist-action-modal {
-    .use-whitelist-search-dropdown {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-    }
   }
 }

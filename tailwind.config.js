@@ -29,7 +29,9 @@ export default {
         'arco-bg-inverse': 'var(--color-bg-inverse)',
         'arco-fill-1': 'var(--color-fill-1)',
         'arco-fill-2': 'var(--color-fill-2)',
+        'arco-fill-3': 'var(--color-fill-3)',
         'arco-fill-inverse-hover': 'var(--color-fill-inverse-hover)',
+        'arco-fill-inverse-heavy': 'var(--color-fill-inverse-heavy)',
         'arco-border-1': 'var(--color-border-1)',
         'arco-border-2': 'var(--color-border-2)',
         'arco-border-inverse': 'var(--color-border-inverse)',
@@ -41,6 +43,7 @@ export default {
         'arco-text-inverse': 'var(--color-text-inverse)',
         'arco-text-inverse-muted': 'var(--color-text-inverse-muted)',
         'arco-text-inverse-subtle': 'var(--color-text-inverse-subtle)',
+        'arco-link-inverse': 'var(--color-link-inverse)',
         'arco-success': 'rgb(var(--success-6))',
         'arco-warning': 'rgb(var(--warning-6))',
         'arco-danger': 'rgb(var(--danger-6))'

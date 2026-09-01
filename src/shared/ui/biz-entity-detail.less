@@ -9,9 +9,9 @@
   }
 
   .arco-drawer-header-title {
-    font-size: 16px;
+    font-size: var(--font-size-title);
     font-weight: 500;
-    line-height: 24px;
+    line-height: var(--line-height-title);
     color: var(--color-text-1);
   }
 
@@ -67,7 +67,7 @@
   .use-user-detail-avatar.arco-avatar {
     background: var(--color-primary-light) !important;
     color: rgb(var(--primary-6)) !important;
-    font-size: 17.5px !important;
+    font-size: var(--font-size-title) !important;
     font-weight: 700 !important;
     line-height: 56px !important;
   }
@@ -112,9 +112,9 @@
       justify-content: center;
       margin: 0 24px 0 0;
       padding: 9px 0;
-      font-size: 14px;
+      font-size: var(--font-size-body);
       font-weight: 400;
-      line-height: 22px;
+      line-height: var(--line-height-body);
       color: var(--color-text-2);
       background-color: transparent !important;
 
@@ -127,7 +127,8 @@
         bottom: 0;
         height: 2px;
         background: transparent;
-        transition: background-color 0.15s ease;
+        transition: background-color var(--motion-duration-hover)
+          var(--motion-ease-standard);
       }
     }
 
@@ -188,9 +189,9 @@
   .use-user-detail-section-title {
     margin: 0 0 12px;
     padding: 0;
-    font-size: 14px;
+    font-size: var(--font-size-body);
     font-weight: 500;
-    line-height: 21px;
+    line-height: var(--line-height-body-compact);
     color: var(--color-text-1);
   }
 
@@ -198,7 +199,7 @@
   .use-user-detail-descriptions.arco-descriptions {
     .arco-descriptions-body {
       border: 1px solid var(--color-border-2);
-      border-radius: 8px;
+      border-radius: var(--radius-surface);
       overflow: hidden;
     }
 
@@ -213,15 +214,15 @@
       min-width: 120px;
       background: var(--color-fill-1);
       color: var(--color-text-3);
-      font-size: 12px;
+      font-size: var(--font-size-caption);
       font-weight: 500;
-      line-height: 22px;
+      line-height: var(--line-height-caption);
     }
 
     .arco-descriptions-item-value {
       color: var(--color-text-1);
-      font-size: 14px;
-      line-height: 21px;
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-body-compact);
     }
   }
 
@@ -294,8 +295,8 @@
 
     .arco-timeline-item-content {
       margin: 0;
-      font-size: 12px;
-      line-height: 20px;
+      font-size: var(--font-size-caption);
+      line-height: var(--line-height-caption);
       color: var(--color-text-1);
     }
   }

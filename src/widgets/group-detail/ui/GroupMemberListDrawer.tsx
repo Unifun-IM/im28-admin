@@ -124,7 +124,7 @@ export default function GroupMemberListDrawer({
                 value={keyword}
                 onChange={setKeyword}
               />
-              <div className="text-[14px] leading-[21px] text-arco-text-2">
+              <div className="text-sm text-arco-text-2">
                 {t['groupDetail.members.total'].replace(
                   '{n}',
                   String(keyword.trim() ? filteredMembers.length : total)
@@ -149,7 +149,7 @@ export default function GroupMemberListDrawer({
                       <div className="min-w-0">
                         <div className="flex min-w-0 items-center gap-1">
                           <span
-                            className="truncate text-[14px] font-medium leading-[21px] text-arco-text-2"
+                            className="truncate text-sm font-medium text-arco-text-2"
                             style={groupRoleNameStyle(m.userId, m.roleLevel)}
                           >
                             {m.nickname || '-'}
@@ -159,7 +159,7 @@ export default function GroupMemberListDrawer({
                             roleLevel={m.roleLevel}
                           />
                         </div>
-                        <div className="text-[12px] leading-[20px] text-arco-text-3">
+                        <div className="text-xs text-arco-text-3">
                           ID：{m.userId || '-'}
                         </div>
                       </div>
@@ -168,7 +168,7 @@ export default function GroupMemberListDrawer({
                   </button>
                 ))}
                 {!loading && !filteredMembers.length ? (
-                  <div className="py-8 text-center text-[12px] text-arco-text-3">
+                  <div className="py-8 text-center text-xs text-arco-text-3">
                     {t['groupDetail.members.empty']}
                   </div>
                 ) : null}

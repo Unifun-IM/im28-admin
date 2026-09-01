@@ -143,7 +143,7 @@ export default function ChatHistoryPanel({
       (tab === 'date' && dateFiltered.length === 0 && searched));
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2.5 bg-white px-4">
+    <div className="flex h-full min-h-0 flex-col gap-2.5 bg-arco-bg-2 px-4">
       <header className="relative flex h-14 shrink-0 items-center justify-center">
         <button
           type="button"
@@ -153,7 +153,7 @@ export default function ChatHistoryPanel({
         >
           <IconClose className="text-[16px]" />
         </button>
-        <h3 className="m-0 text-[18px] font-medium leading-[1.5] text-[var(--color-text-1)]">
+        <h3 className="m-0 text-title font-medium text-arco-text-1">
           查看聊天记录
         </h3>
       </header>
@@ -179,7 +179,7 @@ export default function ChatHistoryPanel({
           />
           <Button
             type="primary"
-            className="use-chat-history-search-btn !h-10 !min-w-0 !rounded-md !border-0 !bg-[rgb(var(--primary-6))] !px-3 !text-[16px] !font-normal !leading-[1.5] !text-white hover:!bg-[rgb(var(--primary-7))]"
+            className="use-chat-history-search-btn !h-10 !min-w-0 !border-0 !bg-primary !px-3 !text-title !font-normal !text-arco-text-inverse hover:!bg-primary-7"
             onClick={() => {
               if (tab === 'date') setTab('all');
               runSearch(keyword, tab === 'date' ? 'all' : tab);
@@ -215,10 +215,10 @@ export default function ChatHistoryPanel({
             <button
               key={k}
               type="button"
-              className={`h-7 cursor-pointer rounded-md border-0 px-3 text-[12px] ${
+              className={`h-7 cursor-pointer rounded border-0 px-3 text-caption-compact ${
                 mediaFilter === k
-                  ? 'bg-[var(--color-fill-3,#e5e6eb)] text-arco-text-1'
-                  : 'bg-[var(--color-fill-2,#f2f3f5)] text-arco-text-2'
+                  ? 'bg-arco-fill-3 text-arco-text-1'
+                  : 'bg-arco-fill-2 text-arco-text-2'
               }`}
               onClick={() => setMediaFilter(k)}
             >
@@ -235,7 +235,7 @@ export default function ChatHistoryPanel({
           </div>
         ) : tab === 'all' ? (
           !searched ? (
-            <div className="py-16 text-center text-[14px] text-arco-text-3">
+            <div className="py-16 text-center text-sm text-arco-text-3">
               输入关键词后点击搜索
             </div>
           ) : empty ? (
@@ -256,19 +256,19 @@ export default function ChatHistoryPanel({
                 <button
                   key={item.id}
                   type="button"
-                  className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-[rgba(120,120,128,0.12)] bg-transparent py-3 text-left"
+                  className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-arco-border-2 bg-transparent py-3 text-left"
                   onClick={() => onLocate?.(item.id)}
                 >
                   <Avatar size={40}>{item.senderName.slice(0, 1)}</Avatar>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[12px] text-arco-text-3">
+                    <div className="text-caption-compact text-arco-text-3">
                       {item.senderName}
                     </div>
-                    <div className="truncate text-[16px] text-arco-text-1">
+                    <div className="truncate text-title text-arco-text-1">
                       {highlight(item.content)}
                     </div>
                   </div>
-                  <span className="shrink-0 text-[12px] text-arco-text-3">
+                  <span className="shrink-0 text-caption-compact text-arco-text-3">
                     {item.time}
                   </span>
                 </button>
@@ -281,14 +281,14 @@ export default function ChatHistoryPanel({
           ) : (
             <div className="h-full overflow-y-auto">
               {query ? (
-                <p className="m-0 mb-3 text-[12px] text-arco-text-3">
+                <p className="m-0 mb-3 text-caption-compact text-arco-text-3">
                   找到“{query}”相关的图片，共
                   {mediaGroups.reduce((n, g) => n + g.items.length, 0)}个
                 </p>
               ) : null}
               {mediaGroups.map((g) => (
                 <div key={g.month} className="mb-4">
-                  <div className="mb-2 text-[14px] text-arco-text-2">
+                  <div className="mb-2 text-sm text-arco-text-2">
                     {g.month}
                   </div>
                   <div className="grid grid-cols-4 gap-2">
@@ -296,14 +296,14 @@ export default function ChatHistoryPanel({
                       <button
                         key={m.id}
                         type="button"
-                        className="relative aspect-square cursor-pointer overflow-hidden rounded-md border-0 bg-[var(--color-fill-2,#eee)] p-0"
+                        className="relative aspect-square cursor-pointer overflow-hidden rounded border-0 bg-arco-fill-2 p-0"
                         onClick={() => onLocate?.(m.id)}
                       >
                         <span className="absolute inset-0 flex items-center justify-center text-[11px] text-arco-text-3">
                           {m.kind === 'video' ? '视频' : '图片'}
                         </span>
                         {m.kind === 'video' ? (
-                          <IconPlayArrowFill className="absolute bottom-1 left-1 text-[18px] text-white drop-shadow" />
+                          <IconPlayArrowFill className="absolute bottom-1 left-1 text-[18px] text-arco-text-inverse drop-shadow" />
                         ) : null}
                       </button>
                     ))}
@@ -319,7 +319,7 @@ export default function ChatHistoryPanel({
             <div className="h-full overflow-y-auto">
               {fileGroups.map((g) => (
                 <div key={g.month} className="mb-4">
-                  <div className="mb-2 text-[14px] text-arco-text-2">
+                  <div className="mb-2 text-sm text-arco-text-2">
                     {g.month}
                   </div>
                   {g.items.map((item) => (
@@ -331,20 +331,20 @@ export default function ChatHistoryPanel({
                     >
                       <div className="flex items-center gap-2">
                         <Avatar size={28}>{item.senderName.slice(0, 1)}</Avatar>
-                        <span className="min-w-0 flex-1 truncate text-[14px] text-arco-text-1">
+                        <span className="min-w-0 flex-1 truncate text-sm text-arco-text-1">
                           {item.senderName}
                         </span>
-                        <span className="shrink-0 whitespace-nowrap text-[12px] text-arco-text-3">
+                        <span className="shrink-0 whitespace-nowrap text-caption-compact text-arco-text-3">
                           {item.time}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 rounded-xl bg-[var(--color-fill-2,#f2f3f5)] px-3 py-2">
+                      <div className="flex items-center gap-2 rounded-xl bg-arco-fill-2 px-3 py-2">
                         <FileTypeIcon ext={item.fileExt || 'DOC'} />
                         <div className="min-w-0">
-                          <div className="truncate text-[14px] text-arco-text-1">
+                          <div className="truncate text-sm text-arco-text-1">
                             {item.fileName}
                           </div>
-                          <div className="text-[12px] text-arco-text-3">
+                          <div className="text-caption-compact text-arco-text-3">
                             {item.fileSize}
                           </div>
                         </div>
@@ -358,7 +358,7 @@ export default function ChatHistoryPanel({
         ) : (
           <div className="relative h-full">
             {showCalendar ? (
-              <div className="absolute left-0 top-0 z-10 w-[280px] rounded-xl bg-[var(--color-bg-2,#fff)] p-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+              <div className="absolute left-0 top-0 z-10 w-[280px] rounded-xl bg-arco-bg-2 p-2 shadow-popover">
                 <Calendar
                   panel
                   value={selectedDate}
@@ -373,7 +373,7 @@ export default function ChatHistoryPanel({
             ) : (
               <button
                 type="button"
-                className="mb-3 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[rgb(var(--primary-6))]"
+                className="mb-3 cursor-pointer border-0 bg-transparent p-0 text-sm text-primary"
                 onClick={() => setShowCalendar(true)}
               >
                 {selectedDate.format('YYYY年M月D日')} · 重选日期
@@ -383,7 +383,7 @@ export default function ChatHistoryPanel({
               className={showCalendar ? 'h-full pt-[320px]' : 'h-full'}
               style={{ overflow: showCalendar ? 'hidden' : undefined }}
             >
-              <div className="mb-2 text-[14px] text-arco-text-2">
+              <div className="mb-2 text-sm text-arco-text-2">
                 {selectedDate.format('YYYY年M月D日')}
               </div>
               {dateFiltered.length === 0 ? (
@@ -404,19 +404,19 @@ export default function ChatHistoryPanel({
                     <button
                       key={item.id}
                       type="button"
-                      className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-[rgba(120,120,128,0.12)] bg-transparent py-3 text-left"
+                      className="flex w-full cursor-pointer items-start gap-3 border-0 border-b border-solid border-arco-border-2 bg-transparent py-3 text-left"
                       onClick={() => onLocate?.(item.id)}
                     >
                       <Avatar size={40}>{item.senderName.slice(0, 1)}</Avatar>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[12px] text-arco-text-3">
+                        <div className="text-caption-compact text-arco-text-3">
                           {item.senderName}
                         </div>
-                        <div className="truncate text-[16px] text-arco-text-1">
+                        <div className="truncate text-title text-arco-text-1">
                           {highlight(item.content)}
                         </div>
                       </div>
-                      <span className="shrink-0 text-[12px] text-arco-text-3">
+                      <span className="shrink-0 text-caption-compact text-arco-text-3">
                         {item.time}
                       </span>
                     </button>
@@ -433,7 +433,7 @@ export default function ChatHistoryPanel({
 
 function EmptyResult() {
   return (
-    <div className="flex h-48 items-center justify-center text-[14px] text-arco-text-3">
+    <div className="flex h-48 items-center justify-center text-sm text-arco-text-3">
       无结果
     </div>
   );
@@ -441,10 +441,14 @@ function EmptyResult() {
 
 function FileTypeIcon({ ext }: { ext: string }) {
   const color =
-    ext === 'PDF' ? '#F53F3F' : ext === 'ZIP' ? '#00B42A' : '#3491FA';
+    ext === 'PDF'
+      ? 'rgb(var(--danger-6))'
+      : ext === 'ZIP'
+      ? 'rgb(var(--success-6))'
+      : 'rgb(var(--blue-6))';
   return (
     <span
-      className="inline-flex size-8 shrink-0 items-center justify-center rounded text-[10px] font-semibold text-white"
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded text-[10px] font-semibold text-arco-text-inverse"
       style={{ background: color }}
     >
       {ext || <IconFile />}
