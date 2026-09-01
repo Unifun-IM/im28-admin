@@ -232,8 +232,8 @@ body {
 }
 
 /**
- * Modal：标题左对齐；底栏按钮 8px 圆角 + 取消描边（Figma 666:21515 等）
- * 全局按钮圆角由 theme-tokens --border-radius-small 驱动（Arco size-* 依赖该变量）
+ * Modal：标题左对齐；底栏按钮统一使用控件圆角 + 取消描边（Figma 666:21515 等）
+ * Arco 在 body 重定义 --border-radius-small，普通按钮直接使用项目语义 token。
  *
  * Checkbox 也吃 --border-radius-small：14px 方框 + 8px 圆角会像 Radio，
  * 单独压回 2px，保持列表选择列为方形勾选框。
@@ -243,7 +243,7 @@ body {
 }
 
 .arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
-  border-radius: var(--border-radius-small, 8px);
+  border-radius: var(--radius-control, 8px);
 }
 
 /**
@@ -345,10 +345,6 @@ body {
   }
 
   .arco-modal-footer {
-    .arco-btn:not(.arco-btn-shape-circle):not(.arco-btn-shape-round) {
-      border-radius: var(--border-radius-small, 8px);
-    }
-
     /* 取消 / 次要：卡片底 + 描边（亮/暗均走 token） */
     .arco-btn-secondary,
     .arco-btn-outline,
