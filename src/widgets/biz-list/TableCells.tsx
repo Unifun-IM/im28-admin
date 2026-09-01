@@ -14,6 +14,10 @@ import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import useLocale from '@shared/lib/useLocale';
 import { UserAvatar } from '@shared/ui';
 import IconMoreDots from '@assets/icon/icon-more-dots.svg?react';
+import {
+  DEFAULT_TEXT_ACTION_FOLDED_VISIBLE,
+  TEXT_ACTION_FOLD_WHEN_OVER
+} from './tableDefaults';
 
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
@@ -175,7 +179,7 @@ export type ActionLinksProps = {
   items: ActionLinkItem[];
   /**
    * 折叠后外露条数。
-   * - text：仅当 items.length > 2 时折叠为「外露 + 更多」，默认外露 1
+   * - text：仅当 items.length > 3 时折叠为「外露 + 更多」，默认外露 1
    * - icon：默认 3（含「更多」占位；溢出时可见数 = maxVisible - 1）
    */
   maxVisible?: number;
@@ -184,9 +188,6 @@ export type ActionLinksProps = {
   className?: string;
 };
 
-/** text：超过 2 项时只保留首要动作，其余收进更多 */
-const TEXT_FOLD_WHEN_OVER = 2;
-const DEFAULT_TEXT_FOLDED_VISIBLE = 1;
 /** icon：最多 3 个槽位 */
 const DEFAULT_ICON_MAX_VISIBLE = 3;
 
@@ -256,7 +257,7 @@ function buildMoreMenu(
 /**
  * 表格操作列
  * - 移动端：单操作直接使用图标，多操作统一收进一个 32px 更多菜单
- * - text：≤2 全部展示；>2 折叠为「首项 + 更多」
+ * - text：≤3 全部展示；>3 折叠为「首项 + 更多」
  * - icon：最多 3 个槽位（含更多）
  */
 export function ActionLinks({
@@ -311,9 +312,9 @@ export function ActionLinks({
   if (variant === 'text') {
     const foldedVisible = Math.max(
       0,
-      maxVisible ?? DEFAULT_TEXT_FOLDED_VISIBLE
+      maxVisible ?? DEFAULT_TEXT_ACTION_FOLDED_VISIBLE
     );
-    const needFold = items.length > TEXT_FOLD_WHEN_OVER;
+    const needFold = items.length > TEXT_ACTION_FOLD_WHEN_OVER;
     const visibleItems = needFold ? items.slice(0, foldedVisible) : items;
     const moreItems = needFold ? items.slice(foldedVisible) : [];
     const moreMenu = moreItems.length
@@ -322,7 +323,7 @@ export function ActionLinks({
     return (
       <div
         className={cs(
-          'flex w-full items-center justify-center gap-[8px]',
+          'flex w-full items-center justify-start gap-[8px]',
           className
         )}
       >
@@ -365,7 +366,7 @@ export function ActionLinks({
   return (
     <div
       className={cs(
-        'flex w-full items-center justify-center gap-2',
+        'flex w-full items-center justify-start gap-2',
         className
       )}
     >

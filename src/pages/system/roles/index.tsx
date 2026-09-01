@@ -7,6 +7,7 @@ import {
   FilterField,
   FilterInput,
   FilterSelect,
+  getTextActionColumnWidth,
   StatusBadge
 } from '@widgets/biz-list';
 import {
@@ -180,7 +181,10 @@ export function RolesPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 120,
+              width: getTextActionColumnWidth(
+                [common['common.edit'], common['common.delete']],
+                common['common.action']
+              ),
               render: (_: unknown, row: AdminAPI.SysRoleWrap) => {
                 if (isSuperAdminRole(row.role)) return '--';
                 return (

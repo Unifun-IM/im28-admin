@@ -111,6 +111,7 @@ src/
 | 设计语言、尺度与响应式 | [docs/skills/design-system/SKILL.md](docs/skills/design-system/SKILL.md) |
 | API 与 typings 生成 | [docs/skills/api-generation/SKILL.md](docs/skills/api-generation/SKILL.md) |
 | CSS、主题与 Tailwind | [docs/skills/css-usage/SKILL.md](docs/skills/css-usage/SKILL.md) |
+| 动效、页面切换与减少动态效果 | [docs/skills/animation-usage/SKILL.md](docs/skills/animation-usage/SKILL.md) |
 | Figma 规则 | [docs/skills/figma-rules/SKILL.md](docs/skills/figma-rules/SKILL.md) |
 | SVG 与图标 | [docs/skills/svg-icon-usage/SKILL.md](docs/skills/svg-icon-usage/SKILL.md) |
 | 组件选择、Arco 最佳使用与抽取 | [docs/skills/component-usage/SKILL.md](docs/skills/component-usage/SKILL.md) |

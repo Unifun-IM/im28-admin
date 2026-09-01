@@ -1,3 +1,11 @@
+/* 登录背景的彩色层跟随运行时主题色；SVG 内保留原始颜色作为回退。 */
+.use-login-banner {
+  --login-banner-base-start: rgb(var(--primary-5));
+  --login-banner-base-end: rgb(var(--primary-3));
+  --login-banner-glow-start: rgb(var(--primary-6));
+  --login-banner-glow-end: rgb(var(--primary-2));
+}
+
 /* —— 登录表单：Figma 602:35261 —— */
 .use-login-form {
   .arco-form-item {
@@ -6,7 +14,7 @@
 
   .arco-input-inner-wrapper,
   .arco-input-password {
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     background: var(--color-bg-2, #fff);
   }
 
@@ -19,7 +27,7 @@
   .arco-input-prefix {
     padding-right: 12px;
     color: var(--color-text-3, #86909c);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     display: inline-flex;
     align-items: center;
 
@@ -41,8 +49,8 @@
 
   .arco-input {
     height: 22px;
-    line-height: 22px;
-    font-size: 14px;
+    line-height: var(--line-height-body);
+    font-size: var(--font-size-body);
     color: var(--color-text-1, #1d2129);
 
     &::placeholder {
@@ -51,10 +59,9 @@
   }
 
   .arco-btn-primary {
-    border-radius: 8px;
     height: 32px;
-    font-size: 14px;
-    line-height: 21px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
     background-color: rgb(var(--primary-6));
     border-color: rgb(var(--primary-6));
   }
@@ -75,7 +82,7 @@
   height: 32px;
   overflow: hidden;
   user-select: none;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   border: 1px solid var(--color-border-2);
   background: var(--color-fill-2);
   transition: background-color 0.35s ease, border-color 0.35s ease;
@@ -115,8 +122,8 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    font-size: 14px;
-    line-height: 21px;
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
     user-select: none;
   }
 
@@ -153,7 +160,7 @@
     justify-content: center;
     height: 32px;
     padding: 0 16px;
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     cursor: grab;
     background: rgb(var(--primary-6));
     box-shadow: 0 2px 8px rgba(99, 92, 255, 0.28);
@@ -275,9 +282,9 @@
 
 /* 首次强制改密弹窗 — Figma 921:44793 / 922:44914 */
 .arco-modal.use-login-force-modal {
-  border-radius: 12px;
+  border-radius: var(--radius-overlay);
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-overlay);
   border: 1px solid var(--color-border-1, #f2f3f5);
 
   .arco-modal-content {
@@ -291,7 +298,6 @@
   }
 
   .arco-btn {
-    border-radius: 6px;
     height: 32px;
   }
 
@@ -312,9 +318,9 @@
 
   .arco-input-inner-wrapper,
   .arco-input-password {
-    border-radius: 8px;
+    border-radius: var(--radius-control);
     border-color: var(--color-border-2);
-    background: #fff;
+    background: var(--color-bg-2);
   }
 
   .arco-input-inner-wrapper {

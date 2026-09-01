@@ -5,7 +5,7 @@ description: Generate or update admin navigation, routes, lists, filters, detail
 
 # Admin Page Generation
 
-本 skill 属于技术负责人组织的工程执行阶段，负责页面信息架构、字段推导、路由和落页流程，不反向改写产品或设计决策。开始前沿用 `ai-code` 已加载的 `PROJECT.md`；可见 UI 读取 `DESIGN.md` 和 `design-system`，写 JSX 前读取 `component-usage`，新增或修改样式时读取 `css-usage`。接口生成和 Figma 读取分别交给对应专项 skill。
+本 skill 属于技术负责人组织的工程执行阶段，负责页面信息架构、字段推导、路由和落页流程，不反向改写产品或设计决策。开始前沿用 `ai-code` 已加载的 `PROJECT.md`；可见 UI 读取 `DESIGN.md` 和 `design-system`，写 JSX 前读取 `component-usage`，新增或修改样式时读取 `css-usage`。新增自定义状态反馈、视图切换或空间变化时读取 `animation-usage`；普通路由与 Arco 弹层沿用公共动效。接口生成和 Figma 读取分别交给对应专项 skill。
 
 ## 信息来源
 
@@ -138,6 +138,7 @@ Figma / PRD 未定义列集合时：
 - Drawer 是否沿用 `component-usage` 的公共契约，没有无依据固定像素宽度。
 - 列宽是否基于最终中英文文案和真实内容验证，操作列没有截断或显著空白。
 - 页面是否按 `design-system` 验证窄屏、桌面、浅色、暗色与最长文案，且响应式修复位于公共层级。
+- 自定义交互动效是否有明确反馈目的并遵循 `animation-usage`，没有覆盖公共页面切换或叠加 Arco 弹层动效。
 - PC 能力清单与移动任务流是否一一对应，移动端是否没有桌面侧栏、多页签或并排面板的压缩残留，并具备连续的进入与返回路径。
 - 页面是否符合 `PROJECT.md` 的产品边界、术语、导航和跨页面产品约束，且没有把单页推断反写成项目事实。
 - 页面是否符合 `DESIGN.md` 的项目设计方向与适用范围，且没有跳过设计归一直接从 PRD 推断全局风格。

@@ -7,7 +7,7 @@
 
   .arco-table-container {
     border: 1px solid var(--color-border-2);
-    border-radius: 8px;
+    border-radius: var(--radius-surface);
     overflow: hidden;
   }
 
@@ -45,9 +45,9 @@
     background: var(--color-fill-1);
     height: 32px;
     padding: 5px 12px;
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     font-weight: 500;
-    line-height: 22px;
+    line-height: var(--line-height-body);
     color: var(--color-text-3);
     border-radius: 0;
     border-top: none !important;
@@ -70,8 +70,8 @@
     min-height: 40px;
     height: auto;
     padding: 10px 12px;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
     color: var(--color-text-1);
     /* 同列表：无上下边框，仅列分隔；底边交给外框 */
     border-top: none !important;

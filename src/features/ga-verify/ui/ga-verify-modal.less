@@ -1,9 +1,9 @@
 /* —— 通用 GA 验证 / 绑定弹窗；颜色一律走主题语义 token —— */
 .arco-modal.use-ga-verify-modal,
 .arco-modal.use-login-ga-modal {
-  border-radius: 12px;
+  border-radius: var(--radius-overlay);
   overflow: hidden;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-overlay);
   border: 1px solid var(--color-border-2);
 
   .arco-modal-content {
@@ -22,15 +22,15 @@
   }
 
   .use-ga-title {
-    font-size: 20px;
+    font-size: var(--font-size-page-title);
     font-weight: 500;
-    line-height: 28px;
+    line-height: var(--line-height-page-title);
     color: var(--color-text-1);
   }
 
   .use-ga-desc {
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
     color: var(--color-text-3);
   }
 
@@ -52,9 +52,9 @@
   }
 
   .use-ga-label {
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     font-weight: 500;
-    line-height: 18px;
+    line-height: var(--line-height-caption-compact);
     color: var(--color-text-1);
   }
 
@@ -67,7 +67,6 @@
   }
 
   .arco-btn {
-    border-radius: 6px;
     height: 32px;
     min-width: 80px;
   }
@@ -152,7 +151,7 @@
   .arco-input {
     text-align: center;
     color: var(--color-text-1);
-    font-size: 14px;
+    font-size: var(--font-size-body);
   }
 }
 
@@ -168,9 +167,9 @@
     height: 48px;
     padding: 10px;
     text-align: center;
-    font-size: 20px;
+    font-size: var(--font-size-page-title);
     font-weight: 700;
-    line-height: 28px;
+    line-height: var(--line-height-page-title);
     border-radius: 6px;
     border: 1px solid var(--color-border-2) !important;
     background: var(--color-fill-2) !important;
@@ -194,5 +193,3 @@
     border-color: rgb(var(--danger-6)) !important;
   }
 }
-
-

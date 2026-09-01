@@ -18,13 +18,43 @@ description: Style admin UI with project theme variables, Tailwind for ordinary 
 
 Tailwind 不替代 Arco Form、Grid、Table、Button、Select。
 
-## 主题颜色
+## 设计 Token
 
 权威来源：
 
 - 运行时：`src/app/styles/theme-tokens.less`
 - 设计 token：`docs/theme/Light.tokens.json`、`docs/theme/Dark.tokens.json`
 - Tailwind 映射：`tailwind.config.js`
+
+`theme-tokens.less` 同时维护两类变量：
+
+- `:root` 中主题无关的排版、形状、层级和动效 token。
+- `body` / `body[arco-theme='dark']` 中随主题变化的颜色 token。
+
+新增或修改样式时先使用已有语义：
+
+| 类别 | 语义变量 |
+| --- | --- |
+| 字体 | `--font-family-body` |
+| 字号 | `--font-size-caption`、`--font-size-body`、`--font-size-title`、`--font-size-page-title` |
+| 行高 | 与字号角色对应的 `--line-height-*`；紧凑正文 / 辅助文案使用对应 `-compact` |
+| 圆角 | `--radius-compact`、`--radius-control`、`--radius-surface`、`--radius-overlay`、`--radius-full` |
+| 阴影 | `--shadow-popup`、`--shadow-overlay`、`--shadow-sticky` |
+| 动效 | `--motion-duration-*` 与 `--motion-ease-*` |
+
+Arco 的 `--border-radius-*` 是上述圆角 token 的兼容别名；Tailwind 的字体、圆角、阴影和动效扩展必须映射同一来源，不能再维护平行数值。
+
+### 抽取边界
+
+- 字号与行高按语义角色成对使用。正文、辅助文案和标题使用 token；图标尺寸、控件高度对齐行高和特殊数字展示可以保留局部值。
+- 4 / 8 / 12px 的通用紧凑元素、控件 / 业务面和浮层圆角使用 token；`0`、`50%`、复合方向圆角及明确的特殊造型保持局部。
+- 普通 Arco Button 的默认圆角由 `global.less` 统一映射 `--radius-control`，与列表查询按钮一致；业务样式不得重复声明。只有明确的 `shape="circle"` / `shape="round"`、组合控件或高优先级设计要求可以覆盖。
+- 只有跨组件稳定复用的浮层、弹层和 sticky 层级抽阴影 token；品牌按钮、插画和单页特效阴影留在所属组件。
+- 颜色透明度属于颜色语义，写入对应 `--color-*`；`opacity: 0/1`、拖拽态、显隐态和只出现一次的状态透明度不抽成全局变量。
+- 多处共享的 Hover、状态切换、布局和主题切换时长 / easing 使用动效 token；关键帧、弹簧参数和业务编排动画保持局部，并支持 `prefers-reduced-motion`。
+- 只有能表达稳定设计决策的值才新增 token。不得为消除一次硬编码创建 `--value-*`、`--size-12` 或组件名伪语义变量。
+
+## 主题颜色
 
 常用语义：
 
@@ -75,6 +105,7 @@ Less：
 
 - 详情表格：`@shared/ui/biz-detail-table.less` + `use-biz-detail-table`
 - 标准表单 Modal：`@shared/ui/biz-form-modal.less` + `use-biz-form-modal`
+- 设置页表单：`@widgets/session-settings` 统一控件视觉；`InputNumber` 的 `.arco-input-number` 只是布局外壳，边框、背景和焦点态只落在内部 `.arco-input-inner-wrapper`，不能同时装饰两层。
 
 具体组件契约见 `component-usage`，业务页不要复制这些壳层样式。
 
@@ -83,6 +114,7 @@ Less：
 - Arco Modal 的桌面宽度可以由组件 `style.width` 表达；`md` 及以下统一由 `global.less` 通过 `max-width` 限制在视口安全边距内，不能用 `width: 100%` 把原本较窄的确认弹层反向拉宽。业务样式不得再次写平行的移动端宽度补丁。
 - 自定义复合 Modal 若使用桌面固定高度，移动端必须根据流程选择内容自适应或近全屏，不能直接继承桌面高度。可滚动内容放在唯一内容区，Header / Footer 保持可达。
 - Modal 内 `width: 100%` 的 flex / grid 子项同时设置 `box-sizing: border-box`、`min-width: 0` 和 `max-width: 100%`；padding 必须包含在父内容宽度内，禁止依靠外层 `overflow: hidden` 掩盖越界。
+- 只允许纵向滚动的内容区必须同时约束 `min-width: 0`、`max-width: 100%` 和 `overflow-x: hidden`；仅写 `overflow-y: auto` 会使另一轴计算为 `auto`，细小溢出也会生成横向滚动槽。
 
 ## 验收
 

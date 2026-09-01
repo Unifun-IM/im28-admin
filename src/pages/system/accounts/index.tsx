@@ -6,7 +6,8 @@ import {
   BizListPage,
   FilterField,
   FilterInput,
-  FilterSelect
+  FilterSelect,
+  getTextActionColumnWidth
 } from '@widgets/biz-list';
 import {
   postV1AdminSystemUsersList,
@@ -194,7 +195,14 @@ export function AccountsPage() {
             {
               title: common['common.action'],
               dataIndex: 'op',
-              width: 160,
+              width: getTextActionColumnWidth(
+                [
+                  t['accounts.resetPassword'],
+                  t['accounts.resetGa'],
+                  t['accounts.ipWhitelist']
+                ],
+                common['common.action']
+              ),
               render: (_: unknown, row: AdminAPI.SysUserWrap) => (
                 <ActionLinks
                   variant="text"

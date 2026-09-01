@@ -1,14 +1,60 @@
 /**
- * Figma 语义色 → Arco / 业务 CSS 变量
+ * 基础设计 token + Figma 语义色 → Arco / 业务 CSS 变量
  * 源：docs/theme/Light.tokens.json、docs/theme/Dark.tokens.json
  *
  * 约定：
+ * - :root：主题无关的排版、圆角、阴影和动效 token
  * - --color-*：完整色值（可含 alpha）
  * - --primary-* / --success-* / --warning-* / --danger-* / --arcoblue-*：
  *   Arco RGB 三元组（无 alpha），供 rgb()/rgba() 使用
  * - primary/1、success/1 等在 Figma 为品牌色 12% 透明；菜单等场景用
  *   rgba(var(--primary-6), 0.12)；--*-1 提供叠在典型底色上的近似实色
  */
+
+/* 主题无关的基础语义 token：排版、形状、层级与动效 */
+:root {
+  --font-family-body: Inter, -apple-system, BlinkMacSystemFont, 'PingFang SC',
+    'Hiragino Sans GB', 'Noto Sans', 'Microsoft YaHei', 'Helvetica Neue',
+    Helvetica, Arial, sans-serif;
+
+  --font-size-caption: 12px;
+  --font-size-body: 14px;
+  --font-size-title: 16px;
+  --font-size-page-title: 20px;
+  --line-height-caption-compact: 18px;
+  --line-height-caption: 20px;
+  --line-height-body-compact: 21px;
+  --line-height-body: 22px;
+  --line-height-title: 24px;
+  --line-height-page-title: 28px;
+
+  --radius-compact: 4px;
+  --radius-control: 8px;
+  --radius-surface: 8px;
+  --radius-overlay: 12px;
+  --radius-full: 999px;
+
+  /* Arco compatibility aliases */
+  --border-radius-xs: var(--radius-compact);
+  --border-radius-small: var(--radius-control);
+  --border-radius-medium: var(--radius-overlay);
+  --border-radius-large: var(--radius-overlay);
+  --border-radius-circle: var(--radius-full);
+
+  --shadow-popup: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --shadow-overlay: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --shadow-sticky: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  --motion-duration-hover: 150ms;
+  --motion-duration-fade: 200ms;
+  --motion-duration-page-enter: 280ms;
+  --motion-duration-state: 300ms;
+  --motion-duration-layout: 280ms;
+  --motion-duration-theme: 500ms;
+  --motion-ease-standard: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --motion-ease-layout: cubic-bezier(0.34, 0.69, 0.1, 1);
+  --motion-ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
 /* —— 浅色 Light.tokens.json —— */
 body {
@@ -101,16 +147,6 @@ body {
   --blue-5: 87, 169, 251; /* #57A9FB */
   --blue-6: 52, 145, 250; /* #3491FA */
   --blue-7: 52, 145, 250;
-
-  /**
-   * 圆角 Figma：xs=4 / s=8 / m=12 / round=999
-   * Arco 按钮吃 --border-radius-small → 对齐 圆角/s
-   */
-  --border-radius-xs: 4px;
-  --border-radius-small: 8px;
-  --border-radius-medium: 12px;
-  --border-radius-large: 12px;
-  --border-radius-circle: 999px;
 }
 
 /* —— 暗色 Dark.tokens.json —— */

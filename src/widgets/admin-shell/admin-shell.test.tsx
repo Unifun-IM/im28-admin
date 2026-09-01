@@ -34,6 +34,7 @@ describe('PageLayout', () => {
 
     expect(container.querySelector('.arco-layout')).toBeTruthy();
     expect(container.querySelector('.arco-layout-sider, .arco-menu')).toBeTruthy();
+    expect(container.querySelector('[data-page-transition]')).toBeTruthy();
     expect(
       container.querySelector('[data-layout-navbar]')?.getAttribute('style')
     ).toContain('height: 86px');

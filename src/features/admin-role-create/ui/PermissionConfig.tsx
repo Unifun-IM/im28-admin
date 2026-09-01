@@ -144,7 +144,7 @@ export default function PermissionConfig({
     return (
       <div
         key={res.key}
-        className="flex items-start gap-3 border-0 border-b border-dashed border-[var(--color-border-2)] bg-[var(--color-fill-1,#f7f8fa)] py-2 pl-[46px] pr-4 last:border-b-0 max-md:flex-col max-md:pl-4"
+        className="box-border flex min-w-0 max-w-full items-start gap-3 border-0 border-b border-dashed border-[var(--color-border-2)] bg-[var(--color-fill-1,#f7f8fa)] py-2 pl-[46px] pr-4 last:border-b-0 max-md:flex-col max-md:pl-4"
       >
         <div className="flex w-[240px] shrink-0 items-center gap-3 border-0 border-r border-solid border-[var(--color-border-2)] pr-3 max-md:w-full max-md:border-r-0 max-md:pr-0">
           <Checkbox
@@ -162,6 +162,7 @@ export default function PermissionConfig({
             {res.actions.map((a) => (
               <Checkbox
                 key={a.key}
+                className="max-w-full"
                 checked={checked.has(a.key)}
                 onChange={(v) => {
                   const next = new Set(checked);
@@ -180,7 +181,7 @@ export default function PermissionConfig({
                   setKeys(next);
                 }}
               >
-                <span className="text-[14px] text-arco-text-2">
+                <span className="break-words text-[14px] text-arco-text-2">
                   {permTitle(a.key, a.title)}
                 </span>
               </Checkbox>
@@ -192,7 +193,7 @@ export default function PermissionConfig({
   };
 
   return (
-    <div className="use-role-perm-config overflow-hidden rounded-xl border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)]">
+    <div className="use-role-perm-config min-w-0 max-w-full overflow-hidden rounded-xl border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)]">
       <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-[var(--color-border-2)] px-4 py-2 max-md:items-start max-md:flex-col">
         <div className="flex min-w-0 flex-1 items-center gap-3 max-md:w-full max-md:flex-wrap">
           <Input
@@ -230,7 +231,7 @@ export default function PermissionConfig({
         </button>
       </div>
 
-      <div className="max-h-[360px] overflow-y-auto">
+      <div className="use-role-perm-scroll box-border max-h-[360px] w-full min-w-0 max-w-full overflow-x-hidden overflow-y-auto">
         {loading ? (
           <div className="flex justify-center px-4 py-10">
             <Spin />
@@ -240,7 +241,7 @@ export default function PermissionConfig({
             {t['common.empty']}
           </div>
         ) : (
-          filterModules.map((mod) => {
+          filterModules.map((mod, index) => {
             const keys = collectModuleKeys(mod);
             const modAll =
               keys.length > 0 && keys.every((k) => checked.has(k));
@@ -248,10 +249,16 @@ export default function PermissionConfig({
             const open = expanded[mod.key] !== false;
             const hasChildren = !mod.leaf && (mod.resources?.length || 0) > 0;
             const selectedCount = keys.filter((k) => checked.has(k)).length;
+            const isLast = index === filterModules.length - 1;
 
             return (
-              <div key={mod.key}>
-                <div className="flex items-center justify-between border-0 border-b border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)] px-4 py-2">
+              <div key={mod.key} className="min-w-0 max-w-full">
+                <div
+                  className={cs(
+                    'box-border flex min-w-0 max-w-full items-center justify-between border-0 border-b border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2,#fff)] px-4 py-2',
+                    isLast && (!hasChildren || !open) && 'border-b-0'
+                  )}
+                >
                   <div className="flex min-w-0 items-center gap-3">
                     <Checkbox
                       checked={modAll}

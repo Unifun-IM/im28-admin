@@ -1,4 +1,10 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, {
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import {
   Button,
   Card,
@@ -27,7 +33,8 @@ import DataSummary, { type SummaryItem } from './DataSummary';
 import SearchFilterBar from './SearchFilterBar';
 import TableBatchBar from './TableBatchBar';
 import {
-  normalizeBizColumns,
+  DEFAULT_AUXILIARY_COLUMN_WIDTH,
+  resolveBizTableLayout,
   resolveBizPagination
 } from './tableDefaults';
 
@@ -93,6 +100,8 @@ export function BizListPage<T extends Record<string, unknown>>({
   const t = useLocale();
   const compactActions = useMediaQuery(MOBILE_MEDIA_QUERY);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [tableAvailableWidth, setTableAvailableWidth] = useState(0);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
   /** 有 batchActions 时：点「批量操作」后才进入选择模式 */
   const [batchSelectMode, setBatchSelectMode] = useState(false);
   const tableFullscreen = pageTabsStore.tableFullscreen;
@@ -108,6 +117,25 @@ export function BizListPage<T extends Record<string, unknown>>({
     [tableProps.rowSelection?.selectedRowKeys]
   );
   const selectedCount = selectedRowKeys.length;
+
+  useLayoutEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return undefined;
+
+    const syncWidth = () => {
+      const nextWidth = Math.floor(container.clientWidth);
+      setTableAvailableWidth((current) =>
+        current === nextWidth ? current : nextWidth
+      );
+    };
+
+    syncWidth();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+
+    const observer = new ResizeObserver(syncWidth);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const exitBatchSelect = () => {
     setBatchSelectMode(false);
@@ -135,17 +163,6 @@ export function BizListPage<T extends Record<string, unknown>>({
     selectedRowKeys
   ]);
 
-  // 依赖 lang：切换语言后强制按新表头文案规范化列
-  const columns = useMemo(
-    () =>
-      normalizeBizColumns(
-        (tableProps.columns || []) as TableColumnProps<T>[],
-        { compactActions }
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- lang 变化时需重算 i18n 表头
-    [compactActions, tableProps.columns, lang]
-  );
-
   /** 有选择列时默认左侧固定；配置了 batchActions 时仅批量模式下展示 */
   const rowSelection = useMemo(() => {
     if (!tableProps.rowSelection) return undefined;
@@ -155,6 +172,35 @@ export function BizListPage<T extends Record<string, unknown>>({
       ...tableProps.rowSelection
     };
   }, [tableProps.rowSelection, needsBatchEntry, batchSelectMode]);
+  const auxiliaryColumnWidth =
+    (rowSelection
+      ? rowSelection.columnWidth ?? DEFAULT_AUXILIARY_COLUMN_WIDTH
+      : 0) +
+    (tableProps.expandedRowRender
+      ? tableProps.expandProps?.width ?? DEFAULT_AUXILIARY_COLUMN_WIDTH
+      : 0);
+
+  // 依赖 lang：切换语言后强制按新表头文案规范化列
+  const tableLayout = useMemo(
+    () =>
+      resolveBizTableLayout(
+        (tableProps.columns || []) as TableColumnProps<T>[],
+        {
+          compactActions,
+          auxiliaryColumnWidth,
+          availableWidth: tableAvailableWidth
+        }
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- lang 变化时需重算 i18n 表头
+    [
+      auxiliaryColumnWidth,
+      compactActions,
+      tableAvailableWidth,
+      tableProps.columns,
+      lang
+    ]
+  );
+  const columns = tableLayout.columns;
   const pagination = resolveBizPagination(
     tableProps.pagination as false | undefined | Record<string, unknown>,
     displayData.length,
@@ -164,10 +210,10 @@ export function BizListPage<T extends Record<string, unknown>>({
   const scroll = useMemo(() => {
     const incoming = tableProps.scroll || {};
     return {
-      x: true as const,
+      x: tableLayout.scrollX,
       ...incoming
     };
-  }, [tableProps.scroll]);
+  }, [tableLayout.scrollX, tableProps.scroll]);
 
   const batchTheme = batchActions?.theme || 'light';
   const batchInToolbar = batchTheme === 'light';
@@ -370,6 +416,7 @@ export function BizListPage<T extends Record<string, unknown>>({
           </div>
         )}
         <div
+          ref={tableContainerRef}
           className={cs(
             'relative min-w-0 max-w-full overflow-x-hidden',
             tableFullscreen && 'min-h-0 flex-1 overflow-y-auto'

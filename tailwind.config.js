@@ -37,18 +37,47 @@ export default {
         'arco-warning': 'rgb(var(--warning-6))',
         'arco-danger': 'rgb(var(--danger-6))'
       },
+      fontFamily: {
+        sans: ['var(--font-family-body)']
+      },
       borderRadius: {
-        sm: '4px',
-        DEFAULT: '8px',
-        lg: '8px',
-        xl: '12px'
+        sm: 'var(--radius-compact)',
+        DEFAULT: 'var(--radius-control)',
+        lg: 'var(--radius-surface)',
+        xl: 'var(--radius-overlay)'
       },
       boxShadow: {
-        popover: '0 4px 10px rgba(0, 0, 0, 0.1)'
+        popover: 'var(--shadow-popup)',
+        overlay: 'var(--shadow-overlay)',
+        sticky: 'var(--shadow-sticky)'
       },
       fontSize: {
-        xs: ['12px', { lineHeight: '20px' }],
-        sm: ['14px', { lineHeight: '21px' }]
+        xs: [
+          'var(--font-size-caption)',
+          { lineHeight: 'var(--line-height-caption)' }
+        ],
+        sm: [
+          'var(--font-size-body)',
+          { lineHeight: 'var(--line-height-body-compact)' }
+        ],
+        title: [
+          'var(--font-size-title)',
+          { lineHeight: 'var(--line-height-title)' }
+        ],
+        'page-title': [
+          'var(--font-size-page-title)',
+          { lineHeight: 'var(--line-height-page-title)' }
+        ]
+      },
+      transitionDuration: {
+        hover: 'var(--motion-duration-hover)',
+        state: 'var(--motion-duration-state)',
+        layout: 'var(--motion-duration-layout)'
+      },
+      transitionTimingFunction: {
+        standard: 'var(--motion-ease-standard)',
+        layout: 'var(--motion-ease-layout)',
+        emphasized: 'var(--motion-ease-emphasized)'
       }
     }
   },
