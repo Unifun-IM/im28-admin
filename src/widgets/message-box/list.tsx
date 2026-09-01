@@ -87,7 +87,7 @@ function MessageList(props: MessageListProps) {
                     {item.title}
                   </span>
                   <span className="inline-flex shrink-0 items-center gap-1">
-                    <span className="text-[10px] leading-[14px] text-arco-text-3">
+                    <span className="text-caption-compact text-arco-text-3">
                       {item.time}
                     </span>
                     <span

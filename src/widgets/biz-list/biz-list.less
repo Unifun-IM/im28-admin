@@ -9,10 +9,7 @@
 }
 
 .use-biz-summary-grid {
-  grid-template-columns: repeat(
-    var(--biz-summary-columns, 3),
-    minmax(0, 1fr)
-  );
+  grid-template-columns: repeat(var(--biz-summary-columns, 3), minmax(0, 1fr));
   gap: 1px;
   background: var(--color-border-2);
 }
@@ -164,7 +161,8 @@
   }
 
   .arco-input-group-addbefore + .arco-input-inner-wrapper,
-  .arco-input-group:has(.arco-input-group-addbefore) > .arco-input-inner-wrapper {
+  .arco-input-group:has(.arco-input-group-addbefore)
+    > .arco-input-inner-wrapper {
     background-color: transparent;
     border: none;
     border-radius: 0 var(--radius-control) var(--radius-control) 0;
@@ -528,7 +526,7 @@
     height: 32px;
     margin: 0 !important;
     padding: 0 8px !important;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     line-height: var(--line-height-body);
     font-size: var(--font-size-body);
     color: var(--color-text-1, #1d2129);
@@ -559,7 +557,7 @@
     gap: 4px;
     height: 32px;
     padding: 0 8px;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     cursor: pointer;
     font-size: var(--font-size-body);
     line-height: var(--line-height-body);
@@ -654,7 +652,7 @@
 
 .use-table-batch-bar-dark {
   .arco-switch:not(.arco-switch-checked) {
-    background-color: rgba(255, 255, 255, 0.16);
+    background-color: var(--color-fill-inverse-heavy);
   }
 }
 
@@ -685,7 +683,6 @@
     height: 56px;
     padding: 12px;
     border-bottom: 1px solid var(--color-border-2);
-
   }
 
   @media (max-width: 768px) {
@@ -909,11 +906,17 @@
     }
 
     /* 末行贴卡片底边时补齐圆角，避免方角露白 */
-    .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td:first-child {
+    .arco-table-content-inner
+      tbody
+      > .arco-table-tr:last-child
+      > .arco-table-td:first-child {
       border-bottom-left-radius: 8px;
     }
 
-    .arco-table-content-inner tbody > .arco-table-tr:last-child > .arco-table-td:last-child {
+    .arco-table-content-inner
+      tbody
+      > .arco-table-tr:last-child
+      > .arco-table-td:last-child {
       border-bottom-right-radius: 8px;
     }
   }
@@ -1002,7 +1005,10 @@
   }
 
   .arco-table-content-inner tbody > .arco-table-tr-checked > .arco-table-td,
-  .arco-table-content-inner tbody > .arco-table-tr-checked:hover > .arco-table-td {
+  .arco-table-content-inner
+    tbody
+    > .arco-table-tr-checked:hover
+    > .arco-table-td {
     background-color: rgba(var(--primary-6), 0.06) !important;
   }
 

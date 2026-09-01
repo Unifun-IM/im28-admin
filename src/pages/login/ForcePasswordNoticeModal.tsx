@@ -31,11 +31,11 @@ export default function ForcePasswordNoticeModal({
       style={{ width: 480 }}
     >
       <div className="box-border flex h-[48px] items-center border-0 border-b border-solid border-[var(--color-border-2)] px-[24px]">
-        <span className="text-[16px] font-medium leading-6 text-[var(--color-text-1,#1d2129)]">
+        <span className="text-title font-medium text-arco-text-1">
           {t['login.forceNotice.title']}
         </span>
       </div>
-      <div className="box-border p-[24px] text-[14px] leading-[21px] text-black">
+      <div className="box-border p-[24px] text-sm text-arco-text-1">
         <p className="m-0">{t['login.forceNotice.line1']}</p>
         <p className="m-0">{t['login.forceNotice.line2']}</p>
       </div>

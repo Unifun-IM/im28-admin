@@ -27,7 +27,7 @@ function CustomTooltip(props: TooltipProps) {
         {props.data.map((item, index) => (
           <div
             className={cs(
-              'use-customer-tooltip-item flex h-8 items-center justify-between rounded-sm bg-[rgb(255_255_255_/_90%)] px-2 leading-8 text-arco-text-2 shadow-[6px_0_20px_rgb(34_87_188_/_10%)]',
+              'use-customer-tooltip-item flex h-8 items-center justify-between rounded-sm px-2 leading-8 text-arco-text-2',
               index < props.data.length - 1 && 'mb-2'
             )}
             key={index}

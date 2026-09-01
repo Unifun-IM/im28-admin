@@ -101,10 +101,10 @@ export default function ResetOwnGaFlow({
           </div>
         }
       >
-        <p className="m-0 text-[14px] leading-[21px] text-arco-text-1">
+        <p className="m-0 text-sm text-arco-text-1">
           {t['userCenter.gaConfirm.desc']}
         </p>
-        <ul className="m-0 mt-3 list-disc pl-[21px] text-[14px] leading-[21px] text-arco-text-1">
+        <ul className="m-0 mt-3 list-disc pl-[21px] text-sm text-arco-text-1">
           <li>{t['userCenter.gaConfirm.bullet.1']}</li>
           <li>{t['userCenter.gaConfirm.bullet.2']}</li>
           <li>{t['userCenter.gaConfirm.bullet.3']}</li>
@@ -145,7 +145,7 @@ export default function ResetOwnGaFlow({
             extra={
               <Button
                 type="primary"
-                className="!min-w-[100px] !rounded-lg"
+                className="!min-w-[100px]"
                 onClick={onDone}
               >
                 {common['common.done']}

@@ -165,7 +165,11 @@ export default function CreateAccountModal({
       style={{ width: 780 }}
     >
       {step === 'form' ? (
-        <Form form={form} layout="vertical" requiredSymbol={{ position: 'end' }}>
+        <Form
+          form={form}
+          layout="vertical"
+          requiredSymbol={{ position: 'end' }}
+        >
           <FormItem
             field="username"
             label={t['createAccount.field.username']}
@@ -201,7 +205,7 @@ export default function CreateAccountModal({
             field="ip_text"
             label={t['createAccount.field.ipWhitelist']}
             extra={
-              <span className="text-[12px] leading-[18px] text-[rgb(var(--danger-6))]">
+              <span className="text-caption-compact text-arco-danger">
                 {t['createAccount.field.ipWhitelistExtra']}
               </span>
             }
@@ -226,7 +230,7 @@ export default function CreateAccountModal({
               </span>
             }
           />
-          <div className="use-create-account-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[var(--color-border-2)] p-3 text-[12px] leading-[1.5] text-arco-text-1">
+          <div className="use-create-account-credential mx-auto mt-4 w-full max-w-[520px] rounded-lg border border-solid border-[var(--color-border-2)] p-3 text-caption-compact text-arco-text-1">
             <div className="flex items-center gap-6">
               <span className="w-[120px] shrink-0">
                 {t['createAccount.success.username']}

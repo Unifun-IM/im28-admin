@@ -26,14 +26,13 @@
   padding: 0 12px;
   /* Figma 741:29115：顶栏白底，与内容区 fill-1 区分 */
   background-color: var(--color-bg-2, #fff);
-  transition:
-    left var(--motion-duration-layout) var(--motion-ease-layout),
+  transition: left var(--motion-duration-layout) var(--motion-ease-layout),
     width var(--motion-duration-layout) var(--motion-ease-layout),
     height var(--motion-duration-layout) var(--motion-ease-layout),
     gap var(--motion-duration-layout) var(--motion-ease-layout),
     padding var(--motion-duration-layout) var(--motion-ease-layout),
     background-color var(--motion-duration-state) var(--motion-ease-standard),
-    box-shadow var(--motion-duration-fade) ease;
+    box-shadow var(--motion-duration-fade) var(--motion-ease-standard);
   display: flex;
   flex-direction: column;
   gap: @header-navbar-gap;
@@ -77,9 +76,8 @@
   height: @nav-size-height;
   overflow: hidden;
   opacity: 1;
-  transition:
-    height var(--motion-duration-layout) var(--motion-ease-layout),
-    opacity var(--motion-duration-fade) ease,
+  transition: height var(--motion-duration-layout) var(--motion-ease-layout),
+    opacity var(--motion-duration-fade) var(--motion-ease-standard),
     margin var(--motion-duration-layout) var(--motion-ease-layout);
 
   .layout-navbar-chrome-fullscreen &,
@@ -139,7 +137,7 @@
   }
 
   img {
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     object-fit: cover;
   }
 
@@ -175,12 +173,11 @@
   border-right: 1px solid var(--color-border-2, rgba(0, 0, 0, 0.08));
   border-radius: 0;
   overflow: hidden;
-  transition:
-    width var(--motion-duration-layout) var(--motion-ease-layout),
+  transition: width var(--motion-duration-layout) var(--motion-ease-layout),
     min-width var(--motion-duration-layout) var(--motion-ease-layout),
-    opacity var(--motion-duration-fade) ease,
+    opacity var(--motion-duration-fade) var(--motion-ease-standard),
     transform var(--motion-duration-layout) var(--motion-ease-layout),
-    border-color var(--motion-duration-fade) ease;
+    border-color var(--motion-duration-fade) var(--motion-ease-standard);
 
   ::-webkit-scrollbar {
     width: 12px;
@@ -242,16 +239,16 @@
   }
 
   .sider-logo-img {
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     object-fit: cover;
   }
 
   span {
     flex: 1;
     min-width: 0;
-    font-size: 18px;
+    font-size: var(--font-size-page-title);
     font-weight: 600;
-    line-height: var(--line-height-title);
+    line-height: var(--line-height-page-title);
     color: var(--color-text-1, #1d2129);
     white-space: nowrap;
     overflow: hidden;
@@ -367,7 +364,10 @@
   :global(.arco-menu-item.arco-menu-selected),
   :global(.arco-menu-item.arco-menu-selected:hover) {
     border-radius: var(--radius-control);
-    background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+    background-color: var(
+      --color-primary-light,
+      rgba(99, 92, 255, 0.12)
+    ) !important;
     color: rgb(var(--primary-6)) !important;
     font-weight: 500;
 
@@ -405,7 +405,9 @@
   }
 
   /* L1 展开区：左侧竖线 + 12px 内边距，避免二级项背景贴线 */
-  > :global(.arco-menu-inner) > :global(.arco-menu-inline) > :global(.arco-menu-inline-content) {
+  > :global(.arco-menu-inner)
+    > :global(.arco-menu-inline)
+    > :global(.arco-menu-inline-content) {
     box-sizing: border-box;
     margin: 0 0 0 20px;
     padding-left: 12px;
@@ -431,7 +433,10 @@
     > :global(.arco-menu-item.arco-menu-selected),
     > :global(.arco-menu-item.arco-menu-selected:hover) {
       border-radius: var(--radius-control);
-      background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+      background-color: var(
+        --color-primary-light,
+        rgba(99, 92, 255, 0.12)
+      ) !important;
       color: rgb(var(--primary-6)) !important;
       font-weight: 500;
     }
@@ -503,7 +508,10 @@
       > :global(.arco-menu-item.arco-menu-selected),
     :global(.arco-menu-inline-content)
       > :global(.arco-menu-item.arco-menu-selected:hover) {
-      background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+      background-color: var(
+        --color-primary-light,
+        rgba(99, 92, 255, 0.12)
+      ) !important;
       color: rgb(var(--primary-6)) !important;
       font-weight: 500;
     }
@@ -564,7 +572,10 @@
       height: 40px !important;
       min-height: 40px;
       border-radius: var(--radius-overlay);
-      background-color: var(--color-primary-light, rgba(99, 92, 255, 0.12)) !important;
+      background-color: var(
+        --color-primary-light,
+        rgba(99, 92, 255, 0.12)
+      ) !important;
       color: rgb(var(--primary-6)) !important;
       font-weight: 400;
 
@@ -657,8 +668,8 @@
   min-width: 0;
   min-height: 100vh;
   overflow-x: clip;
-  transition:
-    padding-left var(--motion-duration-layout) var(--motion-ease-layout),
+  transition: padding-left var(--motion-duration-layout)
+      var(--motion-ease-layout),
     padding-top var(--motion-duration-layout) var(--motion-ease-layout);
   box-sizing: border-box;
 }

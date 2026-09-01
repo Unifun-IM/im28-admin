@@ -28,9 +28,7 @@ export function CopyValue({
     <span
       className={`inline-flex items-center gap-[8px] ${className || ''}`.trim()}
     >
-      <span className="text-[12px] leading-[22px] text-arco-text-1">
-        {display}
-      </span>
+      <span className="text-xs text-arco-text-1">{display}</span>
       {canCopy ? (
         <button
           type="button"

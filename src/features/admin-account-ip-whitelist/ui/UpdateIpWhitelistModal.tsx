@@ -70,9 +70,7 @@ export default function UpdateIpWhitelistModal({
       const nextIps = parseIps(values.ip_text || '');
       const invalid = nextIps.find((ip) => !IPV4_RE.test(ip));
       if (invalid) {
-        Message.error(
-          t['ipWhitelist.msg.invalidIp'].replace('{ip}', invalid)
-        );
+        Message.error(t['ipWhitelist.msg.invalidIp'].replace('{ip}', invalid));
         return;
       }
       setIps(nextIps);
@@ -120,11 +118,7 @@ export default function UpdateIpWhitelistModal({
             <Button type="outline" className="!min-w-[80px]" onClick={onCancel}>
               {common['common.cancel']}
             </Button>
-            <Button
-              type="primary"
-              className="!min-w-[80px]"
-              onClick={goGa}
-            >
+            <Button type="primary" className="!min-w-[80px]" onClick={goGa}>
               {t['ipWhitelist.action.save']}
             </Button>
           </div>
@@ -139,15 +133,12 @@ export default function UpdateIpWhitelistModal({
             field="ip_text"
             label={t['ipWhitelist.field.ips']}
             extra={
-              <span className="text-[12px] leading-[18px] text-[rgb(var(--danger-6))]">
+              <span className="text-caption-compact text-arco-danger">
                 {t['ipWhitelist.field.ipsExtra']}
               </span>
             }
           >
-            <Input
-              allowClear
-              placeholder={t['ipWhitelist.placeholder.ips']}
-            />
+            <Input allowClear placeholder={t['ipWhitelist.placeholder.ips']} />
           </FormItem>
         </Form>
       </Modal>

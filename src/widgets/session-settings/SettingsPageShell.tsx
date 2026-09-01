@@ -40,17 +40,17 @@ export default function SettingsPageShell({
     <Card
       loading={loading}
       bordered={false}
-      className="use-session-settings-shell !rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]"
+      className="use-session-settings-shell !rounded-lg border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)]"
       bodyStyle={{ padding: 12 }}
     >
       <div className="use-session-settings-header mb-0 flex items-center justify-between gap-3 max-md:flex-wrap">
-        <h2 className="m-0 min-w-0 text-[20px] font-medium leading-7 text-arco-text-1">
+        <h2 className="m-0 min-w-0 text-page-title font-medium text-arco-text-1">
           {title}
         </h2>
         <Space size={8} className="use-session-settings-actions">
           <Button
             type="secondary"
-            className="!min-w-[80px] !rounded-lg"
+            className="!min-w-[80px]"
             disabled={!dirty}
             onClick={onCancel}
           >
@@ -58,7 +58,7 @@ export default function SettingsPageShell({
           </Button>
           <Button
             type="primary"
-            className="!min-w-[80px] !rounded-lg"
+            className="!min-w-[80px]"
             loading={saving}
             disabled={!dirty}
             onClick={onSave}
@@ -69,7 +69,7 @@ export default function SettingsPageShell({
       </div>
 
       <div className="use-session-settings-layout mt-3 flex items-start gap-3 max-md:flex-col">
-        <div className="use-session-settings-nav w-[240px] shrink-0 rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-2 max-md:w-full">
+        <div className="use-session-settings-nav w-[240px] shrink-0 rounded-lg border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-2 max-md:w-full">
           <Anchor
             className="use-session-settings-anchor"
             lineless
@@ -114,12 +114,10 @@ export function SettingsSectionCard({
   return (
     <div
       id={id}
-      className="scroll-mt-3 rounded-[12px] border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-3"
+      className="scroll-mt-3 rounded-lg border border-solid border-[var(--color-border-2)] bg-[var(--color-bg-2)] p-3"
     >
       <div className="mb-0 flex h-8 items-center">
-        <h3 className="m-0 text-[16px] font-medium leading-6 text-arco-text-1">
-          {title}
-        </h3>
+        <h3 className="m-0 text-title font-medium text-arco-text-1">{title}</h3>
       </div>
       {children}
     </div>

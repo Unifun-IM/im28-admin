@@ -42,14 +42,10 @@ export function EmptyState({
         style={{ width: imageWidth, height: imageHeight }}
       />
       {resolvedDescription ? (
-        <div className="text-[14px] leading-[21px] text-arco-text-1">
-          {resolvedDescription}
-        </div>
+        <div className="text-sm text-arco-text-1">{resolvedDescription}</div>
       ) : null}
       {secondary ? (
-        <div className="text-[14px] leading-[21px] text-arco-text-3">
-          {secondary}
-        </div>
+        <div className="text-sm text-arco-text-3">{secondary}</div>
       ) : null}
     </div>
   );

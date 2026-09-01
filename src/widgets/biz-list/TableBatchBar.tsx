@@ -44,9 +44,9 @@ export function BatchBarAction({
       type="button"
       disabled={disabled}
       className={cs(
-        'inline-flex h-8 items-center gap-2 border-0 border-l border-solid bg-transparent px-3 text-[14px] leading-[21px] disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-[16px]',
+        'inline-flex h-8 items-center gap-2 border-0 border-l border-solid bg-transparent px-3 text-sm disabled:cursor-not-allowed disabled:opacity-40 [&_svg]:text-[16px]',
         isDark
-          ? 'border-[#262828] text-[rgba(255,255,255,0.9)] hover:bg-[rgba(255,255,255,0.08)]'
+          ? 'border-arco-border-inverse text-arco-text-inverse hover:bg-arco-fill-inverse-hover'
           : cs(
               'border-[var(--color-border-2)] hover:opacity-80',
               STATUS_COLOR[status]
@@ -105,10 +105,10 @@ export default function TableBatchBar({
   return (
     <div
       className={cs(
-        'use-table-batch-bar flex h-8 max-w-full items-center overflow-x-auto overflow-y-hidden rounded-[8px]',
+        'use-table-batch-bar flex h-8 max-w-full items-center overflow-x-auto overflow-y-hidden rounded',
         isLight
           ? 'use-table-batch-bar-light border border-solid border-[var(--color-fill-3,#e5e6eb)] bg-[var(--color-bg-1,#f7f8fa)]'
-          : 'use-table-batch-bar-dark border border-[rgba(255,255,255,0.12)] bg-[#171a21] shadow-popover',
+          : 'use-table-batch-bar-dark border border-arco-border-inverse bg-arco-bg-inverse shadow-popover',
         className
       )}
       role="toolbar"
@@ -116,8 +116,8 @@ export default function TableBatchBar({
     >
       <div
         className={cs(
-          'flex h-8 shrink-0 items-center justify-center gap-2 px-3 text-[14px] leading-[21px]',
-          isLight ? 'text-arco-text-1' : 'text-[rgba(255,255,255,0.9)]'
+          'flex h-8 shrink-0 items-center justify-center gap-2 px-3 text-sm',
+          isLight ? 'text-arco-text-1' : 'text-arco-text-inverse'
         )}
       >
         {onExit ? (
@@ -127,7 +127,7 @@ export default function TableBatchBar({
               'inline-flex size-3.5 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0',
               isLight
                 ? 'text-arco-text-2 hover:text-arco-text-1'
-                : 'text-[rgba(255,255,255,0.7)] hover:text-white'
+                : 'text-arco-text-inverse-muted hover:text-arco-text-inverse'
             )}
             aria-label={t['common.cancel']}
             onClick={onExit}

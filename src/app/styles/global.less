@@ -26,7 +26,9 @@
 }
 
 .arco-select-single .arco-select-view-selector .arco-select-view-input,
-.arco-tree-select-single .arco-tree-select-view-selector .arco-tree-select-view-input,
+.arco-tree-select-single
+  .arco-tree-select-view-selector
+  .arco-tree-select-view-input,
 .arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-input {
   position: absolute;
   left: 0;
@@ -37,8 +39,12 @@
 }
 
 .arco-select-single .arco-select-view-selector .arco-select-view-value-mirror,
-.arco-tree-select-single .arco-tree-select-view-selector .arco-tree-select-view-value-mirror,
-.arco-cascader-single .arco-cascader-view-selector .arco-cascader-view-value-mirror {
+.arco-tree-select-single
+  .arco-tree-select-view-selector
+  .arco-tree-select-view-value-mirror,
+.arco-cascader-single
+  .arco-cascader-view-selector
+  .arco-cascader-view-value-mirror {
   opacity: 0;
 }
 
@@ -176,7 +182,7 @@ body {
       background: var(--color-fill-2, #f2f3f5) !important;
       color: var(--color-text-1, #1d2129) !important;
       font-weight: 500;
-      border-radius: 6px;
+      border-radius: var(--radius-control);
     }
 
     &::before,

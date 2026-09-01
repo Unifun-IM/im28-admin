@@ -25,14 +25,22 @@ export default {
         'arco-bg-1': 'var(--color-bg-1)',
         'arco-bg-2': 'var(--color-bg-2)',
         'arco-bg-popup': 'var(--color-bg-popup)',
+        'arco-bg-black': 'var(--color-bg-black)',
+        'arco-bg-inverse': 'var(--color-bg-inverse)',
         'arco-fill-1': 'var(--color-fill-1)',
         'arco-fill-2': 'var(--color-fill-2)',
+        'arco-fill-inverse-hover': 'var(--color-fill-inverse-hover)',
         'arco-border-1': 'var(--color-border-1)',
         'arco-border-2': 'var(--color-border-2)',
+        'arco-border-inverse': 'var(--color-border-inverse)',
         'arco-text-1': 'var(--color-text-1)',
         'arco-text-2': 'var(--color-text-2)',
         'arco-text-3': 'var(--color-text-3)',
         'arco-text-4': 'var(--color-text-4)',
+        'arco-text-white': 'var(--color-text-white)',
+        'arco-text-inverse': 'var(--color-text-inverse)',
+        'arco-text-inverse-muted': 'var(--color-text-inverse-muted)',
+        'arco-text-inverse-subtle': 'var(--color-text-inverse-subtle)',
         'arco-success': 'rgb(var(--success-6))',
         'arco-warning': 'rgb(var(--warning-6))',
         'arco-danger': 'rgb(var(--danger-6))'
@@ -56,9 +64,17 @@ export default {
           'var(--font-size-caption)',
           { lineHeight: 'var(--line-height-caption)' }
         ],
+        'caption-compact': [
+          'var(--font-size-caption)',
+          { lineHeight: 'var(--line-height-caption-compact)' }
+        ],
         sm: [
           'var(--font-size-body)',
           { lineHeight: 'var(--line-height-body-compact)' }
+        ],
+        body: [
+          'var(--font-size-body)',
+          { lineHeight: 'var(--line-height-body)' }
         ],
         title: [
           'var(--font-size-title)',

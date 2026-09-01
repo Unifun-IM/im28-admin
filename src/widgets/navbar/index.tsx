@@ -22,10 +22,7 @@ import {
   IconSearch,
   IconMenu
 } from '@arco-design/web-react/icon';
-import {
-  useGlobalSelector,
-  type GlobalState
-} from '@entities/global-state';
+import { useGlobalSelector, type GlobalState } from '@entities/global-state';
 import { GlobalContext } from '@shared/lib/global-context';
 import useLocale from '@shared/lib/useLocale';
 import startThemeTransition from '@shared/lib/startThemeTransition';
@@ -89,9 +86,7 @@ function Navbar({
   }
 
   const displayName =
-    userInfo?.sys_user?.display_name ||
-    userInfo?.sys_user?.username ||
-    'Admin';
+    userInfo?.sys_user?.display_name || userInfo?.sys_user?.username || 'Admin';
 
   async function logout() {
     try {
@@ -136,10 +131,10 @@ function Navbar({
             {(displayName || '?').slice(0, 1)}
           </Avatar>
           <div className="min-w-0">
-            <div className="text-sm font-medium leading-[14px] text-arco-text-1">
+            <div className="text-sm font-medium text-arco-text-1">
               {displayName}
             </div>
-            <div className="mt-1 text-xs leading-3 text-arco-text-3">
+            <div className="mt-1 text-caption-compact text-arco-text-3">
               {userInfo?.sys_user?.username || ''}
             </div>
           </div>
@@ -172,9 +167,7 @@ function Navbar({
         {breadcrumb.length > 0 && (
           <Breadcrumb
             className="use-navbar-breadcrumb"
-            separator={
-              <IconObliqueLine className="text-xs text-arco-text-3" />
-            }
+            separator={<IconObliqueLine className="text-xs text-arco-text-3" />}
           >
             {breadcrumb.map((node, index) => {
               const isLast = index === breadcrumb.length - 1;
@@ -185,7 +178,7 @@ function Navbar({
                 <Breadcrumb.Item key={`${name}-${index}`}>
                   <span
                     className={cs(
-                      'inline-flex items-center gap-1 p-1 text-sm font-normal leading-[22px] text-arco-text-2',
+                      'inline-flex items-center gap-1 p-1 text-body font-normal text-arco-text-2',
                       isLast && 'px-1 font-medium text-arco-text-1'
                     )}
                   >
@@ -212,7 +205,10 @@ function Navbar({
         <div className="flex items-center gap-[8px]">
           <Select
             triggerElement={
-              <IconButton icon={<IconLanguage />} tip={t['message.lang.tips']} />
+              <IconButton
+                icon={<IconLanguage />}
+                tip={t['message.lang.tips']}
+              />
             }
             options={[
               { label: t['common.lang.zh'], value: 'zh-CN' },
@@ -233,10 +229,7 @@ function Navbar({
           />
           <MessageBox onVisibleChange={setMessageVisible}>
             <Badge count={0} className="use-navbar-badge">
-              <IconButton
-                active={messageVisible}
-                icon={<IconNotification />}
-              />
+              <IconButton active={messageVisible} icon={<IconNotification />} />
             </Badge>
           </MessageBox>
           <IconButton
@@ -267,7 +260,7 @@ function Navbar({
                   (displayName || '?').slice(0, 1)
                 )}
               </Avatar>
-              <span className="max-w-24 overflow-hidden text-ellipsis whitespace-nowrap pr-1 text-sm font-medium leading-[22px] text-arco-text-1 max-[900px]:hidden">
+              <span className="max-w-24 overflow-hidden text-ellipsis whitespace-nowrap pr-1 text-body font-medium text-arco-text-1 max-[900px]:hidden">
                 {displayName}
               </span>
             </div>
