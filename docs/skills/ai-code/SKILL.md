@@ -1,26 +1,35 @@
 ---
 name: ai-code
-description: Route Codex, Claude Code, Cursor, and other AI coding tools from requirements and PRD through PROJECT.md and DESIGN.md into the smallest relevant code-generation skill set.
+description: Orchestrate AI coding through the project's product manager, design director, and technical lead contracts, then load the smallest relevant implementation skill set.
 ---
 
 # AI Code Skill Router
 
-本文件是 Codex、Claude Code、Cursor 和其它 AI code 工具的唯一入口。入口文件不再预加载其它文档；由本 router 按任务选择最小上下文。
+本文件是 Codex、Claude Code、Cursor 和其它 AI code 工具的统一 router。工具入口先加载 `AGENTS.md` 的技术负责人契约，再由本文件按任务选择最小上下文。
+
+## 三个角色
+
+- `PROJECT.md` 作为产品经理，归一产品目标、范围、信息架构、术语和验收边界。
+- `DESIGN.md` 作为设计总监，把产品目标转化为项目级视觉、交互和响应式方向。
+- `AGENTS.md` 作为技术负责人，组织工程执行、架构约束、增量修改和质量闭环。
+
+三者是决策层，不复制专项 skill 的实现细则。产品问题回到 `PROJECT.md`，设计问题回到 `DESIGN.md`，工程执行问题由 `AGENTS.md` 路由到对应 skill；不能用代码现状替产品或设计做决定。
 
 ## 固定启动
 
-1. 读取 `docs/skills/project-rules/SKILL.md` 并检查未提交改动。
+1. 按 `AGENTS.md` 的技术负责人职责，读取 `docs/skills/project-rules/SKILL.md` 并检查未提交改动。
 2. 读取 `PROJECT.md`；任务涉及可见 UI、交互或响应式时再读取 `DESIGN.md`。
 3. 理解当前文字输入，读取用户点名或与目标模块直接相关的 PRD / Figma / 代码，不扫描无关需求文档。
-4. 从下表选择一个主 skill；只有主 skill 明确要求或任务新增了对应工作时才补读其它 skill。
+4. 产品输入先由 `project-context` 归一；稳定设计变化再由 `design-system` 归一。普通局部任务不制造上下文 diff。
+5. 从下表选择一个主 skill；只有主 skill 明确要求或任务新增了对应工作时才补读其它 skill。
 
 ## 需求归一
 
-当输入包含会持续影响后续任务的新需求时，先更新上下文再写代码：
+当输入包含会持续影响后续任务的新需求时，按产品经理 -> 设计总监 -> 技术负责人的顺序收敛后再写代码：
 
-1. 产品定位、范围、导航、术语或跨页面业务约束变化：使用 `project-context` 增量更新 `PROJECT.md`。
-2. 可见 UI 的品牌、密度、体验或响应式方向发生稳定变化：使用 `design-system` 基于最新 `PROJECT.md` 增量更新 `DESIGN.md`。
-3. 上下文一致后进入主 skill 生成代码。
+1. 产品经理阶段：产品定位、范围、导航、术语或跨页面业务约束变化时，使用 `project-context` 增量更新 `PROJECT.md`。
+2. 设计总监阶段：可见 UI 的品牌、密度、体验或响应式方向发生稳定变化时，使用 `design-system` 基于最新 `PROJECT.md` 增量更新 `DESIGN.md`。
+3. 技术负责人阶段：上下文一致后选择主 skill，在现有架构与生成物边界内实现、验证并检查 diff。
 
 普通修复、单页临时要求和纯 API 生成只读取需要的上下文，不制造 `PROJECT.md` / `DESIGN.md` diff。代码中的猜测不能反写为项目事实。
 
@@ -47,6 +56,7 @@ description: Route Codex, Claude Code, Cursor, and other AI coding tools from re
 
 - 产品定位、业务信息架构、术语和稳定业务约束：`PROJECT.md`，由 `project-context` 维护
 - 项目设计目标、视觉方向和稳定设计差异：`DESIGN.md`，由 `design-system` 维护
+- 工程执行、职责编排和质量闭环：`AGENTS.md`，细则路由到以下专项 skills
 - 任务范围、增量修改、FSD 和 git：`project-rules`
 - 技术基线、工具职责、依赖与构建测试边界：`tech-stack`
 - 视觉语言、尺度、信息密度与响应式行为：`design-system`

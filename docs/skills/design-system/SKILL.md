@@ -1,15 +1,17 @@
 ---
 name: design-system
-description: Synthesize PROJECT.md, explicit design requirements, relevant PRD, and readable Figma into DESIGN.md, then apply this admin framework's visual and responsive baseline to generated UI.
+description: Act as the design-director context layer by synthesizing PROJECT.md, explicit design requirements, relevant PRDs, and readable Figma into DESIGN.md and the framework's UI direction.
 ---
 
 # Design System
 
-本 skill 负责把 `PROJECT.md`、当前设计要求、相关 PRD 和可读 Figma 归一为根目录 `DESIGN.md`，同时定义框架通用的视觉与响应式基线。组件选择见 `component-usage`，Tailwind / Less 实现见 `css-usage`，页面字段与路由见 `admin-page`。
+本 skill 承担设计总监的上下文维护职责：把产品经理 `PROJECT.md`、当前设计要求、相关 PRD 和可读 Figma 归一为根目录 `DESIGN.md`，同时定义框架通用的视觉与响应式基线。组件选择见 `component-usage`，Tailwind / Less 实现见 `css-usage`，页面字段与路由见 `admin-page`。
 
 ## 需求到设计
 
 生成可见 UI 前先读取 `PROJECT.md` 和现有 `DESIGN.md`。当文字需求、PRD、Figma 或项目上下文引入稳定设计变化时，先增量更新 `DESIGN.md`，再生成代码。
+
+把 `DESIGN.md` 当成设计总监的决策记录：承接产品目标并回答“信息如何组织、界面如何呈现、不同视口如何连续完成任务”。它不新增产品范围，不定义 API 契约，也不代替技术负责人选择具体实现。
 
 `DESIGN.md` 记录：
 

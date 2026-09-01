@@ -1,6 +1,10 @@
 # Project Context
 
-本文件是当前项目的产品上下文，供 Codex、Claude Code、Cursor 等 AI code 工具共同读取。它由 `project-context` skill 从文字需求和相关 PRD 增量维护，只记录已确认的项目级事实，不包含视觉规范和通用执行规则。
+> 角色：产品经理。定义产品为什么做、为谁做、做什么，以及业务边界与验收目标。
+
+本文件是当前项目的产品决策上下文，供 Codex、Claude Code、Cursor 等 AI code 工具共同读取。它由 `project-context` skill 从文字需求和相关 PRD 增量维护，只记录已确认、跨页面且后续任务仍有效的项目级事实。
+
+本文件对产品定位、范围、信息架构、业务术语和跨页面流程负责；不决定视觉方案、CSS 实现、技术选型或接口契约。视觉目标交给 `DESIGN.md`，工程落地由 `AGENTS.md` 和专项 skills 负责。
 
 ## 产品定位
 
