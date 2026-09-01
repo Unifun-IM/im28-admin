@@ -113,6 +113,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 - zh-CN / en-US、12 / 24 小时、最长状态和动态操作。
 - 表头与首行单元格 `getBoundingClientRect()` 的宽度都大于 0，边界和顺序一致。
 - 日期、表头、状态和操作不截断；操作列无显著空白。
+- 表格最右外边界由 `use-biz-table-card` 的真实边框承担，末列不得再用 border 或 inset shadow 重复补线；固定右列只保留左侧滚动阴影。
 - 表头保持单行，不因刚好卡在字符宽度与 padding 的理论值而换行。
 - 宽屏下主要内容列吸收空间，短列不会膨胀到接近等宽。
 
