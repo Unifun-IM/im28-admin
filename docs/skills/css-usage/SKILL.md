@@ -113,6 +113,7 @@ Less：
 - Arco Modal 的桌面宽度可以由组件 `style.width` 表达；`md` 及以下统一由 `global.less` 通过 `max-width` 限制在视口安全边距内，不能用 `width: 100%` 把原本较窄的确认弹层反向拉宽。业务样式不得再次写平行的移动端宽度补丁。
 - 自定义复合 Modal 若使用桌面固定高度，移动端必须根据流程选择内容自适应或近全屏，不能直接继承桌面高度。可滚动内容放在唯一内容区，Header / Footer 保持可达。
 - Modal 内 `width: 100%` 的 flex / grid 子项同时设置 `box-sizing: border-box`、`min-width: 0` 和 `max-width: 100%`；padding 必须包含在父内容宽度内，禁止依靠外层 `overflow: hidden` 掩盖越界。
+- 只允许纵向滚动的内容区必须同时约束 `min-width: 0`、`max-width: 100%` 和 `overflow-x: hidden`；仅写 `overflow-y: auto` 会使另一轴计算为 `auto`，细小溢出也会生成横向滚动槽。
 
 ## 验收
 
