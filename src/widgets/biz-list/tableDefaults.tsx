@@ -23,6 +23,7 @@ export type ActionLabelSlot = string | readonly string[];
 type BizTableLayoutOptions = {
   compactActions?: boolean;
   auxiliaryColumnWidth?: number;
+  availableWidth?: number;
 };
 
 function estimateTextWidth(
@@ -156,17 +157,20 @@ function getNumericColumnWidth<T>(column: TableColumnProps<T>): number | null {
 
 /**
  * 把基础列宽转换成最终表格布局：紧凑列保持像素宽度，内容列吸收宽屏余量；
- * scrollX 保留所有基础列宽，窄屏只在 Table 内容区滚动。
+ * 所有最终宽度均为数字，避免 Arco 固定列把 calc 宽度解析成无效偏移。
  */
 export function resolveBizTableLayout<T>(
   columns: TableColumnProps<T>[] = [],
   options: BizTableLayoutOptions = {}
 ): { columns: TableColumnProps<T>[]; scrollX: number | true } {
   const normalized = normalizeBizColumns(columns, options);
-  const measured = normalized.map((column) => ({
-    column,
-    width: getNumericColumnWidth(column)
-  }));
+  const measured = normalized.map((column) => {
+    const width = getNumericColumnWidth(column);
+    return {
+      column: width == null ? column : { ...column, width },
+      width
+    };
+  });
 
   if (measured.some(({ width }) => width == null)) {
     return { columns: normalized, scrollX: true };
@@ -192,24 +196,37 @@ export function resolveBizTableLayout<T>(
     (sum, item) => sum + (item.width as number),
     0
   );
-  const scrollX = measured.reduce(
+  const baseWidth = measured.reduce(
     (sum, item) => sum + (item.width as number),
     auxiliaryColumnWidth
   );
 
-  if (elasticWidth === 0) return { columns: normalized, scrollX };
+  const availableWidth = Math.floor(options.availableWidth ?? 0);
+  const scrollX = Math.max(baseWidth, availableWidth);
+  const surplus = scrollX - baseWidth;
 
-  const fixedWidth = scrollX - elasticWidth;
+  if (elasticWidth === 0 || surplus === 0) {
+    return {
+      columns: measured.map(({ column }) => column),
+      scrollX
+    };
+  }
+
   const elasticColumns = new Set(elastic.map(({ column }) => column));
+  let distributedWidth = 0;
+  let distributedCount = 0;
   const fittedColumns = measured.map(({ column, width }) => {
     if (!elasticColumns.has(column)) return column;
 
-    const ratio = (width as number) / elasticWidth;
-    const percentage = Number((ratio * 100).toFixed(6));
-    const offset = Number((ratio * fixedWidth).toFixed(3));
+    distributedCount += 1;
+    const extra =
+      distributedCount === elastic.length
+        ? surplus - distributedWidth
+        : Math.floor((surplus * (width as number)) / elasticWidth);
+    distributedWidth += extra;
     return {
       ...column,
-      width: `calc(${percentage}% - ${offset}px)`
+      width: (width as number) + extra
     };
   });
 

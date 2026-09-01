@@ -52,7 +52,7 @@ describe('normalizeBizColumns', () => {
     expect(columns[1].align).toBe('center');
   });
 
-  it('keeps compact columns fixed and assigns wide-table space to content columns', () => {
+  it('keeps every base width numeric before the container is measured', () => {
     const layout = resolveBizTableLayout(
       [
         { title: 'Group', dataIndex: 'group', width: 240 },
@@ -66,12 +66,31 @@ describe('normalizeBizColumns', () => {
     );
 
     expect(layout.scrollX).toBe(1049);
-    expect(layout.columns[0].width).toMatch(/^calc\(/u);
-    expect(layout.columns[1].width).toMatch(/^calc\(/u);
+    expect(layout.columns[0].width).toBe(240);
+    expect(layout.columns[1].width).toBe(220);
     expect(layout.columns[2].width).toBe(93);
     expect(layout.columns[3].width).toBe(96);
-    expect(layout.columns[4].width).toMatch(/^calc\(/u);
+    expect(layout.columns[4].width).toBe(200);
     expect(layout.columns[5].width).toBe(160);
+  });
+
+  it('distributes wide-container surplus only to content columns', () => {
+    const layout = resolveBizTableLayout(
+      [
+        { title: 'Group', dataIndex: 'group', width: 240 },
+        { title: 'Owner', dataIndex: 'owner', width: 220 },
+        { title: 'Members', dataIndex: 'members', width: 80 },
+        { title: 'Status', dataIndex: 'status', width: 96 },
+        { title: 'Created at', dataIndex: 'createdAt', width: 200 },
+        { title: 'Action', dataIndex: 'op', width: 160 }
+      ],
+      { auxiliaryColumnWidth: 40, availableWidth: 1440 }
+    );
+
+    expect(layout.scrollX).toBe(1440);
+    expect(layout.columns.map(({ width }) => width)).toEqual([
+      382, 350, 93, 96, 319, 160
+    ]);
   });
 
   it('preserves unsupported custom widths instead of guessing a layout', () => {
@@ -92,7 +111,7 @@ describe('normalizeBizColumns', () => {
     ]);
 
     expect(layout.scrollX).toBe(216);
-    expect(layout.columns[0].width).toMatch(/^calc\(/u);
+    expect(layout.columns[0].width).toBe(96);
     expect(layout.columns[1].width).toBe(120);
   });
 

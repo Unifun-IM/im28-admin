@@ -75,7 +75,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 
 ## 列宽
 
-`BizListPage` 的列 `width` 表示该列的目标基础宽度。公共列表会把操作、状态、数量等紧凑列保持为目标像素宽度，并让名称、主体信息、时间等内容列按基础宽度比例吸收宽屏余量；视口小于基础宽度总和时，只在 Table 内容区横向滚动。
+`BizListPage` 的列 `width` 表示该列的目标基础宽度。公共列表测量 Table 可用宽度后，以纯数字像素把宽屏余量按基础比例分给名称、主体信息、时间等内容列；操作、状态、数量等紧凑列保持目标宽度。视口小于基础宽度总和时，只在 Table 内容区横向滚动。不要向 Arco 固定列传入 `calc(...)` 混合宽度，其内部固定偏移无法可靠解析。
 
 因此：
 
