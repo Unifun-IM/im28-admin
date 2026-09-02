@@ -260,7 +260,7 @@ export function BizListPage<T extends Record<string, unknown>>({
           enableFullscreen ||
           hasRowSelection) && (
           <div className="use-biz-table-toolbar relative max-md:h-auto max-md:flex-wrap">
-            <div className="flex min-w-0 max-w-full items-center gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
               {title != null && title !== '' && (
                 <div className="use-biz-table-toolbar-title">{title}</div>
               )}
@@ -274,7 +274,7 @@ export function BizListPage<T extends Record<string, unknown>>({
                 </div>
               )}
             </div>
-            <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 max-md:w-full max-md:shrink max-md:justify-end">
+            <div className="ml-auto flex min-w-0 max-w-full shrink-0 flex-wrap items-center justify-end gap-2">
               {(onRefresh || enableFullscreen) && (
                 <div className="flex items-center gap-2">
                   {onRefresh && (

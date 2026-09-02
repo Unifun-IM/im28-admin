@@ -4,7 +4,7 @@ import { GlobalContext } from '@shared/lib/global-context';
 import { BizListPage } from './BizListPage';
 
 describe('BizListPage responsive toolbar', () => {
-  it('right-aligns table actions on mobile', () => {
+  it('keeps the mobile title and right-aligned actions on one row when space allows', () => {
     const { container } = render(
       <GlobalContext.Provider
         value={{
@@ -28,9 +28,11 @@ describe('BizListPage responsive toolbar', () => {
     );
 
     const toolbar = container.querySelector('.use-biz-table-toolbar');
+    const title = toolbar?.children.item(0);
     const actions = toolbar?.children.item(1);
 
-    expect(actions).toHaveClass('max-md:w-full', 'max-md:justify-end');
-    expect(actions).not.toHaveClass('max-md:justify-start');
+    expect(title).toHaveClass('min-w-0', 'flex-1');
+    expect(actions).toHaveClass('ml-auto', 'items-center', 'justify-end');
+    expect(actions).not.toHaveClass('max-md:w-full');
   });
 });

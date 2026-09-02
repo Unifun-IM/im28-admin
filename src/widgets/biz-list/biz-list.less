@@ -687,7 +687,7 @@
 
   @media (max-width: 768px) {
     .use-biz-table-toolbar {
-      align-items: flex-start;
+      align-items: center;
       min-height: 56px;
       height: auto;
     }
@@ -700,10 +700,14 @@
   }
 
   .use-biz-table-toolbar-title {
+    min-width: 0;
+    overflow: hidden;
     font-size: var(--font-size-body);
     font-weight: 500;
     line-height: var(--line-height-body-compact);
     color: var(--color-text-1, #1d2129);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .use-biz-table-icon-btn.arco-btn {
