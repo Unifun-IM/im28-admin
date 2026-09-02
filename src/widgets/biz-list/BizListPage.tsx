@@ -274,7 +274,7 @@ export function BizListPage<T extends Record<string, unknown>>({
                 </div>
               )}
             </div>
-            <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 max-md:w-full max-md:shrink max-md:justify-start">
+            <div className="flex min-w-0 shrink-0 flex-wrap items-center gap-2 max-md:w-full max-md:shrink max-md:justify-end">
               {(onRefresh || enableFullscreen) && (
                 <div className="flex items-center gap-2">
                   {onRefresh && (
