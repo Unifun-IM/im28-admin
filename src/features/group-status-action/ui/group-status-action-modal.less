@@ -1,0 +1,122 @@
+/* 群聊状态操作 — Figma 1225:28204 / 1225:28358 / 1225:28046 / 1225:28771 */
+.arco-modal.use-group-status-action-modal {
+  .arco-modal-content {
+    padding-bottom: 24px;
+  }
+
+  .use-group-status-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    margin-bottom: 12px;
+  }
+
+  .use-group-status-avatar {
+    flex-shrink: 0;
+    border-radius: var(--radius-control);
+  }
+
+  .use-group-status-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 8px;
+    margin-top: 2px;
+    color: var(--color-text-3);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
+  }
+
+  .use-group-status-description,
+  .use-group-status-reason,
+  .use-group-status-confirmation {
+    margin: 0;
+    color: var(--color-text-1);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body-compact);
+  }
+
+  .use-group-status-reason {
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--color-border-2);
+  }
+
+  .use-group-status-confirmation {
+    padding: 12px 0;
+  }
+
+  .use-group-status-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+
+    .arco-form-item {
+      margin-bottom: 0;
+    }
+
+    .arco-form-label-item {
+      display: inline-flex;
+      align-items: center;
+      padding-bottom: 8px;
+      margin-bottom: 0;
+      line-height: var(--line-height-body-compact);
+    }
+
+    .arco-form-label-item > label {
+      color: var(--color-text-1);
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-body-compact);
+    }
+
+    .arco-form-item-symbol {
+      order: 1;
+      margin-left: 4px;
+      color: rgb(var(--danger-6));
+    }
+
+    .arco-form-message {
+      min-height: 12px;
+      margin-top: 0;
+      line-height: 12px;
+    }
+
+    .arco-select-view {
+      height: 32px;
+      padding: 4px 12px;
+    }
+  }
+
+  .use-group-status-targets {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    min-height: 32px;
+
+    .arco-radio {
+      margin-right: 0;
+      padding-left: 0;
+    }
+
+    .arco-radio-text {
+      color: var(--color-text-1);
+      font-size: var(--font-size-body);
+      line-height: var(--line-height-body-compact);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .arco-modal.use-group-status-action-modal {
+    .arco-modal-content {
+      max-height: calc(100dvh - 128px);
+      overflow-y: auto;
+    }
+
+    .use-group-status-summary {
+      align-items: flex-start;
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
+import { Button, Form, Input } from '@arco-design/web-react';
 import {
   ActionLinks,
   AvatarNameCell,
@@ -10,11 +10,11 @@ import {
   FilterSelect,
   StatusBadge
 } from '@widgets/biz-list';
+import { postV1AdminGroupsList } from '@shared/api/admin/groups';
 import {
-  postV1AdminGroupsBan,
-  postV1AdminGroupsList,
-  postV1AdminGroupsMute
-} from '@shared/api/admin/groups';
+  GroupStatusActionModal,
+  GroupStatusActionMode
+} from '@features/group-status-action';
 import { GroupDetailDrawer } from '@widgets/group-detail';
 import { UserDetailDrawer } from '@widgets/user-detail';
 import useLocale from '@shared/lib/useLocale';
@@ -74,6 +74,10 @@ export default function GroupQueryPage() {
   const [pageSize, setPageSize] = useState(15);
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
+  const [statusAction, setStatusAction] = useState<{
+    mode: GroupStatusActionMode;
+    row: GroupListRow;
+  } | null>(null);
 
   const keywordTypeOptions = useMemo(
     () =>
@@ -204,40 +208,6 @@ export default function GroupQueryPage() {
     form.setFieldValue('batchGroupIds', undefined);
   };
 
-  /** 封禁 / 解除封禁 — postV1AdminGroupsBan（enabled） */
-  const confirmBan = (row: GroupListRow, enabled: boolean) => {
-    const group_id = row.group?.group_id;
-    if (!group_id) return;
-    const name = row.group?.title || group_id;
-    const kind = enabled ? 'ban' : 'unban';
-    Modal.confirm({
-      title: t[`groupQuery.confirm.${kind}`].replace('{name}', name),
-      onOk: async () => {
-        await postV1AdminGroupsBan({ group_id, enabled });
-        Message.success(common['common.success']);
-        fetchData(page, pageSize);
-      }
-    });
-  };
-
-  /**
-   * 全体禁言 / 解除 — postV1AdminGroupsMute（改 mute_all，不改生命周期 status）
-   */
-  const confirmMute = (row: GroupListRow, enabled: boolean) => {
-    const group_id = row.group?.group_id;
-    if (!group_id) return;
-    const name = row.group?.title || group_id;
-    const kind = enabled ? 'mute' : 'unmute';
-    Modal.confirm({
-      title: t[`groupQuery.confirm.${kind}`].replace('{name}', name),
-      onOk: async () => {
-        await postV1AdminGroupsMute({ group_id, enabled });
-        Message.success(common['common.success']);
-        fetchData(page, pageSize);
-      }
-    });
-  };
-
   /**
    * 按群状态 / mute_all 组装更多菜单（详情始终外露）
    * 已解散无操作；已封禁仅解封；其余可封禁 / 禁言(mute_all)
@@ -250,7 +220,7 @@ export default function GroupQueryPage() {
         {
           key: 'unban',
           label: t['groupQuery.action.unban'],
-          onClick: () => confirmBan(row, false)
+          onClick: () => setStatusAction({ mode: 'unban', row })
         }
       ];
     }
@@ -260,12 +230,12 @@ export default function GroupQueryPage() {
         {
           key: 'unmute',
           label: t['groupQuery.action.unmute'],
-          onClick: () => confirmMute(row, false)
+          onClick: () => setStatusAction({ mode: 'unmute', row })
         },
         {
           key: 'ban',
           label: t['groupQuery.action.ban'],
-          onClick: () => confirmBan(row, true)
+          onClick: () => setStatusAction({ mode: 'ban', row })
         }
       ];
     }
@@ -273,12 +243,12 @@ export default function GroupQueryPage() {
       {
         key: 'ban',
         label: t['groupQuery.action.ban'],
-        onClick: () => confirmBan(row, true)
+        onClick: () => setStatusAction({ mode: 'ban', row })
       },
       {
         key: 'mute',
         label: t['groupQuery.action.mute'],
-        onClick: () => confirmMute(row, true)
+        onClick: () => setStatusAction({ mode: 'mute', row })
       }
     ];
   };
@@ -489,6 +459,13 @@ export default function GroupQueryPage() {
         visible={!!detailUserId}
         userId={detailUserId}
         onClose={() => setDetailUserId(null)}
+      />
+      <GroupStatusActionModal
+        visible={!!statusAction}
+        mode={statusAction?.mode || 'mute'}
+        group={statusAction?.row.group}
+        onCancel={() => setStatusAction(null)}
+        onSuccess={() => fetchData(page, pageSize)}
       />
     </>
   );
