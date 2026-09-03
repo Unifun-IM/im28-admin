@@ -1,7 +1,21 @@
 import { AxiosHeaders, type AxiosAdapter } from 'axios';
 import { vi } from 'vitest';
 
+const { fingerprintGet, fingerprintLoad } = vi.hoisted(() => ({
+  fingerprintGet: vi.fn().mockResolvedValue({
+    visitorId: 'fingerprint-device-id'
+  }),
+  fingerprintLoad: vi.fn()
+}));
+
+vi.mock('@fingerprintjs/fingerprintjs', () => ({
+  default: {
+    load: fingerprintLoad
+  }
+}));
+
 import request, {
+  AUTH_DEVICE_ID_STORAGE_KEY,
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_TOKEN_STORAGE_KEY,
   clearAuthSession,
@@ -12,8 +26,16 @@ import request, {
 } from './request';
 
 describe('request', () => {
+  beforeEach(() => {
+    localStorage.removeItem(AUTH_DEVICE_ID_STORAGE_KEY);
+    fingerprintGet.mockClear();
+    fingerprintLoad.mockClear();
+    fingerprintLoad.mockResolvedValue({ get: fingerprintGet });
+  });
+
   afterEach(() => {
     clearAuthSession();
+    localStorage.removeItem(AUTH_DEVICE_ID_STORAGE_KEY);
   });
 
   it('injects bearer token from localStorage', async () => {
@@ -51,6 +73,42 @@ describe('request', () => {
       };
       await request.get('/health-2');
       expect(authHeader).toBe('Bearer access-token');
+    } finally {
+      request.defaults.adapter = previous;
+    }
+  });
+
+  it('injects one fingerprint device ID unless the caller provides one', async () => {
+    const previous = request.defaults.adapter;
+    const receivedDeviceIds: Array<string | null> = [];
+    request.defaults.adapter = async (config) => {
+      receivedDeviceIds.push(
+        AxiosHeaders.from(config.headers).get('X-Device-ID') as string | null
+      );
+      return {
+        config,
+        data: { ok: true },
+        headers: {},
+        status: 200,
+        statusText: 'OK'
+      };
+    };
+
+    try {
+      await request.get('/first');
+      await request.get('/second');
+      await request.get('/custom', {
+        headers: { 'X-Device-ID': 'caller-device-id' }
+      });
+
+      expect(receivedDeviceIds).toEqual([
+        'fingerprint-device-id',
+        'fingerprint-device-id',
+        'caller-device-id'
+      ]);
+      expect(fingerprintLoad).toHaveBeenCalledTimes(1);
+      expect(fingerprintLoad).toHaveBeenCalledWith({ monitoring: false });
+      expect(fingerprintGet).toHaveBeenCalledTimes(1);
     } finally {
       request.defaults.adapter = previous;
     }
@@ -122,7 +180,7 @@ describe('request', () => {
       expect(localStorage.getItem(AUTH_REFRESH_TOKEN_STORAGE_KEY)).toBe(
         'refresh-2'
       );
-      expect(getDeviceId()).toBeTruthy();
+      await expect(getDeviceId()).resolves.toBeTruthy();
       expect(businessHits).toBe(2);
     } finally {
       request.defaults.adapter = previous;

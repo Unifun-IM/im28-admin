@@ -26,7 +26,7 @@ description: Apply this repository's established frontend runtime, state, routin
 | UI | Arco Design React、Arco Design Pro 主题 |
 | 状态 | MobX、`mobx-react-lite` |
 | 样式 | Tailwind CSS 3（`preflight: false`）、Less、PostCSS / Autoprefixer |
-| 请求与 API | Axios、`@umijs/openapi`、全局 `AdminAPI` typings |
+| 请求与 API | Axios、FingerprintJS、`@umijs/openapi`、全局 `AdminAPI` typings |
 | 测试 | Vitest 2、Testing Library、jest-dom、user-event、jsdom |
 | 常用能力 | dayjs、lodash、classnames、query-string、copy-to-clipboard、NProgress |
 | 可视化与加载 | BizCharts、`@loadable/component`、`vite-plugin-svgr` |
