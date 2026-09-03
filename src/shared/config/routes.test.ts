@@ -8,10 +8,10 @@ describe('IM admin sidebar routes', () => {
       'group',
       'session',
       'asset',
+      'risk',
       'platform',
       'trade',
-      'system',
-      'risk'
+      'system'
     ]);
   });
 

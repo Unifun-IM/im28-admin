@@ -76,8 +76,10 @@ Codex、Cursor、Claude Code 共用同一套仓库规则，不分别维护页面
 | 用户 | `/user/*` | 用户查询、黑白名单、用户日志、统一用户详情 |
 | 群组 | `/group/*` | 群组查询、群组设置、群组与成员详情 |
 | 会话 | `/session/*` | 单聊/群聊会话查询、会话设置、只读聊天记录 |
-| 系统 | `/system/*`、`/system-params/settings` | 后台账号、角色、参数和操作日志 |
+| 资产 | `/asset/*` | 充值地址、提现订单及安全审核 |
 | 风控 | `/risk/*` | IP 黑名单 |
+| 配置 | `/platform/*` | Banner、客户端版本和平台条款 |
+| 系统 | `/system/*`、`/system-params/settings` | 后台账号、角色、参数和操作日志 |
 | 交易 | `/trade/*` | 红包记录、配置和详情；当前菜单隐藏 |
 
 业务接口直接使用 `@shared/api/admin/*` 生成函数与 `AdminAPI` 类型，不在页面层映射接口字段。图片上传统一通过 `@shared/lib/uploadAdminImage`。

@@ -14,7 +14,7 @@ export type IRoute = AuthParams & {
 };
 
 /**
- * 侧栏顺序：首页看板 → 用户 → 群组 → 会话 → 资产 → 平台配置 → 交易 → 系统 → 风控
+ * 侧栏顺序：首页看板 → 用户 → 群组 → 会话 → 资产 → 风控 → 配置 → 交易 → 系统
  * 系统下：后台账号 / 角色 / 系统参数设置 / 系统操作日志
  * 风控下：IP黑名单
  */
@@ -74,6 +74,13 @@ export const routes: IRoute[] = [
     ]
   },
   {
+    name: 'menu.risk',
+    key: 'risk',
+    children: [
+      { name: 'menu.risk.ipBlacklist', key: 'risk/ip-blacklist' }
+    ]
+  },
+  {
     name: 'menu.platform',
     key: 'platform',
     children: [
@@ -112,13 +119,6 @@ export const routes: IRoute[] = [
         key: 'system-params/settings'
       },
       { name: 'menu.system.opLogs', key: 'system/op-logs' }
-    ]
-  },
-  {
-    name: 'menu.risk',
-    key: 'risk',
-    children: [
-      { name: 'menu.risk.ipBlacklist', key: 'risk/ip-blacklist' }
     ]
   }
 ];
