@@ -9,7 +9,10 @@ import {
   postV1AdminAuthTwoFactorSetup,
   postV1AdminAuthTwoFactorVerify
 } from '@shared/api/admin/auth';
-import { setAuthTokens } from '@shared/api/request';
+import {
+  getRequestErrorMessage,
+  setAuthTokens
+} from '@shared/api/request';
 import { isIpAccessDeniedError } from '@shared/lib/ipAccessDenied';
 import useLocale from '@shared/lib/useLocale';
 
@@ -19,7 +22,6 @@ import GaBindModal from './GaBindModal';
 import { GaVerifyModal } from '@features/ga-verify';
 import iconUnlock from '@assets/icon/icon-unlock.svg';
 import iconUser from '@assets/icon/icon-user.svg';
-import { mapLoginToast } from './mapLoginToast';
 import SlideCaptcha from './SlideCaptcha';
 
 type PendingAuth = {
@@ -30,7 +32,7 @@ type PendingAuth = {
 /**
  * 登录表单 — AdminAPI auth next_step
  *
- * Toast 文案仅用前端 Figma 979:39539，不透出后端 message
+ * 接口异常优先展示服务端 message，无 message 时使用当前流程的本地兜底。
  */
 export default function LoginForm() {
   const formRef = useRef<FormInstance>();
@@ -107,7 +109,9 @@ export default function LoginForm() {
         // 绑定为首次强制步骤，不可跳过（取消=退出登录）
         await openBindTwoFactor(data.pre_auth_token, true);
       } catch (error) {
-        Message.error(mapLoginToast(error, 'gaSetup', t));
+        Message.error(
+          getRequestErrorMessage(error, t['login.msg.setupFail'])
+        );
         exitOnboarding();
       }
       return;
@@ -134,7 +138,7 @@ export default function LoginForm() {
     } catch (error) {
       // 100031 由 request 全局拦截跳转 /ip-denied；此处仅避免再弹登录错误 Toast
       if (isIpAccessDeniedError(error)) return;
-      Message.error(mapLoginToast(error, 'login', t));
+      Message.error(getRequestErrorMessage(error, t['login.msg.network']));
       setSliderOk(false);
     } finally {
       setLoading(false);
@@ -164,7 +168,7 @@ export default function LoginForm() {
       );
       finishLogin(res.data?.token);
     } catch (error) {
-      Message.error(mapLoginToast(error, 'gaVerify', t));
+      Message.error(getRequestErrorMessage(error, t['login.msg.verifyFail']));
       setGaErrorTick((n) => n + 1);
     } finally {
       setGaLoading(false);
@@ -184,7 +188,7 @@ export default function LoginForm() {
       );
       finishLogin(res.data?.token);
     } catch (error) {
-      Message.error(mapLoginToast(error, 'gaBind', t));
+      Message.error(getRequestErrorMessage(error, t['login.msg.bindFail']));
       setGaErrorTick((n) => n + 1);
     } finally {
       setGaLoading(false);
@@ -208,7 +212,9 @@ export default function LoginForm() {
         });
       }
     } catch (error) {
-      Message.error(mapLoginToast(error, 'passwordChange', t));
+      Message.error(
+        getRequestErrorMessage(error, t['login.msg.pwdChangeFail'])
+      );
     } finally {
       setLoading(false);
     }

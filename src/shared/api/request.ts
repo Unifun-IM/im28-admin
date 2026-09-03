@@ -36,11 +36,43 @@ export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
 export const AUTH_DEVICE_ID_STORAGE_KEY = DEVICE_ID_STORAGE_KEY;
 export { getDeviceId };
 
-export interface RequestFailedError {
+type RequestFailedDetails = {
   status?: number;
   bizCode?: number;
-  message: string;
   original?: unknown;
+};
+
+export class RequestFailedError extends Error {
+  readonly status?: number;
+  readonly bizCode?: number;
+  readonly original?: unknown;
+
+  constructor(message: string, details: RequestFailedDetails = {}) {
+    super(message);
+    this.name = 'RequestFailedError';
+    this.status = details.status;
+    this.bizCode = details.bizCode;
+    this.original = details.original;
+  }
+}
+
+export function getRequestErrorMessage(
+  error: unknown,
+  fallback = '请求失败'
+) {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  if (typeof error === 'string' && error.trim()) {
+    return error;
+  }
+  if (error && typeof error === 'object') {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+  }
+  return fallback;
 }
 
 type RequestConfig = InternalAxiosRequestConfig & {
@@ -320,11 +352,10 @@ instance.interceptors.response.use(
           ? data.message
           : '请求失败';
       const bizCode = data.code;
-      const failed: RequestFailedError = {
+      const failed = new RequestFailedError(msg, {
         bizCode,
-        message: msg,
         original: data
-      };
+      });
 
       // 100031：全站 IP 白名单拦截（任意接口，优先于登录态处理）
       if (isIpAccessDeniedError(failed)) {
@@ -351,12 +382,11 @@ instance.interceptors.response.use(
     const { status, message } = resolveFailMessage(error);
     const body = error.response?.data;
     const bizCode = isApiBasePayload(body) ? body.code : undefined;
-    const failed: RequestFailedError = {
+    const failed = new RequestFailedError(message, {
       status,
       bizCode,
-      message,
       original: error
-    };
+    });
 
     // 100031：全站 IP 白名单拦截（HTTP 错误体里也可能带业务码）
     if (isIpAccessDeniedError(failed)) {
