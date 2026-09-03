@@ -9,7 +9,7 @@
  *   OPENAPI_YAML_URL=docs/openapi.yaml npm run openapi:convert
  *   OPENAPI_YAML_URL=https://... npm run openapi:convert
  *
- * 优先级: 命令行参数 > 环境变量 / .env > 默认远程地址
+ * 优先级: 命令行参数 > 环境变量 / .env
  * OPENAPI_YAML_URL 可为 https://... 或相对仓库根目录的本地路径
  */
 
@@ -23,8 +23,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '..');
 const OUTPUT_JSON_PATH = resolve(ROOT, 'openapi.json');
-const DEFAULT_REMOTE_URL =
-  'https://im-api-gateway.djftech.app/docs/admin/openapi.yaml';
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return;
@@ -93,7 +91,13 @@ async function convertYamlToJson(yamlSource) {
   }
 }
 
-const yamlSource =
-  process.argv[2] || process.env.OPENAPI_YAML_URL || DEFAULT_REMOTE_URL;
+const yamlSource = process.argv[2] || process.env.OPENAPI_YAML_URL;
+
+if (!yamlSource) {
+  console.error(
+    '❌ 未配置 OpenAPI YAML：请传入命令行参数或设置 OPENAPI_YAML_URL'
+  );
+  process.exit(1);
+}
 
 convertYamlToJson(yamlSource);

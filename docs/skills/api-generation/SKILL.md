@@ -24,7 +24,7 @@ description: Generate API clients and AdminAPI typings through the repository-co
 | 中间 schema | `openapi.json`，git ignored |
 | 默认输出 | `src/shared/api/admin/**` |
 
-输入优先级由转换脚本决定，当前为：命令行参数 -> `OPENAPI_YAML_URL` / `.env` -> 脚本默认地址。派生项目仍执行同一命令，但 schema、命名空间、请求实例和输出目录以其当前配置为准。
+输入优先级由转换脚本决定，当前为：命令行参数 -> `OPENAPI_YAML_URL` / `.env`。未配置输入源时命令应明确失败；派生项目仍执行同一命令，但 schema、命名空间、请求实例和输出目录以其当前配置为准。
 
 ## 工作流
 
