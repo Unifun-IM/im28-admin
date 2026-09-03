@@ -22,7 +22,7 @@ import {
 export { StatusBadge, type StatusBadgeProps } from '@shared/ui';
 
 /** 组合单元格内单行截断；悬停用 Tooltip 展示全文 */
-function TruncateText({
+export function TruncateText({
   children,
   className
 }: {

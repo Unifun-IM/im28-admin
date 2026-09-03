@@ -39,7 +39,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 | 标准列表 | `@widgets/biz-list` 的 `BizListPage` |
 | 筛选 | `SearchFilterBar`、`FilterField`、`Filter*` |
 | 汇总 / 批量 | `DataSummary`、`TableBatchBar` |
-| 主次信息 | `AvatarNameCell`、`DoubleLineCell` |
+| 主次信息 | `AvatarNameCell`、`DoubleLineCell`、`TruncateText` |
 | 状态 / 操作 | `StatusBadge`、`ActionLinks` |
 | 详情 | `@widgets/biz-detail-drawer` 的 `BizDetailDrawer` |
 | 关系子 Drawer | `@widgets/biz-relation-list-drawer` 的 `BizRelationListDrawer` |
@@ -70,6 +70,8 @@ description: Discover, reuse, compose, and extract project components for admin 
 - 筛选控件放在 `FilterField + Form.Item` 内。
 - `toolbar` 随批量模式隐藏；`toolbarAlways` 始终展示。
 - 时间使用 `formatDateTime`，图片使用 Avatar / Image，长文本使用省略 + Tooltip。
+- `column.ellipsis` 只覆盖 Table 默认文本渲染；使用自定义 `render` 后，由渲染组件负责建立可收缩宽度、显示单行省略号，并用 Tooltip 展示完整值，禁止只靠父级 `overflow` 硬裁切。
+- 地址、UUID、哈希、URL 等需要复制的机器值使用 `<CopyValue value={value} truncate />`；无需复制的普通长文本使用 `TruncateText`。详情内需要完整换行时不要启用 `truncate`。
 - 操作列使用 `ActionLinks`，不要手写一排 Button。
 - 页面壳层不承载横向滚动；字段确实超宽时只允许 Table 内容区横向滚动。表格全屏外层只处理纵向滚动，避免嵌套横向滚动条。
 - 空数据、短数据和无分页状态只改变分页与底部边界，不得把 Table 内容区设为 `overflow: hidden`；超宽列在这些状态下仍必须支持鼠标、触控板和触摸横向滚动。
