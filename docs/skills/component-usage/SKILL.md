@@ -70,6 +70,7 @@ description: Discover, reuse, compose, and extract project components for admin 
 - 筛选控件放在 `FilterField + Form.Item` 内。
 - `toolbar` 随批量模式隐藏；`toolbarAlways` 始终展示。
 - 时间使用 `formatDateTime`，图片使用 Avatar / Image，长文本使用省略 + Tooltip。
+- 同一实体的主值与 ID 已按 `admin-page` 决定合并时，有头像使用 `AvatarNameCell`，无头像使用 `DoubleLineCell`；需要复制对应行时传 `copyPrimary` / `copySecondary`，不要在页面重复拼两套文字与复制按钮。
 - `column.ellipsis` 只覆盖 Table 默认文本渲染；使用自定义 `render` 后，由渲染组件负责建立可收缩宽度、显示单行省略号，并用 Tooltip 展示完整值，禁止只靠父级 `overflow` 硬裁切。
 - 地址、UUID、哈希、URL 等需要复制的机器值使用 `<CopyValue value={value} truncate />`；无需复制的普通长文本使用 `TruncateText`。详情内需要完整换行时不要启用 `truncate`。
 - 操作列使用 `ActionLinks`，不要手写一排 Button。

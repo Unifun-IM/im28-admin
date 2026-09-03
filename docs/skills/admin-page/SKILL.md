@@ -94,8 +94,10 @@ Figma / PRD 未定义整个筛选区域时，按请求字段语义选择：
 
 Figma / PRD 未定义列集合时：
 
-- ID 与名称 / 标题 / 账号优先合并，复用 `AvatarNameCell` 或 `DoubleLineCell`。
-- 其余响应字段默认一个字段一列。
+- 先识别同一实体的“可读主值 + 稳定 ID”字段对，例如名称 + 用户 ID、标题 + 记录 ID、地址 + 地址 ID；合并为一列双行展示，主值在上、ID 在下，表头使用主值的业务名称。
+- 有头像的实体字段对使用 `AvatarNameCell`，无头像使用 `DoubleLineCell`；两行机器值都需复制时使用 `copyPrimary` 和 `copySecondary`。具体截断与复制契约见 `component-usage`。
+- 用户 ID 与钱包 ID 等语义不同的标识不合并；Figma / PRD 明确分列，或字段需要独立比较、排序时也保持分列。
+- 完成同实体字段配对后，其余响应字段默认一个字段一列。
 - 状态用 `StatusBadge`，时间用 `formatDateTime`，图片用 `UserAvatar` / Arco Avatar / Image。
 - 长文本单行省略，需要全文时用 Tooltip 或详情 Drawer。
 - 操作列使用 `ActionLinks`；危险操作必须确认。

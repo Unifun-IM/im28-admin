@@ -2,7 +2,11 @@ import { render, screen } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
 import { GlobalContext } from '@shared/lib/global-context';
-import { ActionLinks, type ActionLinkItem } from './TableCells';
+import {
+  ActionLinks,
+  DoubleLineCell,
+  type ActionLinkItem
+} from './TableCells';
 
 const contextValue = {
   lang: 'zh-CN',
@@ -18,6 +22,30 @@ function renderActions(items: ActionLinkItem[]) {
     </GlobalContext.Provider>
   );
 }
+
+describe('DoubleLineCell', () => {
+  it('keeps paired machine values truncated and independently copyable', () => {
+    render(
+      <GlobalContext.Provider value={contextValue}>
+        <DoubleLineCell
+          primary="THjyozbWDPWaALWBb2f4bf6Pa6ZuDBDTz"
+          secondary="82958095-89f8-4d3c-a36e-6ac760be175a"
+          copyPrimary
+          copySecondary
+        />
+      </GlobalContext.Provider>
+    );
+
+    expect(screen.getAllByRole('button', { name: '复制' })).toHaveLength(2);
+    expect(screen.getByText('THjyozbWDPWaALWBb2f4bf6Pa6ZuDBDTz')).toHaveClass(
+      'text-ellipsis',
+      'text-arco-text-1'
+    );
+    expect(
+      screen.getByText('82958095-89f8-4d3c-a36e-6ac760be175a')
+    ).toHaveClass('text-ellipsis', 'text-arco-text-3');
+  });
+});
 
 describe('ActionLinks text layout', () => {
   const originalMatchMedia = window.matchMedia;
