@@ -18,6 +18,7 @@ import request, {
   AUTH_DEVICE_ID_STORAGE_KEY,
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_TOKEN_STORAGE_KEY,
+  RequestFailedError,
   clearAuthSession,
   getDeviceId,
   setAccessToken,
@@ -111,6 +112,40 @@ describe('request', () => {
       expect(fingerprintGet).toHaveBeenCalledTimes(1);
     } finally {
       request.defaults.adapter = previous;
+    }
+  });
+
+  it('throws the API message as a standard error for business failures', async () => {
+    const previous = request.defaults.adapter;
+    const errorSpy = vi
+      .spyOn((await import('@arco-design/web-react')).Message, 'error')
+      .mockImplementation(() => () => {});
+    request.defaults.adapter = async (config) => ({
+      config,
+      data: { code: 100400, message: '接口返回的错误信息' },
+      headers: {},
+      status: 200,
+      statusText: 'OK'
+    });
+
+    try {
+      let received: unknown;
+      try {
+        await request.post('/failed', {});
+      } catch (error) {
+        received = error;
+      }
+
+      expect(received).toBeInstanceOf(Error);
+      expect(received).toBeInstanceOf(RequestFailedError);
+      expect(received).toMatchObject({
+        bizCode: 100400,
+        message: '接口返回的错误信息'
+      });
+      expect(errorSpy).toHaveBeenCalledWith('接口返回的错误信息');
+    } finally {
+      request.defaults.adapter = previous;
+      errorSpy.mockRestore();
     }
   });
 
