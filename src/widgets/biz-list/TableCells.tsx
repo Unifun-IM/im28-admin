@@ -10,6 +10,7 @@ import {
 } from '@arco-design/web-react/icon';
 import cs from 'classnames';
 import copy from 'copy-to-clipboard';
+import { GlobalContext } from '@shared/lib/global-context';
 import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import useLocale from '@shared/lib/useLocale';
 import { CopyValue, UserAvatar } from '@shared/ui';
@@ -148,6 +149,10 @@ export function AvatarNameCell({
 export type DoubleLineCellProps = {
   primary: React.ReactNode;
   secondary?: React.ReactNode;
+  /** 主行字段标签；用于合并后仍需标明字段语义的场景 */
+  primaryLabel?: React.ReactNode;
+  /** 副行字段标签，如“用户 ID”或“地址 ID” */
+  secondaryLabel?: React.ReactNode;
   /** 主行是字符串或数字时展示复制操作 */
   copyPrimary?: boolean;
   /** 副行是字符串或数字时展示复制操作 */
@@ -157,45 +162,67 @@ export type DoubleLineCellProps = {
 function renderDoubleLineValue(
   value: React.ReactNode,
   copyable: boolean,
-  className: string
+  className: string,
+  label: React.ReactNode,
+  labelSeparator: string
 ) {
   const copyValue =
     typeof value === 'string' || typeof value === 'number'
       ? String(value)
       : undefined;
 
-  if (copyable && copyValue) {
-    return (
+  const content =
+    copyable && copyValue ? (
       <CopyValue
         value={copyValue}
         truncate
         valueClassName={className}
       />
+    ) : (
+      <TruncateText className={className}>{value}</TruncateText>
     );
-  }
 
-  return <TruncateText className={className}>{value}</TruncateText>;
+  if (label == null || label === '') return content;
+
+  return (
+    <div className={cs('flex min-w-0 items-center', className)}>
+      <span className="shrink-0">
+        {label}
+        {labelSeparator}
+      </span>
+      <span className="min-w-0 flex-1">{content}</span>
+    </div>
+  );
 }
 
 /** 双行文本单元格 */
 export function DoubleLineCell({
   primary,
   secondary,
+  primaryLabel,
+  secondaryLabel,
   copyPrimary = false,
   copySecondary = false
 }: DoubleLineCellProps) {
+  const { lang } = React.useContext(GlobalContext);
+  const labelSeparator = lang?.startsWith('zh') ? '：' : ':\u00a0';
+
   return (
     <div className="flex min-w-0 flex-col justify-center gap-[4px]">
       {renderDoubleLineValue(
         primary,
         copyPrimary,
-        'text-[10px] leading-[10px] text-arco-text-1'
+        'text-[10px] leading-[10px] text-arco-text-1',
+        primaryLabel,
+        labelSeparator
       )}
       {secondary != null && secondary !== '' && (
         renderDoubleLineValue(
           secondary,
           copySecondary,
-          'text-[10px] leading-[10px] text-arco-text-3'
+          'text-[10px] leading-[10px] text-arco-text-3',
+          secondaryLabel,
+          labelSeparator
         )
       )}
     </div>
