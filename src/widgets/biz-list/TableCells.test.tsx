@@ -30,6 +30,7 @@ describe('DoubleLineCell', () => {
         <DoubleLineCell
           primary="THjyozbWDPWaALWBb2f4bf6Pa6ZuDBDTz"
           secondary="82958095-89f8-4d3c-a36e-6ac760be175a"
+          secondaryLabel="地址 ID"
           copyPrimary
           copySecondary
         />
@@ -44,6 +45,7 @@ describe('DoubleLineCell', () => {
     expect(
       screen.getByText('82958095-89f8-4d3c-a36e-6ac760be175a')
     ).toHaveClass('text-ellipsis', 'text-arco-text-3');
+    expect(screen.getByText('地址 ID：')).toBeInTheDocument();
   });
 });
 
