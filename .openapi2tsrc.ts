@@ -7,8 +7,7 @@
  *
  * 生成目录：src/shared/api/admin（禁止手改；业务直接引用生成函数）
  *
- * 文档来源：OPENAPI_YAML_URL 或
- *   https://im-api-gateway.djftech.app/docs/admin/openapi.yaml
+ * 文档来源：OPENAPI_YAML_URL
  */
 
 import { resolve } from 'node:path';
