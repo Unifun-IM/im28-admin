@@ -188,13 +188,13 @@ export default function WithdrawalPage() {
               title: t['asset.col.withdrawalId'],
               dataIndex: 'withdrawal_id',
               width: 216,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.userId'],
               dataIndex: 'user_id',
               width: 184,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.amount'],
@@ -225,7 +225,7 @@ export default function WithdrawalPage() {
               title: t['asset.col.address'],
               dataIndex: 'address',
               width: 264,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.status'],
@@ -242,7 +242,7 @@ export default function WithdrawalPage() {
               title: t['asset.col.txHash'],
               dataIndex: 'tx_hash',
               width: 240,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.createdAt'],

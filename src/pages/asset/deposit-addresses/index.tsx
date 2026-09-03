@@ -129,25 +129,25 @@ export default function DepositAddressPage() {
               title: t['asset.col.address'],
               dataIndex: 'address',
               width: 280,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.addressId'],
               dataIndex: 'address_id',
               width: 216,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.userId'],
               dataIndex: 'user_id',
               width: 184,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.walletId'],
               dataIndex: 'wallet_id',
               width: 184,
-              render: (value: string) => <CopyValue value={value} />
+              render: (value: string) => <CopyValue value={value} truncate />
             },
             {
               title: t['asset.col.currency'],
