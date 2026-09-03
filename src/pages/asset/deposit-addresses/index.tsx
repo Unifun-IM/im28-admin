@@ -137,6 +137,7 @@ export default function DepositAddressPage() {
                 <DoubleLineCell
                   primary={row.address}
                   secondary={row.address_id}
+                  secondaryLabel={t['asset.col.addressId']}
                   copyPrimary
                   copySecondary
                 />
