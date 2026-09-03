@@ -12,6 +12,10 @@ import {
   isIpAccessDeniedError,
   redirectToIpAccessDenied
 } from '@shared/lib/ipAccessDenied';
+import {
+  DEVICE_ID_STORAGE_KEY,
+  getDeviceId
+} from '@shared/lib/deviceId';
 
 /** 业务成功码（与 Admin OpenAPI ResponseBase / ApiCode 的 0 一致） */
 const API_SUCCESS_CODE = 0;
@@ -29,7 +33,8 @@ const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/';
  */
 export const AUTH_TOKEN_STORAGE_KEY = 'token';
 export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
-export const AUTH_DEVICE_ID_STORAGE_KEY = 'device_id';
+export const AUTH_DEVICE_ID_STORAGE_KEY = DEVICE_ID_STORAGE_KEY;
+export { getDeviceId };
 
 export interface RequestFailedError {
   status?: number;
@@ -125,19 +130,6 @@ export function getRefreshToken() {
   return localStorage.getItem(AUTH_REFRESH_TOKEN_STORAGE_KEY);
 }
 
-/** 持久化设备 ID（refresh 接口必填） */
-export function getDeviceId() {
-  let id = localStorage.getItem(AUTH_DEVICE_ID_STORAGE_KEY);
-  if (id) return id;
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    id = crypto.randomUUID();
-  } else {
-    id = `web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-  }
-  localStorage.setItem(AUTH_DEVICE_ID_STORAGE_KEY, id);
-  return id;
-}
-
 /** 登录 / refresh 成功后写入 access + refresh */
 export function setAuthTokens(
   token: { access_token?: string; refresh_token?: string } | null
@@ -220,7 +212,7 @@ async function refreshAccessToken(): Promise<string | null> {
       '/v1/admin/auth/refresh-token',
       {
         refresh_token: refreshToken,
-        device_id: getDeviceId()
+        device_id: await getDeviceId()
       } satisfies AdminAPI.RefreshTokenRequest,
       {
         skipErrorHandler: true,
@@ -294,10 +286,13 @@ const instance = axios.create({
   timeout: 15000
 });
 
-instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`);
+  }
+  if (!config.headers.get('X-Device-ID')) {
+    config.headers.set('X-Device-ID', await getDeviceId());
   }
   // Admin OpenAPI：除健康检查外业务接口要求透传 X-Request-ID
   if (!config.headers.get('X-Request-ID')) {

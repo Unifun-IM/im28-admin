@@ -76,7 +76,7 @@ Vite 已配置 `@app`、`@assets`、`@pages`、`@widgets`、`@features`、`@enti
 
 ## API、状态与基础能力
 
-- 请求实例：`src/shared/api/request.ts`，支持鉴权、语言、Request ID、统一错误和 token refresh
+- 请求实例：`src/shared/api/request.ts`，支持鉴权、FingerprintJS 设备 ID、语言、Request ID、统一错误和 token refresh
 - 生成 API：`src/shared/api/admin/**`，统一执行 `npm run openapi`
 - 图片上传：`src/shared/lib/uploadAdminImage.ts`，支持 JPG / PNG / WEBP、1MB 校验和 OSS 直传
 - MobX store：`globalStore`、`pageTabsStore`、`systemSettingsStore`
