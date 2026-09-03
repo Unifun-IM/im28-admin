@@ -6,6 +6,7 @@ import { BizDetailDrawer } from '@widgets/biz-detail-drawer';
 import {
   ActionLinks,
   BizListPage,
+  DoubleLineCell,
   FilterField,
   FilterInput,
   FilterSelect,
@@ -128,14 +129,18 @@ export default function DepositAddressPage() {
             {
               title: t['asset.col.address'],
               dataIndex: 'address',
-              width: 280,
-              render: (value: string) => <CopyValue value={value} truncate />
-            },
-            {
-              title: t['asset.col.addressId'],
-              dataIndex: 'address_id',
-              width: 216,
-              render: (value: string) => <CopyValue value={value} truncate />
+              width: 320,
+              render: (
+                _: string,
+                row: AdminAPI.AdminAssetDepositAddress
+              ) => (
+                <DoubleLineCell
+                  primary={row.address}
+                  secondary={row.address_id}
+                  copyPrimary
+                  copySecondary
+                />
+              )
             },
             {
               title: t['asset.col.userId'],
