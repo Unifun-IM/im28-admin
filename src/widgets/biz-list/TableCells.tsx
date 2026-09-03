@@ -12,7 +12,7 @@ import cs from 'classnames';
 import copy from 'copy-to-clipboard';
 import useMediaQuery, { MOBILE_MEDIA_QUERY } from '@shared/lib/useMediaQuery';
 import useLocale from '@shared/lib/useLocale';
-import { UserAvatar } from '@shared/ui';
+import { CopyValue, UserAvatar } from '@shared/ui';
 import IconMoreDots from '@assets/icon/icon-more-dots.svg?react';
 import {
   DEFAULT_TEXT_ACTION_FOLDED_VISIBLE,
@@ -148,19 +148,55 @@ export function AvatarNameCell({
 export type DoubleLineCellProps = {
   primary: React.ReactNode;
   secondary?: React.ReactNode;
+  /** 主行是字符串或数字时展示复制操作 */
+  copyPrimary?: boolean;
+  /** 副行是字符串或数字时展示复制操作 */
+  copySecondary?: boolean;
 };
 
+function renderDoubleLineValue(
+  value: React.ReactNode,
+  copyable: boolean,
+  className: string
+) {
+  const copyValue =
+    typeof value === 'string' || typeof value === 'number'
+      ? String(value)
+      : undefined;
+
+  if (copyable && copyValue) {
+    return (
+      <CopyValue
+        value={copyValue}
+        truncate
+        valueClassName={className}
+      />
+    );
+  }
+
+  return <TruncateText className={className}>{value}</TruncateText>;
+}
+
 /** 双行文本单元格 */
-export function DoubleLineCell({ primary, secondary }: DoubleLineCellProps) {
+export function DoubleLineCell({
+  primary,
+  secondary,
+  copyPrimary = false,
+  copySecondary = false
+}: DoubleLineCellProps) {
   return (
     <div className="flex min-w-0 flex-col justify-center gap-[4px]">
-      <TruncateText className="text-[10px] leading-[10px]">
-        {primary}
-      </TruncateText>
+      {renderDoubleLineValue(
+        primary,
+        copyPrimary,
+        'text-[10px] leading-[10px] text-arco-text-1'
+      )}
       {secondary != null && secondary !== '' && (
-        <TruncateText className="text-[10px] leading-[10px] text-arco-text-3">
-          {secondary}
-        </TruncateText>
+        renderDoubleLineValue(
+          secondary,
+          copySecondary,
+          'text-[10px] leading-[10px] text-arco-text-3'
+        )
       )}
     </div>
   );

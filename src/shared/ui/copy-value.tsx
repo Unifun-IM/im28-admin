@@ -11,6 +11,8 @@ export type CopyValueProps = {
   emptyText?: string;
   /** 单行省略，并在 Tooltip 中展示完整值 */
   truncate?: boolean;
+  /** 值文案样式；传入时替代默认字号与颜色 */
+  valueClassName?: string;
   className?: string;
 };
 
@@ -21,6 +23,7 @@ export function CopyValue({
   value,
   emptyText = '--',
   truncate = false,
+  valueClassName,
   className
 }: CopyValueProps) {
   const t = useLocale();
@@ -31,7 +34,7 @@ export function CopyValue({
   const valueNode = (
     <span
       className={cs(
-        'text-xs text-arco-text-1',
+        valueClassName || 'text-xs text-arco-text-1',
         truncate &&
           'block min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'
       )}
