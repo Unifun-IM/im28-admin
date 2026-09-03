@@ -37,12 +37,9 @@ const BEHAVIOR_TYPES = [
 ] as const;
 
 const CLIENT_TYPES = [
-  'ios',
-  'android',
-  'windows',
-  'macos',
-  'web',
-  'server'
+  'app',
+  'pc',
+  'h5'
 ] as const;
 
 function toRfc3339(value: unknown): string | undefined {

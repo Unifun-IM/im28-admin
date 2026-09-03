@@ -36,7 +36,11 @@ export const MessageContentType = {
   Quote: 114,
   /** Admin：MESSAGE_TYPE_EMOJI */
   CustomFace: 115,
-  AdvancedText: 117,
+  /** Admin：MESSAGE_TYPE_TRANSFER */
+  Transfer: 116,
+  /** Admin：MESSAGE_TYPE_RED_PACKET */
+  RedPacket: 117,
+  /** IM 历史扩展；不在当前 Admin MessageType 中 */
   Markdown: 118,
   CustomMsgNotTriggerConversation: 119,
   CustomMsgOnlineOnly: 120,
@@ -129,7 +133,11 @@ export type ImChatUiMsgType =
   | 'location'
   | 'quote'
   | 'merger'
+  | 'red-packet'
   | 'system';
+
+export type RedPacketKind = 'lucky' | 'equal' | 'exclusive' | 'unknown';
+export type RedPacketStatus = 'claimed' | 'completed' | 'expired';
 
 export type ParsedChatMessageBody = {
   content?: string;
@@ -152,6 +160,11 @@ export type ParsedChatMessageBody = {
   callKind?: 'voice' | 'video';
   forwardFromName?: string;
   forwardFromAvatar?: string;
+  redPacketKind?: RedPacketKind;
+  redPacketStatus?: RedPacketStatus;
+  redPacketGreeting?: string;
+  redPacketRecipientName?: string;
+  redPacketCoverUrl?: string;
 };
 
 /** 不应展示为会话气泡的类型（输入中、已读回执、在线-only 等） */
@@ -197,7 +210,8 @@ const KNOWN_USER_CONTENT_TYPES = new Set<number>([
   MessageContentType.Custom,
   MessageContentType.Quote,
   MessageContentType.CustomFace,
-  MessageContentType.AdvancedText,
+  MessageContentType.Transfer,
+  MessageContentType.RedPacket,
   MessageContentType.Markdown
 ]);
 
@@ -274,6 +288,31 @@ function nested(body: MessageBody, ...keys: string[]): MessageBody | undefined {
     const value = asMessageBody(body[key]);
     if (value) return value;
   }
+  return undefined;
+}
+
+function parseJsonBody(value: unknown): MessageBody | undefined {
+  if (typeof value !== 'string' || !value.trim()) return undefined;
+  try {
+    return asMessageBody(JSON.parse(value));
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeRedPacketKind(value: unknown): RedPacketKind {
+  const kind = String(value || '').trim().toLowerCase();
+  if (kind === 'random' || kind === 'lucky') return 'lucky';
+  if (kind === 'equal') return 'equal';
+  if (kind === 'exclusive') return 'exclusive';
+  return 'unknown';
+}
+
+function normalizeRedPacketStatus(value: unknown): RedPacketStatus | undefined {
+  const status = String(value || '').trim().toLowerCase();
+  if (status === 'claimed') return 'claimed';
+  if (status === 'depleted' || status === 'completed') return 'completed';
+  if (status === 'expired' || status === 'withdrawn') return 'expired';
   return undefined;
 }
 
@@ -753,6 +792,8 @@ export function mapMessageContentTypeToUi(
       return 'file';
     case MessageContentType.Card:
       return 'card';
+    case MessageContentType.RedPacket:
+      return 'red-packet';
     case MessageContentType.Location:
       return 'location';
     case MessageContentType.Quote:
@@ -805,13 +846,26 @@ export function parseImMessageBody(
   /** Admin：emoji；IM 兼容 faceElem */
   const faceElem = nested(body, 'emoji', 'faceElem', 'face_elem');
   const customElem = nested(body, 'custom', 'customElem', 'custom_elem');
+  const transferElem = nested(body, 'transfer', 'transferElem', 'transfer_elem');
+  const directRedPacketElem = nested(
+    body,
+    'red_packet',
+    'redPacket',
+    'redPacketElem',
+    'red_packet_elem'
+  );
+  const customData = parseJsonBody(customElem?.data);
+  const redPacketElem =
+    directRedPacketElem ||
+    (customData
+      ? nested(customData, 'red_packet', 'redPacket') || customData
+      : undefined);
   const markdownElem = asMessageBody(body.markdown);
   /** Admin 系统通知统一为 body.system */
   const systemElem = nested(body, 'system', 'notificationElem', 'notification_elem');
 
   switch (type) {
     case MessageContentType.Text:
-    case MessageContentType.AdvancedText:
     case MessageContentType.Markdown:
       return {
         ...forward,
@@ -824,6 +878,61 @@ export function parseImMessageBody(
           typeof body.markdown === 'string' ? body.markdown : undefined
         )
       };
+
+    case MessageContentType.Transfer:
+      return {
+        ...forward,
+        content: pickStr(
+          transferElem?.text,
+          transferElem?.title,
+          transferElem?.description,
+          transferElem?.remark,
+          transferElem?.note,
+          imMsg(t, 'transfer', '[转账]')
+        )
+      };
+
+    case MessageContentType.RedPacket:
+      {
+        const greeting = pickStr(
+          redPacketElem?.greeting,
+          redPacketElem?.text,
+          redPacketElem?.title,
+          redPacketElem?.description,
+          redPacketElem?.remark,
+          redPacketElem?.note,
+          imMsg(t, 'redPacketGreeting', '恭喜发财，大吉大利')
+        );
+        const recipientUserId = pickStr(
+          redPacketElem?.recipient_user_id,
+          redPacketElem?.recipientUserID
+        );
+        return {
+          ...forward,
+          content: greeting,
+          redPacketKind: normalizeRedPacketKind(
+            redPacketElem?.kind ?? redPacketElem?.type
+          ),
+          redPacketStatus: normalizeRedPacketStatus(
+            redPacketElem?.presentation_status ??
+              redPacketElem?.status ??
+              customElem?.presentation_status
+          ),
+          redPacketGreeting: greeting,
+          redPacketRecipientName:
+            pickStr(
+              redPacketElem?.recipient_name,
+              redPacketElem?.recipientName
+            ) ||
+            (recipientUserId
+              ? opts?.resolveUserName?.(recipientUserId)
+              : undefined),
+          redPacketCoverUrl: pickStr(
+            redPacketElem?.cover_url,
+            redPacketElem?.coverURL
+          )
+        };
+      }
 
     case MessageContentType.AtText:
       return {

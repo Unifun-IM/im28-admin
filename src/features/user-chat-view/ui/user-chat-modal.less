@@ -104,6 +104,140 @@
     color: var(--color-bg-2);
   }
 
+  .use-chat-red-packet-bubble {
+    gap: 4px;
+    padding: 4px;
+
+    &.is-self {
+      padding: 2px;
+    }
+  }
+
+  .use-chat-red-packet-card {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    width: 199px;
+    max-width: 100%;
+    height: 79px;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+    border-radius: var(--radius-control);
+    padding: 8px;
+    background: var(--color-red-packet-surface);
+    color: var(--color-red-packet-text);
+    font-family: var(--font-family-body);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-align: left;
+    white-space: normal;
+
+    &.is-inactive {
+      opacity: 0.5;
+    }
+  }
+
+  .use-chat-red-packet-cover,
+  .use-chat-red-packet-cover-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  .use-chat-red-packet-cover {
+    object-fit: cover;
+  }
+
+  .use-chat-red-packet-cover-overlay {
+    background: var(--color-red-packet-cover-overlay);
+  }
+
+  .use-chat-red-packet-main {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    height: 40px;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .use-chat-red-packet-icon {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    place-items: center;
+
+    img {
+      display: block;
+      width: 30px;
+      height: 38px;
+    }
+  }
+
+  .use-chat-red-packet-copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .use-chat-red-packet-title,
+  .use-chat-red-packet-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .use-chat-red-packet-title {
+    font-size: var(--font-size-title);
+    line-height: var(--line-height-title);
+  }
+
+  .use-chat-red-packet-subtitle {
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption-compact);
+  }
+
+  .use-chat-red-packet-divider {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    border-top: 1px solid var(--color-red-packet-divider);
+  }
+
+  .use-chat-red-packet-footer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    line-height: 15px;
+    white-space: nowrap;
+  }
+
+  .use-chat-red-packet-meta {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 2px;
+    color: var(--color-red-packet-text-muted);
+  }
+
   /* 无 title/footer 时 children 直接在 content 下；有 body 时也要吃满 */
   .arco-modal.use-user-chat-modal .arco-modal-content > div,
   .arco-modal.use-user-chat-modal .arco-modal-body > div {

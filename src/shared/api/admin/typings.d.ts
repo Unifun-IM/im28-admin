@@ -36,6 +36,126 @@ declare namespace AdminAPI {
     two_factor_code: string;
   };
 
+  type AdminAssetDepositAddress = {
+    /** 充值地址记录唯一 ID，用于状态修改及地址追踪。 */
+    address_id: string;
+    /** 该充值地址当前所属的钱包内部 ID。 */
+    wallet_id: string;
+    /** 该充值地址当前分配给的 C 端用户 ID。 */
+    user_id: string;
+    /** 充值币种代码。当前仅支持 USDT。 */
+    currency_code: string;
+    /** 充值地址所属的区块链网络。当前仅支持 TRC20。 */
+    network_code: string;
+    /** 分配给该用户的链上充值地址；同一网络下地址不得分配给多个用户。 */
+    address: string;
+    /** 地址要求的 Memo 或 Tag；当前 TRC20 地址返回空字符串。 */
+    memo: string;
+    /** 充值地址状态：
+- `active`：当前分配并可供用户充值。
+- `unavailable`：地址保留用于历史追踪，但不可继续展示或用于新充值。 */
+    status: "active" | "unavailable";
+    /** 地址被标记为不可用的原因；active 状态时返回空字符串。 */
+    unavailable_reason: string;
+    /** 地址记录创建时间，RFC3339 格式。 */
+    created_at: string;
+    /** 地址记录最后更新时间，RFC3339 格式。 */
+    updated_at: string;
+  };
+
+  type AdminAssetDepositAddressData = {
+    /** 替换或修改状态后的充值地址记录。 */
+    address: AdminAssetDepositAddress;
+  };
+
+  type AdminAssetDepositAddressEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data: AdminAssetDepositAddressData;
+    };
+
+  type AdminAssetWithdrawalData = {
+    /** 指定提现订单的完整后台信息。 */
+    withdrawal: AdminAssetWithdrawalOrder;
+  };
+
+  type AdminAssetWithdrawalEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data: AdminAssetWithdrawalData;
+      type?: string;
+    };
+
+  type AdminAssetWithdrawalOrder = {
+    /** 提现订单唯一 ID，固定为 24 位纯数字，第 9-10 位类型码为 02，用于详情查询和审核。 */
+    withdrawal_id: string;
+    /** 提现扣款钱包的内部 ID。 */
+    wallet_id: string;
+    /** 提现申请所属的 C 端用户 ID。 */
+    user_id: string;
+    /** 提现币种代码。当前仅支持 USDT。 */
+    currency_code: string;
+    /** 提现使用的区块链网络。当前仅支持 TRC20。 */
+    network_code: string;
+    /** 用户提交的链上提现目标地址。 */
+    address: string;
+    /** 目标地址要求的 Memo 或 Tag；不需要时返回空字符串。 */
+    memo: string;
+    /** 用户申请从钱包扣减的总金额，十进制字符串，等于手续费与实际到账金额之和；返回时至少保留两位小数，超过两位的有效小数不截断。 */
+    amount: string;
+    /** 提现手续费，十进制字符串；返回时至少保留两位小数，超过两位的有效小数不截断。 */
+    fee_amount: string;
+    /** 预计或实际链上到账金额，十进制字符串，等于 amount 减去 fee_amount；返回时至少保留两位小数，超过两位的有效小数不截断。 */
+    actual_amount: string;
+    /** 提现订单状态：
+- `pending_review`：等待后台审核。
+- `processing`：审核已通过，正在执行链上提现。
+- `succeeded`：链上提现成功。
+- `rejected`：后台审核驳回，冻结资金已退回。
+- `canceled`：用户在待审核阶段取消，冻结资金已退回。
+- `failed`：链上执行失败，冻结资金已退回。 */
+    status:
+      | "pending_review"
+      | "processing"
+      | "succeeded"
+      | "rejected"
+      | "canceled"
+      | "failed";
+    /** 链上提现交易哈希；尚未广播交易时返回空字符串。 */
+    tx_hash: string;
+    /** 审核备注或驳回原因；尚未审核或无备注时返回空字符串。 */
+    review_reason: string;
+    /** 链上执行失败原因；非失败状态返回空字符串。 */
+    failure_reason: string;
+    /** 未审核时为空字符串，否则为 RFC3339 时间。 */
+    reviewed_at: string;
+    /** 未完成时为空字符串，否则为 RFC3339 时间。 */
+    completed_at: string;
+    /** 未取消时为空字符串，否则为 RFC3339 时间。 */
+    canceled_at: string;
+    /** 提现申请创建时间，RFC3339 格式。 */
+    created_at: string;
+    /** 提现订单最后更新时间，RFC3339 格式。 */
+    updated_at: string;
+    /** 审核后台用户 ID，尚未审核时为空字符串。 */
+    operator_user_id: string;
+    /** 客户端创建提现时提交的幂等请求 ID，用于定位重复请求。 */
+    client_request_id: string;
+  };
+
+  type AdminAssetWithdrawalRecordSummary = {
+    /** 汇总对应的币种代码。 */
+    currency_code: string;
+    /** 符合本次筛选条件的提现订单数量，包含所有匹配状态。 */
+    total_count: number;
+    /** 符合本次筛选条件的提现申请总金额，包含所有匹配状态；返回时至少保留两位小数，超过两位的有效小数不截断。 */
+    total_amount: string;
+    /** 符合本次筛选条件且状态为 succeeded 的提现订单数量。 */
+    succeeded_count: number;
+    /** 符合本次筛选条件且状态为 succeeded 的成功提现总金额；返回时至少保留两位小数，超过两位的有效小数不截断。 */
+    succeeded_amount: string;
+  };
+
   type AdminBanGroupRequest = {
     /** 群 ID。 */
     group_id: string;
@@ -60,6 +180,7 @@ declare namespace AdminAPI {
   };
 
   type AdminBanUserRequest = {
+    /** 要封禁的 C 端用户 ID。 */
     user_id: string;
     /** 拉黑原因，不能仅包含空白字符。 */
     reason: string;
@@ -180,6 +301,7 @@ declare namespace AdminAPI {
   };
 
   type AdminDetailGroupRequest = {
+    /** 要查看详情的群 ID。 */
     group_id: string;
   };
 
@@ -195,6 +317,7 @@ declare namespace AdminAPI {
     };
 
   type AdminDetailUserRequest = {
+    /** 要查看详情的 C 端用户 ID。 */
     user_id: string;
   };
 
@@ -283,6 +406,34 @@ declare namespace AdminAPI {
     last_accessed_at?: RFC3339Time;
   };
 
+  type AdminListAssetDepositAddressData = {
+    /** 当前页充值地址记录。 */
+    list: AdminAssetDepositAddress[];
+    /** 符合筛选条件的充值地址记录总数。 */
+    total: number;
+  };
+
+  type AdminListAssetDepositAddressEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data: AdminListAssetDepositAddressData;
+    };
+
+  type AdminListAssetWithdrawalData = {
+    /** 当前页提现订单。 */
+    list: AdminAssetWithdrawalOrder[];
+    /** 符合筛选条件的提现订单总数。 */
+    total: number;
+    /** 按币种汇总的提现申请与成功提现数据，统计范围与本次筛选条件一致，不受分页影响；没有匹配记录时返回空数组。 */
+    summaries: AdminAssetWithdrawalRecordSummary[];
+  };
+
+  type AdminListAssetWithdrawalEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data: AdminListAssetWithdrawalData;
+    };
+
   type AdminListBannedUserEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -300,8 +451,11 @@ declare namespace AdminAPI {
     operator_id?: number;
     /** 最近一次封禁操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
+    /** 最近一次封禁操作时间范围终点；与 operated_start_at 同时传入时不得早于起点。 */
     operated_end_at?: RFC3339Time;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -336,7 +490,9 @@ declare namespace AdminAPI {
   type AdminListGroupByUserRequest = {
     /** 需要查询当前群聊列表的 C 端用户 ID。 */
     user_id: string;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -354,7 +510,9 @@ declare namespace AdminAPI {
     /** 群主用户 ID，精确匹配。 */
     owner_user_id?: string;
     status?: GroupStatus;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -373,7 +531,9 @@ declare namespace AdminAPI {
   type AdminListGroupMemberRequest = {
     /** 要查看成员的群业务 ID。 */
     group_id: string;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -384,6 +544,7 @@ declare namespace AdminAPI {
     };
 
   type AdminListGroupOperationLogRequest = {
+    /** 要查询操作日志的群 ID。 */
     group_id: string;
     /** 按操作类型精确筛选，例如 `group_created`、`title_updated`、`members_removed`。 */
     action?: string;
@@ -391,7 +552,9 @@ declare namespace AdminAPI {
     operated_start_at?: RFC3339Time;
     /** 操作时间终点。 */
     operated_end_at?: RFC3339Time;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -400,6 +563,7 @@ declare namespace AdminAPI {
     keyword?: string;
     /** 关键词类型。group_id=群 ID 精确匹配，title=群名称模糊匹配；传此字段时必须同时传 `keyword`。 */
     keyword_type?: "group_id" | "title";
+    /** 群主用户 ID 精确筛选；不传表示全部群主。 */
     owner_user_id?: string;
     status?: GroupStatus;
     /** 群创建时间起点，必须早于或等于 `created_end_at`。 */
@@ -410,7 +574,9 @@ declare namespace AdminAPI {
     sort_by?: "member_count" | "created_at";
     /** 排序方向。asc=升序，desc=降序；传此字段时必须同时传 `sort_by`，不传时默认 desc。 */
     sort_order?: "asc" | "desc";
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -427,8 +593,11 @@ declare namespace AdminAPI {
     reason?: string;
     /** 加入黑名单时间范围起点；不得晚于 operated_end_at。 */
     operated_start_at?: RFC3339Time;
+    /** 加入黑名单时间范围终点；与 operated_start_at 同时传入时不得早于起点。 */
     operated_end_at?: RFC3339Time;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -441,7 +610,7 @@ declare namespace AdminAPI {
   type AdminListSystemOperationLogRequest = {
     /** 操作后台账号，支持模糊匹配；传入时不能仅包含空白字符。 */
     operator_account?: string;
-    /** 操作类型。依次表示登录与安全、后台账号管理、角色管理、用户查询、用户拉黑、白名单管理、群聊查询、聊天记录查看、系统参数设置、操作日志查看、权限与安全拦截、访问记录。 */
+    /** 操作类型。login_security=登录与安全，system_user_management=后台账号管理，role_management=角色管理，user_query=用户查询，user_ban=用户拉黑，whitelist_management=白名单管理，group_query=群聊查询，message_query=聊天记录查看，system_setting=系统参数设置，operation_log_query=操作日志查看，permission_security=权限与安全拦截，access_record=访问记录。 */
     operation_type?:
       | "login_security"
       | "system_user_management"
@@ -463,8 +632,11 @@ declare namespace AdminAPI {
     content_keyword?: string;
     /** 操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
+    /** 操作时间范围终点；与 operated_start_at 同时传入时不得早于起点。 */
     operated_end_at?: RFC3339Time;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -498,14 +670,18 @@ declare namespace AdminAPI {
     user_ids?: string[];
     /** 用户状态筛选。active=正常，disabled=黑名单；不传表示全部。当前系统没有独立的注销状态。 */
     status?: "active" | "disabled";
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
   type AdminListUserConversationRequest = {
     /** 要查看会话的 C 端用户 ID。 */
     user_id: string;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -545,21 +721,26 @@ declare namespace AdminAPI {
     keyword_type?: "user_id" | "phone" | "email" | "account" | "nickname";
     /** 行为类型机器标识，例如 registered、logged_in、profile_updated、friend_applied、message_sent、group_created、call_started；为空时查询全部类型。 */
     behavior_type?: string;
-    /** 客户端类型。ios=iOS，android=Android，windows=Windows，macos=macOS，web=Web/H5，server=服务端任务。 */
-    client_type?: "ios" | "android" | "windows" | "macos" | "web" | "server";
+    /** 客户端入口类型。app=移动端 API，pc=PC API，h5=H5 API；不按前端声明的操作系统平台筛选。 */
+    client_type?: "app" | "pc" | "h5";
     /** 操作时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
+    /** 操作时间范围终点；与 operated_start_at 同时传入时不得早于起点。 */
     operated_end_at?: RFC3339Time;
     /** 按操作时间排序。asc=升序，desc=降序。 */
     sort_order?: "asc" | "desc";
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
   type AdminListUserRelationRequest = {
     /** 需要查询的 C 端用户 ID。 */
     user_id: string;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -574,15 +755,19 @@ declare namespace AdminAPI {
     online_status?: OnlineStatus;
     /** 注册时间范围起点；与 registered_end_at 同时传入时不得晚于结束时间。 */
     registered_start_at?: RFC3339Time;
+    /** 注册时间范围终点；与 registered_start_at 同时传入时不得早于起点。 */
     registered_end_at?: RFC3339Time;
     /** 最后操作时间范围起点；与 last_operated_end_at 同时传入时不得晚于结束时间。 */
     last_operated_start_at?: RFC3339Time;
+    /** 最后操作时间范围终点；与 last_operated_start_at 同时传入时不得早于起点。 */
     last_operated_end_at?: RFC3339Time;
     /** 排序字段。registered_at=注册时间，last_operated_at=最后操作时间（用户 updated_at）。 */
     sort_by?: "registered_at" | "last_operated_at";
     /** 排序方向。asc=升序，desc=降序；只能在同时传入 sort_by 时使用。 */
     sort_order?: "asc" | "desc";
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -601,8 +786,11 @@ declare namespace AdminAPI {
     operator_id?: number;
     /** 加入白名单时间范围起点；与 operated_end_at 同时传入时不得晚于结束时间。 */
     operated_start_at?: RFC3339Time;
+    /** 加入白名单时间范围终点；与 operated_start_at 同时传入时不得早于起点。 */
     operated_end_at?: RFC3339Time;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -643,6 +831,7 @@ declare namespace AdminAPI {
   };
 
   type AdminRemoveWhitelistUserRequest = {
+    /** 要从白名单移除的 C 端用户 ID。 */
     user_id: string;
     /** 移除原因，不能仅包含空白字符。 */
     reason: string;
@@ -692,16 +881,24 @@ declare namespace AdminAPI {
     };
 
   type AdminTraceMessageRequest = {
+    /** 分布式追踪 trace ID 精确筛选条件。 */
     trace_id?: string;
+    /** HTTP 请求 ID 精确筛选条件。 */
     request_id?: string;
+    /** 会话 ID 精确筛选条件。 */
     conversation_id?: string;
+    /** 服务端消息 ID 精确筛选条件。 */
     msg_id?: string;
+    /** 客户端消息幂等 ID 精确筛选条件。 */
     client_msg_id?: string;
+    /** 消息发送者用户 ID 精确筛选条件。 */
     sender_id?: string;
+    /** 最多返回的追踪结果数量，默认 20，最大 100。 */
     limit?: number;
   };
 
   type AdminUnbanUserRequest = {
+    /** 要解除封禁的 C 端用户 ID。 */
     user_id: string;
     /** 解禁原因，不能仅包含空白字符。 */
     reason: string;
@@ -726,21 +923,21 @@ declare namespace AdminAPI {
     voice_message_enabled: boolean;
     /** 是否启用名片消息。 */
     card_message_enabled: boolean;
-    /** 文字消息字数上限。 */
+    /** 文字消息字数上限，可选 500、1000、2000 字。 */
     text_max_length: 500 | 1000 | 2000;
-    /** 图片大小上限，单位为字节，对应 5M、10M、20M。 */
+    /** 图片大小上限，单位为字节。5242880=5M，10485760=10M，20971520=20M。 */
     image_max_size_bytes: 5242880 | 10485760 | 20971520;
-    /** 视频大小上限，单位为字节，对应 50M、100M、200M。 */
+    /** 视频大小上限，单位为字节。52428800=50M，104857600=100M，209715200=200M。 */
     video_max_size_bytes: 52428800 | 104857600 | 209715200;
-    /** 音频大小上限，单位为字节，对应 50M、100M、200M。 */
+    /** 音频大小上限，单位为字节。52428800=50M，104857600=100M，209715200=200M。 */
     audio_max_size_bytes: 52428800 | 104857600 | 209715200;
-    /** 文件大小上限，单位为字节，对应 50M、100M、200M。 */
+    /** 文件大小上限，单位为字节。52428800=50M，104857600=100M，209715200=200M。 */
     file_max_size_bytes: 52428800 | 104857600 | 209715200;
-    /** 语音最短时长，单位为秒。 */
+    /** 语音最短时长，单位为秒，可选 1、2、3。 */
     voice_min_duration_seconds: 1 | 2 | 3;
-    /** 语音最长时长，单位为秒，对应 30 秒、1 分钟、2 分钟。 */
+    /** 语音最长时长，单位为秒。30=30 秒，60=1 分钟，120=2 分钟。 */
     voice_max_duration_seconds: 30 | 60 | 120;
-    /** 相册单次选择数量上限。 */
+    /** 相册单次选择数量上限，可选 9、12、20。 */
     album_selection_limit: 9 | 12 | 20;
   };
 
@@ -749,11 +946,12 @@ declare namespace AdminAPI {
     create_group_min_member_count: number;
     /** 普通群人数上限配置。当前仅保存，不参与邀请、申请或成员数量校验。 */
     normal_group_member_limit: number;
-    /** 群公告字数上限配置。当前仅保存，不参与群公告长度校验。 */
+    /** 群公告字数上限配置，可选 500、1000、2000 字；当前仅保存，不参与群公告长度校验。 */
     announcement_max_length: 500 | 1000 | 2000;
   };
 
   type AdminUpgradeGroupRequest = {
+    /** 要升级为大群的群 ID。 */
     group_id: string;
     /** 后台升级备注，可不传。 */
     remark?: string;
@@ -835,13 +1033,13 @@ declare namespace AdminAPI {
   };
 
   type AdminUserOperationClient = {
-    /** 客户端类型。ios=iOS，android=Android，windows=Windows，macos=macOS，web=Web/H5，server=服务端任务。 */
-    type?: "ios" | "android" | "windows" | "macos" | "web" | "server";
+    /** 服务端识别的客户端入口类型。app=移动端 API，pc=PC API，h5=H5 API。 */
+    type?: "app" | "pc" | "h5";
     /** 客户端版本号。 */
     version?: string;
-    /** 操作系统及版本；服务端任务时为空。 */
+    /** 客户端上报的操作系统版本，仅用于审计。 */
     os_version?: string;
-    /** 设备型号；服务端任务时为空。 */
+    /** 客户端上报的设备型号，仅用于审计。 */
     device_model?: string;
   };
 
@@ -913,7 +1111,16 @@ declare namespace AdminAPI {
     | 100029
     | 100030
     | 100031
-    | 100032;
+    | 100032
+    | 100035
+    | 100036
+    | 100037
+    | 100038
+    | 100039
+    | 100040
+    | 100041
+    | 100042
+    | 100043;
 
   type ApplyFriendRequest = {
     target_id: string;
@@ -942,6 +1149,42 @@ declare namespace AdminAPI {
         sys_user?: SysUser;
         is_new_user?: boolean;
       };
+    };
+
+  type Banner = {
+    id: Uint64String;
+    /** 对外使用的 Banner 业务唯一 ID。 */
+    banner_id: string;
+    /** 展示位置。asset_profile=个人中心资产区域；asset_ledger_detail=账单详情区域。 */
+    type: "asset_profile" | "asset_ledger_detail";
+    /** 适用平台数组。app=移动端；pc=桌面端；h5=网页端；全平台传入全部三个值。 */
+    platforms: ("app" | "pc" | "h5")[];
+    /** BCP 47 风格语言标识，例如 zh-CN、en-US；all 表示所有语言。 */
+    language: string;
+    /** Banner 图片的 HTTP 或 HTTPS 地址。 */
+    image_url: string;
+    /** Banner 标题；不展示标题时为空字符串。 */
+    title: string;
+    /** 点击行为。none=不可点击；internal_route=客户端内部路由；web_url=外部网页。 */
+    action_type: "none" | "internal_route" | "web_url";
+    /** none 时必须为空；internal_route 时必须以 / 开头；web_url 时必须为 HTTP 或 HTTPS 地址。 */
+    action_value: string;
+    /** 排序值，数值越大越靠前。 */
+    sort: number;
+    /** 是否启用。禁用后客户端立即不再查询到该 Banner。 */
+    is_enable: boolean;
+    /** 开始展示时间，RFC3339；空字符串表示创建后立即生效。 */
+    starts_at: string;
+    /** 结束展示时间，RFC3339；空字符串表示永不过期。 */
+    ends_at: string;
+    created_at: RFC3339Time;
+    updated_at: RFC3339Time;
+  };
+
+  type BannerEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { banner?: Banner };
     };
 
   type BatchDetailUserEnvelope =
@@ -1049,6 +1292,7 @@ declare namespace AdminAPI {
     };
 
   type CheckSysPermissionRequest = {
+    /** 要校验当前后台用户是否拥有的接口权限键。 */
     permission_key: string;
   };
 
@@ -1065,6 +1309,7 @@ declare namespace AdminAPI {
     };
 
   type CheckTokenRequest = {
+    /** 要校验的后台 access token。 */
     access_token: string;
   };
 
@@ -1081,6 +1326,7 @@ declare namespace AdminAPI {
     platform?: string;
     version?: string;
     build_number?: Uint64String;
+    /** 是否强制客户端升级；true=强制升级，false=可选升级。 */
     force_update?: boolean;
     download_url?: string;
     title?: string;
@@ -1156,6 +1402,31 @@ declare namespace AdminAPI {
     manual_unread?: boolean;
   };
 
+  type CreateBannerRequest = {
+    /** Banner 展示位置。 */
+    type: "asset_profile" | "asset_ledger_detail";
+    /** 适用平台数组；全平台传入 app、pc、h5。 */
+    platforms: ("app" | "pc" | "h5")[];
+    /** 适用语言；all 表示所有语言。 */
+    language: string;
+    /** Banner 图片的 HTTP 或 HTTPS 地址。 */
+    image_url: string;
+    /** 可选标题。 */
+    title?: string;
+    /** 点击行为类型。 */
+    action_type: "none" | "internal_route" | "web_url";
+    /** action_type=none 时不传或传空；其他类型必填，并遵循对应目标格式。 */
+    action_value?: string;
+    /** 排序值，数值越大越靠前。 */
+    sort?: number;
+    /** 是否启用；不传默认 true。 */
+    is_enable?: boolean;
+    /** 可选开始展示时间，RFC3339；不传表示立即生效。 */
+    starts_at?: string;
+    /** 可选结束展示时间，RFC3339；必须晚于 starts_at，不传表示永不过期。 */
+    ends_at?: string;
+  };
+
   type CreateClientVersionRequest = {
     /** 客户端平台标识，不能仅包含空白字符，例如 ios、android、windows、macos、web。 */
     platform: string;
@@ -1163,10 +1434,13 @@ declare namespace AdminAPI {
     version: string;
     /** 平台构建号，必须大于 0。 */
     build_number: PositiveUint64String;
+    /** 是否强制客户端升级；true=强制升级，false=可选升级。 */
     force_update?: boolean;
     /** 可选下载地址；传入时必须是合法的 HTTP 或 HTTPS URL。 */
     download_url?: string;
+    /** 升级提示标题；可不传。 */
     title?: string;
+    /** 版本更新说明；可不传。 */
     description?: string;
     /** 不传默认启用；传 false 表示创建为禁用状态。 */
     is_enable?: boolean;
@@ -1197,13 +1471,15 @@ declare namespace AdminAPI {
   };
 
   type CreateSysPermissionRequest = {
-    /** 权限唯一键，不能仅包含空白字符。 */
+    /** 接口权限唯一键。取 `/v1/admin/` 后的接口路径并将 `/` 替换为 `.`，只允许小写字母、数字、连字符和点分层。 */
     key: string;
     /** 权限名称，不能仅包含空白字符。 */
     name: string;
+    /** 权限说明；可不传。 */
     description?: string;
     /** 权限分类；不传表示不设置，传入时不能仅包含空白字符。 */
     type?: string;
+    /** 是否启用该权限；true=启用，false=禁用。 */
     is_enable?: boolean;
   };
 
@@ -1212,8 +1488,11 @@ declare namespace AdminAPI {
     code: string;
     /** 角色名称，不能仅包含空白字符。 */
     name: string;
+    /** 角色说明；可不传。 */
     description?: string;
+    /** 是否启用角色；true=启用，false=禁用。 */
     is_enable?: boolean;
+    /** 分配给角色的权限 ID 列表，最多 200 个且不可重复；不传表示不分配权限。 */
     permission_ids?: number[];
   };
 
@@ -1226,14 +1505,17 @@ declare namespace AdminAPI {
   type CreateSysUserRequest = {
     /** 后台用户名，不能仅包含空白字符。 */
     username: string;
+    /** 后台用户展示名称；不传时由服务端按账号生成默认值，传入时不能仅包含空白字符。 */
     display_name?: string;
+    /** 后台用户说明；可不传。 */
     description?: string;
     status?: AccountStatus;
+    /** 创建时分配的角色 ID 列表，最多 100 个且不可重复；不传表示暂不分配角色。 */
     role_ids?: number[];
   };
 
   type CustomMessage = {
-    /** 自定义业务类型。通话历史消息使用 type=110、key=rtc.call.summary；1601-1608 通话过程通知改用 body.system。 */
+    /** 自定义业务类型。通话历史消息使用 type=110、key=rtc.call.summary；通话过程通过 WebSocket event=notification 投递。 */
     key: string;
     /** 自定义 JSON 字符串。rtc.call.summary 包含 call_id、conversation_id、call_type、room_name、caller_id、operator_id、status、status_text、reason_code、reason、e2ee_required、started_at、answered_at、ended_at、duration_seconds。 */
     data?: string;
@@ -1258,15 +1540,22 @@ declare namespace AdminAPI {
   };
 
   type DeleteSysPermissionRequest = {
+    /** 要删除的权限 ID。 */
     id: number;
   };
 
   type DeleteSysRoleRequest = {
+    /** 要删除的角色 ID；超级管理员角色不能删除。 */
     id: number;
   };
 
   type DeleteSysUserRequest = {
+    /** 要删除的后台系统用户 ID；超级管理员账号不能删除。 */
     id: number;
+  };
+
+  type DetailBannerRequest = {
+    id: PositiveUint64String;
   };
 
   type DetailClientVersionRequest = {
@@ -1309,14 +1598,17 @@ declare namespace AdminAPI {
   };
 
   type DetailSysPermissionRequest = {
+    /** 要查看的权限 ID。 */
     id: number;
   };
 
   type DetailSysRoleRequest = {
+    /** 要查看的角色 ID。 */
     id: number;
   };
 
   type DetailSysUserRequest = {
+    /** 要查看的后台系统用户 ID。 */
     id: number;
   };
 
@@ -1683,6 +1975,25 @@ declare namespace AdminAPI {
     group_id: string;
   };
 
+  type ListBannerEnvelope =
+    // #/components/schemas/ResponseBase
+    ResponseBase & {
+      data?: { list?: Banner[]; total?: number };
+    };
+
+  type ListBannerRequest = {
+    /** 可选展示位置筛选。 */
+    type?: "asset_profile" | "asset_ledger_detail";
+    /** 可选适用平台包含筛选；返回 platforms 中包含该值的 Banner。 */
+    platform?: "app" | "pc" | "h5";
+    /** 可选语言精确筛选，不区分大小写。 */
+    language?: string;
+    /** 可选启用状态筛选。 */
+    is_enable?: boolean;
+    page?: number;
+    page_size?: number;
+  };
+
   type ListBlacklistEnvelope =
     // #/components/schemas/ResponseBase
     ResponseBase & {
@@ -1703,7 +2014,9 @@ declare namespace AdminAPI {
   type ListClientVersionRequest = {
     /** 可选平台筛选；传入时不能仅包含空白字符。 */
     platform?: string;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -1772,8 +2085,11 @@ declare namespace AdminAPI {
   type ListPlatformTermRequest = {
     /** 可选业务键筛选；传入时不能仅包含空白字符。 */
     key?: string;
+    /** 启用状态筛选；不传表示全部状态。 */
     is_enable?: boolean;
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
   };
 
@@ -1784,10 +2100,15 @@ declare namespace AdminAPI {
     };
 
   type ListSysPermissionRequest = {
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
+    /** 按权限键、名称或说明搜索；不传表示不按关键词筛选。 */
     keyword?: string;
+    /** 权限分类筛选；不传表示全部分类。 */
     type?: string;
+    /** 启用状态筛选；不传表示全部状态。 */
     is_enable?: boolean;
   };
 
@@ -1798,9 +2119,13 @@ declare namespace AdminAPI {
     };
 
   type ListSysRoleRequest = {
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
+    /** 按角色编码、名称或说明搜索；不传表示不按关键词筛选。 */
     keyword?: string;
+    /** 启用状态筛选；不传表示全部状态。 */
     is_enable?: boolean;
   };
 
@@ -1811,14 +2136,19 @@ declare namespace AdminAPI {
     };
 
   type ListSysUserRequest = {
+    /** 页码，从 1 开始；不传默认 1。 */
     page?: number;
+    /** 每页数量，默认 20，最大 100。 */
     page_size?: number;
+    /** 按后台用户名或展示名称搜索；不传表示不按关键词筛选。 */
     keyword?: string;
+    /** 角色 ID 筛选；不传表示全部角色。 */
     role_id?: number;
     status?: AccountStatus;
   };
 
   type LogoutRequest = {
+    /** 要注销的后台 access token；也可通过 Authorization Bearer Header 提交。 */
     access_token?: string;
   };
 
@@ -1892,37 +2222,9 @@ declare namespace AdminAPI {
     | 113
     | 114
     | 115
-    | 1200
-    | 1201
-    | 1202
-    | 1400
-    | 1501
-    | 1502
-    | 1503
-    | 1504
-    | 1507
-    | 1508
-    | 1509
-    | 1510
-    | 1511
-    | 1512
-    | 1513
-    | 1514
-    | 1515
-    | 1516
-    | 1519
-    | 1520
-    | 1521
-    | 1601
-    | 1602
-    | 1603
-    | 1604
-    | 1605
-    | 1606
-    | 1607
-    | 1608
-    | 1701
-    | 2102;
+    | 116
+    | 117
+    | 1400;
 
   type MessageUpdate = {
     update_id?: string;
@@ -1960,6 +2262,7 @@ declare namespace AdminAPI {
     content?: string;
     /** 条款版本号。 */
     version?: string;
+    /** 该条款版本当前是否启用。 */
     is_enable?: boolean;
     created_at?: RFC3339Time;
     updated_at?: RFC3339Time;
@@ -1973,7 +2276,38 @@ declare namespace AdminAPI {
 
   type PositiveUint64String = string;
 
+  type postV1AdminAssetDepositAddressListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAssetDepositAddressReplaceParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAssetDepositAddressStatusUpdateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAssetWithdrawalDetailParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAssetWithdrawalListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminAssetWithdrawalReviewParams = {
+    ""?: any;
+    ""?: any;
+  };
+
   type postV1AdminAuthCheckTokenParams = {
+    ""?: any;
     ""?: any;
     ""?: any;
   };
@@ -1984,6 +2318,7 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminAuthLogoutParams = {
+    ""?: any;
     ""?: any;
     ""?: any;
   };
@@ -2021,6 +2356,7 @@ declare namespace AdminAPI {
   type postV1AdminAuthTwoFactorConfirmParams = {
     ""?: any;
     ""?: any;
+    ""?: any;
   };
 
   type postV1AdminAuthTwoFactorResetParams = {
@@ -2034,6 +2370,27 @@ declare namespace AdminAPI {
   };
 
   type postV1AdminAuthTwoFactorVerifyParams = {
+    ""?: any;
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminBannersCreateParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminBannersDetailParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminBannersListParams = {
+    ""?: any;
+    ""?: any;
+  };
+
+  type postV1AdminBannersUpdateParams = {
     ""?: any;
     ""?: any;
   };
@@ -2441,8 +2798,9 @@ declare namespace AdminAPI {
     };
 
   type RefreshTokenRequest = {
+    /** 登录或上一次刷新返回的后台 refresh token；刷新成功后该 token 立即失效。 */
     refresh_token: string;
-    /** 刷新后新会话使用的设备标识，不能仅包含空白字符。 */
+    /** 必须与原 refresh token 绑定的设备 ID 一致，不能借刷新切换设备。 */
     device_id: string;
   };
 
@@ -2454,7 +2812,7 @@ declare namespace AdminAPI {
     phone_area_code?: string;
     /** type=account 时必填；type=email 或 type=phone 时不需要。 */
     password?: string;
-    /** type=email 或 type=phone 时必填；当前开发阶段固定传 666666，后续接短信或邮件发送。 */
+    /** type=email 或 type=phone 时必填。邮箱必须提交邮件实际收到的六位验证码；手机号验证码当前开发阶段固定传 666666。 */
     verification_code?: string;
     device_id: string;
   };
@@ -2713,17 +3071,43 @@ declare namespace AdminAPI {
 
   type Uint64String = string;
 
+  type UpdateBannerRequest = {
+    id: PositiveUint64String;
+    type?: "asset_profile" | "asset_ledger_detail";
+    /** 完整替换适用平台数组，不能为空。 */
+    platforms?: ("app" | "pc" | "h5")[];
+    language?: string;
+    image_url?: string;
+    /** 传空字符串可清空标题。 */
+    title?: string;
+    action_type?: "none" | "internal_route" | "web_url";
+    /** 可与 action_type 同时修改；改为 none 时必须传空字符串。 */
+    action_value?: string;
+    sort?: number;
+    is_enable?: boolean;
+    /** RFC3339 时间；传空字符串可清除开始时间并改为立即生效。 */
+    starts_at?: string;
+    /** RFC3339 时间；传空字符串可清除结束时间并改为永不过期。 */
+    ends_at?: string;
+  };
+
   type UpdateClientVersionRequest = {
     id: PositiveUint64String;
+    /** 新客户端平台标识；不传保持原值。 */
     platform?: string;
+    /** 新版本号；不传保持原值。 */
     version?: string;
     /** 传入时必须大于 0。 */
     build_number?: PositiveUint64String;
+    /** 是否强制升级；不传保持原值。 */
     force_update?: boolean;
     /** 传空字符串表示清空下载地址；非空时必须是合法的 HTTP 或 HTTPS URL。 */
     download_url?: string;
+    /** 新升级提示标题；不传保持原值，传空字符串表示清空。 */
     title?: string;
+    /** 新版本说明；不传保持原值，传空字符串表示清空。 */
     description?: string;
+    /** 是否启用该版本配置；不传保持原值。 */
     is_enable?: boolean;
   };
 
@@ -2851,18 +3235,21 @@ declare namespace AdminAPI {
     content?: string;
     /** 传入时不能仅包含空白字符。 */
     version?: string;
+    /** 是否启用该条款版本；不传保持原值。 */
     is_enable?: boolean;
   };
 
   type UpdateSysPermissionRequest =
     // #/components/schemas/CreateSysPermissionRequest
     CreateSysPermissionRequest & {
+      /** 要更新的权限 ID。 */
       id: number;
     };
 
   type UpdateSysRoleRequest =
     // #/components/schemas/CreateSysRoleRequest
     CreateSysRoleRequest & {
+      /** 要更新的角色 ID。 */
       id: number;
     };
 
@@ -2889,11 +3276,16 @@ declare namespace AdminAPI {
   };
 
   type UpdateSysUserRequest = {
+    /** 要修改的后台系统用户 ID。 */
     id: number;
+    /** 新后台用户名；不传保持原值，传入时不能仅包含空白字符。 */
     username?: string;
+    /** 新展示名称；不传保持原值，传空字符串表示清空。 */
     display_name?: string;
+    /** 新用户说明；不传保持原值，传空字符串表示清空。 */
     description?: string;
     status?: AccountStatus;
+    /** 新角色 ID 列表；不传保持原值，传空数组表示清空全部角色。 */
     role_ids?: number[];
   };
 
@@ -2949,7 +3341,7 @@ declare namespace AdminAPI {
     phone_area_code?: string;
     /** type=account 时必填；type=email 或 type=phone 时不需要。 */
     password?: string;
-    /** type=email 或 type=phone 时必填；当前开发阶段固定传 666666，后续接短信或邮件发送。 */
+    /** type=email 或 type=phone 时必填。邮箱必须提交邮件实际收到的六位验证码；手机号验证码当前开发阶段固定传 666666。 */
     verification_code?: string;
     device_id: string;
   };
@@ -2961,8 +3353,18 @@ declare namespace AdminAPI {
     };
 
   type VerifySecurityRequest = {
-    /** 本次安全验证用途。update_password=修改当前后台账号密码，reset_two_factor=重置当前后台账号的二步验证；安全 token 只能用于对应操作，不能跨用途使用。 */
-    operation: "update_password" | "reset_two_factor";
+    /** 本次安全验证用途，安全 token 只能用于对应操作，不能跨用途使用：
+- `update_password`：修改当前后台账号密码。
+- `reset_two_factor`：重置当前后台账号的二步验证。
+- `asset_deposit_address_replace`：替换用户充值地址。
+- `asset_deposit_address_status_update`：修改充值地址状态。
+- `asset_withdrawal_review`：审核提现订单。 */
+    operation:
+      | "update_password"
+      | "reset_two_factor"
+      | "asset_deposit_address_replace"
+      | "asset_deposit_address_status_update"
+      | "asset_withdrawal_review";
     /** 当前已绑定认证器生成的 6 位动态验证码。 */
     two_factor_code: string;
   };

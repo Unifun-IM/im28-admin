@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from "@shared/api/request";
 
-/** 创建用户 需要 `admin.system_users.write` 权限。前端不传密码；服务端随机生成临时密码并仅在本次成功响应中返回。新用户首次登录时必须先修改该密码，再绑定或验证二步认证。 POST /v1/admin/system-users/create */
+/** 创建用户 需要 `system-users.create` 权限。前端不传密码；服务端随机生成临时密码并仅在本次成功响应中返回。新用户首次登录时必须先修改该密码，再绑定或验证二步认证。 POST /v1/admin/system-users/create */
 export async function postV1AdminSystemUsersCreate(
   body: AdminAPI.CreateSysUserRequest,
   options?: { [key: string]: any }
@@ -65,7 +65,7 @@ export async function postV1AdminSystemUsersList(
   });
 }
 
-/** 重置密码 需要 `admin.system_users.write` 权限。服务端校验并消费当前管理员的 GA 动态码，随机生成临时密码并记录备注；重置后立即撤销目标账号所有登录态，目标账号下次登录必须先修改临时密码。临时密码只在成功响应中展示一次。 POST /v1/admin/system-users/reset-password */
+/** 重置密码 需要 `system-users.reset-password` 权限。服务端校验并消费当前管理员的 GA 动态码，随机生成临时密码并记录备注；重置后立即撤销目标账号所有登录态，目标账号下次登录必须先修改临时密码。临时密码只在成功响应中展示一次。 POST /v1/admin/system-users/reset-password */
 export async function postV1AdminSystemUsersResetPassword(
   body: AdminAPI.ResetSysUserPasswordRequest,
   options?: { [key: string]: any }
@@ -83,7 +83,7 @@ export async function postV1AdminSystemUsersResetPassword(
   );
 }
 
-/** 重置 Google 验证码 需要 `admin.system_users.write` 权限。服务端校验并消费当前管理员的 GA 动态码，清除目标账号当前 Google 验证码绑定并记录备注；目标账号所有登录态立即失效，下次登录必须重新绑定。 POST /v1/admin/system-users/reset-two-factor */
+/** 重置 Google 验证码 需要 `system-users.reset-two-factor` 权限。服务端校验并消费当前管理员的 GA 动态码，清除目标账号当前 Google 验证码绑定并记录备注；目标账号所有登录态立即失效，下次登录必须重新绑定。 POST /v1/admin/system-users/reset-two-factor */
 export async function postV1AdminSystemUsersResetTwoFactor(
   body: AdminAPI.ResetSysUserTwoFactorRequest,
   options?: { [key: string]: any }
@@ -116,7 +116,7 @@ export async function postV1AdminSystemUsersUpdate(
   });
 }
 
-/** 调整后台 IPv4 白名单 需要 `admin.system_users.write` 权限，并验证当前管理员的 GA 动态码。更新成功后验证码立即失效，目标账号所有登录态立即失效；空数组表示不限制来源 IP。限制会应用于登录、预认证、二步验证、刷新 token 和每次后台接口鉴权。 POST /v1/admin/system-users/update-ip-whitelist */
+/** 调整后台 IPv4 白名单 需要 `system-users.update-ip-whitelist` 权限，并验证当前管理员的 GA 动态码。更新成功后验证码立即失效，目标账号所有登录态立即失效；空数组表示不限制来源 IP。限制会应用于登录、预认证、二步验证、刷新 token 和每次后台接口鉴权。 POST /v1/admin/system-users/update-ip-whitelist */
 export async function postV1AdminSystemUsersUpdateIpWhitelist(
   body: AdminAPI.UpdateSysUserIPWhitelistRequest,
   options?: { [key: string]: any }

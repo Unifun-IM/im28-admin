@@ -2,6 +2,66 @@
 /* eslint-disable */
 import request from "@shared/api/request";
 
+/** 创建 Banner POST /v1/admin/banners/create */
+export async function postV1AdminBannersCreate(
+  body: AdminAPI.CreateBannerRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/banners/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Banner 详情 POST /v1/admin/banners/detail */
+export async function postV1AdminBannersDetail(
+  body: AdminAPI.DetailBannerRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.BannerEnvelope>("/v1/admin/banners/detail", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Banner 列表 POST /v1/admin/banners/list */
+export async function postV1AdminBannersList(
+  body: AdminAPI.ListBannerRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ListBannerEnvelope>("/v1/admin/banners/list", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 更新 Banner POST /v1/admin/banners/update */
+export async function postV1AdminBannersUpdate(
+  body: AdminAPI.UpdateBannerRequest,
+  options?: { [key: string]: any }
+) {
+  return request<AdminAPI.ResponseBase>("/v1/admin/banners/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 创建客户端版本 POST /v1/admin/client-versions/create */
 export async function postV1AdminClientVersionsCreate(
   body: AdminAPI.CreateClientVersionRequest,
@@ -68,7 +128,7 @@ export async function postV1AdminClientVersionsUpdate(
   });
 }
 
-/** 获取系统参数 需要 `admin.system_settings.read` 权限。首次读取时自动创建默认配置：系统名称为“后台管理系统”、默认语言为 zh-CN、时间格式为 12h、IP 白名单开启。 POST /v1/admin/system-settings/get */
+/** 获取系统参数 需要 `system-settings.get` 权限。首次读取时自动创建默认配置：系统名称为“后台管理系统”、默认语言为 zh-CN、时间格式为 12h、IP 白名单开启。 POST /v1/admin/system-settings/get */
 export async function postV1AdminSystemSettingsGet(options?: {
   [key: string]: any;
 }) {
@@ -81,7 +141,7 @@ export async function postV1AdminSystemSettingsGet(options?: {
   );
 }
 
-/** 更新系统参数 需要 `admin.system_settings.write` 权限。system_name 必填，其他字段可选；可选字段不传时保留原值。成功只返回 code 和 message。IP 白名单策略在网关内最多缓存 3 秒，更新当前实例后立即生效，读取策略失败时默认继续校验白名单。 POST /v1/admin/system-settings/update */
+/** 更新系统参数 需要 `system-settings.update` 权限。system_name 必填，其他字段可选；可选字段不传时保留原值。成功只返回 code 和 message。IP 白名单策略在网关内最多缓存 3 秒，更新当前实例后立即生效，读取策略失败时默认继续校验白名单。 POST /v1/admin/system-settings/update */
 export async function postV1AdminSystemSettingsUpdate(
   body: AdminAPI.UpdateSystemSettingRequest,
   options?: { [key: string]: any }

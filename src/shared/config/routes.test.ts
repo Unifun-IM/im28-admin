@@ -7,9 +7,26 @@ describe('IM admin sidebar routes', () => {
       'user',
       'group',
       'session',
+      'asset',
+      'platform',
       'trade',
       'system',
       'risk'
+    ]);
+  });
+
+  it('separates asset operations from platform configuration', () => {
+    const asset = routes.find((route) => route.key === 'asset');
+    const platform = routes.find((route) => route.key === 'platform');
+
+    expect(asset?.children?.map((route) => route.key)).toEqual([
+      'asset/deposit-addresses',
+      'asset/withdrawals'
+    ]);
+    expect(platform?.children?.map((route) => route.key)).toEqual([
+      'platform/banners',
+      'platform/client-versions',
+      'platform/terms'
     ]);
   });
 

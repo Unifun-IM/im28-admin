@@ -14,7 +14,7 @@ export type IRoute = AuthParams & {
 };
 
 /**
- * 侧栏顺序对齐稿面：首页看板 → 用户 → 群组 → 会话 → 交易 → 系统 → 风控
+ * 侧栏顺序：首页看板 → 用户 → 群组 → 会话 → 资产 → 平台配置 → 交易 → 系统 → 风控
  * 系统下：后台账号 / 角色 / 系统参数设置 / 系统操作日志
  * 风控下：IP黑名单
  */
@@ -60,6 +60,29 @@ export const routes: IRoute[] = [
         ]
       },
       { name: 'menu.session.settings', key: 'session/settings' }
+    ]
+  },
+  {
+    name: 'menu.asset',
+    key: 'asset',
+    children: [
+      {
+        name: 'menu.asset.depositAddresses',
+        key: 'asset/deposit-addresses'
+      },
+      { name: 'menu.asset.withdrawals', key: 'asset/withdrawals' }
+    ]
+  },
+  {
+    name: 'menu.platform',
+    key: 'platform',
+    children: [
+      { name: 'menu.platform.banners', key: 'platform/banners' },
+      {
+        name: 'menu.platform.clientVersions',
+        key: 'platform/client-versions'
+      },
+      { name: 'menu.platform.terms', key: 'platform/terms' }
     ]
   },
   {

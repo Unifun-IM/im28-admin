@@ -64,7 +64,8 @@ export type ChatMsg = {
     | 'card'
     | 'location'
     | 'quote'
-    | 'merger';
+    | 'merger'
+    | 'red-packet';
   /** IM / Admin MessageContentType 原始值 */
   contentType?: number;
   content?: string;
@@ -91,6 +92,11 @@ export type ChatMsg = {
   locationAddress?: string;
   forwardFromName?: string;
   forwardFromAvatar?: string;
+  redPacketKind?: 'lucky' | 'equal' | 'exclusive' | 'unknown';
+  redPacketStatus?: 'claimed' | 'completed' | 'expired';
+  redPacketGreeting?: string;
+  redPacketRecipientName?: string;
+  redPacketCoverUrl?: string;
 };
 
 const LIST_PAGE_SIZE = 100;
@@ -131,6 +137,9 @@ function lastMessagePreview(msg?: AdminAPI.AdminConversationMessage): string {
   }
   if (ui === 'card' && parsed.cardName) return parsed.cardName;
   if (ui === 'location' && parsed.locationName) return parsed.locationName;
+  if (ui === 'red-packet') {
+    return `${typeBracketLabel(msg.type)}${parsed.redPacketGreeting || ''}`;
+  }
   return typeBracketLabel(msg.type);
 }
 
@@ -459,6 +468,11 @@ export async function getChatMessages(params: {
         locationAddress: parsed.locationAddress,
         forwardFromName: parsed.forwardFromName,
         forwardFromAvatar: parsed.forwardFromAvatar,
+        redPacketKind: parsed.redPacketKind,
+        redPacketStatus: parsed.redPacketStatus,
+        redPacketGreeting: parsed.redPacketGreeting,
+        redPacketRecipientName: parsed.redPacketRecipientName,
+        redPacketCoverUrl: parsed.redPacketCoverUrl,
         senderId: m.sender_id,
         senderName: sender?.nickname,
         senderAvatar: sender?.avatar_url,

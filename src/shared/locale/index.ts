@@ -5,6 +5,8 @@ import user from "./user";
 import session from "./session";
 import system from "./system";
 import risk from "./risk";
+import asset from "./asset";
+import platform from "./platform";
 import im from "./im";
 
 type LocalePack = Record<string, Record<string, string>>;
@@ -32,6 +34,8 @@ const i18n = mergeLocale(
   session,
   system,
   risk,
+  asset,
+  platform,
   im
 );
 

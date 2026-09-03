@@ -116,7 +116,7 @@ export async function postV1AdminRolesCreate(
   });
 }
 
-/** 删除角色 需要 `admin.rbac.write` 权限。超级管理员角色 `super_admin` 为系统内置角色，不允许删除。 POST /v1/admin/roles/delete */
+/** 删除角色 需要 `roles.delete` 权限。超级管理员角色 `super_admin` 为系统内置角色，不允许删除。 POST /v1/admin/roles/delete */
 export async function postV1AdminRolesDelete(
   body: AdminAPI.DeleteSysRoleRequest,
   options?: { [key: string]: any }

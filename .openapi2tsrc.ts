@@ -20,6 +20,7 @@ const TAG_FILE_MAP: Record<string, string> = {
   'Admin-角色权限': 'rbac',
   'Admin-用户管理': 'users',
   'Admin-群管理': 'groups',
+  'Admin-资产管理': 'assets',
   'Admin-平台配置': 'platform',
   'Admin-消息追踪': 'messages',
   'System-健康检查': 'health'

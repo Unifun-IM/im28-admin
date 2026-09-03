@@ -19,6 +19,8 @@ import { pageTabsStore } from '@entities/page-tabs';
 import { systemSettingsStore } from '@entities/system-settings';
 import Logo from '@assets/common/logo.svg?react';
 import IconDashboard from '@assets/icon/icon-dashboard.svg?react';
+import IconAsset from '@assets/icon/icon-asset.svg?react';
+import IconPlatform from '@assets/icon/icon-platform.svg?react';
 import IconRisk from '@assets/icon/icon-risk-control.svg?react';
 import IconSession from '@assets/icon/icon-session-management.svg?react';
 import IconSystem from '@assets/icon/icon-system.svg?react';
@@ -71,6 +73,10 @@ function getIconFromKey(key: string) {
       return <IconTrade className={styles.icon} />;
     case 'session':
       return <IconSession className={styles.icon} />;
+    case 'asset':
+      return <IconAsset className={styles.icon} />;
+    case 'platform':
+      return <IconPlatform className={styles.icon} />;
     case 'risk':
       return <IconRisk className={styles.icon} />;
     default:

@@ -45,6 +45,7 @@ import ChatIconSession from '@assets/icon/icon-session.svg?react';
 import ChatIconSessionActive from '@assets/icon/icon-session-active.svg?react';
 import iconStar from '@assets/icon/icon-star.svg';
 import ChatHistoryPanel from './ChatHistoryPanel';
+import RedPacketMessageCard from './RedPacketMessageCard';
 import './user-chat-modal.less';
 
 const { Text } = Typography;
@@ -205,7 +206,8 @@ type ChatMsg = {
     | 'card'
     | 'location'
     | 'quote'
-    | 'merger';
+    | 'merger'
+    | 'red-packet';
   /** IM / Admin MessageContentType */
   contentType?: number;
   content?: string;
@@ -232,6 +234,11 @@ type ChatMsg = {
   locationAddress?: string;
   forwardFromName?: string;
   forwardFromAvatar?: string;
+  redPacketKind?: 'lucky' | 'equal' | 'exclusive' | 'unknown';
+  redPacketStatus?: 'claimed' | 'completed' | 'expired';
+  redPacketGreeting?: string;
+  redPacketRecipientName?: string;
+  redPacketCoverUrl?: string;
   dateLabel?: string;
 };
 
@@ -1409,7 +1416,12 @@ function MessageRow({
           src={msg.senderAvatar}
         />
       ) : null}
-      <Bubble msg={msg} isSelf={isSelf} senderName={senderName} />
+      <Bubble
+        msg={msg}
+        isSelf={isSelf}
+        isGroup={isGroup}
+        senderName={senderName}
+      />
     </div>
   );
 }
@@ -1756,10 +1768,12 @@ function VoiceBubble({
 function Bubble({
   msg,
   isSelf,
+  isGroup,
   senderName
 }: {
   msg: ChatMsg;
   isSelf: boolean;
+  isGroup: boolean;
   /** 群聊对方昵称，渲染在气泡内顶部 */
   senderName?: string;
 }) {
@@ -1771,10 +1785,17 @@ function Bubble({
     msg.content?.includes('视频') ||
     msg.callStatus?.includes('视频');
 
-  const wrap = (inner: React.ReactNode, opts?: { stretch?: boolean }) => (
+  const wrap = (
+    inner: React.ReactNode,
+    opts?: { stretch?: boolean; redPacket?: boolean }
+  ) => (
     <div
       className={`${bubbleShell(isSelf, true)} ${
         opts?.stretch ? 'min-w-[100px] items-stretch' : ''
+      } ${
+        opts?.redPacket
+          ? `use-chat-red-packet-bubble${isSelf ? ' is-self' : ''}`
+          : ''
       } relative w-fit max-w-full`}
     >
       <BubbleSenderName name={senderName} />
@@ -1829,6 +1850,22 @@ function Bubble({
         </div>
       </>,
       { stretch: true }
+    );
+  }
+
+  if (msg.msgType === 'red-packet') {
+    return wrap(
+      <RedPacketMessageCard
+        greeting={msg.redPacketGreeting || msg.content}
+        kind={msg.redPacketKind}
+        status={msg.redPacketStatus}
+        recipientName={msg.redPacketRecipientName}
+        coverUrl={msg.redPacketCoverUrl}
+        time={msg.time}
+        isSelf={isSelf}
+        isGroup={isGroup}
+      />,
+      { stretch: true, redPacket: true }
     );
   }
 

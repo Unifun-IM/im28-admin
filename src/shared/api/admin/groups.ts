@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from "@shared/api/request";
 
-/** 封禁或解除封禁群聊 后台开启或解除群封禁。封禁后群主和群管理员不能通过 C 端恢复群聊，只有后台调用本接口并传 `enabled=false` 才能解除。已解散的群不能封禁或恢复。需要 `admin.groups.write` 权限。 POST /v1/admin/groups/ban */
+/** 封禁或解除封禁群聊 后台开启或解除群封禁。封禁后群主和群管理员不能通过 C 端恢复群聊，只有后台调用本接口并传 `enabled=false` 才能解除。已解散的群不能封禁或恢复。需要 `groups.ban` 权限。 POST /v1/admin/groups/ban */
 export async function postV1AdminGroupsBan(
   body: AdminAPI.AdminBanGroupRequest,
   options?: { [key: string]: any }
@@ -17,7 +17,7 @@ export async function postV1AdminGroupsBan(
   });
 }
 
-/** 查询群详情 返回群基础资料、全部群设置、创建人、当前群主、群主及管理员，以及群会话最后活跃时间。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/detail */
+/** 查询群详情 返回群基础资料、全部群设置、创建人、当前群主、群主及管理员，以及群会话最后活跃时间。需要 `groups.detail` 权限。 POST /v1/admin/groups/detail */
 export async function postV1AdminGroupsDetail(
   body: AdminAPI.AdminDetailGroupRequest,
   options?: { [key: string]: any }
@@ -47,7 +47,7 @@ export async function postV1AdminGroupsList(
   });
 }
 
-/** 按用户 ID 查询群聊列表 根据一个 C 端用户 ID 分页查询该用户当前仍有效加入的群聊，按入群时间倒序返回。列表包含群资料及该用户在群内的角色、群昵称、入群时间和禁言状态；已退出或被移除的群不返回。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/list-by-user */
+/** 按用户 ID 查询群聊列表 根据一个 C 端用户 ID 分页查询该用户当前仍有效加入的群聊，按入群时间倒序返回。列表包含群资料及该用户在群内的角色、群昵称、入群时间和禁言状态；已退出或被移除的群不返回。需要 `groups.list-by-user` 权限。 POST /v1/admin/groups/list-by-user */
 export async function postV1AdminGroupsListByUser(
   body: AdminAPI.AdminListGroupByUserRequest,
   options?: { [key: string]: any }
@@ -65,7 +65,7 @@ export async function postV1AdminGroupsListByUser(
   );
 }
 
-/** 查询群成员列表 根据群 ID 分页查询当前有效群成员，按入群时间升序稳定返回。每项包含群成员关系和 C 端用户资料；已退出、被移除或被封禁的历史成员不返回。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/members/list */
+/** 查询群成员列表 根据群 ID 分页查询当前有效群成员，按入群时间升序稳定返回。每项包含群成员关系和 C 端用户资料；已退出、被移除或被封禁的历史成员不返回。需要 `groups.members.list` 权限。 POST /v1/admin/groups/members/list */
 export async function postV1AdminGroupsMembersList(
   body: AdminAPI.AdminListGroupMemberRequest,
   options?: { [key: string]: any }
@@ -83,7 +83,7 @@ export async function postV1AdminGroupsMembersList(
   );
 }
 
-/** 开启或关闭群全体禁言 后台修改群的 `mute_all` 设置，不修改群生命周期状态。群主仍可通过 C 端群禁言设置关闭该禁言。封禁或已解散的群不能通过本接口修改禁言。需要 `admin.groups.write` 权限。 POST /v1/admin/groups/mute */
+/** 开启或关闭群全体禁言 后台修改群的 `mute_all` 设置，不修改群生命周期状态。群主仍可通过 C 端群禁言设置关闭该禁言。封禁或已解散的群不能通过本接口修改禁言。需要 `groups.mute` 权限。 POST /v1/admin/groups/mute */
 export async function postV1AdminGroupsMute(
   body: AdminAPI.AdminMuteGroupRequest,
   options?: { [key: string]: any }
@@ -98,7 +98,7 @@ export async function postV1AdminGroupsMute(
   });
 }
 
-/** 查询群操作日志 按群分页查询操作时间线，可按动作和时间范围筛选。操作日志在群业务提交成功后尽力写入，不作为群业务事务的一部分。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/operation-logs/list */
+/** 查询群操作日志 按群分页查询操作时间线，可按动作和时间范围筛选。操作日志在群业务提交成功后尽力写入，不作为群业务事务的一部分。需要 `groups.operation-logs.list` 权限。 POST /v1/admin/groups/operation-logs/list */
 export async function postV1AdminGroupsOperationLogsList(
   body: AdminAPI.AdminListGroupOperationLogRequest,
   options?: { [key: string]: any }
@@ -116,7 +116,7 @@ export async function postV1AdminGroupsOperationLogsList(
   );
 }
 
-/** 获取群全局配置 获取创建群最少人数、普通群人数上限和群公告字数上限。当前三个配置仅保存和展示，尚未参与 C 端创建群、成员数量或公告长度校验。需要 `admin.groups.read` 权限。 POST /v1/admin/groups/settings/get */
+/** 获取群全局配置 获取创建群最少人数、普通群人数上限和群公告字数上限。当前三个配置仅保存和展示，尚未参与 C 端创建群、成员数量或公告长度校验。需要 `groups.settings.get` 权限。 POST /v1/admin/groups/settings/get */
 export async function postV1AdminGroupsSettingsGet(options?: {
   [key: string]: any;
 }) {
@@ -129,7 +129,7 @@ export async function postV1AdminGroupsSettingsGet(options?: {
   );
 }
 
-/** 更新群全局配置 完整保存创建群最少人数、普通群人数上限和群公告字数上限。当前三个配置仅保存和展示，尚未参与 C 端创建群、成员数量或公告长度校验。需要 `admin.groups.write` 权限。 POST /v1/admin/groups/settings/update */
+/** 更新群全局配置 完整保存创建群最少人数、普通群人数上限和群公告字数上限。当前三个配置仅保存和展示，尚未参与 C 端创建群、成员数量或公告长度校验。需要 `groups.settings.update` 权限。 POST /v1/admin/groups/settings/update */
 export async function postV1AdminGroupsSettingsUpdate(
   body: AdminAPI.AdminUpdateGroupGlobalSettingRequest,
   options?: { [key: string]: any }

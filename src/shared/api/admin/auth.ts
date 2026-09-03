@@ -121,7 +121,7 @@ export async function postV1AdminAuthRefreshToken(
   );
 }
 
-/** 验证当前用户敏感操作 使用当前已绑定的谷歌验证码，为修改密码或重置谷歌验证换取一次性安全 token。动态码和安全 token 均不可重复使用；安全 token 有效期 5 分钟，并与当前用户和指定用途绑定。 POST /v1/admin/auth/security/verify */
+/** 验证当前用户敏感操作 使用当前已绑定的谷歌验证码，为指定敏感操作换取一次性安全 token。动态码和安全 token 均不可重复使用；安全 token 有效期 5 分钟，并与当前用户和指定用途绑定。资金操作应先调用本接口，再将返回的 security_token 提交到对应资产接口。 POST /v1/admin/auth/security/verify */
 export async function postV1AdminAuthSecurityVerify(
   body: AdminAPI.VerifySecurityRequest,
   options?: { [key: string]: any }

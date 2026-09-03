@@ -15,6 +15,7 @@ import * as adminhuihuashezhi from "./adminhuihuashezhi";
 import * as messages from "./messages";
 import * as adminfengkongguanli from "./adminfengkongguanli";
 import * as health from "./health";
+import * as assets from "./assets";
 export default {
   admintongyong,
   auth,
@@ -29,4 +30,5 @@ export default {
   messages,
   adminfengkongguanli,
   health,
+  assets,
 };
