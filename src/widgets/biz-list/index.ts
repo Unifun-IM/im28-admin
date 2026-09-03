@@ -18,7 +18,8 @@ export {
   ActionLinks,
   AvatarNameCell,
   DoubleLineCell,
-  StatusBadge
+  StatusBadge,
+  TruncateText
 } from './TableCells';
 export {
   BIZ_PAGE_SIZE,
